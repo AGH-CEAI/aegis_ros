@@ -1,37 +1,33 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-
-    <!--
+  <!--
         SCHUNK AXIA80 F/T Sensor
     -->
 
-    <xacro:arg name="use_physical_hardware" default="false" />
+  <xacro:arg name="use_physical_hardware" default="false"/>
 
-    <xacro:arg name="ip_address" default="127.0.0.1" />
-    <xacro:arg name="rdt_sampling_rate" default="500" />
-    <xacro:arg name="sensor_type" default="ati_axia80" />
-    <xacro:arg name="bolts_mass" default="0.019" />
-    <xacro:arg name="internal_filter_rate" default="0" />
-    <xacro:arg name="use_hardware_biasing" default="false" />
+  <xacro:arg name="ip_address" default="127.0.0.1"/>
+  <xacro:arg name="rdt_sampling_rate" default="500"/>
+  <xacro:arg name="sensor_type" default="ati_axia80"/>
+  <xacro:arg name="bolts_mass" default="0.019"/>
+  <xacro:arg name="internal_filter_rate" default="0"/>
+  <xacro:arg name="use_hardware_biasing" default="false"/>
 
-    <xacro:include filename="$(find net_ft_description)/urdf/net_ft_sensor.xacro" />
+  <xacro:include filename="$(find net_ft_description)/urdf/net_ft_sensor.xacro"/>
 
-
-    <xacro:macro name="ft_sensor_schunk_axia80" params="prefix parent">
-
-        <xacro:net_ft_sensor
-            parent="${parent}"
-            prefix="${prefix}"
-            use_physical_hardware="$(arg use_physical_hardware)"
-            ip_address="$(arg ip_address)"
-            rdt_sampling_rate="$(arg rdt_sampling_rate)"
-            sensor_type="$(arg sensor_type)"
-            bolts_mass="$(arg bolts_mass)"
-            internal_filter_rate="$(arg internal_filter_rate)"
-            use_hardware_biasing="$(arg use_hardware_biasing)">
-            <origin xyz="0 0 0" rpy="0 0 0" />
-        </xacro:net_ft_sensor>
-
-    </xacro:macro>
-
+  <xacro:macro name="ft_sensor_schunk_axia80" params="prefix parent">
+    <xacro:net_ft_sensor
+      parent="${parent}"
+      prefix="${prefix}"
+      use_physical_hardware="$(arg use_physical_hardware)"
+      ip_address="$(arg ip_address)"
+      rdt_sampling_rate="$(arg rdt_sampling_rate)"
+      sensor_type="$(arg sensor_type)"
+      bolts_mass="$(arg bolts_mass)"
+      internal_filter_rate="$(arg internal_filter_rate)"
+      use_hardware_biasing="$(arg use_hardware_biasing)"
+    >
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:net_ft_sensor>
+  </xacro:macro>
 </robot>

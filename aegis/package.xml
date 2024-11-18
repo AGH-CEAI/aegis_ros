@@ -4,7 +4,7 @@
   <name>aegis</name>
   <version>0.0.1</version>
   <description>Meta package which contains all packages of the Aegis UR station.</description>
-  <maintainer email="ceai@agh.edu.pl">AGH Center of Excelence in Artificial Inteligence</maintainer>
+  <maintainer email="ceai@agh.edu.pl">AGH Center of Excelence in Artificial Intelligence</maintainer>
   <license>Apache License 2.0</license>
 
   <url type="website">https://husarion.com/</url>

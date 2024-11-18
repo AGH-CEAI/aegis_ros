@@ -1,6 +1,6 @@
 # aegis_ros
 
-A comeplete suite of ROS 2 packages for the Aegis UR5e cobot station.
+A complete suite of ROS 2 packages for the Aegis UR5e cobot station.
 
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
@@ -19,7 +19,7 @@ A comeplete suite of ROS 2 packages for the Aegis UR5e cobot station.
 
 ```bash
 mkdir -p ~/ceai_ws
-cd ~/ceai_ws 
+cd ~/ceai_ws
 git clone -b ros2 https://github.com/husarion/panther_ros.git src/panther_ros
 ```
 ### Containers
