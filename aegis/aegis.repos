@@ -1,0 +1,9 @@
+repositories:
+  ros2_net_ft_driver:
+    type: git
+    url: https://github.com/AGH-CEAI/ros2_net_ft_driver
+    version: 9633eef704d0c3940f4abce9269d842eaf0c9138
+  robotiq_hande_description:
+    type: git
+    url: https://github.com/AGH-CEAI/robotiq_hande_description
+    version: 27a113275f52913b41b27594842ec68fddf7e592
