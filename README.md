@@ -42,3 +42,7 @@ This project uses various tools for aiding the quality of the source code. Curre
 ```bash
 pre-commit install
 ```
+
+---
+## License
+This repository is licensed under the Apache 2.0, see LICENSE for details.

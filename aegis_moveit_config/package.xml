@@ -4,14 +4,13 @@
   <name>aegis_moveit_config</name>
   <version>0.3.0</version>
   <description>An automatically generated package with all the configuration and launch files for using the aegis with the MoveIt Motion Planning Framework</description>
-  <maintainer email="macal@agh.edu.pl">Maciej Aleksandrowicz</maintainer>
-  <maintainer email="sivral@proton.me">Jakub Plachno</maintainer>
+  <maintainer email="ceai@agh.edu.pl">AGH Center of Excelence in Artificial Intelligence</maintainer>
 
   <license>Apache-2.0</license>
 
-  <url type="website">http://moveit.ros.org/</url>
-  <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
-  <url type="repository">https://github.com/ros-planning/moveit2</url>
+  <url type="website">http://cdsi.agh.edu.pl</url>
+  <url type="repository">https://github.com/AGH-CEAI/aegis_ros</url>
+  <url type="bugtracker">https://github.com/AGH-CEAI/aegis_ros/issues</url>
 
   <author email="macal@agh.edu.pl">Maciej Aleksandrowicz</author>
   <author email="sivral@proton.me">Jakub Plachno</author>
