@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>panther</name>
-  <version>0.0.0</version>
-  <description>Meta package for containing all packages of the Aegis UR station.</description>
+  <name>aegis</name>
+  <version>0.0.1</version>
+  <description>Meta package which contains all packages of the Aegis UR station.</description>
   <maintainer email="ceai@agh.edu.pl">AGH Center of Excelence in Artificial Inteligence</maintainer>
   <license>Apache License 2.0</license>
 
@@ -15,8 +15,7 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>panther_bringup</depend>
-  <depend condition="$HUSARION_ROS_BUILD_TYPE == simulation">panther_gazebo</depend>
+  <depend>aegis_bringup</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

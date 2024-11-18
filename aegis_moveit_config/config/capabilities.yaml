@@ -1,0 +1,6 @@
+move_group_capabilities:
+  - move_group/MoveGroupCartesianPathService
+  - move_group/MoveGroupExecuteServiceCapability
+  - move_group/MoveGroupKinematicsService
+  - move_group/MoveGroupMoveActionCapability
+  - move_group/MoveGroupPlanningPipelineService

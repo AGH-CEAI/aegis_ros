@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find aegis_description)/urdf/cylinders_inertial.xacro" />
+
+  <xacro:macro name="adapter_from_sensor" params="prefix parent">
+    <xacro:property name="mass" value="0.217" />
+    <xacro:property name="radius1" value="0.041" />
+    <xacro:property name="height1" value="0.0119" />
+    <xacro:property name="radius2" value="0.0315" />
+    <xacro:property name="height2" value="0.007" />
+
+    <joint name="adapter_from_sensor_joint" type="fixed">
+      <origin xyz="0 0 ${height1}" rpy="0 0 0" />
+      <parent link="${parent}" />
+      <child link="${prefix}adapter_from_sensor" />
+    </joint>
+
+    <link name="${prefix}adapter_from_sensor">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://aegis_description/meshes/adapter_from_sensor.dae"
+            scale="1.0 1.0 1.0" />
+        </geometry>
+      </visual>
+      <xacro:cylinders_inertial r1="${radius1}" l1="${height1}" r2="${radius2}" l2="${height2}" m="${mass}" />
+      <collision>
+        <geometry>
+          <cylinder radius="${radius1}" length="${height1 + height2}" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}adapter_from_sensor_end_joint" type="fixed">
+      <origin xyz="0 0 ${height2}" rpy="0 0 0" />
+      <parent link="${prefix}adapter_from_sensor" />
+      <child link="${prefix}adapter_from_sensor_end" />
+    </joint>
+
+    <link name="${prefix}adapter_from_sensor_end" />
+
+  </xacro:macro>
+
+</robot>

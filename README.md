@@ -6,6 +6,13 @@ A comeplete suite of ROS 2 packages for the Aegis UR5e cobot station.
 
 ---
 
+## List of packages
+
+* [aegis_description](./aegis_description/README.md) - the description of the Aegis robot station.
+* [aegis_moveit_config](./aegis_moveit_config/README.md) - the collection of configuration files to run the [MoveIt2](https://moveit.picknik.ai/main/index.html).
+
+---
+
 ## Quick start
 
 ### Create workspace
@@ -16,7 +23,8 @@ cd ~/ceai_ws
 git clone -b ros2 https://github.com/husarion/panther_ros.git src/panther_ros
 ```
 ### Containers
-
+W.I.P.
+```
 #### Docker
 
 #### Podman & Toolbx
@@ -24,6 +32,7 @@ git clone -b ros2 https://github.com/husarion/panther_ros.git src/panther_ros
 ### Build
 
 ### Launch Arguments
+```
 
 ---
 ## Development notes
