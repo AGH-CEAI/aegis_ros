@@ -8,6 +8,7 @@ A complete suite of ROS 2 packages for the Aegis UR5e cobot station.
 
 ## List of packages
 
+* [aegis_bringup](./aegis_bringup/README.md) - the main launch file with all hardware-dependend configuration files.
 * [aegis_description](./aegis_description/README.md) - the description of the Aegis robot station.
 * [aegis_moveit_config](./aegis_moveit_config/README.md) - the collection of configuration files to run the [MoveIt2](https://moveit.picknik.ai/main/index.html).
 
