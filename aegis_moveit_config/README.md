@@ -35,7 +35,6 @@ position: [0.025, 0.025]
 velocity: [0.0, 0.0]
 effort: [0.0, 0.0]
 "
-
 ```
 
 ## Running with the O3DE simulation
