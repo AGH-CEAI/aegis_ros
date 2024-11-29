@@ -34,6 +34,20 @@ def generate_launch_description():
         description="Add namespace to all launched nodes.",
     )
 
+    ur_driver_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution(
+                [FindPackageShare("ur_robot_driver"), "launch", "ur_control.launch.py"]
+            )
+        ),
+        launch_arguments={
+            "namespace": namespace,
+            "ur_type": "ur5e",
+            "robot_ip": "aegis",
+            "launch_rviz": "false",
+        }.items(),
+    )
+
     moveit_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
@@ -43,6 +57,10 @@ def generate_launch_description():
         launch_arguments={"namespace": namespace}.items(),
     )
 
-    actions = [declare_namespace_arg, moveit_launch]
-
-    return LaunchDescription(actions)
+    return LaunchDescription(
+        [
+            declare_namespace_arg,
+            moveit_launch,
+            ur_driver_launch,
+        ]
+    )
