@@ -1,8 +1,7 @@
 from typing import Dict, List
 
-from launch import LaunchDescription
+from launch import LaunchDescription, LaunchContext
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
-from launch.context import LaunchContext
 from launch.conditions import IfCondition
 from launch.substitutions import (
     Command,
@@ -14,6 +13,38 @@ from launch_ros.descriptions import ParameterValue
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from ur_moveit_config.launch_common import load_yaml
+
+
+class AegisPathsCfg:
+    """Contains paths to the configuration files."""
+
+    def __init__(self):
+        self.moveit_cfg_pkg_name = "aegis_moveit_config"
+        self.moveit_cfg_pkg = FindPackageShare(self.moveit_cfg_pkg_name)
+
+        self.controllers_cfg = "config/move_group/controllers.yaml"
+        self.joint_limits_cfg = "config/move_group/joint_limits.yaml"
+        self.ompl_planning_cfg = "config/move_group/ompl_planning.yaml"
+
+        self.kinematics_cfg = PathJoinSubstitution(
+            [self.moveit_cfg_pkg, "config", "move_group", "kinematics.yaml"]
+        )
+
+        self.srdf_path = PathJoinSubstitution(
+            [self.moveit_cfg_pkg, "urdf", "aegis.srdf"]
+        )
+        self.urdf_path = PathJoinSubstitution(
+            [self.moveit_cfg_pkg, "urdf", "aegis.urdf.xacro"]
+        )
+
+        self.ur_calibrarion_cfg = PathJoinSubstitution(
+            [self.moveit_cfg_pkg, "config", "ur_calibration.yaml"]
+        )
+
+        self.rviz_cfg = PathJoinSubstitution(
+            [self.moveit_cfg_pkg, "config", "moveit.rviz"]
+        )
+        self.xacro_path = PathJoinSubstitution([FindExecutable(name="xacro")])
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -38,28 +69,25 @@ def generate_launch_description() -> LaunchDescription:
     )
 
 
-def launch_setup(context: LaunchContext, *args, **kwargs) -> List[Node]:
+def launch_setup(context: LaunchContext) -> List[Node]:
 
     launch_rviz = LaunchConfiguration("launch_rviz")
     use_sim = LaunchConfiguration("use_sim")
     # TODO(issue#5) enable real-time servo
     # launch_servo = LaunchConfiguration("launch_servo")
 
-    moveit_config_pkg = FindPackageShare("aegis_moveit_config")
-    robot_description = get_robot_description(moveit_config_pkg)
+    aegis_paths = AegisPathsCfg()
+    robot_description = get_robot_description(aegis_paths)
 
-    move_group_node, rviz_node = (
-        prepare_move_group_and_rviz_nodes(
-            launch_context=context,
-            use_sim=use_sim,
-            launch_rviz=launch_rviz,
-            moveit_config_pkg=moveit_config_pkg,
-            robot_description=robot_description,
-        ),
+    move_group_node, rviz_node = prepare_move_group_and_rviz_nodes(
+        use_sim=use_sim,
+        launch_rviz=launch_rviz,
+        paths=aegis_paths,
+        robot_description=robot_description,
     )
 
-    tf_robot_base_node, tf_odom_node = static_transforms_nodes()
-    robot_state_publisher_node = preapre_robot_state_publisher_node(robot_description)
+    tf_robot_base_node, tf_odom_node = prepare_static_transforms_nodes()
+    robot_state_publisher_node = prepare_robot_state_publisher_node(robot_description)
 
     nodes_to_start = [
         move_group_node,
@@ -76,25 +104,15 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> List[Node]:
     return nodes_to_start
 
 
-def get_robot_description(moveit_config_pkg: FindPackageShare) -> Dict:
-    kinematics_params = PathJoinSubstitution(
-        [
-            moveit_config_pkg,
-            "config",
-            "aegis_ur5e_calibration.yaml",
-        ]
-    )
-
+def get_robot_description(paths: AegisPathsCfg) -> Dict:
     robot_description_content = Command(
         [
-            PathJoinSubstitution([FindExecutable(name="xacro")]),
+            paths.xacro_path,
             " ",
-            PathJoinSubstitution(
-                [FindPackageShare("aegis_description"), "urdf", "aegis.urdf.xacro"]
-            ),
+            paths.urdf_path,
             " ",
             "kinematics_params:=",
-            kinematics_params,
+            paths.ur_calibrarion_cfg,
         ]
     )
     return {
@@ -102,15 +120,9 @@ def get_robot_description(moveit_config_pkg: FindPackageShare) -> Dict:
     }
 
 
-def get_robot_description_semantic(moveit_config_pkg: FindPackageShare) -> Dict:
-    xacro_path = PathJoinSubstitution([FindExecutable(name="xacro")])
-
+def get_robot_description_semantic(paths: AegisPathsCfg) -> Dict:
     robot_description_semantic_content = Command(
-        [
-            xacro_path,
-            " ",
-            PathJoinSubstitution([moveit_config_pkg, "config", "aegis.srdf"]),
-        ]
+        [paths.xacro_path, " ", paths.srdf_path]
     )
     return {
         "robot_description_semantic": ParameterValue(
@@ -120,25 +132,19 @@ def get_robot_description_semantic(moveit_config_pkg: FindPackageShare) -> Dict:
 
 
 def prepare_move_group_and_rviz_nodes(
-    launch_context: LaunchContext,
     use_sim: LaunchConfiguration,
     launch_rviz: LaunchConfiguration,
-    moveit_config_pkg: FindPackageShare,
+    paths: AegisPathsCfg,
     robot_description: Dict,
 ) -> tuple[Node, Node]:
 
     # TODO(issue#2) re-enable simulation
     # use_fake_hardware = use_sim
 
-    moveit_config_pkg_str = str(moveit_config_pkg.perform(launch_context))
-    robot_description_semantic = get_robot_description_semantic(moveit_config_pkg)
-    robot_description_kinematics_file = PathJoinSubstitution(
-        [moveit_config_pkg, "config", "kinematics.yaml"]
-    )
     robot_description_planning = {
         "robot_description_planning": load_yaml(
-            moveit_config_pkg_str,
-            "config/joint_limits.yaml",
+            paths.moveit_cfg_pkg_name,
+            paths.joint_limits_cfg,
         )
     }
 
@@ -150,11 +156,12 @@ def prepare_move_group_and_rviz_nodes(
             "start_state_max_bounds_error": 0.1,
         }
     }
-    ompl_planning_yaml = load_yaml(moveit_config_pkg_str, "config/ompl_planning.yaml")
+
+    ompl_planning_yaml = load_yaml(paths.moveit_cfg_pkg_name, paths.ompl_planning_cfg)
     ompl_planning_pipeline_config["move_group"].update(ompl_planning_yaml)
 
     # Trajectory Execution Configuration
-    controllers_yaml = load_yaml(moveit_config_pkg_str, "config/controllers.yaml")
+    controllers_yaml = load_yaml(paths.moveit_cfg_pkg_name, paths.controllers_cfg)
     # TODO(issue#2) use fake hardware for the simulation
     # the scaled_joint_trajectory_controller does not work on fake hardware
     # change_controllers = context.perform_substitution(use_fake_hardware)
@@ -193,20 +200,20 @@ def prepare_move_group_and_rviz_nodes(
 
     node_cfg = {
         "launch_rviz": launch_rviz,
-        "moveit_config_pkg": moveit_config_pkg,
+        "moveit_config_pkg": paths.moveit_cfg_pkg,
         "moveit_controllers": moveit_controllers,
         "ompl_planning_pipeline_config": ompl_planning_pipeline_config,
         "planning_scene_monitor_parameters": planning_scene_monitor_parameters,
-        "robot_description_kinematics_file": robot_description_kinematics_file,
+        "robot_description_kinematics_file": paths.kinematics_cfg,
         "robot_description_planning": robot_description_planning,
-        "robot_description_semantic": robot_description_semantic,
+        "robot_description_semantic": get_robot_description_semantic(paths),
         "robot_description": robot_description,
         "trajectory_execution": trajectory_execution,
         "use_sim": use_sim,
         "warehouse_ros_config": warehouse_ros_config,
     }
 
-    return prepare_move_group_node(node_cfg), preapre_rviz_node(node_cfg)
+    return prepare_move_group_node(node_cfg), prepare_rviz_node(node_cfg)
 
 
 def prepare_move_group_node(cfg: Dict) -> Node:
@@ -223,7 +230,7 @@ def prepare_move_group_node(cfg: Dict) -> Node:
             cfg["trajectory_execution"],
             cfg["moveit_controllers"],
             cfg["planning_scene_monitor_parameters"],
-            {"use_sim_time": cfg["use_sim_time"]},
+            {"use_sim_time": cfg["use_sim"]},
             {"publish_robot_description": True},
             {"publish_robot_description_semantic": True},
             # TODO(issue#1) Re-enable warehouse integration
@@ -232,7 +239,7 @@ def prepare_move_group_node(cfg: Dict) -> Node:
     )
 
 
-def preapre_rviz_node(cfg: Dict) -> Node:
+def prepare_rviz_node(cfg: Dict) -> Node:
     rviz_config_file = PathJoinSubstitution(
         [cfg["moveit_config_pkg"], "config", "moveit.rviz"]
     )
@@ -255,23 +262,8 @@ def preapre_rviz_node(cfg: Dict) -> Node:
     )
 
 
-def static_transforms_nodes() -> tuple[Node, Node]:
-    tf_robot_base_node = Node(
-        package="tf2_ros",
-        executable="static_transform_publisher",
-        name="static_transform_publisher",
-        output="log",
-        arguments=[
-            "0.0",
-            "0.0",
-            "0.0",
-            "0.0",
-            "0.0",
-            "0.0",
-            "world",
-            "ur_base",
-        ],
-    )
+def prepare_static_transforms_nodes() -> tuple[Node, Node]:
+    tf_robot_base_node = static_tf_node("world", "ur_base")
     tf_odom_node = static_tf_node("world", "odom")
     return tf_robot_base_node, tf_odom_node
 
@@ -286,7 +278,7 @@ def static_tf_node(base_link: str, child_link: str) -> Node:
     )
 
 
-def preapre_robot_state_publisher_node(robot_description: Dict) -> Node:
+def prepare_robot_state_publisher_node(robot_description: Dict) -> Node:
     return Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",

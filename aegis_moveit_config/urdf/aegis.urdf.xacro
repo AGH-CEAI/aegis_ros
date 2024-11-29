@@ -3,7 +3,7 @@
   <xacro:arg name="initial_positions_file" default="initial_positions.yaml"/>
 
   <!-- Import aegis urdf file -->
-  <xacro:include filename="$(find aegis_description)/urdf/aegis.urdf.xacro"/>
+  <xacro:include filename="$(find ceai_ur_description)/urdf/aegis.urdf.xacro"/>
 
   <!-- Import control_xacro -->
   <xacro:include filename="aegis.ros2_control.xacro"/>
