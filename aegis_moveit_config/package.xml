@@ -33,7 +33,9 @@
   <exec_depend>rviz_common</exec_depend>
   <exec_depend>rviz_default_plugins</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>ur_moveit_config</exec_depend>
   <exec_depend>xacro</exec_depend>
+
   <!-- TODO(issue#1) Re-enable warehouse integration -->
   <!-- <exec_depend>moveit_ros_warehouse</exec_depend> -->
   <!-- # TODO(issue#1) Re-enable warehouse integration -->
