@@ -1,0 +1,19 @@
+UniqueSceneObjectExample:
+  pretty_name: "Green Cylinder"
+  type: cylinder
+  frame_id: ur_base
+  size:
+    x: 0.1
+    y: 0.1
+    z: 0.2
+  scale: 1.0
+  pose:
+    position:
+      x: 0.4
+      y: 0.4
+      z: 0.0
+    orientation:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      w: 1.0

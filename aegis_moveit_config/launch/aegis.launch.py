@@ -41,6 +41,10 @@ class AegisPathsCfg:
             [self.moveit_cfg_pkg, "config", "ur_calibration.yaml"]
         )
 
+        self.scene_objects_cfg = PathJoinSubstitution(
+            [self.moveit_cfg_pkg, "config", "scene_objects.yaml"]
+        )
+
         self.rviz_cfg = PathJoinSubstitution(
             [self.moveit_cfg_pkg, "config", "moveit.rviz"]
         )
@@ -89,12 +93,15 @@ def launch_setup(context: LaunchContext) -> List[Node]:
     tf_robot_base_node, tf_odom_node = prepare_static_transforms_nodes()
     robot_state_publisher_node = prepare_robot_state_publisher_node(robot_description)
 
+    scene_objects_manager_node = prepare_scene_objects_manager_node(aegis_paths)
+
     nodes_to_start = [
         move_group_node,
         rviz_node,
         tf_robot_base_node,
         tf_odom_node,
         robot_state_publisher_node,
+        scene_objects_manager_node,
         # TODO(issue#5) enable real-time servo
         # servo_node(),
         # TODO(issue#6) enable RGBD it for real hardware
@@ -285,6 +292,16 @@ def prepare_robot_state_publisher_node(robot_description: Dict) -> Node:
         name="robot_state_publisher",
         output="both",
         parameters=[robot_description],
+    )
+
+
+def prepare_scene_objects_manager_node(paths: AegisPathsCfg) -> Node:
+    return Node(
+        package="scene_objects_manager",
+        executable="scene_objects_manager",
+        name="scene_objects_manager",
+        output="screen",
+        arguments=["--cfg", paths.scene_objects_cfg, "--frame", "ur_base"],
     )
 
 
