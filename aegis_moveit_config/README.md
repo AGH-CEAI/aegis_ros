@@ -36,7 +36,7 @@ velocity: [0.0, 0.0]
 effort: [0.0, 0.0]
 "
 
-```aegis_moveit_config
+```
 
 ## Running with the O3DE simulation
 
