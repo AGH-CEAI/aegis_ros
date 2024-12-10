@@ -42,10 +42,18 @@ toolbox create --image localhost/ceai/aegis_dev
 toolbox enter aegis_dev
 ```
 
-### Build
+### Resolving dependencies and build
+```bash
+source /opt/ros/humble/setup.bash
+rosdep init
+mkdir -p ~/ceai_ws
+```
 ```bash
 cd ~/ceai_ws
-source /opt/ros/humble/setup.bash
+git clone -b devel https://github.com/AGH-CEAI/aegis_ros.git src/aegis_ros
+vcs import src < src/aegis_ros/aegis/aegis.repos
+rosdep update --rosdistro $ROS_DISTRO
+rosdep install --from-paths src -y -i
 colcon build --symlink-install
 source ./install/local_setup.bash
 ```
