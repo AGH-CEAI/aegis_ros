@@ -22,3 +22,6 @@
 - [ ] Code has been (auto)formatted.
 - [ ] Documentation (e.g., README, CHANGELOG, Wiki) has been updated.
 - [ ] All automated checks have passed.
+
+---
+Clickup task: [hash](link)
