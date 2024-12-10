@@ -1,0 +1,6 @@
+devel/
+logs/
+build/
+bin/
+install/
+*.sqlite
