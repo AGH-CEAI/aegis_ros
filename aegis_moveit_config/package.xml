@@ -2,9 +2,9 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>aegis_moveit_config</name>
-  <version>0.0.1</version>
-  <description>An automatically generated package with all the configuration and launch files for using the aegis with the MoveIt Motion Planning Framework</description>
-  <maintainer email="ceai@agh.edu.pl">AGH Center of Excelence in Artificial Intelligence</maintainer>
+  <version>0.1.0</version>
+  <description>An automatically generated package containing all the configuration and launch files for using the Aegis with the MoveIt Motion Planning Framework</description>
+  <maintainer email="ceai@agh.edu.pl">AGH Center of Excellence in Artificial Intelligence</maintainer>
 
   <license>Apache-2.0</license>
 
