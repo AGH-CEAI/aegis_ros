@@ -50,7 +50,7 @@ mkdir -p ~/ceai_ws
 ```
 ```bash
 cd ~/ceai_ws
-git clone -b devel https://github.com/AGH-CEAI/aegis_ros.git src/aegis_ros
+git clone -b humble-devel https://github.com/AGH-CEAI/aegis_ros.git src/aegis_ros
 vcs import src < src/aegis_ros/aegis/aegis.repos
 rosdep update --rosdistro $ROS_DISTRO
 rosdep install --from-paths src -y -i
