@@ -22,6 +22,9 @@ class AegisPathsCfg:
         self.moveit_cfg_pkg_name = "aegis_moveit_config"
         self.moveit_cfg_pkg = FindPackageShare(self.moveit_cfg_pkg_name)
 
+        self.control_cfg_pkg_name = "aegis_control"
+        self.control_cfg_pkg = FindPackageShare(self.control_cfg_pkg_name)
+
         self.controllers_cfg = "config/move_group/controllers.yaml"
         self.joint_limits_cfg = "config/move_group/joint_limits.yaml"
         self.ompl_planning_cfg = "config/move_group/ompl_planning.yaml"
@@ -31,14 +34,14 @@ class AegisPathsCfg:
         )
 
         self.srdf_path = PathJoinSubstitution(
-            [self.moveit_cfg_pkg, "urdf", "aegis.srdf"]
+            [self.moveit_cfg_pkg, "config", "aegis.srdf"]
         )
         self.urdf_path = PathJoinSubstitution(
-            [self.moveit_cfg_pkg, "urdf", "aegis.urdf.xacro"]
+            [self.control_cfg_pkg, "urdf", "aegis_control.urdf.xacro"]
         )
 
         self.ur_calibrarion_cfg = PathJoinSubstitution(
-            [self.moveit_cfg_pkg, "config", "ur_calibration.yaml"]
+            [self.control_cfg_pkg, "config", "ur_calibration.yaml"]
         )
 
         self.scene_objects_cfg = PathJoinSubstitution(
@@ -54,10 +57,16 @@ class AegisPathsCfg:
 def generate_launch_description() -> LaunchDescription:
 
     declared_arguments = [
+        # TODO apply namespace param to all nodes
         DeclareLaunchArgument(
-            "use_sim",
+            "namespace",
+            default_value="",
+            description="UNUSED | Set the namespace for ROS 2 communication.",
+        ),
+        DeclareLaunchArgument(
+            "fake_hardware",
             default_value="false",
-            description="Indicate whether robot is running in simulation or not.",
+            description="Mock the hardware?",
         ),
         DeclareLaunchArgument(
             "launch_rviz", default_value="true", description="Launch RViz?"
@@ -75,8 +84,8 @@ def generate_launch_description() -> LaunchDescription:
 
 def launch_setup(context: LaunchContext) -> List[Node]:
 
+    fake_hardware = LaunchConfiguration("fake_hardware")
     launch_rviz = LaunchConfiguration("launch_rviz")
-    use_sim = LaunchConfiguration("use_sim")
     # TODO(issue#5) enable real-time servo
     # launch_servo = LaunchConfiguration("launch_servo")
 
@@ -84,7 +93,7 @@ def launch_setup(context: LaunchContext) -> List[Node]:
     robot_description = get_robot_description(aegis_paths)
 
     move_group_node, rviz_node = prepare_move_group_and_rviz_nodes(
-        use_sim=use_sim,
+        fake_hardware=fake_hardware,
         launch_rviz=launch_rviz,
         paths=aegis_paths,
         robot_description=robot_description,
@@ -139,7 +148,7 @@ def get_robot_description_semantic(paths: AegisPathsCfg) -> Dict:
 
 
 def prepare_move_group_and_rviz_nodes(
-    use_sim: LaunchConfiguration,
+    fake_hardware: LaunchConfiguration,
     launch_rviz: LaunchConfiguration,
     paths: AegisPathsCfg,
     robot_description: Dict,
@@ -216,7 +225,7 @@ def prepare_move_group_and_rviz_nodes(
         "robot_description_semantic": get_robot_description_semantic(paths),
         "robot_description": robot_description,
         "trajectory_execution": trajectory_execution,
-        "use_sim": use_sim,
+        "fake_hardware": fake_hardware,
         "warehouse_ros_config": warehouse_ros_config,
     }
 
@@ -237,7 +246,7 @@ def prepare_move_group_node(cfg: Dict) -> Node:
             cfg["trajectory_execution"],
             cfg["moveit_controllers"],
             cfg["planning_scene_monitor_parameters"],
-            {"use_sim_time": cfg["use_sim"]},
+            {"use_sim_time": cfg["fake_hardware"]},
             {"publish_robot_description": True},
             {"publish_robot_description_semantic": True},
             # TODO(issue#1) Re-enable warehouse integration

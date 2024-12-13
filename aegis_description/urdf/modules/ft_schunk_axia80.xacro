@@ -15,7 +15,8 @@
 
   <xacro:include filename="$(find net_ft_description)/urdf/net_ft_sensor.xacro"/>
 
-  <xacro:macro name="ft_sensor_schunk_axia80" params="prefix parent">
+  <xacro:macro name="ft_sensor_schunk_axia80" params="prefix parent fake_hardware">
+    <!-- TODO: include the fake_hardware param -->
     <xacro:net_ft_sensor
       parent="${parent}"
       prefix="${prefix}"

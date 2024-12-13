@@ -1,19 +1,9 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://wiki.ros.org/xacro" name="aegis">
   <xacro:arg name="name" default="aegis"/>
-  <xacro:arg name="kinematics_params" default="$(find ur_description)/config/ur5e/default_kinematics.yaml"/>
 
-  <xacro:include filename="$(find aegis_description)/urdf/ur_definition.xacro"/>
-  <xacro:include filename="$(find aegis_description)/urdf/adapter_to_sensor.xacro"/>
-  <xacro:include filename="$(find aegis_description)/urdf/ft_schunk_axia80.xacro"/>
-  <xacro:include filename="$(find aegis_description)/urdf/adapter_from_sensor.xacro"/>
-  <xacro:include filename="$(find robotiq_hande_description)/urdf/robotiq_hande_gripper.xacro"/>
+  <xacro:include filename="$(find aegis_description)/urdf/aegis.xacro"/>
 
   <link name="ur_base"/>
-
-  <xacro:ur_definition name="$(arg name)" kinematics_params="$(arg kinematics_params)"/>
-  <xacro:adapter_to_sensor parent="tool0" prefix=""/>
-  <xacro:ft_sensor_schunk_axia80 parent="adapter_to_sensor_end" prefix=""/>
-  <xacro:adapter_from_sensor parent="tool_mount_link" prefix=""/>
-  <xacro:robotiq_hande_gripper parent="adapter_from_sensor_end" prefix=""/>
+  <xacro:aegis_robot name="$(arg name)" parent="ur_base" prefix=""/>
 </robot>
