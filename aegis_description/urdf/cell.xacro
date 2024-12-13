@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="cell" params="parent">
+
+    <joint name="world_to_cell_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="${parent}" />
+      <child link="cell" />
+    </joint>
+
+    <link name="cell">
+      <visual>
+        <origin xyz="-0.460 -0.240 0.786" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://aegis_description/meshes/cell.dae"
+            scale="1.0 1.0 1.0" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="-0.460 -0.240 0.786" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://aegis_description/meshes/cell.dae"
+            scale="1.0 1.0 1.0" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="cell_to_ur_base" type="fixed">
+      <origin xyz="0 0 0.806" rpy="0 0 ${0.5 * pi}" />
+      <parent link="cell" />
+      <child link="ur_base" />
+    </joint>
+
+    <link name="ur_base" />
+
+  </xacro:macro>
+</robot>
