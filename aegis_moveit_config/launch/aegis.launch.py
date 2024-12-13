@@ -291,6 +291,7 @@ def prepare_robot_state_publisher_node(robot_description: Dict) -> Node:
         parameters=[robot_description],
     )
 
+
 def prepare_joint_state_publisher_node() -> Node:
     return Node(
         package="joint_state_publisher",

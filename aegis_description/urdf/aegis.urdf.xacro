@@ -10,12 +10,11 @@
   <xacro:include filename="$(find aegis_description)/urdf/adapter_from_sensor.xacro"/>
   <xacro:include filename="$(find robotiq_hande_description)/urdf/robotiq_hande_gripper.xacro"/>
 
-  <link name="world" />
-  <xacro:cell parent="world" />
+  <link name="world"/>
+  <xacro:cell parent="world"/>
   <xacro:ur_definition name="$(arg name)" kinematics_params="$(arg kinematics_params)"/>
   <xacro:adapter_to_sensor parent="tool0" prefix=""/>
   <xacro:ft_sensor_schunk_axia80 parent="adapter_to_sensor_end" prefix=""/>
   <xacro:adapter_from_sensor parent="tool_mount_link" prefix=""/>
   <xacro:robotiq_hande_gripper parent="adapter_from_sensor_end" prefix=""/>
-
 </robot>
