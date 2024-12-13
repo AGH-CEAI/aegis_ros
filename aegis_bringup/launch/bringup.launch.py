@@ -34,33 +34,57 @@ def generate_launch_description():
         description="Add namespace to all launched nodes.",
     )
 
-    ur_driver_launch = IncludeLaunchDescription(
+    mock_hardware = LaunchConfiguration("mock_hardware")
+    declare_namespace_arg = DeclareLaunchArgument(
+        "mock_hardware",
+        default_value=EnvironmentVariable("MOCK_HARDWARE", default_value="false"),
+        description="Mock the hardware for testing purposes.",
+    )
+
+    # ur_driver_launch = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource(
+    #         PathJoinSubstitution(
+    #             [FindPackageShare("ur_robot_driver"), "launch", "ur_control.launch.py"]
+    #         )
+    #     ),
+    #     launch_arguments={
+    #         "namespace": namespace,
+    #         "use_fake_hardware": fake_hardware,
+    #         "ur_type": "ur5e",
+    #         "robot_ip": "aegis_ur",
+    #         "launch_rviz": "false",
+    #     }.items(),
+    # )
+
+    drivers_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
-                [FindPackageShare("ur_robot_driver"), "launch", "ur_control.launch.py"]
+                [FindPackageShare("aegis_control"), "launch", "start_drivers.launch.py"]
             )
         ),
         launch_arguments={
             "namespace": namespace,
-            "ur_type": "ur5e",
-            "robot_ip": "aegis",
-            "launch_rviz": "false",
+            "mock_hardware": mock_hardware,
         }.items(),
     )
 
     moveit_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
-                [FindPackageShare("aegis_moveit_config"), "launch", "aegis.launch.py"]
+                [
+                    FindPackageShare("aegis_moveit_config"),
+                    "launch",
+                    "move_group.launch.py",
+                ]
             )
         ),
-        launch_arguments={"namespace": namespace}.items(),
+        launch_arguments={"launch_rviz": "true"}.items(),
     )
 
     return LaunchDescription(
         [
             declare_namespace_arg,
+            drivers_launch,
             moveit_launch,
-            ur_driver_launch,
         ]
     )

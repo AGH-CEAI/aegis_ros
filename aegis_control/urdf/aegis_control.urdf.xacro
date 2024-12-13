@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="aegis">
+  <xacro:arg name="use_mock_hardware" default="false"/>
+  <xacro:arg name="mock_sensor_commands" default="false"/>
+
+  <xacro:include filename="$(find aegis_description)/urdf/aegis.xacro"/>
+  <xacro:include filename="$(find aegis_control)/urdf/aegis.ros2_control.xacro"/>
+
+  <link name="ur_base"/>
+
+  <xacro:aegis_robot parent="ur_base" prefix=""/>
+
+  <xacro:aegis_ros2_control use_mock_hardware="$(arg use_mock_hardware)" mock_sensor_commands="$(arg mock_sensor_commands)"/>
+</robot>
