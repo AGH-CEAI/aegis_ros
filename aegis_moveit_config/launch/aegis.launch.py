@@ -94,6 +94,8 @@ def launch_setup(context: LaunchContext) -> List[Node]:
 
     robot_state_publisher_node = prepare_robot_state_publisher_node(robot_description)
 
+    joint_state_publisher_node = prepare_joint_state_publisher_node()
+
     scene_objects_manager_node = prepare_scene_objects_manager_node(aegis_paths)
 
     nodes_to_start = [
@@ -101,6 +103,7 @@ def launch_setup(context: LaunchContext) -> List[Node]:
         rviz_node,
         tf_odom_node,
         robot_state_publisher_node,
+        joint_state_publisher_node,
         scene_objects_manager_node,
         # TODO(issue#5) enable real-time servo
         # servo_node(),
@@ -286,6 +289,14 @@ def prepare_robot_state_publisher_node(robot_description: Dict) -> Node:
         name="robot_state_publisher",
         output="both",
         parameters=[robot_description],
+    )
+
+def prepare_joint_state_publisher_node() -> Node:
+    return Node(
+        package="joint_state_publisher",
+        executable="joint_state_publisher",
+        name="joint_state_publisher",
+        output="screen",
     )
 
 
