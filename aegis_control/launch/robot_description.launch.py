@@ -26,7 +26,8 @@ def generate_launch_description():
                     "aegis_control.urdf.xacro",
                 ]
             ),
-            "use_mock_hardware:=",
+            " ",
+            "mock_hardware:=",
             mock_hardware,
         ]
     )

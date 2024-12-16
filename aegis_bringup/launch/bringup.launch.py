@@ -25,7 +25,7 @@ from launch.substitutions import (
 from launch_ros.substitutions import FindPackageShare
 
 
-def generate_launch_description():
+def generate_launch_description() -> LaunchDescription:
 
     namespace = LaunchConfiguration("namespace")
     declare_namespace_arg = DeclareLaunchArgument(
@@ -35,7 +35,7 @@ def generate_launch_description():
     )
 
     mock_hardware = LaunchConfiguration("mock_hardware")
-    declare_namespace_arg = DeclareLaunchArgument(
+    declare_mock_hardware_arg = DeclareLaunchArgument(
         "mock_hardware",
         default_value=EnvironmentVariable("MOCK_HARDWARE", default_value="false"),
         description="Mock the hardware for testing purposes.",
@@ -84,6 +84,7 @@ def generate_launch_description():
     return LaunchDescription(
         [
             declare_namespace_arg,
+            declare_mock_hardware_arg,
             drivers_launch,
             moveit_launch,
         ]

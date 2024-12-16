@@ -36,7 +36,7 @@ class AegisPathsCfg:
         self.srdf_path = PathJoinSubstitution(
             [self.moveit_cfg_pkg, "config", "aegis.srdf"]
         )
-        self.urdf_path = PathJoinSubstitution(
+        self.control_urdf_path = PathJoinSubstitution(
             [self.control_cfg_pkg, "urdf", "aegis_control.urdf.xacro"]
         )
 
@@ -125,10 +125,7 @@ def get_robot_description(paths: AegisPathsCfg) -> Dict:
         [
             paths.xacro_path,
             " ",
-            paths.urdf_path,
-            " ",
-            "kinematics_params:=",
-            paths.ur_calibrarion_cfg,
+            paths.control_urdf_path,
         ]
     )
     return {

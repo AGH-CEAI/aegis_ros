@@ -8,7 +8,7 @@ from launch.substitutions import (
 from launch_ros.substitutions import FindPackageShare
 
 
-def generate_launch_description():
+def generate_launch_description() -> LaunchDescription:
 
     launch_arguments = {
         "namespace": LaunchConfiguration("namespace", default=""),
