@@ -15,12 +15,11 @@
 
   <xacro:include filename="$(find net_ft_description)/urdf/net_ft_sensor.xacro"/>
 
-  <xacro:macro name="ft_sensor_schunk_axia80" params="prefix parent fake_hardware">
-    <!-- TODO: include the fake_hardware param -->
+  <xacro:macro name="ft_sensor_schunk_axia80" params="prefix parent mock_hardware">
     <xacro:net_ft_sensor
       parent="${parent}"
       prefix="${prefix}"
-      use_physical_hardware="$(arg use_physical_hardware)"
+      use_physical_hardware="${mock_hardware == 'false'}"
       ip_address="$(arg ip_address)"
       rdt_sampling_rate="$(arg rdt_sampling_rate)"
       sensor_type="$(arg sensor_type)"

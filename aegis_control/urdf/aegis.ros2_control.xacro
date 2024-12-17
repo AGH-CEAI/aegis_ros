@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:macro name="aegis_ros2_control" params="mock_hardware">
+  <xacro:macro name="aegis_ros2_control" params="initial_positions_file mock_hardware">
     <xacro:property name="initial_positions" value="${xacro.load_yaml(initial_positions_file)['initial_positions']}"/>
 
-    <ros2_control name="${name}" type="system">
+    <ros2_control name="aegis" type="system">
       <hardware>
         <!-- By default, set up controllers for simulation. This won't work on real hardware -->
         <plugin>mock_components/GenericSystem</plugin>

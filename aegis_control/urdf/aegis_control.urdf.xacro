@@ -1,8 +1,10 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="aegis">
+  <xacro:arg name="mock_hardware" default="false"/>
+
   <xacro:arg name="base_link" default="ur_base"/>
   <xacro:arg name="prefix" default=""/>
-  <xacro:arg name="mock_hardware" default="false"/>
+  <xacro:arg name="initial_positions_file" default="$(find aegis_control)/config/initial_positions.yaml"/>
 
   <xacro:include filename="$(find aegis_description)/urdf/aegis.xacro"/>
   <xacro:include filename="$(find aegis_control)/urdf/aegis.ros2_control.xacro"/>
@@ -10,5 +12,5 @@
   <link name="$(arg base_link)"/>
 
   <xacro:aegis_robot parent="$(arg base_link)" prefix="$(arg prefix)" kinematics_calibration="$(find aegis_control)/config/ur_calibration.yaml" mock_hardware="$(arg mock_hardware)"/>
-  <xacro:aegis_ros2_control mock_hardware="$(arg mock_hardware)"/>
+  <xacro:aegis_ros2_control initial_positions_file="$(arg initial_positions_file)" mock_hardware="$(arg mock_hardware)"/>
 </robot>
