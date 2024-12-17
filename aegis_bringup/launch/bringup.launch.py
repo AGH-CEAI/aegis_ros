@@ -85,7 +85,7 @@ def generate_launch_description() -> LaunchDescription:
         [
             declare_namespace_arg,
             declare_mock_hardware_arg,
-            drivers_launch,
+            # drivers_launch,
             moveit_launch,
         ]
     )
