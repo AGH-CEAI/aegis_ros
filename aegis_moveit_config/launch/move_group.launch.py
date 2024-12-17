@@ -121,12 +121,9 @@ def launch_setup(context: LaunchContext) -> List[Node]:
 
 
 def get_robot_description(paths: AegisPathsCfg) -> Dict:
+    # TODO move it to the aegis_description or aegis_control
     robot_description_content = Command(
-        [
-            paths.xacro_path,
-            " ",
-            paths.control_urdf_path,
-        ]
+        [paths.xacro_path, " ", paths.control_urdf_path, " ", "mock_hardware:=true"]
     )
     return {
         "robot_description": ParameterValue(robot_description_content, value_type=str)
