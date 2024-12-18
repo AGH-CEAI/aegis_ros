@@ -4,6 +4,7 @@
   <xacro:arg name="kinematics_params" default="$(find ur_description)/config/ur5e/default_kinematics.yaml"/>
 
   <xacro:include filename="$(find aegis_description)/urdf/cell.xacro"/>
+  <xacro:include filename="$(find aegis_description)/urdf/oakd_pro_camera.xacro"/>
   <xacro:include filename="$(find aegis_description)/urdf/ur_definition.xacro"/>
   <xacro:include filename="$(find aegis_description)/urdf/adapter_to_sensor.xacro"/>
   <xacro:include filename="$(find aegis_description)/urdf/ft_schunk_axia80.xacro"/>
@@ -12,6 +13,7 @@
 
   <link name="world"/>
   <xacro:cell parent="world"/>
+  <xacro:oakd_pro_camera parent="cell"/>
   <xacro:ur_definition name="$(arg name)" kinematics_params="$(arg kinematics_params)"/>
   <xacro:adapter_to_sensor parent="tool0" prefix=""/>
   <xacro:ft_sensor_schunk_axia80 parent="adapter_to_sensor_end" prefix=""/>
