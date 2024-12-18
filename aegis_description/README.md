@@ -16,6 +16,11 @@ ros2 launch aegis_description display.launch.py
 
 ## URDF files diagram
 
+TODO - embed dynamic PlantUML generation:
+```markdown
+![alternative text](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.github.com/plantuml/plantuml-server/master/src/main/webapp/resource/test2diagrams.txt
+```
+
 ```plantuml
 @startuml URDF diagram
 

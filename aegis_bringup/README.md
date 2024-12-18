@@ -39,6 +39,11 @@ ros2 service call /dashboard_client/play std_srvs/srv/Trigger {}
 
 ## Launch files diagram
 
+TODO - embed dynamic PlantUML generation:
+```markdown
+![alternative text](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.github.com/plantuml/plantuml-server/master/src/main/webapp/resource/test2diagrams.txt
+```
+
 ```plantuml
 @startuml Launch Files
 
