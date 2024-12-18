@@ -36,3 +36,70 @@ effort: [0.0, 0.0]"
 ```bash
 ros2 service call /dashboard_client/play std_srvs/srv/Trigger {}
 ```
+
+## Launch files diagram
+
+```plantuml
+@startuml Launch Files
+
+package aegis_bringup {
+    class bringup << (L,#FF7700) LaunchFile >> {
+        Arg namespace=""
+        Arg mock_hardware="false"
+    }
+}
+
+package aegis_control {
+    class start_drivers << (L,#FF7700) LaunchFile >> {
+        Arg namespace
+        Arg mock_hardware
+    }
+    class robot_description << (L,#FF7700) LaunchFile >> {
+        Arg namespace
+        Arg mock_hardware
+        Node robot_state_publisher()
+    }
+    class ur_driver << (L,#FF7700) LaunchFile >> {
+        Arg namespace
+        Arg mock_hardware
+        Node control_node()
+        Node ur_control_node()
+        Node dashboard_client_node()
+        Node tool_communication_node()
+        Node controller_stopper_node()
+        Node urscript_interface()
+        Node controller_spawners()
+    }
+
+}
+
+package aegis_description {
+    class aegis_display << (L,#FF7700) LaunchFile >> {
+        Launch urdf_launch/display.launch()
+        Node static_transform_publisher()
+    }
+}
+
+package aegis_moveit_config {
+    class move_group << (L,#FF7700) LaunchFile >> {
+        Arg namespace
+        Arg fake_hardware
+        Arg launch_rviz
+        Node move_group_node()
+        Node rviz_node()
+        Node tf_robot_base_node()
+        Node tf_odom_node()
+        Node robot_state_publisher_node()
+        Node scene_objects_manager_node()
+    }
+}
+
+
+aegis_bringup.bringup --> aegis_control.start_drivers
+aegis_bringup.bringup --> aegis_moveit_config.move_group
+aegis_control.start_drivers --> aegis_control.robot_description
+aegis_control.start_drivers --> aegis_control.ur_driver
+
+skinparam classAttributeIconSize 0
+@enduml
+```
