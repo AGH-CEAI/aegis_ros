@@ -8,6 +8,7 @@ from launch.substitutions import (
     LaunchConfiguration,
     PathJoinSubstitution,
 )
+from launch_ros.descriptions import ParameterValue
 
 
 def generate_launch_description():
@@ -15,7 +16,7 @@ def generate_launch_description():
     namespace = LaunchConfiguration("namespace", default="")
     mock_hardware = LaunchConfiguration("mock_hardware", default="false")
 
-    robot_description = Command(
+    robot_description_str = Command(
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
@@ -39,7 +40,11 @@ def generate_launch_description():
                 executable="robot_state_publisher",
                 output="both",
                 parameters=[
-                    {"robot_description": robot_description},
+                    {
+                        "robot_description": ParameterValue(
+                            robot_description_str, value_type=str
+                        )
+                    },
                     {"namespace", namespace},
                 ],
             )

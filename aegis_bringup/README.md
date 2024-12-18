@@ -94,7 +94,6 @@ package aegis_moveit_config {
         Node rviz_node()
         Node tf_robot_base_node()
         Node tf_odom_node()
-        Node robot_state_publisher_node()
         Node scene_objects_manager_node()
     }
 }

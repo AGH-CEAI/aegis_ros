@@ -36,9 +36,6 @@ class AegisPathsCfg:
         self.srdf_path = PathJoinSubstitution(
             [self.moveit_cfg_pkg, "config", "aegis.srdf"]
         )
-        self.control_urdf_path = PathJoinSubstitution(
-            [self.control_cfg_pkg, "urdf", "aegis_control.urdf.xacro"]
-        )
 
         self.ur_calibrarion_cfg = PathJoinSubstitution(
             [self.control_cfg_pkg, "config", "ur_calibration.yaml"]
@@ -64,7 +61,7 @@ def generate_launch_description() -> LaunchDescription:
             description="UNUSED | Set the namespace for ROS 2 communication.",
         ),
         DeclareLaunchArgument(
-            "fake_hardware",
+            "mock_hardware",
             default_value="false",
             description="Mock the hardware?",
         ),
@@ -84,23 +81,20 @@ def generate_launch_description() -> LaunchDescription:
 
 def launch_setup(context: LaunchContext) -> List[Node]:
 
-    fake_hardware = LaunchConfiguration("fake_hardware")
+    mock_hardware = LaunchConfiguration("mock_hardware")
     launch_rviz = LaunchConfiguration("launch_rviz")
     # TODO(issue#5) enable real-time servo
     # launch_servo = LaunchConfiguration("launch_servo")
 
     aegis_paths = AegisPathsCfg()
-    robot_description = get_robot_description(aegis_paths)
 
     move_group_node, rviz_node = prepare_move_group_and_rviz_nodes(
-        fake_hardware=fake_hardware,
+        fake_hardware=mock_hardware,
         launch_rviz=launch_rviz,
         paths=aegis_paths,
-        robot_description=robot_description,
     )
 
     tf_robot_base_node, tf_odom_node = prepare_static_transforms_nodes()
-    robot_state_publisher_node = prepare_robot_state_publisher_node(robot_description)
 
     scene_objects_manager_node = prepare_scene_objects_manager_node(aegis_paths)
 
@@ -109,7 +103,6 @@ def launch_setup(context: LaunchContext) -> List[Node]:
         rviz_node,
         tf_robot_base_node,
         tf_odom_node,
-        robot_state_publisher_node,
         scene_objects_manager_node,
         # TODO(issue#5) enable real-time servo
         # servo_node(),
@@ -118,16 +111,6 @@ def launch_setup(context: LaunchContext) -> List[Node]:
     ]
 
     return nodes_to_start
-
-
-def get_robot_description(paths: AegisPathsCfg) -> Dict:
-    # TODO move it to the aegis_description or aegis_control
-    robot_description_content = Command(
-        [paths.xacro_path, " ", paths.control_urdf_path, " ", "mock_hardware:=true"]
-    )
-    return {
-        "robot_description": ParameterValue(robot_description_content, value_type=str)
-    }
 
 
 def get_robot_description_semantic(paths: AegisPathsCfg) -> Dict:
@@ -145,7 +128,6 @@ def prepare_move_group_and_rviz_nodes(
     fake_hardware: LaunchConfiguration,
     launch_rviz: LaunchConfiguration,
     paths: AegisPathsCfg,
-    robot_description: Dict,
 ) -> tuple[Node, Node]:
 
     # TODO(issue#2) re-enable simulation
@@ -217,7 +199,6 @@ def prepare_move_group_and_rviz_nodes(
         "robot_description_kinematics_file": paths.kinematics_cfg,
         "robot_description_planning": robot_description_planning,
         "robot_description_semantic": get_robot_description_semantic(paths),
-        "robot_description": robot_description,
         "trajectory_execution": trajectory_execution,
         "fake_hardware": fake_hardware,
         "warehouse_ros_config": warehouse_ros_config,
@@ -232,7 +213,6 @@ def prepare_move_group_node(cfg: Dict) -> Node:
         executable="move_group",
         output="screen",
         parameters=[
-            cfg["robot_description"],
             cfg["robot_description_semantic"],
             cfg["robot_description_kinematics_file"],
             cfg["robot_description_planning"],
@@ -261,7 +241,6 @@ def prepare_rviz_node(cfg: Dict) -> Node:
         output="log",
         arguments=["-d", rviz_config_file],
         parameters=[
-            cfg["robot_description"],
             cfg["robot_description_semantic"],
             cfg["ompl_planning_pipeline_config"],
             cfg["robot_description_kinematics_file"],
@@ -284,17 +263,24 @@ def static_tf_node(base_link: str, child_link: str) -> Node:
         executable="static_transform_publisher",
         name="static_transform_publisher",
         output="log",
-        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", base_link, child_link],
-    )
-
-
-def prepare_robot_state_publisher_node(robot_description: Dict) -> Node:
-    return Node(
-        package="robot_state_publisher",
-        executable="robot_state_publisher",
-        name="robot_state_publisher",
-        output="both",
-        parameters=[robot_description],
+        arguments=[
+            "--x",
+            "0.0",
+            "--y",
+            "0.0",
+            "--z",
+            "0.0",
+            "--roll",
+            "0.0",
+            "--pitch",
+            "0.0",
+            "--yaw",
+            "0.0",
+            "--frame-id",
+            base_link,
+            "--child-frame-id",
+            child_link,
+        ],
     )
 
 

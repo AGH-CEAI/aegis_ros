@@ -40,6 +40,6 @@ def generate_launch_description() -> LaunchDescription:
     return LaunchDescription(
         [
             robot_description,
-            ur_driver,
+            # ur_driver,
         ]
     )

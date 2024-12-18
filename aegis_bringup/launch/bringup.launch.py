@@ -41,21 +41,6 @@ def generate_launch_description() -> LaunchDescription:
         description="Mock the hardware for testing purposes.",
     )
 
-    # ur_driver_launch = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource(
-    #         PathJoinSubstitution(
-    #             [FindPackageShare("ur_robot_driver"), "launch", "ur_control.launch.py"]
-    #         )
-    #     ),
-    #     launch_arguments={
-    #         "namespace": namespace,
-    #         "use_fake_hardware": fake_hardware,
-    #         "ur_type": "ur5e",
-    #         "robot_ip": "aegis_ur",
-    #         "launch_rviz": "false",
-    #     }.items(),
-    # )
-
     drivers_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
@@ -78,14 +63,18 @@ def generate_launch_description() -> LaunchDescription:
                 ]
             )
         ),
-        launch_arguments={"launch_rviz": "true"}.items(),
+        launch_arguments={
+            "namespace": namespace,
+            "mock_hardware": mock_hardware,
+            "launch_rviz": "true",
+        }.items(),
     )
 
     return LaunchDescription(
         [
             declare_namespace_arg,
             declare_mock_hardware_arg,
-            # drivers_launch,
+            drivers_launch,
             moveit_launch,
         ]
     )
