@@ -76,12 +76,28 @@ package aegis_control {
         Node controller_spawners()
     }
 
+    package config {
+        class ur_calibration << (Y,#ffffc9) YAML >> {}
+    }
+
+    package urdf {
+        class aegis_control_urdf << (U,#bcffc8) urdf.xacro >> {}
+    }
+
 }
 
 package aegis_description {
     class aegis_display << (L,#FF7700) LaunchFile >> {
         Launch urdf_launch/display.launch()
         Node static_transform_publisher()
+    }
+
+    package config {
+        class controllers << (Y,#ffffc9) YAML >> {}
+        class joint_limits << (Y,#ffffc9) YAML >> {}
+        package ur5e {
+            class update_rate << (Y,#ffffc9) YAML >> {}
+        }
     }
 }
 
@@ -96,14 +112,35 @@ package aegis_moveit_config {
         Node tf_odom_node()
         Node scene_objects_manager_node()
     }
+    package config {
+        class aegis << (S,#c298e9) SRDF >> {}
+        package move_group {
+            class ompl_planning << (Y,#ffffc9) YAML >> {}
+            class kinematics << (Y,#ffffc9) YAML >> {}
+        }
+        class moveit << (R,#ffffff) rviz >> {}
+    }
 }
 
 
-aegis_bringup.bringup --> aegis_control.start_drivers
-aegis_bringup.bringup --> aegis_moveit_config.move_group
-aegis_control.start_drivers --> aegis_control.robot_description
-aegis_control.start_drivers --> aegis_control.ur_driver
+aegis_bringup.bringup *-- aegis_control.start_drivers
+aegis_bringup.bringup *-- aegis_moveit_config.move_group
+
+aegis_control.start_drivers *-- aegis_control.robot_description
+aegis_control.start_drivers *-- aegis_control.ur_driver
+aegis_control.robot_description *-- aegis_control.urdf.aegis_control_urdf
+aegis_control.ur_driver *-- aegis_description.config.ur5e
+aegis_control.ur_driver *-- aegis_description.config.controllers
+
+aegis_moveit_config.move_group *-- aegis_moveit_config.config
+aegis_moveit_config.move_group *-- aegis_description.config.controllers
+aegis_moveit_config.move_group *-- aegis_description.config.joint_limits
+aegis_moveit_config.move_group *-- aegis_control.config.ur_calibration
 
 skinparam classAttributeIconSize 0
+hide << YAML >> members
+hide << urdf.xacro >> members
+hide << SRDF >> members
+hide << rviz >> members
 @enduml
 ```

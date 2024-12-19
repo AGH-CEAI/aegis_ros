@@ -25,9 +25,15 @@ class AegisPathsCfg:
         self.control_cfg_pkg_name = "aegis_control"
         self.control_cfg_pkg = FindPackageShare(self.control_cfg_pkg_name)
 
-        self.controllers_cfg = "config/move_group/controllers.yaml"
-        self.joint_limits_cfg = "config/move_group/joint_limits.yaml"
+        self.description_cfg_pkg_name = "aegis_description"
+        self.description_cfg_pkg = FindPackageShare(self.description_cfg_pkg_name)
+
+        # aegis_moveit_config
         self.ompl_planning_cfg = "config/move_group/ompl_planning.yaml"
+
+        # aegis_description
+        self.controllers_cfg = "config/controllers.yaml"
+        self.joint_limits_cfg = "config/move_group/joint_limits.yaml"
 
         self.kinematics_cfg = PathJoinSubstitution(
             [self.moveit_cfg_pkg, "config", "move_group", "kinematics.yaml"]
@@ -54,11 +60,10 @@ class AegisPathsCfg:
 def generate_launch_description() -> LaunchDescription:
 
     declared_arguments = [
-        # TODO apply namespace param to all nodes
         DeclareLaunchArgument(
             "namespace",
             default_value="",
-            description="UNUSED | Set the namespace for ROS 2 communication.",
+            description="Set the namespace for ROS 2 communication.",
         ),
         DeclareLaunchArgument(
             "mock_hardware",
@@ -135,7 +140,7 @@ def prepare_move_group_and_rviz_nodes(
 
     robot_description_planning = {
         "robot_description_planning": load_yaml(
-            paths.moveit_cfg_pkg_name,
+            paths.description_cfg_pkg_name,
             paths.joint_limits_cfg,
         )
     }
@@ -153,7 +158,7 @@ def prepare_move_group_and_rviz_nodes(
     ompl_planning_pipeline_config["move_group"].update(ompl_planning_yaml)
 
     # Trajectory Execution Configuration
-    controllers_yaml = load_yaml(paths.moveit_cfg_pkg_name, paths.controllers_cfg)
+    controllers_yaml = load_yaml(paths.description_cfg_pkg_name, paths.controllers_cfg)
     # TODO(issue#2) use fake hardware for the simulation
     # the scaled_joint_trajectory_controller does not work on fake hardware
     # change_controllers = context.perform_substitution(use_fake_hardware)
