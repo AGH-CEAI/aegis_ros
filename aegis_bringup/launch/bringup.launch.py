@@ -40,7 +40,7 @@ def generate_launch_description():
     declare_use_sim_arg = DeclareLaunchArgument(
         "use_sim",
         default_value="false",
-        description="Mock hardware mode is enabled and UR driver will not be launched."
+        description="Mock hardware mode is enabled and UR driver will not be launched.",
     )
 
     ur_driver_launch = IncludeLaunchDescription(
@@ -55,7 +55,7 @@ def generate_launch_description():
             "robot_ip": "aegis",
             "launch_rviz": "false",
         }.items(),
-        condition=UnlessCondition(use_sim)
+        condition=UnlessCondition(use_sim),
     )
 
     moveit_launch = IncludeLaunchDescription(

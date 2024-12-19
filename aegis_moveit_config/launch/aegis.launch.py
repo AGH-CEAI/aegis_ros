@@ -298,7 +298,7 @@ def prepare_joint_state_publisher_node(use_sim: bool) -> Node:
         executable="joint_state_publisher",
         name="joint_state_publisher",
         output="screen",
-        condition=IfCondition(use_sim)
+        condition=IfCondition(use_sim),
     )
 
 
