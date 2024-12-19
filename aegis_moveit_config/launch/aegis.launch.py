@@ -94,7 +94,7 @@ def launch_setup(context: LaunchContext) -> List[Node]:
 
     robot_state_publisher_node = prepare_robot_state_publisher_node(robot_description)
 
-    joint_state_publisher_node = prepare_joint_state_publisher_node()
+    joint_state_publisher_node = prepare_joint_state_publisher_node(use_sim)
 
     scene_objects_manager_node = prepare_scene_objects_manager_node(aegis_paths)
 
@@ -292,12 +292,13 @@ def prepare_robot_state_publisher_node(robot_description: Dict) -> Node:
     )
 
 
-def prepare_joint_state_publisher_node() -> Node:
+def prepare_joint_state_publisher_node(use_sim: bool) -> Node:
     return Node(
         package="joint_state_publisher",
         executable="joint_state_publisher",
         name="joint_state_publisher",
         output="screen",
+        condition=IfCondition(use_sim)
     )
 
 
