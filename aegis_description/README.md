@@ -43,6 +43,10 @@ package aegis_description {
         class ft_schunk_axia80 << (X,cyan) xacro >> {}
         class ur_definition << (X,cyan) xacro >> {}
     }
+
+    class joint_limits << (Y,#ffffc9) YAML >> {}
+    class physical_parameters << (Y,#ffffc9) YAML >> {}
+    class visual_parameters << (Y,#ffffc9) YAML >> {}
 }
 
 package aegis_moveit_config {
@@ -59,9 +63,6 @@ package net_ft_description {
 
 package ur_description {
     class ur_macro << (X,cyan) xacro >> {}
-    class joint_limits << (Y,#ffffc9) YAML >> {}
-    class physical_parameters << (Y,#ffffc9) YAML >> {}
-    class visual_parameters << (Y,#ffffc9) YAML >> {}
 }
 
 package ur_robot_driver {
@@ -83,7 +84,11 @@ aegis_description.modules.adapter_to_sensor *-- aegis_description.cylinders_iner
 aegis_description.modules.ft_schunk_axia80 *-- net_ft_description.net_ft_sensor
 aegis_description.modules.ur_definition *-- ur_description
 aegis_description.modules.ur_definition *-- ur_robot_driver
-aegis_description.modules.ur_definition o-- aegis_control.initial_positions
+aegis_description.modules.ur_definition *-- aegis_control.initial_positions
+aegis_description.modules.ur_definition *-- aegis_description.joint_limits
+aegis_description.modules.ur_definition *-- aegis_description.physical_parameters
+aegis_description.modules.ur_definition *-- aegis_description.visual_parameters
+
 
 hide members
 show << urdf.xacro >> fields
