@@ -16,6 +16,7 @@
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.conditions import UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
     EnvironmentVariable,
@@ -28,10 +29,18 @@ from launch_ros.substitutions import FindPackageShare
 def generate_launch_description():
 
     namespace = LaunchConfiguration("namespace")
+    use_sim = LaunchConfiguration("use_sim")
+
     declare_namespace_arg = DeclareLaunchArgument(
         "namespace",
         default_value=EnvironmentVariable("ROBOT_NAMESPACE", default_value=""),
         description="Add namespace to all launched nodes.",
+    )
+
+    declare_use_sim_arg = DeclareLaunchArgument(
+        "use_sim",
+        default_value="false",
+        description="Mock hardware mode is enabled and UR driver will not be launched."
     )
 
     ur_driver_launch = IncludeLaunchDescription(
@@ -46,6 +55,7 @@ def generate_launch_description():
             "robot_ip": "aegis",
             "launch_rviz": "false",
         }.items(),
+        condition=UnlessCondition(use_sim)
     )
 
     moveit_launch = IncludeLaunchDescription(
@@ -54,12 +64,13 @@ def generate_launch_description():
                 [FindPackageShare("aegis_moveit_config"), "launch", "aegis.launch.py"]
             )
         ),
-        launch_arguments={"namespace": namespace}.items(),
+        launch_arguments={"namespace": namespace, "use_sim": use_sim}.items(),
     )
 
     return LaunchDescription(
         [
             declare_namespace_arg,
+            declare_use_sim_arg,
             moveit_launch,
             ur_driver_launch,
         ]
