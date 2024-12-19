@@ -30,7 +30,7 @@
 
     <!-- Simulation parameters -->
     <xacro:arg name="use_fake_hardware" default="${str(mock_hardware)}"/>
-    <xacro:arg name="fake_sensor_commands" default="false"/>
+    <xacro:arg name="fake_sensor_commands" default="${str(mock_hardware)}"/>
     <xacro:arg name="sim_gazebo" default="false"/>
     <xacro:arg name="sim_ignition" default="false"/>
     <xacro:arg name="simulation_controllers" default=""/>

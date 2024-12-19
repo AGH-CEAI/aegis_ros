@@ -12,116 +12,41 @@ from launch.substitutions import (
 )
 
 
-def generate_launch_description(context: LaunchContext):
+def generate_launch_description(context: LaunchContext) -> LaunchDescription:
 
-    # TODO: WIP
+    namespace = LaunchConfiguration("namespace")
+    mock_hardware = LaunchConfiguration("mock_hardware")
+
+    # TODO: Define common parameters for this UR launch file & UR's URDF in an external YAML file
     ur_type = "ur5e"
     robot_ip = "aegis_ur"
 
-    runtime_config_package = LaunchConfiguration("runtime_config_package")
-    controllers_file = LaunchConfiguration("controllers_file")
-    use_fake_hardware = LaunchConfiguration("use_fake_hardware")
-    fake_sensor_commands = LaunchConfiguration("fake_sensor_commands")
-    controller_spawner_timeout = LaunchConfiguration("controller_spawner_timeout")
-    initial_joint_controller = LaunchConfiguration("initial_joint_controller")
-    activate_joint_controller = LaunchConfiguration("activate_joint_controller")
-    headless_mode = LaunchConfiguration("headless_mode")
-    launch_dashboard_client = LaunchConfiguration("launch_dashboard_client")
-    use_tool_communication = LaunchConfiguration("use_tool_communication")
-    tool_device_name = LaunchConfiguration("tool_device_name")
-    tool_tcp_port = LaunchConfiguration("tool_tcp_port")
+    use_tool_communication = "false"
+    tool_device_name = "/tmp/ttyUR"
 
+    controller_spawner_timeout = "10"  # s
+    initial_joint_controller = "scaled_joint_trajectory_controller"
     initial_joint_controllers = PathJoinSubstitution(
-        [FindPackageShare(runtime_config_package), "config", controllers_file]
+        [FindPackageShare("aegis_description"), "config", "controllers.yaml"]
     )
-
-    # define update rate
     update_rate_config_file = PathJoinSubstitution(
-        [
-            FindPackageShare(runtime_config_package),
-            "config",
-            ur_type.perform(context) + "_update_rate.yaml",
-        ]
+        [FindPackageShare("aegis_description"), "config", ur_type, "update_rate.yaml"]
     )
 
-    control_node = Node(
-        package="controller_manager",
-        executable="ros2_control_node",
-        parameters=[
-            update_rate_config_file,
-            ParameterFile(initial_joint_controllers, allow_substs=True),
-        ],
-        output="screen",
-        condition=IfCondition(use_fake_hardware),
+    control_node = prepare_control_node(
+        namespace, mock_hardware, initial_joint_controllers, update_rate_config_file
     )
-
-    ur_control_node = Node(
-        package="ur_robot_driver",
-        executable="ur_ros2_control_node",
-        parameters=[
-            update_rate_config_file,
-            ParameterFile(initial_joint_controllers, allow_substs=True),
-        ],
-        output="screen",
-        condition=UnlessCondition(use_fake_hardware),
+    ur_control_node = prepare_ur_control_node(
+        namespace, mock_hardware, initial_joint_controllers, update_rate_config_file
     )
-
-    dashboard_client_node = Node(
-        package="ur_robot_driver",
-        condition=IfCondition(
-            AndSubstitution(launch_dashboard_client, NotSubstitution(use_fake_hardware))
-        ),
-        executable="dashboard_client",
-        name="dashboard_client",
-        output="screen",
-        emulate_tty=True,
-        parameters=[{"robot_ip": robot_ip}],
+    dashboard_client_node = prepare_dashboard_client_node(
+        namespace, robot_ip, mock_hardware
     )
-
-    tool_communication_node = Node(
-        package="ur_robot_driver",
-        condition=IfCondition(use_tool_communication),
-        executable="tool_communication.py",
-        name="ur_tool_comm",
-        output="screen",
-        parameters=[
-            {
-                "robot_ip": robot_ip,
-                "tcp_port": tool_tcp_port,
-                "device_name": tool_device_name,
-            }
-        ],
+    tool_communication_node = prepare_tool_communication_node(
+        namespace, robot_ip, use_tool_communication, tool_device_name
     )
-
-    urscript_interface = Node(
-        package="ur_robot_driver",
-        executable="urscript_interface",
-        parameters=[{"robot_ip": robot_ip}],
-        output="screen",
-    )
-
-    controller_stopper_node = Node(
-        package="ur_robot_driver",
-        executable="controller_stopper_node",
-        name="controller_stopper",
-        output="screen",
-        emulate_tty=True,
-        condition=UnlessCondition(use_fake_hardware),
-        parameters=[
-            {"headless_mode": headless_mode},
-            {"joint_controller_active": activate_joint_controller},
-            {
-                "consistent_controllers": [
-                    "io_and_status_controller",
-                    "force_torque_sensor_broadcaster",
-                    "joint_state_broadcaster",
-                    "speed_scaling_state_broadcaster",
-                    "tcp_pose_broadcaster",
-                    "ur_configuration_controller",
-                ]
-            },
-        ],
-    )
+    urscript_interface = prepare_urscript_interface(namespace, robot_ip)
+    controller_stopper_node = prepare_controller_stopper_node(namespace, mock_hardware)
 
     def controller_spawner(controllers, active=True):
         inactive_flags = ["--inactive"] if not active else []
@@ -153,9 +78,8 @@ def generate_launch_description(context: LaunchContext):
         "forward_position_controller",
         "passthrough_trajectory_controller",
     ]
-    if activate_joint_controller.perform(context) == "true":
-        controllers_active.append(initial_joint_controller.perform(context))
-        controllers_inactive.remove(initial_joint_controller.perform(context))
+    controllers_active.append(initial_joint_controller.perform(context))
+    controllers_inactive.remove(initial_joint_controller.perform(context))
 
     controller_spawners = [controller_spawner(controllers_active)] + [
         controller_spawner(controllers_inactive, active=False)
@@ -171,4 +95,120 @@ def generate_launch_description(context: LaunchContext):
             urscript_interface,
         ]
         + controller_spawners
+    )
+
+
+def prepare_control_node(
+    namespace: LaunchConfiguration,
+    mock_hardware: LaunchConfiguration | str,
+    initial_joint_controllers: LaunchConfiguration | str,
+    update_rate_config_file: LaunchConfiguration | str,
+) -> Node:
+    return Node(
+        package="controller_manager",
+        executable="ros2_control_node",
+        parameters=[
+            update_rate_config_file,
+            ParameterFile(initial_joint_controllers, allow_substs=True),
+            {"namespace": namespace},
+        ],
+        output="screen",
+        condition=IfCondition(mock_hardware),
+    )
+
+
+def prepare_controller_stopper_node(
+    namespace: LaunchConfiguration,
+    mock_hardware: LaunchConfiguration | str,
+) -> Node:
+    return Node(
+        package="ur_robot_driver",
+        executable="controller_stopper_node",
+        name="controller_stopper",
+        output="screen",
+        emulate_tty=True,
+        condition=UnlessCondition(mock_hardware),
+        parameters=[
+            {"headless_mode": "false"},
+            {"joint_controller_active": "true"},
+            {
+                "consistent_controllers": [
+                    "io_and_status_controller",
+                    "force_torque_sensor_broadcaster",
+                    "joint_state_broadcaster",
+                    "speed_scaling_state_broadcaster",
+                    "tcp_pose_broadcaster",
+                    "ur_configuration_controller",
+                ]
+            },
+            {"namespace", namespace},
+        ],
+    )
+
+
+def prepare_urscript_interface(
+    namespace: LaunchConfiguration, robot_ip: LaunchConfiguration | str
+) -> Node:
+    return Node(
+        package="ur_robot_driver",
+        executable="urscript_interface",
+        parameters=[{"robot_ip": robot_ip, "namespace": namespace}],
+        output="screen",
+    )
+
+
+def prepare_tool_communication_node(
+    namespace: LaunchConfiguration,
+    robot_ip: LaunchConfiguration | str,
+    use_tool_communication: LaunchConfiguration | str,
+    tool_device_name: LaunchConfiguration | str,
+) -> Node:
+    return Node(
+        package="ur_robot_driver",
+        condition=IfCondition(use_tool_communication),
+        executable="tool_communication.py",
+        name="ur_tool_comm",
+        output="screen",
+        parameters=[
+            {
+                "robot_ip": robot_ip,
+                "device_name": tool_device_name,
+                "namespace": namespace,
+            }
+        ],
+    )
+
+
+def prepare_dashboard_client_node(
+    namespace: LaunchConfiguration,
+    robot_ip: LaunchConfiguration | str,
+    mock_hardware: LaunchConfiguration | str,
+) -> Node:
+    return Node(
+        package="ur_robot_driver",
+        condition=IfCondition(NotSubstitution(mock_hardware)),
+        executable="dashboard_client",
+        name="dashboard_client",
+        output="screen",
+        emulate_tty=True,
+        parameters=[{"robot_ip": robot_ip}, {"namespace", namespace}],
+    )
+
+
+def prepare_ur_control_node(
+    namespace: LaunchConfiguration,
+    mock_hardware: LaunchConfiguration | str,
+    initial_joint_controllers: LaunchConfiguration | str,
+    update_rate_config_file: LaunchConfiguration | str,
+) -> Node:
+    return Node(
+        package="ur_robot_driver",
+        executable="ur_ros2_control_node",
+        parameters=[
+            update_rate_config_file,
+            ParameterFile(initial_joint_controllers, allow_substs=True),
+            {"namespace", namespace},
+        ],
+        output="screen",
+        condition=UnlessCondition(mock_hardware),
     )

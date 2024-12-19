@@ -1,12 +1,64 @@
-# Joints limits
+# joint_limits.yaml allows the dynamics properties specified in the URDF to be overwritten or augmented as needed
 #
+# Based on the Universal Robots ROS2 Driver UR5e example
 # Sources:
-#
 #  - Universal Robots e-Series, User Manual, UR5e, Version 5.8
 #    https://s3-eu-west-1.amazonaws.com/ur-support-site/69091/99404_UR5e_User_Manual_en_Global.pdf
 #  - Support > Articles > UR articles > Max. joint torques
 #    https://www.universal-robots.com/articles/ur-articles/max-joint-torques
 #    retrieved: 2020-06-16, last modified: 2020-06-09
+
+# For beginners, we downscale velocity and acceleration limits.
+# You can always specify higher scaling factors (<= 1.0) in your motion requests.  # Increase the values below to 1.0 to always move at maximum speed.
+default_velocity_scaling_factor: 0.1
+default_acceleration_scaling_factor: 0.1
+
+#TODO integrate the generated file with UR5e example
+# Specific joint properties can be changed with the keys [max_position, min_position, max_velocity, max_acceleration]
+# Joint limits can be turned off with [has_velocity_limits, has_acceleration_limits]
+# joint_limits:
+#   elbow_joint:
+#     has_velocity_limits: true
+#     max_velocity: 3.1415926535897931
+#     has_acceleration_limits: false
+#     max_acceleration: 0
+#   hande_left_finger_joint:
+#     has_velocity_limits: true
+#     max_velocity: 0.14999999999999999
+#     has_acceleration_limits: false
+#     max_acceleration: 0
+#   hande_right_finger_joint:
+#     has_velocity_limits: true
+#     max_velocity: 0.14999999999999999
+#     has_acceleration_limits: false
+#     max_acceleration: 0
+#   shoulder_lift_joint:
+#     has_velocity_limits: true
+#     max_velocity: 3.1415926535897931
+#     has_acceleration_limits: false
+#     max_acceleration: 0
+#   shoulder_pan_joint:
+#     has_velocity_limits: true
+#     max_velocity: 3.1415926535897931
+#     has_acceleration_limits: false
+#     max_acceleration: 0
+#   wrist_1_joint:
+#     has_velocity_limits: true
+#     max_velocity: 3.1415926535897931
+#     has_acceleration_limits: false
+#     max_acceleration: 0
+#   wrist_2_joint:
+#     has_velocity_limits: true
+#     max_velocity: 3.1415926535897931
+#     has_acceleration_limits: false
+#     max_acceleration: 0
+#   wrist_3_joint:
+#     has_velocity_limits: true
+#     max_velocity: 3.1415926535897931
+#     has_acceleration_limits: false
+#     max_acceleration: 0
+
+
 joint_limits:
   shoulder_pan_joint:
     # acceleration limits are not publicly available
