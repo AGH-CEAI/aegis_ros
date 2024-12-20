@@ -10,7 +10,7 @@ def generate_launch_description():
 
     pkg_path = FindPackageShare("aegis_description")
     model_path = PathJoinSubstitution(["urdf", "aegis.urdf.xacro"])
-    rviz_config_path = PathJoinSubstitution([pkg_path, "rviz", "urdf.rviz"])
+    rviz_config_path = PathJoinSubstitution([pkg_path, "rviz", "preview.rviz"])
     run_joint_state_publisher_gui = "true"
 
     ld.add_action(

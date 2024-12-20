@@ -22,9 +22,9 @@ def generate_launch_description():
             " ",
             PathJoinSubstitution(
                 [
-                    FindPackageShare("aegis_control"),
+                    FindPackageShare("aegis_description"),
                     "urdf",
-                    "aegis_control.urdf.xacro",
+                    "aegis.urdf.xacro",
                 ]
             ),
             " ",

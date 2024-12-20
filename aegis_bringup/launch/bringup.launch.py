@@ -41,6 +41,22 @@ def generate_launch_description() -> LaunchDescription:
         description="Mock the hardware for testing purposes.",
     )
 
+    robot_description_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution(
+                [
+                    FindPackageShare("aegis_description"),
+                    "launch",
+                    "robot_description.launch.py",
+                ]
+            )
+        ),
+        launch_arguments={
+            "namespace": namespace,
+            "mock_hardware": mock_hardware,
+        }.items(),
+    )
+
     drivers_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
@@ -74,6 +90,7 @@ def generate_launch_description() -> LaunchDescription:
         [
             declare_namespace_arg,
             declare_mock_hardware_arg,
+            robot_description_launch,
             drivers_launch,
             moveit_launch,
         ]
