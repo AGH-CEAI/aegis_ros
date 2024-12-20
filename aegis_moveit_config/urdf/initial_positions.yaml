@@ -1,4 +1,4 @@
-# Default initial positions for aegis's ros2_control fake system
+# Default initial positions for Aegis' ros2_control fake system
 
 initial_positions:
   shoulder_pan_joint: 0

@@ -8,9 +8,9 @@ A complete suite of ROS 2 packages for the Aegis UR5e cobot station.
 
 ## List of packages
 
-* [aegis_bringup](./aegis_bringup/README.md) - the main launch file with all hardware-dependend configuration files.
-* [aegis_description](./aegis_description/README.md) - the description of the Aegis robot station.
-* [aegis_moveit_config](./aegis_moveit_config/README.md) - the collection of configuration files to run the [MoveIt2](https://moveit.picknik.ai/main/index.html).
+* [aegis_bringup](./aegis_bringup/README.md): The main launch file with all hardware-dependent configuration files.
+* [aegis_description](./aegis_description/README.md): The description of the Aegis robot station.
+* [aegis_moveit_config](./aegis_moveit_config/README.md): The collection of configuration files to run the [MoveIt 2](https://moveit.picknik.ai/main/index.html).
 
 ---
 
@@ -42,10 +42,18 @@ toolbox create --image localhost/ceai/aegis_dev
 toolbox enter aegis_dev
 ```
 
-### Build
+### Resolving dependencies and build
+```bash
+source /opt/ros/humble/setup.bash
+rosdep init
+mkdir -p ~/ceai_ws
+```
 ```bash
 cd ~/ceai_ws
-source /opt/ros/humble/setup.bash
+git clone -b humble-devel https://github.com/AGH-CEAI/aegis_ros.git src/aegis_ros
+vcs import src < src/aegis_ros/aegis/aegis.repos
+rosdep update --rosdistro $ROS_DISTRO
+rosdep install --from-paths src -y -i
 colcon build --symlink-install
 source ./install/local_setup.bash
 ```

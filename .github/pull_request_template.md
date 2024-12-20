@@ -18,7 +18,10 @@
 ## Checklist
 <!--- Go over all the following points, and put an `x` in all the boxes that apply. -->
 <!--- If you're unsure about any of these, don't hesitate to ask. We're here to help! -->
-- [ ] All TODOs in the code has been resolved or linked with a proper issue.
-- [ ] Code is (auto)formatted.
-- [ ] Documentation (README/CHANGELOG/Wiki/etc) has been updated.
-- [ ] All automatic checks passed.
+- [ ] All TODOs in the code have been resolved or linked to a proper issue.
+- [ ] Code has been (auto)formatted.
+- [ ] Documentation (e.g., README, CHANGELOG, Wiki) has been updated.
+- [ ] All automated checks have passed.
+
+---
+Clickup task: [hash](link)

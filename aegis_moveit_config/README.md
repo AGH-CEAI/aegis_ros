@@ -17,12 +17,12 @@ ros2 launch ur_robot_driver ur_control.launch.py ur_type:=ur5e robot_ip:=aegis l
 ros2 service call /dashboard_client/stop std_srvs/srv/Trigger {}
 ros2 service call /dashboard_client/play std_srvs/srv/Trigger {}
 ```
-3. Run the MoveIt2
+3. Launch MoveIt 2 configuration for motion planning with RViz visualization:
 ```bash
 ros2 launch aegis_moveit_config aegis.launch.py launch_rviz:=true
 ```
 
-4. Run the hotfix publisher for the gripper state
+4. Run the hotfix publisher for the gripper state:
 ```bash
 ros2 topic pub /joint_states sensor_msgs/msg/JointState \
 "header:
