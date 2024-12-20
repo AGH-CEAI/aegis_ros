@@ -1,15 +1,17 @@
 # aegis_control
 
-This package contains the ROS 2 control configuration files of the Aegis robot station, which extends the `aegis_description` package.
+This package contains the [ros2_control](https://control.ros.org/) launch files of the Aegis robot station, which uses configuration files from the `aegis_description` package.
 
-## Configuration files
+## Launch files
 
 ```
 aegis_control/
-├── config
-│   ├── ros2_controllers.yaml
-│   └── ur_calibration.yaml
+├── launch
+│   ├── start_drivers.launch.py
+│   └── ur_driver.launch.py
 ```
 
-* `ros2_controllers.yaml` - Config for the all ros2_control controllers.
-* `ur_calibration.yaml` - The extracted configuration file from the robot ([info](https://docs.universal-robots.com/Universal_Robots_ROS_Documentation/doc/ur_robot_driver/ur_calibration/doc/usage.html)).
+| File                                                        | Description                                                                                                                           |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| [start_drivers.launch.py](./launch/start_drivers.launch.py) | The main launch file to run whole Aegis' ros2_control stack.                                                                          |
+| [ur_driver.launch.py](./launch/ur_driver.launch.py)         | Launches nodes from the [ur_robot_driver](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver) to control the UR5e robot. |

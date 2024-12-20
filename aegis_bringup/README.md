@@ -59,11 +59,6 @@ package aegis_control {
         Arg namespace
         Arg mock_hardware
     }
-    class robot_description << (L,#FF7700) LaunchFile >> {
-        Arg namespace
-        Arg mock_hardware
-        Node robot_state_publisher()
-    }
     class ur_driver << (L,#FF7700) LaunchFile >> {
         Arg namespace
         Arg mock_hardware
@@ -76,14 +71,6 @@ package aegis_control {
         Node controller_spawners()
     }
 
-    package config {
-        class ur_calibration << (Y,#ffffc9) YAML >> {}
-    }
-
-    package urdf {
-        class aegis_control_urdf << (U,#bcffc8) urdf.xacro >> {}
-    }
-
 }
 
 package aegis_description {
@@ -92,12 +79,23 @@ package aegis_description {
         Node static_transform_publisher()
     }
 
+    class robot_description << (L,#FF7700) LaunchFile >> {
+        Arg namespace
+        Arg mock_hardware
+        Node robot_state_publisher()
+    }
+
     package config {
         class controllers << (Y,#ffffc9) YAML >> {}
-        class joint_limits << (Y,#ffffc9) YAML >> {}
         package ur5e {
+            class calibration << (Y,#ffffc9) YAML >> {}
+            class joint_limits << (Y,#ffffc9) YAML >> {}
             class update_rate << (Y,#ffffc9) YAML >> {}
         }
+    }
+
+    package urdf {
+        class aegis_urdf << (U,#bcffc8) urdf.xacro >> {}
     }
 }
 
@@ -123,19 +121,19 @@ package aegis_moveit_config {
 }
 
 
-aegis_bringup.bringup *-- aegis_control.start_drivers
+aegis_bringup.bringup *-left- aegis_control.start_drivers
 aegis_bringup.bringup *-- aegis_moveit_config.move_group
+aegis_bringup.bringup *-- aegis_description.robot_description
+aegis_description.robot_description *-- aegis_description.urdf.aegis_urdf
 
-aegis_control.start_drivers *-- aegis_control.robot_description
 aegis_control.start_drivers *-- aegis_control.ur_driver
-aegis_control.robot_description *-- aegis_control.urdf.aegis_control_urdf
-aegis_control.ur_driver *-- aegis_description.config.ur5e
+aegis_control.ur_driver *-- aegis_description.config.ur5e.update_rate
 aegis_control.ur_driver *-- aegis_description.config.controllers
 
 aegis_moveit_config.move_group *-- aegis_moveit_config.config
 aegis_moveit_config.move_group *-- aegis_description.config.controllers
-aegis_moveit_config.move_group *-- aegis_description.config.joint_limits
-aegis_moveit_config.move_group *-- aegis_control.config.ur_calibration
+aegis_moveit_config.move_group *-- aegis_description.config.ur5e.joint_limits
+aegis_moveit_config.move_group *-- aegis_description.config.ur5e.calibration
 
 skinparam classAttributeIconSize 0
 hide << YAML >> members
