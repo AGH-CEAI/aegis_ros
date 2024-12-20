@@ -54,6 +54,7 @@ def generate_launch_description():
             "ur_type": "ur5e",
             "robot_ip": "aegis",
             "launch_rviz": "false",
+            "namespace": namespace,
         }.items(),
         condition=UnlessCondition(use_sim),
     )
