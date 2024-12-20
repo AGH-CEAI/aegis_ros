@@ -6,8 +6,8 @@
   <xacro:include filename="$(find aegis_description)/urdf/modules/adapter_from_sensor.xacro"/>
   <xacro:include filename="$(find robotiq_hande_description)/urdf/robotiq_hande_gripper.xacro"/>
 
-  <xacro:macro name="aegis_robot" params="parent prefix kinematics_calibration mock_hardware">
-    <xacro:ur_definition name="aegis" parent="${parent}" prefix="${prefix}" kinematics_calibration="${kinematics_calibration}" mock_hardware="${mock_hardware}"/>
+  <xacro:macro name="aegis_robot" params="parent prefix mock_hardware">
+    <xacro:ur_definition name="aegis" parent="${parent}" prefix="${prefix}" mock_hardware="${mock_hardware}"/>
     <xacro:adapter_to_sensor parent="tool0" prefix="${prefix}"/>
     <xacro:ft_sensor_schunk_axia80 parent="adapter_to_sensor_end" prefix="${prefix}" mock_hardware="${mock_hardware}"/>
     <xacro:adapter_from_sensor parent="tool_mount_link" prefix="${prefix}"/>
