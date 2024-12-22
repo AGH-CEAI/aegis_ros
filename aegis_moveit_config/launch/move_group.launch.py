@@ -22,18 +22,11 @@ class AegisPathsCfg:
         self.moveit_cfg_pkg_name = "aegis_moveit_config"
         self.moveit_cfg_pkg = FindPackageShare(self.moveit_cfg_pkg_name)
 
-        self.control_cfg_pkg_name = "aegis_control"
-        self.control_cfg_pkg = FindPackageShare(self.control_cfg_pkg_name)
-
         self.description_cfg_pkg_name = "aegis_description"
         self.description_cfg_pkg = FindPackageShare(self.description_cfg_pkg_name)
 
-        # aegis_moveit_config
-        self.ompl_planning_cfg = "config/move_group/ompl_planning.yaml"
-
-        # aegis_description
-        self.controllers_cfg = "config/controllers.yaml"
-        self.joint_limits_cfg = "config/move_group/joint_limits.yaml"
+        self.control_cfg_pkg_name = "aegis_control"
+        self.control_cfg_pkg = FindPackageShare(self.control_cfg_pkg_name)
 
         self.kinematics_cfg = PathJoinSubstitution(
             [self.moveit_cfg_pkg, "config", "move_group", "kinematics.yaml"]
@@ -56,15 +49,21 @@ class AegisPathsCfg:
         )
         self.xacro_path = PathJoinSubstitution([FindExecutable(name="xacro")])
 
+    def load_ompl_planning_cfg(self) -> dict:
+        return load_yaml(
+            self.moveit_cfg_pkg_name, "config/move_group/ompl_planning.yaml"
+        )
+
+    def load_controllers_cfg(self) -> dict:
+        return load_yaml(self.description_cfg_pkg_name, "config/controllers.yaml")
+
+    def load_joint_limits_cfg(self) -> dict:
+        return load_yaml(self.description_cfg_pkg_name, "config/ur5e/joint_limits.yaml")
+
 
 def generate_launch_description() -> LaunchDescription:
 
     declared_arguments = [
-        DeclareLaunchArgument(
-            "namespace",
-            default_value="",
-            description="Set the namespace for ROS 2 communication.",
-        ),
         DeclareLaunchArgument(
             "mock_hardware",
             default_value="false",
@@ -94,7 +93,7 @@ def launch_setup(context: LaunchContext) -> List[Node]:
     aegis_paths = AegisPathsCfg()
 
     move_group_node, rviz_node = prepare_move_group_and_rviz_nodes(
-        fake_hardware=mock_hardware,
+        mock_hardware=mock_hardware,
         launch_rviz=launch_rviz,
         paths=aegis_paths,
     )
@@ -130,19 +129,13 @@ def get_robot_description_semantic(paths: AegisPathsCfg) -> Dict:
 
 
 def prepare_move_group_and_rviz_nodes(
-    fake_hardware: LaunchConfiguration,
+    mock_hardware: LaunchConfiguration,
     launch_rviz: LaunchConfiguration,
     paths: AegisPathsCfg,
 ) -> tuple[Node, Node]:
 
-    # TODO(issue#2) re-enable simulation
-    # use_fake_hardware = use_sim
-
     robot_description_planning = {
-        "robot_description_planning": load_yaml(
-            paths.description_cfg_pkg_name,
-            paths.joint_limits_cfg,
-        )
+        "robot_description_planning": paths.load_joint_limits_cfg()
     }
 
     # Planning Configuration
@@ -154,11 +147,11 @@ def prepare_move_group_and_rviz_nodes(
         }
     }
 
-    ompl_planning_yaml = load_yaml(paths.moveit_cfg_pkg_name, paths.ompl_planning_cfg)
+    ompl_planning_yaml = paths.load_ompl_planning_cfg()
     ompl_planning_pipeline_config["move_group"].update(ompl_planning_yaml)
 
     # Trajectory Execution Configuration
-    controllers_yaml = load_yaml(paths.description_cfg_pkg_name, paths.controllers_cfg)
+    controllers_yaml = paths.load_controllers_cfg()
     # TODO(issue#2) use fake hardware for the simulation
     # the scaled_joint_trajectory_controller does not work on fake hardware
     # change_controllers = context.perform_substitution(use_fake_hardware)
@@ -197,7 +190,6 @@ def prepare_move_group_and_rviz_nodes(
 
     node_cfg = {
         "launch_rviz": launch_rviz,
-        "moveit_config_pkg": paths.moveit_cfg_pkg,
         "moveit_controllers": moveit_controllers,
         "ompl_planning_pipeline_config": ompl_planning_pipeline_config,
         "planning_scene_monitor_parameters": planning_scene_monitor_parameters,
@@ -205,11 +197,11 @@ def prepare_move_group_and_rviz_nodes(
         "robot_description_planning": robot_description_planning,
         "robot_description_semantic": get_robot_description_semantic(paths),
         "trajectory_execution": trajectory_execution,
-        "fake_hardware": fake_hardware,
+        "mock_hardware": mock_hardware,
         "warehouse_ros_config": warehouse_ros_config,
     }
 
-    return prepare_move_group_node(node_cfg), prepare_rviz_node(node_cfg)
+    return prepare_move_group_node(node_cfg), prepare_rviz_node(node_cfg, paths)
 
 
 def prepare_move_group_node(cfg: Dict) -> Node:
@@ -225,7 +217,7 @@ def prepare_move_group_node(cfg: Dict) -> Node:
             cfg["trajectory_execution"],
             cfg["moveit_controllers"],
             cfg["planning_scene_monitor_parameters"],
-            {"use_sim_time": cfg["fake_hardware"]},
+            {"use_sim_time": cfg["mock_hardware"]},
             {"publish_robot_description": True},
             {"publish_robot_description_semantic": True},
             # TODO(issue#1) Re-enable warehouse integration
@@ -234,17 +226,14 @@ def prepare_move_group_node(cfg: Dict) -> Node:
     )
 
 
-def prepare_rviz_node(cfg: Dict) -> Node:
-    rviz_config_file = PathJoinSubstitution(
-        [cfg["moveit_config_pkg"], "config", "moveit.rviz"]
-    )
+def prepare_rviz_node(cfg: Dict, paths: AegisPathsCfg) -> Node:
     return Node(
         package="rviz2",
         condition=IfCondition(cfg["launch_rviz"]),
         executable="rviz2",
         name="rviz2_moveit",
         output="log",
-        arguments=["-d", rviz_config_file],
+        arguments=["-d", paths.rviz_cfg],
         parameters=[
             cfg["robot_description_semantic"],
             cfg["ompl_planning_pipeline_config"],
