@@ -13,7 +13,6 @@ from launch_ros.descriptions import ParameterValue
 
 def generate_launch_description():
 
-    namespace = LaunchConfiguration("namespace", default="")
     mock_hardware = LaunchConfiguration("mock_hardware", default="false")
 
     robot_description_str = Command(
@@ -44,8 +43,7 @@ def generate_launch_description():
                         "robot_description": ParameterValue(
                             robot_description_str, value_type=str
                         )
-                    },
-                    {"namespace", namespace},
+                    }
                 ],
             )
         ]
