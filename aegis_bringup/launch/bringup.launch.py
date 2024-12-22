@@ -102,7 +102,7 @@ def generate_launch_description() -> LaunchDescription:
             declare_mock_hardware_arg,
             declare_launch_rviz_arg,
             robot_description_launch,
-            # drivers_launch,
+            drivers_launch,
             moveit_launch,
         ]
     )

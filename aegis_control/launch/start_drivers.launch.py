@@ -15,19 +15,6 @@ def generate_launch_description() -> LaunchDescription:
         "mock_hardware": LaunchConfiguration("mock_hardware", default="false"),
     }
 
-    robot_description = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            PathJoinSubstitution(
-                [
-                    FindPackageShare("aegis_control"),
-                    "launch",
-                    "robot_description.launch.py",
-                ]
-            )
-        ),
-        launch_arguments=launch_arguments.items(),
-    )
-
     ur_driver = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
@@ -37,9 +24,4 @@ def generate_launch_description() -> LaunchDescription:
         launch_arguments=launch_arguments.items(),
     )
 
-    return LaunchDescription(
-        [
-            robot_description,
-            ur_driver,
-        ]
-    )
+    return LaunchDescription([ur_driver])
