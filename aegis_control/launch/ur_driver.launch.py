@@ -2,7 +2,8 @@ from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterFile
 from launch_ros.substitutions import FindPackageShare
 
-from launch import LaunchDescription, LaunchContext
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import (
     LaunchConfiguration,
@@ -11,7 +12,7 @@ from launch.substitutions import (
 )
 
 
-def URConfig():
+class URConfig:
     def __init__(self):
         # TODO: Define common parameters for this UR launch file & UR's URDF in an external YAML file
         self.ur_type = "ur5e"
@@ -23,8 +24,7 @@ def URConfig():
         self.controller_spawner_timeout = "10"  # s
         self.initial_joint_controller = "scaled_joint_trajectory_controller"
 
-        # TODO: Somehow provide `tf_prefix` var for "$(var tf_prefix)" substitution in that file
-        self.initial_joint_controllers = PathJoinSubstitution(
+        self.ur_controllers_cfg = PathJoinSubstitution(
             [FindPackageShare("aegis_description"), "config", "controllers.yaml"]
         )
         self.update_rate_config_file = PathJoinSubstitution(
@@ -40,6 +40,13 @@ def URConfig():
 def generate_launch_description() -> LaunchDescription:
 
     mock_hardware = LaunchConfiguration("mock_hardware")
+    tf_prefix = DeclareLaunchArgument(
+        "tf_prefix",
+        default_value="",
+        description="tf_prefix of the joint names, useful for "
+        "multi-robot setup. If changed, also joint names in the controllers' configuration "
+        "have to be updated.",
+    )
 
     cfg = URConfig()
 
@@ -63,6 +70,7 @@ def generate_launch_description() -> LaunchDescription:
             ]
             + inactive_flags
             + controllers,
+            remappings=[("~/robot_description", "robot_description")],
         )
 
     controllers_active = [
@@ -89,6 +97,7 @@ def generate_launch_description() -> LaunchDescription:
 
     return LaunchDescription(
         [
+            tf_prefix,
             control_node,
             ur_control_node,
             dashboard_client_node,
@@ -106,10 +115,10 @@ def prepare_control_node(mock_hardware: LaunchConfiguration, cfg: URConfig) -> N
         executable="ros2_control_node",
         parameters=[
             cfg.update_rate_config_file,
-            ParameterFile(cfg.initial_joint_controllers, allow_substs=True),
+            ParameterFile(cfg.ur_controllers_cfg, allow_substs=True),
         ],
         output="screen",
-        condition=IfCondition(mock_hardware),
+        remappings=[("~/robot_description", "robot_description")],
     )
 
 
@@ -122,8 +131,8 @@ def prepare_controller_stopper_node(mock_hardware: LaunchConfiguration) -> Node:
         emulate_tty=True,
         condition=UnlessCondition(mock_hardware),
         parameters=[
-            {"headless_mode": "false"},
-            {"joint_controller_active": "true"},
+            {"headless_mode": False},
+            {"joint_controller_active": True},
             {
                 "consistent_controllers": [
                     "io_and_status_controller",
@@ -168,7 +177,7 @@ def prepare_dashboard_client_node(
 ) -> Node:
     return Node(
         package="ur_robot_driver",
-        condition=IfCondition(NotSubstitution(mock_hardware)),
+        condition=UnlessCondition(mock_hardware),
         executable="dashboard_client",
         name="dashboard_client",
         output="screen",
@@ -183,8 +192,9 @@ def prepare_ur_control_node(mock_hardware: LaunchConfiguration, cfg: URConfig) -
         executable="ur_ros2_control_node",
         parameters=[
             cfg.update_rate_config_file,
-            ParameterFile(cfg.initial_joint_controllers, allow_substs=True),
+            ParameterFile(cfg.ur_controllers_cfg, allow_substs=True),
         ],
         output="screen",
         condition=UnlessCondition(mock_hardware),
+        remappings=[("~/robot_description", "robot_description")],
     )

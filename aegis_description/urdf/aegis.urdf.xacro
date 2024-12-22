@@ -7,12 +7,7 @@
   <xacro:arg name="initial_positions_file" default="$(find aegis_description)/config/initial_positions.yaml"/>
 
   <xacro:include filename="$(find aegis_description)/urdf/aegis.xacro"/>
-  <xacro:include filename="$(find aegis_description)/urdf/aegis.control.xacro"/>
 
   <link name="$(arg base_link)"/>
-
   <xacro:aegis_robot parent="$(arg base_link)" prefix="$(arg prefix)" mock_hardware="$(arg mock_hardware)"/>
-
-  <!-- TODO: VERIFY IF CUSTOM ROS2 CONTROL FILE IS NEEDED FOR OUR SETUP SINCE UR_ROBOT_DRIVER DOES SOMETHING -->
-  <xacro:aegis_ros2_control initial_positions_file="$(arg initial_positions_file)" mock_hardware="$(arg mock_hardware)"/>
 </robot>
