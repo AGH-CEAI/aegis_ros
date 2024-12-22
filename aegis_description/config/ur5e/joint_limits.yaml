@@ -13,52 +13,6 @@
 default_velocity_scaling_factor: 0.1
 default_acceleration_scaling_factor: 0.1
 
-#TODO integrate the generated file with UR5e example
-# Specific joint properties can be changed with the keys [max_position, min_position, max_velocity, max_acceleration]
-# Joint limits can be turned off with [has_velocity_limits, has_acceleration_limits]
-# joint_limits:
-#   elbow_joint:
-#     has_velocity_limits: true
-#     max_velocity: 3.1415926535897931
-#     has_acceleration_limits: false
-#     max_acceleration: 0
-#   hande_left_finger_joint:
-#     has_velocity_limits: true
-#     max_velocity: 0.14999999999999999
-#     has_acceleration_limits: false
-#     max_acceleration: 0
-#   hande_right_finger_joint:
-#     has_velocity_limits: true
-#     max_velocity: 0.14999999999999999
-#     has_acceleration_limits: false
-#     max_acceleration: 0
-#   shoulder_lift_joint:
-#     has_velocity_limits: true
-#     max_velocity: 3.1415926535897931
-#     has_acceleration_limits: false
-#     max_acceleration: 0
-#   shoulder_pan_joint:
-#     has_velocity_limits: true
-#     max_velocity: 3.1415926535897931
-#     has_acceleration_limits: false
-#     max_acceleration: 0
-#   wrist_1_joint:
-#     has_velocity_limits: true
-#     max_velocity: 3.1415926535897931
-#     has_acceleration_limits: false
-#     max_acceleration: 0
-#   wrist_2_joint:
-#     has_velocity_limits: true
-#     max_velocity: 3.1415926535897931
-#     has_acceleration_limits: false
-#     max_acceleration: 0
-#   wrist_3_joint:
-#     has_velocity_limits: true
-#     max_velocity: 3.1415926535897931
-#     has_acceleration_limits: false
-#     max_acceleration: 0
-
-
 joint_limits:
   shoulder_pan_joint:
     # acceleration limits are not publicly available
@@ -67,9 +21,9 @@ joint_limits:
     has_position_limits: true
     has_velocity_limits: true
     max_effort: 150.0
-    max_position: "360.0" #deg
-    max_velocity: "180.0" #deg
-    min_position: "-360.0" #deg
+    max_position: !degrees  360.0
+    max_velocity: !degrees  180.0
+    min_position: !degrees -360.0
   shoulder_lift_joint:
     # acceleration limits are not publicly available
     has_acceleration_limits: false
@@ -77,9 +31,9 @@ joint_limits:
     has_position_limits: true
     has_velocity_limits: true
     max_effort: 150.0
-    max_position: "360.0" #deg
-    max_velocity: "180.0" #deg
-    min_position: "-360.0" #deg
+    max_position: !degrees  360.0
+    max_velocity: !degrees  180.0
+    min_position: !degrees -360.0
   elbow_joint:
     # acceleration limits are not publicly available
     has_acceleration_limits: false
@@ -97,9 +51,9 @@ joint_limits:
     #
     # Refer to https://github.com/ros-industrial/universal_robot/issues/265 for
     # more information.
-    max_position: "180.0" #deg
-    max_velocity: "180.0" #deg
-    min_position: "-180.0" #deg
+    max_position: !degrees  180.0
+    max_velocity: !degrees  180.0
+    min_position: !degrees -180.0
   wrist_1_joint:
     # acceleration limits are not publicly available
     has_acceleration_limits: false
@@ -107,9 +61,9 @@ joint_limits:
     has_position_limits: true
     has_velocity_limits: true
     max_effort: 28.0
-    max_position: "360.0" #deg
-    max_velocity: "180.0" #deg
-    min_position: "-360.0" #deg
+    max_position: !degrees  360.0
+    max_velocity: !degrees  180.0
+    min_position: !degrees -360.0
   wrist_2_joint:
     # acceleration limits are not publicly available
     has_acceleration_limits: false
@@ -117,9 +71,9 @@ joint_limits:
     has_position_limits: true
     has_velocity_limits: true
     max_effort: 28.0
-    max_position: "360.0" #deg
-    max_velocity: "180.0" #deg
-    min_position: "-360.0" #deg
+    max_position: !degrees  360.0
+    max_velocity: !degrees  180.0
+    min_position: !degrees -360.0
   wrist_3_joint:
     # acceleration limits are not publicly available
     has_acceleration_limits: false
@@ -127,6 +81,6 @@ joint_limits:
     has_position_limits: true
     has_velocity_limits: true
     max_effort: 28.0
-    max_position: "360.0" #deg
-    max_velocity: "180.0" #deg
-    min_position: "-360.0" #deg
+    max_position: !degrees  360.0
+    max_velocity: !degrees  180.0
+    min_position: !degrees -360.0
