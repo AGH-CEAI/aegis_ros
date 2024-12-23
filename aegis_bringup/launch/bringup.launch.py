@@ -35,6 +35,13 @@ def generate_launch_description() -> LaunchDescription:
         description="Add namespace to all launched nodes.",
     )
 
+    tf_prefix = LaunchConfiguration("tf_prefix")
+    declare_tf_prefix_arg = DeclareLaunchArgument(
+        "namespace",
+        default_value=EnvironmentVariable("TF_PREFIX", default_value=""),
+        description="Add prefix to the all robot's links & joints.",
+    )
+
     mock_hardware = LaunchConfiguration("mock_hardware")
     declare_mock_hardware_arg = DeclareLaunchArgument(
         "mock_hardware",
@@ -60,6 +67,7 @@ def generate_launch_description() -> LaunchDescription:
             )
         ),
         launch_arguments={
+            "tf_prefix": tf_prefix,
             "mock_hardware": mock_hardware,
         }.items(),
     )
@@ -74,6 +82,7 @@ def generate_launch_description() -> LaunchDescription:
             )
         ),
         launch_arguments={
+            "tf_prefix": tf_prefix,
             "mock_hardware": mock_hardware,
         }.items(),
     )
@@ -99,6 +108,7 @@ def generate_launch_description() -> LaunchDescription:
     return LaunchDescription(
         [
             declare_namespace_arg,
+            declare_tf_prefix_arg,
             declare_mock_hardware_arg,
             declare_launch_rviz_arg,
             robot_description_launch,

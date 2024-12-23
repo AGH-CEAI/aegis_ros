@@ -13,6 +13,7 @@ from launch_ros.descriptions import ParameterValue
 
 def generate_launch_description():
 
+    tf_prefix = LaunchConfiguration("tf_prefix", default="")
     mock_hardware = LaunchConfiguration("mock_hardware", default="false")
 
     robot_description_str = Command(
@@ -26,6 +27,9 @@ def generate_launch_description():
                     "aegis.urdf.xacro",
                 ]
             ),
+            " ",
+            "tf_prefix:=",
+            tf_prefix,
             " ",
             "mock_hardware:=",
             mock_hardware,

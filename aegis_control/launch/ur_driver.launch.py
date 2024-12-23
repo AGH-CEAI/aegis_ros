@@ -39,18 +39,14 @@ class URConfig:
 def generate_launch_description() -> LaunchDescription:
 
     mock_hardware = LaunchConfiguration("mock_hardware")
-    tf_prefix = DeclareLaunchArgument(
-        "tf_prefix",
-        default_value="",
-        description="tf_prefix of the joint names, useful for "
-        "multi-robot setup. If changed, also joint names in the controllers' configuration "
-        "have to be updated.",
-    )
+    # It is necessary to properly parse ur_controllers_cfg YAML file
+    tf_prefix = LaunchConfiguration("tf_prefix")
 
     cfg = URConfig()
 
-    control_node = prepare_control_node(mock_hardware, cfg)
+    mock_control_node = prepare_mock_control_node(mock_hardware, cfg)
     ur_control_node = prepare_ur_control_node(mock_hardware, cfg)
+
     dashboard_client_node = prepare_dashboard_client_node(mock_hardware, cfg)
     tool_communication_node = prepare_tool_communication_node(cfg)
     urscript_interface = prepare_urscript_interface(cfg)
@@ -93,8 +89,7 @@ def generate_launch_description() -> LaunchDescription:
 
     return LaunchDescription(
         [
-            tf_prefix,
-            control_node,
+            mock_control_node,
             ur_control_node,
             dashboard_client_node,
             tool_communication_node,
@@ -105,7 +100,9 @@ def generate_launch_description() -> LaunchDescription:
     )
 
 
-def prepare_control_node(mock_hardware: LaunchConfiguration, cfg: URConfig) -> Node:
+def prepare_mock_control_node(
+    mock_hardware: LaunchConfiguration, cfg: URConfig
+) -> Node:
     return Node(
         package="controller_manager",
         executable="ros2_control_node",

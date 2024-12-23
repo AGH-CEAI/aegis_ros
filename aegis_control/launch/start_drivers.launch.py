@@ -11,10 +11,11 @@ from launch_ros.substitutions import FindPackageShare
 def generate_launch_description() -> LaunchDescription:
 
     launch_arguments = {
-        "namespace": LaunchConfiguration("namespace", default=""),
+        "tf_prefix": LaunchConfiguration("tf_prefix", default=""),
         "mock_hardware": LaunchConfiguration("mock_hardware", default="false"),
     }
 
+    # Note: The ur_driver also spawns the control_manager node
     ur_driver = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(

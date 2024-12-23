@@ -5,9 +5,9 @@
   <!-- The list of all available options can be found in the <ur_description>/ur_macro.xacro file -->
   <!-- Descriptions of the arguments can be found in the <ur_robot_driver>/src/hardware_interface.cpp file -->
 
-  <xacro:macro name="ur_definition" params="name parent prefix mock_hardware">
+  <xacro:macro name="ur_definition" params="name parent tf_prefix mock_hardware">
     <!-- parameters -->
-    <xacro:arg name="tf_prefix" default="${prefix}"/>
+    <xacro:arg name="tf_prefix" default="${tf_prefix}"/>
     <xacro:arg name="joint_limit_params" default="$(find aegis_description)/config/ur5e/joint_limits.yaml"/>
     <xacro:arg name="physical_params" default="$(find aegis_description)/config/ur5e/physical_parameters.yaml"/>
     <xacro:arg name="visual_params" default="$(find aegis_description)/config/ur5e/visual_parameters.yaml"/>
