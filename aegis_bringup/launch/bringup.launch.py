@@ -37,7 +37,7 @@ def generate_launch_description() -> LaunchDescription:
 
     tf_prefix = LaunchConfiguration("tf_prefix")
     declare_tf_prefix_arg = DeclareLaunchArgument(
-        "namespace",
+        "tf_prefix",
         default_value=EnvironmentVariable("TF_PREFIX", default_value=""),
         description="Add prefix to the all robot's links & joints.",
     )
