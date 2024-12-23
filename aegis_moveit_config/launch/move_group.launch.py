@@ -25,9 +25,6 @@ class AegisPathsCfg:
         self.description_cfg_pkg_name = "aegis_description"
         self.description_cfg_pkg = FindPackageShare(self.description_cfg_pkg_name)
 
-        self.control_cfg_pkg_name = "aegis_control"
-        self.control_cfg_pkg = FindPackageShare(self.control_cfg_pkg_name)
-
         self.kinematics_cfg = PathJoinSubstitution(
             [self.moveit_cfg_pkg, "config", "move_group", "kinematics.yaml"]
         )
@@ -37,7 +34,7 @@ class AegisPathsCfg:
         )
 
         self.ur_calibrarion_cfg = PathJoinSubstitution(
-            [self.control_cfg_pkg, "config", "ur_calibration.yaml"]
+            [self.description_cfg_pkg, "config", "ur5e", "calibration.yaml"]
         )
 
         self.scene_objects_cfg = PathJoinSubstitution(
@@ -55,7 +52,7 @@ class AegisPathsCfg:
         )
 
     def load_controllers_cfg(self) -> dict:
-        return load_yaml(self.description_cfg_pkg_name, "config/controllers.yaml")
+        return load_yaml(self.moveit_cfg_pkg_name, "config/controlers_description.yaml")
 
     def load_joint_limits_cfg(self) -> dict:
         return load_yaml(self.description_cfg_pkg_name, "config/ur5e/joint_limits.yaml")
@@ -94,6 +91,7 @@ def launch_setup(context: LaunchContext) -> List[Node]:
 
     move_group_node, rviz_node = prepare_move_group_and_rviz_nodes(
         mock_hardware=mock_hardware,
+        mock_hardware_bool=context.perform_substitution(mock_hardware),
         launch_rviz=launch_rviz,
         paths=aegis_paths,
     )
@@ -130,6 +128,7 @@ def get_robot_description_semantic(paths: AegisPathsCfg) -> Dict:
 
 def prepare_move_group_and_rviz_nodes(
     mock_hardware: LaunchConfiguration,
+    mock_hardware_bool: bool,
     launch_rviz: LaunchConfiguration,
     paths: AegisPathsCfg,
 ) -> tuple[Node, Node]:
@@ -152,12 +151,10 @@ def prepare_move_group_and_rviz_nodes(
 
     # Trajectory Execution Configuration
     controllers_yaml = paths.load_controllers_cfg()
-    # TODO(issue#2) use fake hardware for the simulation
     # the scaled_joint_trajectory_controller does not work on fake hardware
-    # change_controllers = context.perform_substitution(use_fake_hardware)
-    # if change_controllers == "true":
-    #     controllers_yaml["scaled_joint_trajectory_controller"]["default"] = False
-    #     controllers_yaml["joint_trajectory_controller"]["default"] = True
+    if mock_hardware_bool:
+        controllers_yaml["scaled_joint_trajectory_controller"]["default"] = False
+        controllers_yaml["joint_trajectory_controller"]["default"] = True
 
     moveit_controllers = {
         "moveit_simple_controller_manager": controllers_yaml,

@@ -117,6 +117,7 @@ package aegis_moveit_config {
             class kinematics << (Y,#ffffc9) YAML >> {}
         }
         class moveit << (R,#ffffff) rviz >> {}
+        class controlers_description << (Y,#ffffc9) YAML >> {}
     }
 }
 
@@ -131,7 +132,6 @@ aegis_control.ur_driver *-- aegis_description.config.ur5e.update_rate
 aegis_control.ur_driver *-- aegis_description.config.controllers
 
 aegis_moveit_config.move_group *-- aegis_moveit_config.config
-aegis_moveit_config.move_group *-- aegis_description.config.controllers
 aegis_moveit_config.move_group *-- aegis_description.config.ur5e.joint_limits
 aegis_moveit_config.move_group *-- aegis_description.config.ur5e.calibration
 
