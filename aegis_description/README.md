@@ -59,7 +59,6 @@ package aegis_description {
         arg mock_hardware="false"
     }
     class aegis << (X,cyan) xacro >> {}
-    class aegis_control << (R,#98b6e9) control.xacro >> {}
     class cylinders_inertial << (X,cyan) xacro >> {}
 
     package modules {
@@ -97,12 +96,12 @@ package ur_description {
 }
 
 package ur_robot_driver {
+    class ros_control << (U,#ffffc9) urscript >> {}
     class rtde_output_recipe << (T,#ffffc9) TXT >> {}
     class rtde_input_recipe << (T,#ffffc9) TXT >> {}
 }
 
 
-aegis_description.aegis_urdf *-left- aegis_description.aegis_control
 aegis_description.aegis_urdf *-right- aegis_description.aegis
 aegis_description.aegis_urdf *-up- aegis_description.config.initial_positions
 aegis_description.aegis *-- aegis_description.modules

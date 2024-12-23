@@ -19,6 +19,7 @@
 
     <!-- ros2_control related parameters -->
     <xacro:arg name="robot_ip" default="aegis_ur"/>
+    <xacro:arg name="script_filename" default="$(find ur_robot_driver)/resources/ros_control.urscript"/>
     <xacro:arg name="output_recipe_filename" default="$(find ur_robot_driver)/resources/rtde_output_recipe.txt"/>
     <xacro:arg name="input_recipe_filename" default="$(find ur_robot_driver)/resources/rtde_input_recipe.txt"/>
     <xacro:arg name="reverse_ip" default="0.0.0.0"/>
@@ -63,6 +64,7 @@
       tool_voltage="$(arg tool_voltage)"
       tool_device_name="$(arg tool_device_name)"
       robot_ip="$(arg robot_ip)"
+      script_filename="$(arg script_filename)"
       output_recipe_filename="$(arg output_recipe_filename)"
       input_recipe_filename="$(arg input_recipe_filename)"
       reverse_ip="$(arg reverse_ip)"
