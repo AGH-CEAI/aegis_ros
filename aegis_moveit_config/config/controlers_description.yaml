@@ -10,6 +10,7 @@ scaled_joint_trajectory_controller:
   type: FollowJointTrajectory
   default: true
   joints:
+    #TODO somehow apply the "tf_prefix" launch arg to this configuration file
     - shoulder_pan_joint
     - shoulder_lift_joint
     - elbow_joint
