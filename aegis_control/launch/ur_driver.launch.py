@@ -7,7 +7,6 @@ from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import (
     LaunchConfiguration,
-    NotSubstitution,
     PathJoinSubstitution,
 )
 
@@ -64,13 +63,12 @@ def generate_launch_description() -> LaunchDescription:
             executable="spawner",
             arguments=[
                 "--controller-manager",
-                "/controller_manager",
+                "controller_manager",
                 "--controller-manager-timeout",
                 cfg.controller_spawner_timeout,
             ]
             + inactive_flags
             + controllers,
-            remappings=[("~/robot_description", "robot_description")],
         )
 
     controllers_active = [
@@ -78,7 +76,6 @@ def generate_launch_description() -> LaunchDescription:
         "io_and_status_controller",
         "speed_scaling_state_broadcaster",
         "force_torque_sensor_broadcaster",
-        "tcp_pose_broadcaster",
         "ur_configuration_controller",
     ]
     controllers_inactive = [
@@ -86,7 +83,6 @@ def generate_launch_description() -> LaunchDescription:
         "joint_trajectory_controller",
         "forward_velocity_controller",
         "forward_position_controller",
-        "passthrough_trajectory_controller",
     ]
     controllers_active.append(cfg.initial_joint_controller)
     controllers_inactive.remove(cfg.initial_joint_controller)
@@ -117,8 +113,62 @@ def prepare_control_node(mock_hardware: LaunchConfiguration, cfg: URConfig) -> N
             cfg.update_rate_config_file,
             ParameterFile(cfg.ur_controllers_cfg, allow_substs=True),
         ],
-        output="screen",
         remappings=[("~/robot_description", "robot_description")],
+        output="screen",
+        condition=IfCondition(mock_hardware),
+    )
+
+
+def prepare_ur_control_node(mock_hardware: LaunchConfiguration, cfg: URConfig) -> Node:
+    return Node(
+        package="ur_robot_driver",
+        executable="ur_ros2_control_node",
+        parameters=[
+            cfg.update_rate_config_file,
+            ParameterFile(cfg.ur_controllers_cfg, allow_substs=True),
+        ],
+        remappings=[("~/robot_description", "robot_description")],
+        output="screen",
+        condition=UnlessCondition(mock_hardware),
+    )
+
+
+def prepare_dashboard_client_node(
+    mock_hardware: LaunchConfiguration, cfg: URConfig
+) -> Node:
+    return Node(
+        package="ur_robot_driver",
+        condition=UnlessCondition(mock_hardware),
+        executable="dashboard_client",
+        name="dashboard_client",
+        output="screen",
+        emulate_tty=True,
+        parameters=[{"robot_ip": cfg.robot_ip}],
+    )
+
+
+def prepare_tool_communication_node(cfg: URConfig) -> Node:
+    return Node(
+        package="ur_robot_driver",
+        condition=IfCondition(cfg.use_tool_communication),
+        executable="tool_communication.py",
+        name="ur_tool_comm",
+        output="screen",
+        parameters=[
+            {
+                "robot_ip": cfg.robot_ip,
+                "device_name": cfg.tool_device_name,
+            }
+        ],
+    )
+
+
+def prepare_urscript_interface(cfg: URConfig) -> Node:
+    return Node(
+        package="ur_robot_driver",
+        executable="urscript_interface",
+        parameters=[{"robot_ip": cfg.robot_ip}],
+        output="screen",
     )
 
 
@@ -139,62 +189,14 @@ def prepare_controller_stopper_node(mock_hardware: LaunchConfiguration) -> Node:
                     "force_torque_sensor_broadcaster",
                     "joint_state_broadcaster",
                     "speed_scaling_state_broadcaster",
-                    "tcp_pose_broadcaster",
                     "ur_configuration_controller",
                 ]
             },
         ],
-    )
-
-
-def prepare_urscript_interface(cfg: URConfig) -> Node:
-    return Node(
-        package="ur_robot_driver",
-        executable="urscript_interface",
-        parameters=[{"robot_ip": cfg.robot_ip}],
-        output="screen",
-    )
-
-
-def prepare_tool_communication_node(cfg: URConfig) -> Node:
-    return Node(
-        package="ur_robot_driver",
-        condition=IfCondition(cfg.use_tool_communication),
-        executable="tool_communication.py",
-        name="ur_tool_comm",
-        output="screen",
-        parameters=[
-            {
-                "robot_ip": cfg.robot_ip,
-                "device_name": cfg.tool_device_name,
-            }
+        remappings=[
+            (
+                "controller_manager/list_controllers",
+                "~/controller_manager/list_controllers",
+            )
         ],
-    )
-
-
-def prepare_dashboard_client_node(
-    mock_hardware: LaunchConfiguration, cfg: URConfig
-) -> Node:
-    return Node(
-        package="ur_robot_driver",
-        condition=UnlessCondition(mock_hardware),
-        executable="dashboard_client",
-        name="dashboard_client",
-        output="screen",
-        emulate_tty=True,
-        parameters=[{"robot_ip": cfg.robot_ip}],
-    )
-
-
-def prepare_ur_control_node(mock_hardware: LaunchConfiguration, cfg: URConfig) -> Node:
-    return Node(
-        package="ur_robot_driver",
-        executable="ur_ros2_control_node",
-        parameters=[
-            cfg.update_rate_config_file,
-            ParameterFile(cfg.ur_controllers_cfg, allow_substs=True),
-        ],
-        output="screen",
-        condition=UnlessCondition(mock_hardware),
-        remappings=[("~/robot_description", "robot_description")],
     )
