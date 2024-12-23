@@ -34,9 +34,11 @@ from launch_ros.substitutions import FindPackageShare
 def launch_setup(context: LaunchContext) -> list[IncludeLaunchDescription]:
 
     namespace = LaunchConfiguration("namespace")
-    tf_prefix = LaunchConfiguration("tf_prefix")
-    mock_hardware = LaunchConfiguration("mock_hardware")
-    launch_rviz = LaunchConfiguration("launch_rviz")
+    launch_args = {
+        "tf_prefix": LaunchConfiguration("tf_prefix"),
+        "mock_hardware": LaunchConfiguration("mock_hardware"),
+        "launch_rviz": LaunchConfiguration("launch_rviz"),
+    }
 
     robot_description_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -48,10 +50,7 @@ def launch_setup(context: LaunchContext) -> list[IncludeLaunchDescription]:
                 ]
             )
         ),
-        launch_arguments={
-            "tf_prefix": tf_prefix,
-            "mock_hardware": mock_hardware,
-        }.items(),
+        launch_arguments=launch_args.items(),
     )
 
     drivers_launch = IncludeLaunchDescription(
@@ -60,10 +59,7 @@ def launch_setup(context: LaunchContext) -> list[IncludeLaunchDescription]:
                 [FindPackageShare("aegis_control"), "launch", "start_drivers.launch.py"]
             )
         ),
-        launch_arguments={
-            "tf_prefix": tf_prefix,
-            "mock_hardware": mock_hardware,
-        }.items(),
+        launch_arguments=launch_args.items(),
     )
 
     moveit_launch = IncludeLaunchDescription(
@@ -76,10 +72,7 @@ def launch_setup(context: LaunchContext) -> list[IncludeLaunchDescription]:
                 ]
             )
         ),
-        launch_arguments={
-            "mock_hardware": mock_hardware,
-            "launch_rviz": launch_rviz,
-        }.items(),
+        launch_arguments=launch_args.items(),
     )
 
     return set_namespace(
