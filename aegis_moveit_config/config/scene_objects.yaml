@@ -1,17 +1,17 @@
 UniqueSceneObjectExample:
-  pretty_name: "Green Cylinder"
-  type: cylinder
-  frame_id: ur_base
+  pretty_name: "table"
+  type: box
+  frame_id: world
   size:
-    x: 0.1
-    y: 0.1
-    z: 0.2
+    x: 0.84
+    y: 0.55
+    z: 0.82
   scale: 1.0
   pose:
     position:
-      x: 0.4
-      y: 0.4
-      z: 0.0
+      x: 0.0
+      y: 0.6
+      z: 0.41
     orientation:
       x: 0.0
       y: 0.0
