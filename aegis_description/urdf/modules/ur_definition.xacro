@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find ur_description)/urdf/ur_macro.xacro"/>
 
-  <!-- The list of all available options can be found in the <ur_description>/ur_macro.xacro file -->
+  <!-- The list of all available options can be found in the <ur_description>/urdf/ur_macro.xacro file -->
   <!-- Descriptions of the arguments can be found in the <ur_robot_driver>/src/hardware_interface.cpp file -->
 
   <xacro:macro name="ur_definition" params="name parent tf_prefix mock_hardware">
@@ -32,6 +32,7 @@
     <!-- Simulation parameters -->
     <xacro:arg name="use_fake_hardware" default="${str(mock_hardware)}"/>
     <xacro:arg name="fake_sensor_commands" default="${str(mock_hardware)}"/>
+    <xacro:arg name="headless_mode" default="false"/>
     <xacro:arg name="sim_gazebo" default="false"/>
     <xacro:arg name="sim_ignition" default="false"/>
     <xacro:arg name="simulation_controllers" default=""/>
@@ -57,6 +58,7 @@
       safety_k_position="$(arg safety_k_position)"
       use_fake_hardware="$(arg use_fake_hardware)"
       fake_sensor_commands="$(arg fake_sensor_commands)"
+      headless_mode="$(arg headless_mode)"
       sim_gazebo="$(arg sim_gazebo)"
       sim_ignition="$(arg sim_ignition)"
       initial_positions="${xacro.load_yaml(initial_positions_file)}"
