@@ -20,7 +20,6 @@ class URConfig:
         self.use_tool_communication = "false"
         self.tool_device_name = "/tmp/ttyUR"
 
-        self.controller_spawner_timeout = "10"  # s
         self.initial_joint_controller = "scaled_joint_trajectory_controller"
 
         self.ur_controllers_cfg = PathJoinSubstitution(
@@ -34,6 +33,22 @@ class URConfig:
                 "update_rate.yaml",
             ]
         )
+
+
+def controllers_spawner(controllers: list[str], timeout_s: int = 10, active=True):
+    inactive_flags = ["--inactive"] if not active else []
+    return Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "--controller-manager",
+            "controller_manager",
+            "--controller-manager-timeout",
+            str(timeout_s),
+        ]
+        + inactive_flags
+        + controllers,
+    )
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -52,21 +67,6 @@ def generate_launch_description() -> LaunchDescription:
     urscript_interface = prepare_urscript_interface(cfg)
     controller_stopper_node = prepare_controller_stopper_node(mock_hardware)
 
-    def controller_spawner(controllers, active=True):
-        inactive_flags = ["--inactive"] if not active else []
-        return Node(
-            package="controller_manager",
-            executable="spawner",
-            arguments=[
-                "--controller-manager",
-                "controller_manager",
-                "--controller-manager-timeout",
-                cfg.controller_spawner_timeout,
-            ]
-            + inactive_flags
-            + controllers,
-        )
-
     controllers_active = [
         "joint_state_broadcaster",
         "io_and_status_controller",
@@ -83,8 +83,8 @@ def generate_launch_description() -> LaunchDescription:
     controllers_active.append(cfg.initial_joint_controller)
     controllers_inactive.remove(cfg.initial_joint_controller)
 
-    controller_spawners = [controller_spawner(controllers_active)] + [
-        controller_spawner(controllers_inactive, active=False)
+    controller_spawners = [controllers_spawner(controllers_active)] + [
+        controllers_spawner(controllers_inactive, active=False)
     ]
 
     return LaunchDescription(
