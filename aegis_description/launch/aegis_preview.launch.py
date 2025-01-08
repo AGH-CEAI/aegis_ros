@@ -26,16 +26,5 @@ def generate_launch_description():
             }.items(),
         )
     )
-    ld.add_action(static_tf_node("world", "ur_base"))
 
     return ld
-
-
-def static_tf_node(base_link: str, child_link: str) -> Node:
-    return Node(
-        package="tf2_ros",
-        executable="static_transform_publisher",
-        name="static_transform_publisher",
-        output="log",
-        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", base_link, child_link],
-    )

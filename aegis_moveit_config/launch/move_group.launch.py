@@ -96,14 +96,12 @@ def launch_setup(context: LaunchContext) -> List[Node]:
         paths=aegis_paths,
     )
 
-    tf_robot_base_node, tf_odom_node = prepare_static_transforms_nodes()
-
+    tf_odom_node = prepare_static_tf_node("world", "odom")
     scene_objects_manager_node = prepare_scene_objects_manager_node(aegis_paths)
 
     nodes_to_start = [
         move_group_node,
         rviz_node,
-        tf_robot_base_node,
         tf_odom_node,
         scene_objects_manager_node,
         # TODO(issue#5) enable real-time servo
@@ -242,13 +240,7 @@ def prepare_rviz_node(cfg: Dict, paths: AegisPathsCfg) -> Node:
     )
 
 
-def prepare_static_transforms_nodes() -> tuple[Node, Node]:
-    tf_robot_base_node = static_tf_node("world", "ur_base")
-    tf_odom_node = static_tf_node("world", "odom")
-    return tf_robot_base_node, tf_odom_node
-
-
-def static_tf_node(base_link: str, child_link: str) -> Node:
+def prepare_static_tf_node(base_link: str, child_link: str) -> Node:
     return Node(
         package="tf2_ros",
         executable="static_transform_publisher",
