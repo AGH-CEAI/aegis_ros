@@ -29,17 +29,17 @@ aegis_description/
 ```
 
 Legend:
-* 📜 - URDFs
-* 🚀 - Launch Files
+* 📜 - URDF files
+* 🚀 - Launch files
 
 | File                                                                           | Used in | Description                                                                                             |
 | ------------------------------------------------------------------------------ | ------- | ------------------------------------------------------------------------------------------------------- |
-| [config/ur5e/calibration.yaml](./config/ur5e/calibration.yaml)                 | 📜🚀    | The calibration parameters extracted from the UR5e robot.                                               |
-| [config/ur5e/joint_limits.yaml](./config/ur5e/joint_limits.yaml)               | 📜🚀    | Limits for each of the joints, used both by the `ur_robot_driver` and `aegis_moveit_config`.            |
-| [config/ur5e/physical_parameters.yaml](./config/ur5e/physical_parameters.yaml) | 📜      | Reference of the masses and interias taken from the official `ur_robot_driver`.                         |
-| [config/ur5e/update_rate.yaml](./config/ur5e/update_rate.yaml)                 | 🚀      | Configuration for the `controller_manager` Node taken from the `ur_robot_driver`.                       |
+| [config/ur5e/calibration.yaml](./config/ur5e/calibration.yaml)                 | 📜🚀    | Calibration parameters extracted from the UR5e robot.                                               |
+| [config/ur5e/joint_limits.yaml](./config/ur5e/joint_limits.yaml)               | 📜🚀    | Joint limits used by both `ur_robot_driver` and `aegis_moveit_config`.            |
+| [config/ur5e/physical_parameters.yaml](./config/ur5e/physical_parameters.yaml) | 📜      | Reference to masses and intertias taken from the official `ur_robot_driver`.                         |
+| [config/ur5e/update_rate.yaml](./config/ur5e/update_rate.yaml)                 | 🚀      | Configuration for the `controller_manager` node from the `ur_robot_driver`.                       |
 | [config/ur5e/visual_parameters.yaml](./config/ur5e/visual_parameters.yaml)     | 📜      | Paths to the UR5e meshes in the `ur_description` package.                                               |
-| [config/controllers.yaml](./config/controllers.yaml)                           | 🚀      | Config for the `ros2_control` controllers, mix of `ur_robot_driver` and MoveIt2 Setup Assistant output. |
+| [config/controllers.yaml](./config/controllers.yaml)                           | 🚀      | Configuration for the `ros2_control` controllers, combining outputs from `ur_robot_driver` and MoveIt2 Setup Assistant. |
 | [config/initial_positions.yaml](./config/initial_positions.yaml)               | 📜      | Default joints positions.                                                                               |
 
 

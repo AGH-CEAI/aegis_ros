@@ -9,9 +9,9 @@ A complete suite of ROS 2 packages for the Aegis UR5e cobot station.
 ## List of packages
 
 * `aegis`: The meta-package for referencing all project dependencies.
-* [aegis_control](./aegis_control/README.md): The launch files dedicated for the hardware drivers based on the [ros2_control](https://control.ros.org/humble/doc/getting_started/getting_started.html) framework.
+* [aegis_control](./aegis_control/README.md): Launch files dedicated to the hardware drivers based on the [ros2_control](https://control.ros.org/humble/doc/getting_started/getting_started.html) framework.
 * [aegis_bringup](./aegis_bringup/README.md): The main launch file.
-* [aegis_description](./aegis_description/README.md): The description URDF and collection of configuration files of the Aegis robot station.
+* [aegis_description](./aegis_description/README.md): The description and configuration files of the Aegis robot station.
 * [aegis_moveit_config](./aegis_moveit_config/README.md): The configuration to run the [MoveIt 2](https://moveit.picknik.ai/main/index.html) framework.
 
 ---
