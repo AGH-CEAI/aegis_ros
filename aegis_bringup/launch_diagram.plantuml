@@ -17,13 +17,12 @@ package aegis_control {
     class ur_driver << (L,#FF7700) LaunchFile >> {
         Arg tf_prefix
         Arg mock_hardware
-        Node control_node()
-        Node ur_control_node()
-        Node dashboard_client_node()
-        Node tool_communication_node()
-        Node controller_stopper_node()
-        Node urscript_interface()
-        Node controller_spawners()
+        Node ur_driver::controller_stopper_node()
+        Node ur_driver::ur_dashboard_client()
+        Node ur_driver::ur_tool_communication()
+        Node ur_driver::urscript_interface()
+        Node ros2_control::controller_manager()
+        Nodes ros2_control::controller_spawners()
     }
 
 }
