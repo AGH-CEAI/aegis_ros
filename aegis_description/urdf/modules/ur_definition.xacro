@@ -37,7 +37,7 @@
     <xacro:arg name="simulation_controllers" default=""/>
 
     <!-- initial position for simulations (Fake Hardware, Gazebo, Ignition) -->
-    <xacro:arg name="initial_positions_file" default="$(find aegis_control)/config/initial_positions.yaml"/>
+    <xacro:arg name="initial_positions_file" default="$(find aegis_description)/config/initial_positions.yaml"/>
     <xacro:arg name="kinematics_calibration" default="$(find aegis_description)/config/ur5e/calibration.yaml"/>
 
     <!-- convert to property to use substitution in function -->
