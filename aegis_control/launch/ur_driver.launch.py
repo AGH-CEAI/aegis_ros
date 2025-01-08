@@ -13,7 +13,7 @@ from launch.substitutions import (
 
 class URConfig:
     def __init__(self):
-        # TODO: Define common parameters for this UR launch file & UR's URDF in an external YAML file
+        # TODO(issue#11): Define common parameters for this UR launch file & UR's URDF in an external YAML file
         self.ur_type = "ur5e"
         self.robot_ip = "aegis_ur"
 
