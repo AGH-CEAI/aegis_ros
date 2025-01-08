@@ -10,7 +10,7 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description() -> LaunchDescription:
 
-    launch_arguments = {
+    launch_args = {
         "tf_prefix": LaunchConfiguration("tf_prefix", default=""),
         "mock_hardware": LaunchConfiguration("mock_hardware", default="false"),
     }
@@ -22,7 +22,7 @@ def generate_launch_description() -> LaunchDescription:
                 [FindPackageShare("aegis_control"), "launch", "ur_driver.launch.py"]
             )
         ),
-        launch_arguments=launch_arguments.items(),
+        launch_arguments=launch_args.items(),
     )
 
     return LaunchDescription([ur_driver])
