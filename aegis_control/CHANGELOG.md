@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-9](https://github.com/AGH-CEAI/aegis_ros/pull/9) - Initial version of the `aegis_control` package.
+
 ### Changed
 
 ### Deprecated

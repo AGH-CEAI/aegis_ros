@@ -28,7 +28,7 @@ package aegis_control {
 }
 
 package aegis_description {
-    class aegis_display << (L,#FF7700) LaunchFile >> {
+    class aegis_preview << (L,#FF7700) LaunchFile >> {
         Launch urdf_launch/display.launch()
         Node static_transform_publisher()
     }
@@ -50,6 +50,10 @@ package aegis_description {
 
     package urdf {
         class aegis_urdf << (U,#bcffc8) urdf.xacro >> {}
+    }
+
+    package rviz {
+        class preview << (R,#ffffff) rviz >> {}
     }
 }
 
@@ -87,6 +91,8 @@ aegis_control.ur_driver *-- aegis_description.config.controllers
 aegis_moveit_config.move_group *-- aegis_moveit_config.config
 aegis_moveit_config.move_group *-- aegis_description.config.ur5e.joint_limits
 aegis_moveit_config.move_group *-- aegis_description.config.ur5e.calibration
+
+aegis_description.aegis_preview *-- aegis_description.rviz.preview
 
 skinparam classAttributeIconSize 0
 hide << YAML >> members

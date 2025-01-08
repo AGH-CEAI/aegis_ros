@@ -1,4 +1,5 @@
-# Physical parameters
+# This file is copied from the https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver repository
+# Physical parameters for the xacro files
 
 offsets:
   shoulder_offset: 0.138 # measured from model
