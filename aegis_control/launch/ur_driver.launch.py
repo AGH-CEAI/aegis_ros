@@ -38,9 +38,9 @@ class URConfig:
 
 def generate_launch_description() -> LaunchDescription:
 
-    mock_hardware = LaunchConfiguration("mock_hardware")
-    # It is necessary to properly parse ur_controllers_cfg YAML file
+    # tf_prefix is necessary to properly parse ur_controllers_cfg YAML file
     tf_prefix = LaunchConfiguration("tf_prefix")
+    mock_hardware = LaunchConfiguration("mock_hardware")
 
     cfg = URConfig()
 

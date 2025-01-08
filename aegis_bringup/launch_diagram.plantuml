@@ -3,6 +3,7 @@
 package aegis_bringup {
     class bringup << (L,#FF7700) LaunchFile >> {
         Arg namespace=""
+        Arg tf_prefix=""
         Arg mock_hardware="false"
         Arg launch_rviz="true"
     }
@@ -10,11 +11,11 @@ package aegis_bringup {
 
 package aegis_control {
     class start_drivers << (L,#FF7700) LaunchFile >> {
-        Arg namespace
+        Arg tf_prefix
         Arg mock_hardware
     }
     class ur_driver << (L,#FF7700) LaunchFile >> {
-        Arg namespace
+        Arg tf_prefix
         Arg mock_hardware
         Node control_node()
         Node ur_control_node()
@@ -34,7 +35,7 @@ package aegis_description {
     }
 
     class robot_description << (L,#FF7700) LaunchFile >> {
-        Arg namespace
+        Arg tf_prefix
         Arg mock_hardware
         Node robot_state_publisher()
     }
@@ -55,7 +56,6 @@ package aegis_description {
 
 package aegis_moveit_config {
     class move_group << (L,#FF7700) LaunchFile >> {
-        Arg namespace
         Arg mock_hardware
         Arg launch_rviz
         Node move_group_node()
