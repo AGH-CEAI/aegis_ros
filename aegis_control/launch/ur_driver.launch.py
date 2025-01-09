@@ -3,7 +3,6 @@ from launch_ros.parameter_descriptions import ParameterFile
 from launch_ros.substitutions import FindPackageShare
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import (
     LaunchConfiguration,
@@ -108,6 +107,7 @@ def prepare_mock_control_node(
         executable="ros2_control_node",
         parameters=[
             cfg.update_rate_config_file,
+            # implicit usage of the tf_prefix in the cfg.ur_controllers_cfg
             ParameterFile(cfg.ur_controllers_cfg, allow_substs=True),
         ],
         remappings=[("~/robot_description", "robot_description")],
@@ -122,6 +122,7 @@ def prepare_ur_control_node(mock_hardware: LaunchConfiguration, cfg: URConfig) -
         executable="ur_ros2_control_node",
         parameters=[
             cfg.update_rate_config_file,
+            # implicit usage of the tf_prefix in the cfg.ur_controllers_cfg
             ParameterFile(cfg.ur_controllers_cfg, allow_substs=True),
         ],
         remappings=[("~/robot_description", "robot_description")],
