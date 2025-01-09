@@ -2,7 +2,8 @@ from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterFile
 from launch_ros.substitutions import FindPackageShare
 
-from launch import LaunchDescription
+from launch import LaunchDescription, LaunchContext
+from launch.actions import OpaqueFunction
 from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import (
     LaunchConfiguration,
@@ -19,7 +20,8 @@ class URConfig:
         self.use_tool_communication = "false"
         self.tool_device_name = "/tmp/ttyUR"
 
-        self.initial_joint_controller = "scaled_joint_trajectory_controller"
+        self.real_initial_joint_controller = "scaled_joint_trajectory_controller"
+        self.fake_initial_joint_controller = "joint_trajectory_controller"
 
         # This file requires further substitution with the ParameterFile()
         self.ur_controllers_cfg = PathJoinSubstitution(
@@ -52,6 +54,10 @@ def controllers_spawner(controllers: list[str], timeout_s: int = 10, active=True
 
 
 def generate_launch_description() -> LaunchDescription:
+    return LaunchDescription([OpaqueFunction(function=launch_setup)])
+
+
+def launch_setup(context: LaunchContext):
 
     # tf_prefix is necessary to properly parse ur_controllers_cfg YAML file
     tf_prefix = LaunchConfiguration("tf_prefix")
@@ -72,6 +78,7 @@ def generate_launch_description() -> LaunchDescription:
         "io_and_status_controller",
         "speed_scaling_state_broadcaster",
         "force_torque_sensor_broadcaster",
+        # "tcp_pose_broadcaster", # TODO(issue#12): debug why this doesn't work
         "ur_configuration_controller",
     ]
     controllers_inactive = [
@@ -79,25 +86,30 @@ def generate_launch_description() -> LaunchDescription:
         "joint_trajectory_controller",
         "forward_velocity_controller",
         "forward_position_controller",
+        # TODO(issue#12): debug why these controllers don't work
+        # "force_mode_controller",
+        # "passthrough_trajectory_controller",
+        # "freedrive_mode_controller",
     ]
-    controllers_active.append(cfg.initial_joint_controller)
-    controllers_inactive.remove(cfg.initial_joint_controller)
+
+    init_joint_controller = cfg.real_initial_joint_controller
+    if mock_hardware.perform(context) == "true":
+        init_joint_controller = cfg.fake_initial_joint_controller
+    controllers_active.append(init_joint_controller)
+    controllers_inactive.remove(init_joint_controller)
 
     controller_spawners = [controllers_spawner(controllers_active)] + [
         controllers_spawner(controllers_inactive, active=False)
     ]
 
-    return LaunchDescription(
-        [
-            mock_control_node,
-            ur_control_node,
-            dashboard_client_node,
-            tool_communication_node,
-            controller_stopper_node,
-            urscript_interface,
-        ]
-        + controller_spawners
-    )
+    return [
+        mock_control_node,
+        ur_control_node,
+        dashboard_client_node,
+        tool_communication_node,
+        controller_stopper_node,
+        urscript_interface,
+    ] + controller_spawners
 
 
 def prepare_mock_control_node(
