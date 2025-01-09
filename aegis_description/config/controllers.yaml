@@ -32,7 +32,7 @@
         type: position_controllers/JointGroupPositionController
 
       force_mode_controller:
-      type: ur_controllers/ForceModeController
+        type: ur_controllers/ForceModeController
 
       freedrive_mode_controller:
         type: ur_controllers/FreedriveModeController
