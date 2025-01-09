@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://wiki.ros.org/xacro" name="aegis">
   <xacro:arg name="mock_hardware" default="false"/>
 
-  <xacro:arg name="base_link" default="ur_base"/>
+  <xacro:arg name="base_link" default="world"/>
   <xacro:arg name="prefix" default=""/>
   <xacro:arg name="tf_prefix" default=""/>
 
