@@ -21,6 +21,7 @@ class URConfig:
 
         self.initial_joint_controller = "scaled_joint_trajectory_controller"
 
+        # This file requires further substitution with the ParameterFile()
         self.ur_controllers_cfg = PathJoinSubstitution(
             [FindPackageShare("aegis_description"), "config", "controllers.yaml"]
         )
