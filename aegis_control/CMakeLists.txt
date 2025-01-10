@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.8)
-project(aegis_description)
+project(aegis_control)
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 
 install(
-  DIRECTORY config meshes launch urdf rviz
+  DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}
 )
 

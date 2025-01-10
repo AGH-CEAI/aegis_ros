@@ -1,0 +1,101 @@
+@startuml
+package aegis_bringup {
+    class bringup << (L,#FF7700) LaunchFile >> {
+        Arg mock_hardware="false"
+        Arg launch_rviz="true"
+        Param namespace=""
+        Param tf_prefix=""
+    }
+}
+
+package aegis_control {
+    class start_drivers << (L,#FF7700) LaunchFile >> {
+        Param tf_prefix
+        Param mock_hardware
+    }
+    class ur_driver << (L,#FF7700) LaunchFile >> {
+        Param tf_prefix
+        Param mock_hardware
+        Node ur_driver::controller_stopper_node()
+        Node ur_driver::ur_dashboard_client()
+        Node ur_driver::ur_tool_communication()
+        Node ur_driver::urscript_interface()
+        Node ros2_control::controller_manager()
+        Nodes ros2_control::controller_spawners()
+    }
+
+}
+
+package aegis_description {
+    class aegis_preview << (L,#FF7700) LaunchFile >> {
+        Launch urdf_launch/display.launch()
+        Node static_transform_publisher()
+    }
+
+    class robot_description << (L,#FF7700) LaunchFile >> {
+        Param tf_prefix
+        Param mock_hardware
+        Node robot_state_publisher()
+    }
+
+    package config {
+        class controllers << (Y,#ffffc9) YAML >> {}
+        package ur5e {
+            class calibration << (Y,#ffffc9) YAML >> {}
+            class joint_limits << (Y,#ffffc9) YAML >> {}
+            class update_rate << (Y,#ffffc9) YAML >> {}
+        }
+    }
+
+    package urdf {
+        class aegis_urdf << (U,#bcffc8) urdf.xacro >> {}
+    }
+
+    package rviz {
+        class preview << (R,#ffffff) rviz >> {}
+    }
+}
+
+package aegis_moveit_config {
+    class move_group << (L,#FF7700) LaunchFile >> {
+        Param mock_hardware
+        Param launch_rviz
+        Node move_group_node()
+        Node rviz_node()
+        Node tf_robot_base_node()
+        Node tf_odom_node()
+        Node scene_objects_manager_node()
+    }
+    package config {
+        class aegis << (S,#c298e9) SRDF >> {}
+        package move_group {
+            class ompl_planning << (Y,#ffffc9) YAML >> {}
+            class kinematics << (Y,#ffffc9) YAML >> {}
+        }
+        class moveit << (R,#ffffff) rviz >> {}
+        class controlers_description << (Y,#ffffc9) YAML >> {}
+    }
+}
+
+
+aegis_bringup.bringup *-left- aegis_control.start_drivers
+aegis_bringup.bringup *-- aegis_moveit_config.move_group
+aegis_bringup.bringup *-- aegis_description.robot_description
+aegis_description.robot_description *-- aegis_description.urdf.aegis_urdf
+
+aegis_control.start_drivers *-- aegis_control.ur_driver
+aegis_control.ur_driver *-- aegis_description.config.ur5e.update_rate
+aegis_control.ur_driver *-- aegis_description.config.controllers
+
+aegis_moveit_config.move_group *-- aegis_moveit_config.config
+aegis_moveit_config.move_group *-- aegis_description.config.ur5e.joint_limits
+aegis_moveit_config.move_group *-- aegis_description.config.ur5e.calibration
+
+aegis_description.aegis_preview *-- aegis_description.rviz.preview
+
+skinparam classAttributeIconSize 0
+hide << YAML >> members
+hide << urdf.xacro >> members
+hide << SRDF >> members
+hide << rviz >> members
+@enduml
