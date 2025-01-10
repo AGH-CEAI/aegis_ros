@@ -19,9 +19,9 @@ from launch_ros.substitutions import FindPackageShare
 
 def launch_setup(context: LaunchContext) -> list[IncludeLaunchDescription]:
 
-    namespace = LaunchConfiguration("namespace")
+    namespace = LaunchConfiguration("namespace", default="")
     launch_args = {
-        "tf_prefix": LaunchConfiguration("tf_prefix"),
+        "tf_prefix": LaunchConfiguration("tf_prefix", default=""),
         "mock_hardware": LaunchConfiguration("mock_hardware"),
         "launch_rviz": LaunchConfiguration("launch_rviz"),
     }
