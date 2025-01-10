@@ -11,6 +11,10 @@ from launch.substitutions import (
 )
 
 
+def str2bool(x: str) -> bool:
+    return x.lower() in ("true")
+
+
 class URConfig:
     def __init__(self):
         # TODO(issue#11): Define common parameters for this UR launch file & UR's URDF in an external YAML file
@@ -62,6 +66,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     # tf_prefix is necessary to properly parse ur_controllers_cfg YAML file
     tf_prefix = LaunchConfiguration("tf_prefix")
     mock_hardware = LaunchConfiguration("mock_hardware")
+    mock_hardware_bool = str2bool(mock_hardware.perform(context))
 
     cfg = URConfig()
 
@@ -92,9 +97,11 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         # "freedrive_mode_controller",
     ]
 
-    init_joint_controller = cfg.real_initial_joint_controller
-    if mock_hardware.perform(context) == "true":
-        init_joint_controller = cfg.fake_initial_joint_controller
+    init_joint_controller = (
+        cfg.fake_initial_joint_controller
+        if mock_hardware_bool
+        else cfg.real_initial_joint_controller
+    )
     controllers_active.append(init_joint_controller)
     controllers_inactive.remove(init_joint_controller)
 

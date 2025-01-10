@@ -13,6 +13,10 @@ from launch_ros.substitutions import FindPackageShare
 from ur_moveit_config.launch_common import load_yaml
 
 
+def str2bool(x: str) -> bool:
+    return x.lower() in ("true")
+
+
 class AegisPathsCfg:
     """Contains paths to the configuration files."""
 
@@ -71,7 +75,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
 
     move_group_node, rviz_node = prepare_move_group_and_rviz_nodes(
         mock_hardware=mock_hardware,
-        mock_hardware_bool=context.perform_substitution(mock_hardware),
+        mock_hardware_bool=str2bool(context.perform_substitution(mock_hardware)),
         launch_rviz=launch_rviz,
         paths=aegis_paths,
     )
@@ -129,8 +133,10 @@ def prepare_move_group_and_rviz_nodes(
 
     # Trajectory Execution Configuration
     controllers_yaml = paths.load_controllers_cfg()
-    # the scaled_joint_trajectory_controller does not work on fake hardware
+
+    # TODO(issue#11) Extract configuration for real/fake controller to an external YAML
     if mock_hardware_bool:
+        # the scaled_joint_trajectory_controller does not work on fake hardware
         controllers_yaml["scaled_joint_trajectory_controller"]["default"] = False
         controllers_yaml["joint_trajectory_controller"]["default"] = True
 
