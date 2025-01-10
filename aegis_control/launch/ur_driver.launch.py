@@ -57,7 +57,7 @@ def generate_launch_description() -> LaunchDescription:
     return LaunchDescription([OpaqueFunction(function=launch_setup)])
 
 
-def launch_setup(context: LaunchContext):
+def launch_setup(context: LaunchContext) -> list[Node]:
 
     # tf_prefix is necessary to properly parse ur_controllers_cfg YAML file
     tf_prefix = LaunchConfiguration("tf_prefix")

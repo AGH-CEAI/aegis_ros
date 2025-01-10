@@ -1,7 +1,5 @@
-from typing import Dict, List
-
 from launch import LaunchDescription, LaunchContext
-from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.actions import OpaqueFunction
 from launch.conditions import IfCondition
 from launch.substitutions import (
     Command,
@@ -59,28 +57,10 @@ class AegisPathsCfg:
 
 
 def generate_launch_description() -> LaunchDescription:
-
-    declared_arguments = [
-        DeclareLaunchArgument(
-            "mock_hardware",
-            default_value="false",
-            description="Mock the hardware?",
-        ),
-        DeclareLaunchArgument(
-            "launch_rviz", default_value="true", description="Launch RViz?"
-        ),
-        # TODO(issue#5) enable real-time servo
-        # DeclareLaunchArgument(
-        #     "launch_servo", default_value="false", description="Launch Servo?"
-        # ),
-    ]
-
-    return LaunchDescription(
-        declared_arguments + [OpaqueFunction(function=launch_setup)]
-    )
+    return LaunchDescription([OpaqueFunction(function=launch_setup)])
 
 
-def launch_setup(context: LaunchContext) -> List[Node]:
+def launch_setup(context: LaunchContext) -> list[Node]:
 
     mock_hardware = LaunchConfiguration("mock_hardware")
     launch_rviz = LaunchConfiguration("launch_rviz")
@@ -113,7 +93,7 @@ def launch_setup(context: LaunchContext) -> List[Node]:
     return nodes_to_start
 
 
-def get_robot_description_semantic(paths: AegisPathsCfg) -> Dict:
+def get_robot_description_semantic(paths: AegisPathsCfg) -> dict:
     robot_description_semantic_content = Command(
         [paths.xacro_path, " ", paths.srdf_path]
     )
@@ -199,7 +179,7 @@ def prepare_move_group_and_rviz_nodes(
     return prepare_move_group_node(node_cfg), prepare_rviz_node(node_cfg, paths)
 
 
-def prepare_move_group_node(cfg: Dict) -> Node:
+def prepare_move_group_node(cfg: dict) -> Node:
     return Node(
         package="moveit_ros_move_group",
         executable="move_group",
@@ -221,7 +201,7 @@ def prepare_move_group_node(cfg: Dict) -> Node:
     )
 
 
-def prepare_rviz_node(cfg: Dict, paths: AegisPathsCfg) -> Node:
+def prepare_rviz_node(cfg: dict, paths: AegisPathsCfg) -> Node:
     return Node(
         package="rviz2",
         condition=IfCondition(cfg["launch_rviz"]),
