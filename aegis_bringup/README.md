@@ -18,6 +18,10 @@ This package provides the configuration and launch files required to enable all 
 ros2 launch aegis_bringup bringup.launch.py
 ```
 
+Possible launch arguments:
+* `mock_hardware:={false, true}` (default: `false`) - enables the _fake_hardware_ feature of the ros2_control (the simplest "simulation").
+* `launch_rviz:={false, true}` (default: `true`) - launches visualization in RViz.
+
 3. Apply the hotfix publisher for the gripper state:
 ```bash
 ros2 topic pub /joint_states sensor_msgs/msg/JointState \

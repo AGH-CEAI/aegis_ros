@@ -1,22 +1,21 @@
-@startuml Launch Files
-
+@startuml
 package aegis_bringup {
     class bringup << (L,#FF7700) LaunchFile >> {
-        Arg namespace=""
-        Arg tf_prefix=""
         Arg mock_hardware="false"
         Arg launch_rviz="true"
+        Param namespace=""
+        Param tf_prefix=""
     }
 }
 
 package aegis_control {
     class start_drivers << (L,#FF7700) LaunchFile >> {
-        Arg tf_prefix
-        Arg mock_hardware
+        Param tf_prefix
+        Param mock_hardware
     }
     class ur_driver << (L,#FF7700) LaunchFile >> {
-        Arg tf_prefix
-        Arg mock_hardware
+        Param tf_prefix
+        Param mock_hardware
         Node ur_driver::controller_stopper_node()
         Node ur_driver::ur_dashboard_client()
         Node ur_driver::ur_tool_communication()
@@ -34,8 +33,8 @@ package aegis_description {
     }
 
     class robot_description << (L,#FF7700) LaunchFile >> {
-        Arg tf_prefix
-        Arg mock_hardware
+        Param tf_prefix
+        Param mock_hardware
         Node robot_state_publisher()
     }
 
@@ -59,8 +58,8 @@ package aegis_description {
 
 package aegis_moveit_config {
     class move_group << (L,#FF7700) LaunchFile >> {
-        Arg mock_hardware
-        Arg launch_rviz
+        Param mock_hardware
+        Param launch_rviz
         Node move_group_node()
         Node rviz_node()
         Node tf_robot_base_node()
