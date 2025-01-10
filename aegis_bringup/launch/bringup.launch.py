@@ -81,21 +81,22 @@ def generate_launch_description() -> LaunchDescription:
 
     declared_arguments = []
 
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "namespace",
-            default_value=EnvironmentVariable("ROBOT_NAMESPACE", default_value=""),
-            description="Add namespace to all launched nodes.",
-        )
-    )
+    # TODO(issue#13) Debug the namespace and tf_prefix launch args
+    # declared_arguments.append(
+    #     DeclareLaunchArgument(
+    #         "namespace",
+    #         default_value=EnvironmentVariable("ROBOT_NAMESPACE", default_value=""),
+    #         description="Add namespace to all launched nodes.",
+    #     )
+    # )
 
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "tf_prefix",
-            default_value=EnvironmentVariable("TF_PREFIX", default_value=""),
-            description="Add prefix to the all robot's links & joints.",
-        )
-    )
+    # declared_arguments.append(
+    #     DeclareLaunchArgument(
+    #         "tf_prefix",
+    #         default_value=EnvironmentVariable("TF_PREFIX", default_value=""),
+    #         description="Add prefix to the all robot's links & joints.",
+    #     )
+    # )
 
     declared_arguments.append(
         DeclareLaunchArgument(
