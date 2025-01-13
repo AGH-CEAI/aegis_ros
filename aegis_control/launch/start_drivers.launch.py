@@ -76,7 +76,7 @@ def preapre_params_files() -> list[PathJoinSubstitution]:
     )
     ft_sensor_controllers_cfg = PathJoinSubstitution(
         [
-            FindPackageShare("aegis_description"),
+            FindPackageShare("aegis_control"),
             "config",
             "controllers",
             "net_ft_broadcaster.yaml",
