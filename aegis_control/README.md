@@ -1,6 +1,6 @@
 # aegis_control
 
-This package contains the [ros2_control](https://control.ros.org/) launch files for the Aegis robot station, which incorporate configuration files from the `aegis_description` package.
+This package contains the [ros2_control](https://control.ros.org/) launch files for the Aegis robot station.
 
 ## Launch files
 

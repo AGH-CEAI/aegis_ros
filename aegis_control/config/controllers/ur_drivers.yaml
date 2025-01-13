@@ -1,6 +1,5 @@
 # This file is based on the following source:
 # https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver/blob/humble/ur_robot_driver/config/ur_controllers.yaml
-# TODO(issue#10) There might be a better way to integrate multiple controllers (from different drivers)
 # into a single controller_manager  rather than creating one large ROS parameters file.
 
 # Configuration for the ros2_control
@@ -16,7 +15,7 @@
       speed_scaling_state_broadcaster:
         type: ur_controllers/SpeedScalingStateBroadcaster
 
-      force_torque_sensor_broadcaster:
+      ur_force_torque_sensor_broadcaster:
         type: force_torque_sensor_broadcaster/ForceTorqueSensorBroadcaster
 
       joint_trajectory_controller:
@@ -59,7 +58,7 @@
     ros__parameters:
       tf_prefix: "$(var tf_prefix)"
 
-  force_torque_sensor_broadcaster:
+  ur_force_torque_sensor_broadcaster:
     ros__parameters:
       sensor_name: $(var tf_prefix)tcp_fts_sensor
       state_interface_names:
