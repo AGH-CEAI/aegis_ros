@@ -6,7 +6,7 @@
 
   <xacro:arg name="use_physical_hardware" default="false"/>
 
-  <xacro:arg name="ip_address" default="127.0.0.1"/>
+  <xacro:arg name="ip_address" default="aegis_ft"/>
   <xacro:arg name="rdt_sampling_rate" default="500"/>
   <xacro:arg name="sensor_type" default="ati_axia80"/>
   <xacro:arg name="bolts_mass" default="0.019"/>
