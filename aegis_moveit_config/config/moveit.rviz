@@ -1,12 +1,11 @@
 Panels:
   - Class: rviz_common/Displays
-    Help Height: 70
+    Help Height: 71
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /MotionPlanning1
+      Expanded: ~
       Splitter Ratio: 0.5
-    Tree Height: 295
+    Tree Height: 303
   - Class: rviz_common/Help
     Name: Help
   - Class: rviz_common/Views
@@ -97,6 +96,11 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          cell:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           flange:
             Alpha: 1
             Show Axes: false
@@ -134,6 +138,11 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          oakd_pro_camera:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           robotiq_coupler:
             Alpha: 1
             Show Axes: false
@@ -158,6 +167,10 @@ Visualization Manager:
             Show Trail: false
             Value: true
           ur_base:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          world:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -253,6 +266,11 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          cell:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           flange:
             Alpha: 1
             Show Axes: false
@@ -290,6 +308,11 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          oakd_pro_camera:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           robotiq_coupler:
             Alpha: 1
             Show Axes: false
@@ -317,6 +340,10 @@ Visualization Manager:
             Alpha: 1
             Show Axes: false
             Show Trail: false
+          world:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
           wrist_1_link:
             Alpha: 1
             Show Axes: false
@@ -332,11 +359,30 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-        Robot Alpha: 0.5
+        Robot Alpha: 1
         Show Robot Collision: false
         Show Robot Visual: true
       Value: true
       Velocity_Scaling_Factor: 0.1
+    - Accept NaN Values: false
+      Alpha: 0.5
+      Arrow Width: 0.10000000149011612
+      Class: rviz_default_plugins/Wrench
+      Enabled: true
+      Force Arrow Scale: 1
+      Force Color: 204; 51; 51
+      History Length: 1
+      Name: Wrench
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /net_ft_sensor_broadcaster/wrench
+      Torque Arrow Scale: 1
+      Torque Color: 204; 204; 51
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -355,7 +401,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 3.8915979862213135
+      Distance: 3.489501953125
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -370,15 +416,15 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.15039809048175812
+      Pitch: 0.4703981280326843
       Target Frame: ur_base
       Value: Orbit (rviz_default_plugins)
-      Yaw: 0.7167834043502808
+      Yaw: 0.4967840611934662
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1371
+  Height: 1411
   Help:
     collapsed: false
   Hide Left Dock: false
@@ -387,9 +433,9 @@ Window Geometry:
     collapsed: false
   MotionPlanning - Trajectory Slider:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000002b400000505fc0200000005fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000003f00fffffffb000000100044006900730070006c006100790073010000003b000001a8000000c700fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006701000001e9000002490000016900fffffffb0000000800480065006c0070000000029a0000006e0000006e00fffffffb0000000a00560069006500770073010000043800000108000000a000ffffff000007460000050500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000100000000000002b400000528fc0200000005fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000004100fffffffb000000100044006900730070006c006100790073010000003e000001b3000000cb00fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006701000001f70000025a0000017d00fffffffb0000000800480065006c0070000000029a0000006e0000006f00fffffffb0000000a0056006900650077007301000004570000010f000000a500ffffff000007460000052800000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
     collapsed: false
   Width: 2560
-  X: 0
-  Y: 32
+  X: 1440
+  Y: 516
