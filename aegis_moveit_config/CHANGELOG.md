@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * [PR-7](https://github.com/AGH-CEAI/aegis_ros/pull/7) - Initial version of the Aegis ROS 2 packages.
 * [PR-8](https://github.com/AGH-CEAI/aegis_ros/pull/8) - Cell and camera to the robot model.
+* [PR-17](https://github.com/AGH-CEAI/aegis_ros/pull/17) - RViz wrench visualization for the F/T sensor.
 
 ### Changed
 
@@ -21,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 ### Fixed
+
 * [PR-8](https://github.com/AGH-CEAI/aegis_ros/pull/8) - Handling of transformations.
 
 ### Security

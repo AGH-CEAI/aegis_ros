@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * [PR-9](https://github.com/AGH-CEAI/aegis_ros/pull/9) - Launch and URDF files completely revamped.
 * [PR-16](https://github.com/AGH-CEAI/aegis_ros/pull/16) - Updated launch files diagram.
+* [PR-17](https://github.com/AGH-CEAI/aegis_ros/pull/17) - Updated launch files diagram.
 
 ### Deprecated
 
