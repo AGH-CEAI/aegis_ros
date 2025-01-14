@@ -3,4 +3,5 @@ logs/
 build/
 bin/
 install/
+__pycache__
 *.sqlite

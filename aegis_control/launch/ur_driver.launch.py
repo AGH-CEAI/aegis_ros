@@ -1,18 +1,16 @@
-from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterFile
-from launch_ros.substitutions import FindPackageShare
-
 from launch import LaunchDescription, LaunchContext
 from launch.actions import OpaqueFunction
 from launch.conditions import IfCondition, UnlessCondition
-from launch.substitutions import (
-    LaunchConfiguration,
-    PathJoinSubstitution,
-)
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
 
+# Bypassing the launch system to access local import
+import os
+import sys
 
-def str2bool(x: str) -> bool:
-    return x.lower() in ("true")
+run_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(run_path)
+from include.utils import str2bool, controllers_spawner
 
 
 class URConfig:
@@ -26,35 +24,6 @@ class URConfig:
 
         self.real_initial_joint_controller = "scaled_joint_trajectory_controller"
         self.fake_initial_joint_controller = "joint_trajectory_controller"
-
-        # This file requires further substitution with the ParameterFile()
-        self.ur_controllers_cfg = PathJoinSubstitution(
-            [FindPackageShare("aegis_description"), "config", "controllers.yaml"]
-        )
-        self.update_rate_config_file = PathJoinSubstitution(
-            [
-                FindPackageShare("aegis_description"),
-                "config",
-                "ur5e",
-                "update_rate.yaml",
-            ]
-        )
-
-
-def controllers_spawner(controllers: list[str], timeout_s: int = 10, active=True):
-    inactive_flags = ["--inactive"] if not active else []
-    return Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=[
-            "--controller-manager",
-            "controller_manager",
-            "--controller-manager-timeout",
-            str(timeout_s),
-        ]
-        + inactive_flags
-        + controllers,
-    )
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -70,9 +39,6 @@ def launch_setup(context: LaunchContext) -> list[Node]:
 
     cfg = URConfig()
 
-    mock_control_node = prepare_mock_control_node(mock_hardware, cfg)
-    ur_control_node = prepare_ur_control_node(mock_hardware, cfg)
-
     dashboard_client_node = prepare_dashboard_client_node(mock_hardware, cfg)
     tool_communication_node = prepare_tool_communication_node(cfg)
     urscript_interface = prepare_urscript_interface(cfg)
@@ -82,7 +48,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         "joint_state_broadcaster",
         "io_and_status_controller",
         "speed_scaling_state_broadcaster",
-        "force_torque_sensor_broadcaster",
+        "ur_force_torque_sensor_broadcaster",
         # "tcp_pose_broadcaster", # TODO(issue#12): debug why this doesn't work
         "ur_configuration_controller",
     ]
@@ -105,50 +71,14 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     controllers_active.append(init_joint_controller)
     controllers_inactive.remove(init_joint_controller)
 
-    controller_spawners = [controllers_spawner(controllers_active)] + [
-        controllers_spawner(controllers_inactive, active=False)
-    ]
-
     return [
-        mock_control_node,
-        ur_control_node,
         dashboard_client_node,
         tool_communication_node,
         controller_stopper_node,
         urscript_interface,
-    ] + controller_spawners
-
-
-def prepare_mock_control_node(
-    mock_hardware: LaunchConfiguration, cfg: URConfig
-) -> Node:
-    return Node(
-        package="controller_manager",
-        executable="ros2_control_node",
-        parameters=[
-            cfg.update_rate_config_file,
-            # implicit usage of the tf_prefix in the cfg.ur_controllers_cfg
-            ParameterFile(cfg.ur_controllers_cfg, allow_substs=True),
-        ],
-        remappings=[("~/robot_description", "robot_description")],
-        output="screen",
-        condition=IfCondition(mock_hardware),
-    )
-
-
-def prepare_ur_control_node(mock_hardware: LaunchConfiguration, cfg: URConfig) -> Node:
-    return Node(
-        package="ur_robot_driver",
-        executable="ur_ros2_control_node",
-        parameters=[
-            cfg.update_rate_config_file,
-            # implicit usage of the tf_prefix in the cfg.ur_controllers_cfg
-            ParameterFile(cfg.ur_controllers_cfg, allow_substs=True),
-        ],
-        remappings=[("~/robot_description", "robot_description")],
-        output="screen",
-        condition=UnlessCondition(mock_hardware),
-    )
+        controllers_spawner(controllers_active),
+        controllers_spawner(controllers_inactive, active=False),
+    ]
 
 
 def prepare_dashboard_client_node(
