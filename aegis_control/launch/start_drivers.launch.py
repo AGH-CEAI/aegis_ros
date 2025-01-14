@@ -18,8 +18,8 @@ def generate_launch_description() -> LaunchDescription:
         "mock_hardware": LaunchConfiguration("mock_hardware", default="false"),
     }
 
-    control_params_files = preapre_params_files()
-    control_nodes = preapre_control_nodes(
+    control_params_files = prepare_params_files()
+    control_nodes = prepare_control_nodes(
         launch_args["mock_hardware"], control_params_files
     )
 
@@ -40,7 +40,7 @@ def generate_launch_description() -> LaunchDescription:
     )
 
 
-def preapre_params_files() -> list[PathJoinSubstitution]:
+def prepare_params_files() -> list[PathJoinSubstitution]:
     ur_controllers_cfg = ParameterFile(
         PathJoinSubstitution(
             [
@@ -67,7 +67,7 @@ def preapre_params_files() -> list[PathJoinSubstitution]:
     ]
 
 
-def preapre_control_nodes(
+def prepare_control_nodes(
     mock_hardware: LaunchConfiguration, parameters: list[PathJoinSubstitution]
 ) -> list[Node]:
     # The following is due to the design of the ur_robot_driver for ROS 2 Humble
