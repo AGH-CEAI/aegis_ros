@@ -32,9 +32,23 @@ def generate_launch_description() -> LaunchDescription:
         launch_arguments=launch_args.items(),
     )
 
+    ft_sensor_driver = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution(
+                [
+                    FindPackageShare("aegis_control"),
+                    "launch",
+                    "ft_sensor_driver.launch.py",
+                ]
+            )
+        ),
+        launch_arguments=launch_args.items(),
+    )
+
     return LaunchDescription(
         [
             ur_driver,
+            ft_sensor_driver,
         ]
         + control_nodes
     )
@@ -60,10 +74,19 @@ def prepare_params_files() -> list[PathJoinSubstitution]:
             "update_rate.yaml",
         ]
     )
+    ft_sensor_controllers_cfg = PathJoinSubstitution(
+        [
+            FindPackageShare("aegis_control"),
+            "config",
+            "controllers",
+            "net_ft_broadcaster.yaml",
+        ]
+    )
 
     return [
         ur_controllers_cfg,
         ur_update_rate_config_file,
+        ft_sensor_controllers_cfg,
     ]
 
 

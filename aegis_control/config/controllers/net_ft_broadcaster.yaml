@@ -1,0 +1,21 @@
+/**:
+  controller_manager:
+    ros__parameters:
+      net_ft_sensor_broadcaster:
+        type: force_torque_sensor_broadcaster/ForceTorqueSensorBroadcaster
+
+      net_ft_diagnostic_broadcaster:
+        type: net_ft_diagnostic_broadcaster/NetFTDiagnosticBroadcaster
+
+  net_ft_sensor_broadcaster:
+    ros__parameters:
+      sensor_name: tcp_fts_sensor
+      state_interface_names:
+        - force.x
+        - force.y
+        - force.z
+        - torque.x
+        - torque.y
+        - torque.z
+      frame_id: tool0
+      topic_name: ft_data

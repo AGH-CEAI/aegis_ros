@@ -12,6 +12,7 @@ package aegis_control {
     class start_drivers << (L,#FF7700) LaunchFile >> {
         Param tf_prefix
         Param mock_hardware
+        Node ros2_control::controller_manager()
     }
     class ur_driver << (L,#FF7700) LaunchFile >> {
         Param tf_prefix
@@ -20,12 +21,15 @@ package aegis_control {
         Node ur_driver::ur_dashboard_client()
         Node ur_driver::ur_tool_communication()
         Node ur_driver::urscript_interface()
-        Node ros2_control::controller_manager()
-        Nodes ros2_control::controller_spawners()
+        Node ros2_control::controllers_spawner()
+    }
+    class ft_sensor_driver << (L,#FF7700) LaunchFile >> {
+        Node ros2_control::controllers_spawner()
     }
 
     package config {
         package controllers {
+            class net_ft_broadcaster << (Y,#ffffc9) YAML >> {}
             class update_rate << (Y,#ffffc9) YAML >> {}
             class ur_drivers << (Y,#ffffc9) YAML >> {}
         }
@@ -88,6 +92,7 @@ aegis_bringup.bringup *-- aegis_description.robot_description
 aegis_description.robot_description *-- aegis_description.urdf.aegis_urdf
 
 aegis_control.start_drivers *-- aegis_control.ur_driver
+aegis_control.start_drivers *-- aegis_control.ft_sensor_driver
 aegis_control.start_drivers *-- aegis_control.config.controllers
 
 aegis_moveit_config.move_group *-- aegis_moveit_config.config
