@@ -25,11 +25,11 @@ mkdir -p ~/ceai_ws
 cd ~/ceai_ws
 git clone -b humble-devel https://github.com/AGH-CEAI/aegis_ros.git src/aegis_ros
 ```
+
 ### Containers
 
 > [!TIP]
 > Check the [aegis_docker](https://github.com/AGH-CEAI/aegis_docker) repository for the Dockerfile.
-
 
 #### Docker
 ```bash
@@ -40,19 +40,19 @@ docker build . -t ceai/aegis_dev:latest
 
 #### Podman & Toolbx
 ```bash
-toolbox create --image localhost/ceai/aegis_dev
-toolbox enter aegis_dev
+cd ~/ceai_ws/src/aegis_docker
+podman build . -t ceai/aegis_dev:latest
+toolbox create --image localhost/ceai/aegis_dev:latest
+toolbox enter aegis_dev-latest
 ```
 
 ### Resolving dependencies and build
 ```bash
 source /opt/ros/humble/setup.bash
 rosdep init
-mkdir -p ~/ceai_ws
 ```
 ```bash
 cd ~/ceai_ws
-git clone -b humble-devel https://github.com/AGH-CEAI/aegis_ros.git src/aegis_ros
 vcs import src < src/aegis_ros/aegis/aegis.repos
 rosdep update --rosdistro $ROS_DISTRO
 rosdep install --from-paths src -y -i
