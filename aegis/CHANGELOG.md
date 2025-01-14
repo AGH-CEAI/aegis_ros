@@ -19,4 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+* [PR-18](https://github.com/AGH-CEAI/aegis_ros/pull/18) - Updated the `ros2_net_ft_driver` to fix missing `curlpp-dev` dependency.
+
 ### Security
