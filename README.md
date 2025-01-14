@@ -4,6 +4,10 @@ A complete suite of ROS 2 packages for the Aegis UR5e cobot station.
 
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
+<p align="center">
+    <img src="./.docs/aegis_station.png" alt="Aegis cobot station preview" width="640"/>
+</p>
+
 ---
 
 ## List of packages
