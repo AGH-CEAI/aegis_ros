@@ -19,7 +19,7 @@ class URConfig:
         self.ur_type = "ur5e"
         self.robot_ip = "aegis_ur"
 
-        self.use_tool_communication = "false"
+        self.use_tool_communication = "true"
         self.tool_device_name = "/tmp/ttyUR"
 
         self.real_initial_joint_controller = "scaled_joint_trajectory_controller"
