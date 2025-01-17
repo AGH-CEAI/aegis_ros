@@ -25,7 +25,7 @@
     <xacro:arg name="reverse_ip" default="0.0.0.0"/>
 
     <!--   tool communication related parameters-->
-    <xacro:arg name="use_tool_communication" default="false"/>
+    <xacro:arg name="use_tool_communication" default="true"/>
     <xacro:arg name="tool_voltage" default="0"/>
     <xacro:arg name="tool_device_name" default="/tmp/ttyUR"/>
 
