@@ -1,0 +1,7 @@
+/**:
+  ros__parameters:
+    camera:
+      i_nn_type: none
+      i_ip: 169.254.1.100
+    stereo:
+      i_subpixel: true
