@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
   <xacro:include filename="$(find aegis_description)/urdf/modules/cell.xacro"/>
-  <xacro:include filename="$(find aegis_description)/urdf/modules/oakd_pro_camera.xacro"/>
+  <xacro:include filename="$(find aegis_description)/urdf/modules/luxonis_oakd_pro_scene.xacro"/>
   <xacro:include filename="$(find aegis_description)/urdf/modules/ur_definition.xacro"/>
   <xacro:include filename="$(find aegis_description)/urdf/modules/adapter_to_sensor.xacro"/>
   <xacro:include filename="$(find aegis_description)/urdf/modules/ft_schunk_axia80.xacro"/>
@@ -10,7 +10,7 @@
 
   <xacro:macro name="aegis_robot" params="parent tf_prefix prefix mock_hardware">
     <xacro:cell parent="${parent}"/>
-    <xacro:oakd_pro_camera parent="cell"/>
+    <xacro:luxonis_oakd_pro_scene parent="cell"/>
     <xacro:ur_definition name="aegis" parent="ur_base" tf_prefix="${tf_prefix}" mock_hardware="${mock_hardware}"/>
     <xacro:adapter_to_sensor parent="tool0" prefix="${prefix}"/>
     <xacro:ft_sensor_schunk_axia80 parent="adapter_to_sensor_end" prefix="${prefix}" mock_hardware="${mock_hardware}"/>
