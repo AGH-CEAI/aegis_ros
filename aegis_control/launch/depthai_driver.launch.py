@@ -19,49 +19,35 @@ def launch_setup(context, *args, **kwargs):
     if context.environment.get("DEPTHAI_DEBUG") == "1":
         log_level = "debug"
 
-    params_file = LaunchConfiguration("params_file")
-    depthai_prefix = get_package_share_directory("aegis_control")
-
     name = LaunchConfiguration("name").perform(context)
-    rgb_topic_name = name + "/rgb/image_raw"
-    if LaunchConfiguration("rectify_rgb").perform(context) == "true":
-        rgb_topic_name = name + "/rgb/image_rect"
-
-    parent_frame = LaunchConfiguration("parent_frame", default="oakd_pro_camera")
+    parent_frame = LaunchConfiguration("parent_frame", default="world")
+    base_frame = LaunchConfiguration("base_frame").perform(context)
     cam_pos_x = LaunchConfiguration("cam_pos_x", default="0.0")
     cam_pos_y = LaunchConfiguration("cam_pos_y", default="0.0")
     cam_pos_z = LaunchConfiguration("cam_pos_z", default="0.0")
     cam_roll = LaunchConfiguration("cam_roll", default="0.0")
     cam_pitch = LaunchConfiguration("cam_pitch", default="0.0")
     cam_yaw = LaunchConfiguration("cam_yaw", default="0.0")
-    use_composition = LaunchConfiguration("rsp_use_composition", default="true")
-    imu_from_descr = LaunchConfiguration("imu_from_descr", default="false")
-    publish_tf_from_calibration = LaunchConfiguration(
-        "publish_tf_from_calibration", default="false"
-    )
-    override_cam_model = LaunchConfiguration("override_cam_model", default="false")
+    params_file = LaunchConfiguration("params_file")
+    rectify_rgb = LaunchConfiguration("rectify_rgb").perform(context)
 
-    tf_params = {}
-    if publish_tf_from_calibration.perform(context) == "true":
-        cam_model = ""
-        if override_cam_model.perform(context) == "true":
-            cam_model = camera_model.perform(context)
-        tf_params = {
-            "camera": {
-                "i_publish_tf_from_calibration": True,
-                "i_tf_tf_prefix": name,
-                "i_tf_camera_model": cam_model,
-                "i_tf_base_frame": name,
-                "i_tf_parent_frame": parent_frame.perform(context),
-                "i_tf_cam_pos_x": cam_pos_x.perform(context),
-                "i_tf_cam_pos_y": cam_pos_y.perform(context),
-                "i_tf_cam_pos_z": cam_pos_z.perform(context),
-                "i_tf_cam_roll": cam_roll.perform(context),
-                "i_tf_cam_pitch": cam_pitch.perform(context),
-                "i_tf_cam_yaw": cam_yaw.perform(context),
-                "i_tf_imu_from_descr": imu_from_descr.perform(context),
-            }
+    tf_params = {
+        "camera": {
+            "i_publish_tf_from_calibration": True,
+            "i_tf_base_frame": base_frame,
+            "i_tf_parent_frame": parent_frame,
+            "i_tf_cam_pos_x": cam_pos_x,
+            "i_tf_cam_pos_y": cam_pos_y,
+            "i_tf_cam_pos_z": cam_pos_z,
+            "i_tf_cam_roll": cam_roll,
+            "i_tf_cam_pitch": cam_pitch,
+            "i_tf_cam_yaw": cam_yaw,
         }
+    }
+
+    rgb_topic_name = f"{name}/rgb/image_raw"
+    if rectify_rgb == "true":
+        rgb_topic_name = f"{name}/rgb/image_rect"
 
     return [
         ComposableNodeContainer(
@@ -125,35 +111,35 @@ def generate_launch_description():
     depthai_prefix = get_package_share_directory("aegis_control")
     declared_arguments = [
         DeclareLaunchArgument("name", default_value="oak"),
-        DeclareLaunchArgument("camera_model", default_value="OAK-D"),
-        DeclareLaunchArgument("parent_frame", default_value="oak-d-base-frame"),
-        DeclareLaunchArgument("cam_pos_x", default_value="0.0"),
-        DeclareLaunchArgument("cam_pos_y", default_value="0.0"),
-        DeclareLaunchArgument("cam_pos_z", default_value="0.0"),
-        DeclareLaunchArgument("cam_roll", default_value="0.0"),
-        DeclareLaunchArgument("cam_pitch", default_value="0.0"),
+        DeclareLaunchArgument("parent_frame", default_value="cell"),
+        DeclareLaunchArgument("base_frame", default_value="oak-d_frame"),
+        DeclareLaunchArgument("cam_pos_x", default_value="0.014"),
+        DeclareLaunchArgument("cam_pos_y", default_value="0.33"),
+        DeclareLaunchArgument("cam_pos_z", default_value="1.972"),
+        DeclareLaunchArgument("cam_roll", default_value="1.5708"),
+        DeclareLaunchArgument("cam_pitch", default_value="1.5708"),
         DeclareLaunchArgument("cam_yaw", default_value="0.0"),
         DeclareLaunchArgument(
             "params_file",
             default_value=os.path.join(depthai_prefix, "config", "camera.yaml"),
         ),
         DeclareLaunchArgument("rectify_rgb", default_value="true"),
-        DeclareLaunchArgument("rsp_use_composition", default_value="true"),
-        DeclareLaunchArgument(
-            "publish_tf_from_calibration",
-            default_value="false",
-            description="Enables TF publishing from camera calibration file.",
-        ),
-        DeclareLaunchArgument(
-            "imu_from_descr",
-            default_value="false",
-            description="Enables IMU publishing from URDF.",
-        ),
-        DeclareLaunchArgument(
-            "override_cam_model",
-            default_value="false",
-            description="Overrides camera model from calibration file.",
-        ),
+        # DeclareLaunchArgument("rsp_use_composition", default_value="false"),
+        # DeclareLaunchArgument(
+        #     "publish_tf_from_calibration",
+        #     default_value="false",
+        #     description="Enables TF publishing from camera calibration file.",
+        # ),
+        # DeclareLaunchArgument(
+        #     "imu_from_descr",
+        #     default_value="false",
+        #     description="Enables IMU publishing from URDF.",
+        # ),
+        # DeclareLaunchArgument(
+        #     "override_cam_model",
+        #     default_value="false",
+        #     description="Overrides camera model from calibration file.",
+        # ),
     ]
 
     return LaunchDescription(

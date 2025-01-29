@@ -57,7 +57,6 @@ def generate_launch_description() -> LaunchDescription:
         ),
         launch_arguments={
             "pass_tf_args_as_params": "true",
-            "parent_frame": "oakd_pro_camera",
         }.items(),
     )
 
