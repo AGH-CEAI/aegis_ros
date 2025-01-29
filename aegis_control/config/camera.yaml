@@ -1,7 +1,8 @@
 /**:
   ros__parameters:
     camera:
-      i_nn_type: none
       i_ip: 169.254.1.100
-    stereo:
-      i_subpixel: true
+      i_nn_type: spatial
+      i_pipeline_type: RGBD
+    nn:
+      i_nn_config_path: depthai_ros_driver/mobilenet
