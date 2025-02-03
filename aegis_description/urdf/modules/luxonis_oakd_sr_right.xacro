@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:arg name="camera_name_sr_right" default="oak_d_sr_right"/>
+  <xacro:arg name="camera_model_sr_right" default="OAK-D-SR-POE"/>
+  <xacro:arg name="base_frame_sr_right" default="oak_d_sr_right_frame"/>
+  <xacro:arg name="rs_compat_sr_right" default="false"/>
+
+  <xacro:include filename="$(find depthai_descriptions)/urdf/include/depthai_macro.urdf.xacro"/>
+
+  <xacro:macro name="luxonis_oakd_sr_right" params="parent">
+    <xacro:depthai_camera
+      camera_name="$(arg camera_name_sr_right)"
+      parent="${parent}"
+      camera_model="$(arg camera_model_sr_right)"
+      base_frame="$(arg base_frame_sr_right)"
+      cam_pos_x="-0.1"
+      cam_pos_y="0"
+      cam_pos_z="0.14"
+      cam_roll="${pi}"
+      cam_pitch="${-5 * pi / 12}"
+      cam_yaw="0"
+      rs_compat="$(arg rs_compat_sr_right)"
+    />
+  </xacro:macro>
+</robot>
