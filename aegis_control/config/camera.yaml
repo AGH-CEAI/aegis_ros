@@ -16,3 +16,15 @@
   spatial_bb_node:
     ros__parameters:
       desqueeze: true
+/oak_d_sr_left:
+  ros__parameters:
+    camera:
+      i_ip: 169.254.1.12
+      i_mx_id: 14442C10B1C1F1CF00
+      i_pipeline_type: StereoToF
+/oak_d_sr_right:
+  ros__parameters:
+    camera:
+      i_ip: 169.254.1.11
+      i_mx_id: 14442C10A19F37D200
+      i_pipeline_type: StereoToF
