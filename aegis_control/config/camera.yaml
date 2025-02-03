@@ -1,7 +1,8 @@
-/**:
+/oak_d_pro:
   ros__parameters:
     camera:
       i_ip: 169.254.1.100
+      i_mx_id: 184430108157970F00
       i_nn_type: spatial
       i_pipeline_type: RGBD
     rgb:
@@ -12,6 +13,6 @@
       i_disable_resize: true
     stereo:
       i_subpixel: true
-/spatial_bb_node:
-  ros__parameters:
-    desqueeze: true
+  spatial_bb_node:
+    ros__parameters:
+      desqueeze: true
