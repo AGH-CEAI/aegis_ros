@@ -1,11 +1,11 @@
 Panels:
   - Class: rviz_common/Displays
-    Help Height: 71
+    Help Height: 146
     Name: Displays
     Property Tree Widget:
       Expanded: ~
       Splitter Ratio: 0.5
-    Tree Height: 225
+    Tree Height: 189
   - Class: rviz_common/Help
     Name: Help
   - Class: rviz_common/Views
@@ -138,36 +138,36 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          oak_d_pro_frame:
+          oak_d_pro_scene_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          oak_d_pro_left_camera_frame:
+          oak_d_pro_scene_left_camera_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          oak_d_pro_left_camera_optical_frame:
+          oak_d_pro_scene_left_camera_optical_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          oak_d_pro_model_origin:
+          oak_d_pro_scene_model_origin:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          oak_d_pro_rgb_camera_frame:
+          oak_d_pro_scene_rgb_camera_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          oak_d_pro_rgb_camera_optical_frame:
+          oak_d_pro_scene_rgb_camera_optical_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          oak_d_pro_right_camera_frame:
+          oak_d_pro_scene_right_camera_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          oak_d_pro_right_camera_optical_frame:
+          oak_d_pro_scene_right_camera_optical_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -336,36 +336,36 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          oak_d_pro_frame:
+          oak_d_pro_scene_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          oak_d_pro_left_camera_frame:
+          oak_d_pro_scene_left_camera_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          oak_d_pro_left_camera_optical_frame:
+          oak_d_pro_scene_left_camera_optical_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          oak_d_pro_model_origin:
+          oak_d_pro_scene_model_origin:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          oak_d_pro_rgb_camera_frame:
+          oak_d_pro_scene_rgb_camera_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          oak_d_pro_rgb_camera_optical_frame:
+          oak_d_pro_scene_rgb_camera_optical_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          oak_d_pro_right_camera_frame:
+          oak_d_pro_scene_right_camera_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          oak_d_pro_right_camera_optical_frame:
+          oak_d_pro_scene_right_camera_optical_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -464,7 +464,7 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /oak_d_pro/rgb/image_rect
+        Value: /oak_d_pro_scene/rgb/image_rect
       Value: true
       Visibility:
         Grid: true
@@ -516,7 +516,7 @@ Window Geometry:
     collapsed: false
   Displays:
     collapsed: false
-  Height: 1371
+  Height: 1403
   Help:
     collapsed: false
   Hide Left Dock: false
@@ -525,9 +525,9 @@ Window Geometry:
     collapsed: false
   MotionPlanning - Trajectory Slider:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000002b400000505fc0200000007fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000003f00fffffffb000000100044006900730070006c006100790073010000003b00000163000000c700fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006701000001a4000001e80000016900fffffffb0000000800480065006c0070000000029a0000006e0000006e00fffffffb0000000a0056006900650077007300000004510000010d000000a000fffffffb0000000c00430061006d0065007200610100000392000001ae0000002800fffffffb0000000c00430061006d006500720061010000032c000002140000000000000000000007040000050500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000100000000000002b400000521fc0200000008fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000004100fffffffb000000100044006900730070006c006100790073010000003d0000018c000000c900fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006701000001cf0000017d0000017d00fffffffb0000000800480065006c0070000000029a0000006e0000006e00fffffffb0000000a0056006900650077007300000004510000010d000000a400fffffffb0000000c00430061006d00650072006100000003a6000001b80000000000000000fb0000000c00430061006d006500720061010000032c000002140000000000000000fb0000000c00430061006d00650072006101000003520000020c0000002800ffffff000007460000052100000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
     collapsed: false
-  Width: 2494
-  X: 66
-  Y: 32
+  Width: 2560
+  X: 0
+  Y: 0
