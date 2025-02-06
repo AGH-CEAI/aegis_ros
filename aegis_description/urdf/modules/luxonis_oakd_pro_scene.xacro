@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:arg name="scene_camera_name" default="oak_d_pro"/>
+  <xacro:arg name="scene_camera_name" default="oak_d_pro_scene"/>
   <xacro:arg name="scene_camera_model" default="OAK-D-S2"/>
-  <xacro:arg name="scene_camera_base_frame" default="oak_d_pro_frame"/>
+  <xacro:arg name="scene_camera_base_frame" default="oak_d_pro_scene_frame"/>
   <xacro:arg name="scene_camera_rs_compat" default="false"/>
 
   <xacro:include filename="$(find depthai_descriptions)/urdf/include/depthai_macro.urdf.xacro"/>

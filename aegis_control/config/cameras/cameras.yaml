@@ -1,4 +1,4 @@
-/oak_d_pro:
+/oak_d_pro_scene:
   ros__parameters:
     camera:
       i_ip: 169.254.1.100
