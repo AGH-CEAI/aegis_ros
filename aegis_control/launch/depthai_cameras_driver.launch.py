@@ -28,6 +28,7 @@ def generate_launch_description():
 
 
 def launch_setup(context):
+    # TODO(issue#22): Setup the global log_level
     log_level = "info"
     if context.environment.get("DEPTHAI_DEBUG") == "1":
         log_level = "debug"
