@@ -7,6 +7,7 @@ package aegis_description {
     class cylinders_inertial << (X,cyan) xacro >> {}
 
     package modules {
+        class cell << (X,cyan) xacro >> {}
         class luxonis_oakd_pro_scene << (X,cyan) xacro >> {}
         class ur_definition << (X,cyan) xacro >> {}
         class adapter_to_sensor << (X,cyan) xacro >> {}
