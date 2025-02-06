@@ -16,7 +16,7 @@ def generate_launch_description():
                     FindPackageShare("aegis_control"),
                     "config",
                     "cameras",
-                    "cameras.yaml",
+                    "depthai_cameras.yaml",
                 ]
             ),
         ),
