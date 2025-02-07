@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * [PR-7](https://github.com/AGH-CEAI/aegis_ros/pull/7) - Initial version of the Aegis ROS 2 packages.
+* [PR-8](https://github.com/AGH-CEAI/aegis_ros/pull/8) - Added the cell and the OAK-D Pro scene camera to the robot model.
 
 ### Changed
 
@@ -22,5 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 ### Fixed
+
+* [PR-21](https://github.com/AGH-CEAI/aegis_ros/pull/21) - Switched the OAK-D Pro camera description to the official Luxonis repository.
 
 ### Security

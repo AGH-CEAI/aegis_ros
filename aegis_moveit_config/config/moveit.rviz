@@ -1,11 +1,11 @@
 Panels:
   - Class: rviz_common/Displays
-    Help Height: 71
+    Help Height: 146
     Name: Displays
     Property Tree Widget:
       Expanded: ~
       Splitter Ratio: 0.5
-    Tree Height: 303
+    Tree Height: 189
   - Class: rviz_common/Help
     Name: Help
   - Class: rviz_common/Views
@@ -138,11 +138,39 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          oakd_pro_camera:
+          oak_d_pro_scene_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          oak_d_pro_scene_left_camera_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          oak_d_pro_scene_left_camera_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          oak_d_pro_scene_model_origin:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
+          oak_d_pro_scene_rgb_camera_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          oak_d_pro_scene_rgb_camera_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          oak_d_pro_scene_right_camera_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          oak_d_pro_scene_right_camera_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
           robotiq_coupler:
             Alpha: 1
             Show Axes: false
@@ -308,11 +336,39 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          oakd_pro_camera:
+          oak_d_pro_scene_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          oak_d_pro_scene_left_camera_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          oak_d_pro_scene_left_camera_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          oak_d_pro_scene_model_origin:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
+          oak_d_pro_scene_rgb_camera_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          oak_d_pro_scene_rgb_camera_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          oak_d_pro_scene_right_camera_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          oak_d_pro_scene_right_camera_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
           robotiq_coupler:
             Alpha: 1
             Show Axes: false
@@ -364,11 +420,25 @@ Visualization Manager:
         Show Robot Visual: true
       Value: true
       Velocity_Scaling_Factor: 0.1
+    - Class: rviz_default_plugins/TF
+      Enabled: false
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+      Marker Scale: 0.20000000298023224
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: false
+      Tree:
+        {}
+      Update Interval: 0
+      Value: false
     - Accept NaN Values: false
       Alpha: 0.5
       Arrow Width: 0.10000000149011612
       Class: rviz_default_plugins/Wrench
-      Enabled: true
+      Enabled: false
       Force Arrow Scale: 1
       Force Color: 204; 51; 51
       History Length: 1
@@ -382,7 +452,27 @@ Visualization Manager:
         Value: /net_ft_sensor_broadcaster/wrench
       Torque Arrow Scale: 1
       Torque Color: 204; 204; 51
+      Value: false
+    - Class: rviz_default_plugins/Camera
+      Enabled: true
+      Far Plane Distance: 100
+      Image Rendering: background and overlay
+      Name: Camera
+      Overlay Alpha: 0.5
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /oak_d_pro_scene/rgb/image_rect
       Value: true
+      Visibility:
+        Grid: true
+        MotionPlanning: true
+        TF: true
+        Value: true
+        Wrench: true
+      Zoom Factor: 1
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -401,30 +491,32 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 3.489501953125
+      Distance: 4.76232385635376
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: -0.11557871848344803
+        Y: -0.2149348258972168
+        Z: 0.5267499089241028
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.4703981280326843
+      Pitch: 0.27039822936058044
       Target Frame: ur_base
       Value: Orbit (rviz_default_plugins)
-      Yaw: 0.4967840611934662
+      Yaw: 0.68178391456604
     Saved: ~
 Window Geometry:
+  Camera:
+    collapsed: false
   Displays:
     collapsed: false
-  Height: 1411
+  Height: 1403
   Help:
     collapsed: false
   Hide Left Dock: false
@@ -433,9 +525,9 @@ Window Geometry:
     collapsed: false
   MotionPlanning - Trajectory Slider:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000002b400000528fc0200000005fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000004100fffffffb000000100044006900730070006c006100790073010000003e000001b3000000cb00fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006701000001f70000025a0000017d00fffffffb0000000800480065006c0070000000029a0000006e0000006f00fffffffb0000000a0056006900650077007301000004570000010f000000a500ffffff000007460000052800000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000100000000000002b400000521fc0200000008fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000004100fffffffb000000100044006900730070006c006100790073010000003d0000018c000000c900fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006701000001cf0000017d0000017d00fffffffb0000000800480065006c0070000000029a0000006e0000006e00fffffffb0000000a0056006900650077007300000004510000010d000000a400fffffffb0000000c00430061006d00650072006100000003a6000001b80000000000000000fb0000000c00430061006d006500720061010000032c000002140000000000000000fb0000000c00430061006d00650072006101000003520000020c0000002800ffffff000007460000052100000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
     collapsed: false
   Width: 2560
-  X: 1440
-  Y: 516
+  X: 0
+  Y: 0

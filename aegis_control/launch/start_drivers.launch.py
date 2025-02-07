@@ -45,10 +45,23 @@ def generate_launch_description() -> LaunchDescription:
         launch_arguments=launch_args.items(),
     )
 
+    depthai_cameras_driver = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution(
+                [
+                    FindPackageShare("aegis_control"),
+                    "launch",
+                    "depthai_cameras_driver.launch.py",
+                ]
+            )
+        ),
+    )
+
     return LaunchDescription(
         [
             ur_driver,
             ft_sensor_driver,
+            depthai_cameras_driver,
         ]
         + control_nodes
     )

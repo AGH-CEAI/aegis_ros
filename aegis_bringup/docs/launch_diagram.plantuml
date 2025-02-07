@@ -26,12 +26,20 @@ package aegis_control {
     class ft_sensor_driver << (L,#FF7700) LaunchFile >> {
         Node ros2_control::controllers_spawner()
     }
+    class depthai_cameras_driver << (L,#FF7700) LaunchFile >> {
+        Node depthai_ros_driver::create_camera_node()
+        Node image_proc::create_rectify_node()
+        Node depthai_filters::create_spatial_bb_node()
+    }
 
     package config {
         package controllers {
             class net_ft_broadcaster << (Y,#ffffc9) YAML >> {}
             class update_rate << (Y,#ffffc9) YAML >> {}
             class ur_drivers << (Y,#ffffc9) YAML >> {}
+        }
+        package cameras {
+            class cameras << (Y,#ffffc9) YAML >> {}
         }
     }
 }
@@ -93,7 +101,9 @@ aegis_description.robot_description *-- aegis_description.urdf.aegis_urdf
 
 aegis_control.start_drivers *-- aegis_control.ur_driver
 aegis_control.start_drivers *-- aegis_control.ft_sensor_driver
+aegis_control.start_drivers *-- aegis_control.depthai_cameras_driver
 aegis_control.start_drivers *-- aegis_control.config.controllers
+aegis_control.depthai_cameras_driver *-- aegis_control.config.cameras
 
 aegis_moveit_config.move_group *-- aegis_moveit_config.config
 aegis_moveit_config.move_group *-- aegis_description.config.ur5e
