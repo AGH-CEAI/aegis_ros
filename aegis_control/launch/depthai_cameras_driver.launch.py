@@ -28,12 +28,14 @@ def generate_launch_description():
 
 
 def launch_setup(context):
-    # TODO(issue#22): Setup the global log_level
+    # TODO(issue#22): Setup global log level configuration
     log_level = "info"
     if context.environment.get("DEPTHAI_DEBUG") == "1":
         log_level = "debug"
 
     params_file = LaunchConfiguration("params_file")
+
+    # TODO(issue#23): Investigate the necessity of tf parameters
 
     name_pro_scene = LaunchConfiguration("name_pro_scene").perform(context)
     cam_model_pro_scene = LaunchConfiguration(
@@ -54,7 +56,7 @@ def launch_setup(context):
 
     tf_params_pro_scene = {
         "camera": {
-            "i_publish_tf_from_calibration": True,
+            "i_publish_tf_from_calibration": False,
             "i_tf_tf_prefix": name_pro_scene,
             "i_tf_camera_model": cam_model_pro_scene,
             "i_tf_parent_frame": parent_frame_pro_scene.perform(context),
