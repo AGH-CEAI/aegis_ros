@@ -74,6 +74,7 @@ def launch_setup(context):
         create_camera_node(name_pro_scene, tf_params_pro_scene, params_file, log_level),
         create_rectify_node(name_pro_scene),
         create_spatial_bb_node(name_pro_scene, params_file),
+        create_point_cloud_node(name_pro_scene),
     ]
 
 
@@ -136,6 +137,25 @@ def create_spatial_bb_node(name, params_file):
                     ("spatial_bb", name + "/spatial_bb"),
                 ],
                 parameters=[params_file],
+            ),
+        ],
+    )
+
+
+def create_point_cloud_node(name):
+    return LoadComposableNodes(
+        target_container=name + "_container",
+        composable_node_descriptions=[
+            ComposableNode(
+                package="depth_image_proc",
+                plugin="depth_image_proc::PointCloudXyzrgbNode",
+                name=name + "_point_cloud_xyzrgb_node",
+                remappings=[
+                    ("rgb/camera_info", name + "/rgb/camera_info"),
+                    ("rgb/image_rect_color", name + "/rgb/image_rect"),
+                    ("depth_registered/image_rect", name + "/stereo/image_raw"),
+                    ("/points", name + "/pointcloud"),
+                ],
             ),
         ],
     )
