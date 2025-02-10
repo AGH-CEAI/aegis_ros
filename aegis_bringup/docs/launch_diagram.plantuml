@@ -27,9 +27,10 @@ package aegis_control {
         Node ros2_control::controllers_spawner()
     }
     class depthai_cameras_driver << (L,#FF7700) LaunchFile >> {
-        Node depthai_ros_driver::create_camera_node()
-        Node image_proc::create_rectify_node()
-        Node depthai_filters::create_spatial_bb_node()
+        Node depthai_ros_driver::oak_d_pro_scene()
+        Node image_proc::oak_d_pro_scene_rectify_color_node()
+        Node depthai_filters::oak_d_pro_scene_spatial_bb_node()
+        Node depth_image_proc::oak_d_pro_scene_point_cloud_xyzrgb_node()
     }
 
     package config {
