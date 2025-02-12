@@ -9,9 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-25](https://github.com/AGH-CEAI/aegis_ros/pull/25) - Integration with `robotiq_hande_driver` package.
 * [PR-7](https://github.com/AGH-CEAI/aegis_ros/pull/7) - Initial version of the Aegis ROS 2 packages.
 
 ### Changed
+
+* [PR-25](https://github.com/AGH-CEAI/aegis_ros/pull/25) - Updated `robotiq_hande_description` package.
 
 ### Deprecated
 
