@@ -1,5 +1,6 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.actions import OpaqueFunction
+from launch.conditions import UnlessCondition
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node, ComposableNodeContainer, LoadComposableNodes
 from launch_ros.descriptions import ComposableNode
@@ -100,6 +101,7 @@ def create_camera_node(
     log_level: str,
 ) -> LoadComposableNodes:
     return ComposableNodeContainer(
+        condition=UnlessCondition(mock_hardware),
         name=name + "_container",
         namespace="",
         package="rclcpp_components",
@@ -121,6 +123,7 @@ def create_rectify_node(
     mock_hardware: LaunchConfiguration, name: LaunchConfiguration
 ) -> LoadComposableNodes:
     return LoadComposableNodes(
+        condition=UnlessCondition(mock_hardware),
         target_container=name + "_container",
         composable_node_descriptions=[
             ComposableNode(
@@ -149,6 +152,7 @@ def create_spatial_bb_node(
     params_file: LaunchConfiguration,
 ) -> LoadComposableNodes:
     return LoadComposableNodes(
+        condition=UnlessCondition(mock_hardware),
         target_container=name + "_container",
         composable_node_descriptions=[
             ComposableNode(
