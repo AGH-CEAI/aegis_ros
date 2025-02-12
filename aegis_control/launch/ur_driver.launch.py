@@ -10,7 +10,7 @@ import sys
 
 run_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(run_path)
-from include.utils import str2bool, controllers_spawner
+from include.utils import str2bool, controllers_spawner  # noqa E402
 
 
 class URConfig:
@@ -31,9 +31,8 @@ def generate_launch_description() -> LaunchDescription:
 
 
 def launch_setup(context: LaunchContext) -> list[Node]:
-
     # tf_prefix is necessary to properly parse ur_controllers_cfg YAML file
-    tf_prefix = LaunchConfiguration("tf_prefix")
+    tf_prefix = LaunchConfiguration("tf_prefix")  # noqa F841
     mock_hardware = LaunchConfiguration("mock_hardware")
     mock_hardware_bool = str2bool(mock_hardware.perform(context))
 

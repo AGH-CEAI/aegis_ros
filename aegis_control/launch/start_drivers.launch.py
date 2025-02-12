@@ -12,7 +12,6 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description() -> LaunchDescription:
-
     launch_args = {
         "tf_prefix": LaunchConfiguration("tf_prefix", default=""),
         "mock_hardware": LaunchConfiguration("mock_hardware", default="false"),
