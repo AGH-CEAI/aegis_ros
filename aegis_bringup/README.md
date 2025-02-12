@@ -17,26 +17,15 @@ This package provides the configuration and launch files required to enable all 
 ```bash
 ros2 launch aegis_bringup bringup.launch.py
 ```
+```bash
+ros2 launch aegis_bringup bringup.launch.py mock_hardware:=false launch_rviz:=true
+```
 
 Possible launch arguments:
 * `mock_hardware:={false, true}` (default: `false`) - enables the _fake_hardware_ feature of the ros2_control (the simplest "simulation").
 * `launch_rviz:={false, true}` (default: `true`) - launches visualization in RViz.
 
-3. Apply the hotfix publisher for the gripper state:
-```bash
-ros2 topic pub /joint_states sensor_msgs/msg/JointState \
-"header:
-  stamp:
-    sec: 0
-    nanosec: 0
-  frame_id: ''
-name: ["hande_right_finger_joint", "hande_left_finger_joint"]
-position: [0.025, 0.025]
-velocity: [0.0, 0.0]
-effort: [0.0, 0.0]"
-```
-
-4. Start the client program on the robot via dashboard service:
+3. Start the client program on the robot via dashboard service:
 ```bash
 ros2 service call /dashboard_client/play std_srvs/srv/Trigger {}
 ```
