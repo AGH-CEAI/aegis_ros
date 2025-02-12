@@ -1,7 +1,7 @@
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch_ros.actions import ComposableNodeContainer, LoadComposableNodes
+from launch_ros.actions import Node, ComposableNodeContainer, LoadComposableNodes
 from launch_ros.descriptions import ComposableNode
 from launch_ros.substitutions import FindPackageShare
 
@@ -77,7 +77,13 @@ def launch_setup(context):
     ]
 
 
-def create_camera_node(name, tf_params, params_file, log_level):
+def create_camera_node(
+    mock_hardware: LaunchConfiguration,
+    name: LaunchConfiguration,
+    tf_params: dict,
+    params_file: LaunchConfiguration,
+    log_level: str,
+) -> LoadComposableNodes:
     return ComposableNodeContainer(
         name=name + "_container",
         namespace="",
@@ -96,7 +102,9 @@ def create_camera_node(name, tf_params, params_file, log_level):
     )
 
 
-def create_rectify_node(name):
+def create_rectify_node(
+    mock_hardware: LaunchConfiguration, name: LaunchConfiguration
+) -> LoadComposableNodes:
     return LoadComposableNodes(
         target_container=name + "_container",
         composable_node_descriptions=[
@@ -120,7 +128,11 @@ def create_rectify_node(name):
     )
 
 
-def create_spatial_bb_node(name, params_file):
+def create_spatial_bb_node(
+    mock_hardware: LaunchConfiguration,
+    name: LaunchConfiguration,
+    params_file: LaunchConfiguration,
+) -> LoadComposableNodes:
     return LoadComposableNodes(
         target_container=name + "_container",
         composable_node_descriptions=[
