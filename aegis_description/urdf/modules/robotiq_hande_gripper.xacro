@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:arg name="tty" default="/dev/ttyXXX"/>
+
+  <xacro:include filename="$(find robotiq_hande_description)/urdf/robotiq_hande_gripper.xacro"/>
+
+  <!-- TODO: pass initial position from the YAML file analogous to the ur_definition -->
+  <xacro:macro name="hande_gripper" params="parent prefix mock_hardware">
+    <xacro:robotiq_hande_gripper name="robotiq_hande_gripper" prefix="${tf_prefix}" parent="${parent}" tty="$(arg tty)" use_fake_hardware="${mock_hardware}"/>
+  </xacro:macro>
+</robot>

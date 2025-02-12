@@ -2,8 +2,7 @@
 controller_names:
   - scaled_joint_trajectory_controller
   - joint_trajectory_controller
-  # TODO(issue#3) create & integrate the gripper controller
-  # - gripper_controller
+  - gripper_action_controller
 
 scaled_joint_trajectory_controller:
   action_ns: follow_joint_trajectory
@@ -29,10 +28,9 @@ joint_trajectory_controller:
     - wrist_2_joint
     - wrist_3_joint
 
-# TODO(issue#3) create & integrate the gripper controller
-# gripper_controller:
-#   action_ns: follow_joint_trajectory
-#   type: FollowJointTrajectory
-#   default: false
-#   joints:
-#     - hande_left_finger_joint
+gripper_action_controller:
+  action_ns: gripper_cmd
+  type: GripperCommand
+  default: true
+  joints:
+    - robotiq_hande_left_finger_joint
