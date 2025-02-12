@@ -3,7 +3,9 @@ repos:
     rev: v5.0.0
     hooks:
       - id: check-added-large-files
+      - id: check-ast
       - id: check-case-conflict
+      - id: check-executables-have-shebangs
       - id: check-json
       - id: check-merge-conflict
       - id: check-symlinks
@@ -13,6 +15,7 @@ repos:
       - id: destroyed-symlinks
       - id: detect-private-key
       - id: end-of-file-fixer
+      - id: fix-byte-order-marker
       - id: mixed-line-ending
       - id: pretty-format-json
       - id: trailing-whitespace
@@ -20,15 +23,25 @@ repos:
         exclude: joint_limits.yaml # uses custom macro for deg<->rad transformation
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.6
+    rev: v2.4.1
     hooks:
       - id: codespell
         args: [-w]
 
-  - repo: https://github.com/psf/black
-    rev: 24.3.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.5
     hooks:
-      - id: black
+      - id: ruff
+        args:
+          - --fix
+          - --exit-non-zero-on-fix
+      - id: ruff-format
+
+  - repo: https://github.com/cheshirekow/cmake-format-precommit
+    rev: v0.6.13
+    hooks:
+      - id: cmake-format
+      - id: cmake-lint
 
   - repo: https://github.com/tier4/pre-commit-hooks-ros
     rev: v0.10.0
