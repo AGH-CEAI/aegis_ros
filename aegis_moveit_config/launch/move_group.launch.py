@@ -287,27 +287,3 @@ def prepare_scene_objects_manager_node(paths: AegisPathsCfg) -> Node:
 #         ],
 #         output="screen",
 #     )
-
-# TODO(issue#6) enable RGBD it for real hardware
-# def rgbd_point_cloud_node() -> Node:
-#     return ComposableNodeContainer(
-#         name="container0",
-#         namespace="",
-#         package="rclcpp_components",
-#         executable="component_container",
-#         composable_node_descriptions=[
-#             ComposableNode(
-#                 package="depth_image_proc",
-#                 plugin="depth_image_proc::PointCloudXyzrgbNode",
-#                 name="point_cloud_xyzrgb_node",
-#                 remappings=[
-#                     ("rgb/camera_info", "/color_camera_info"),
-#                     ("rgb/image_rect_color", "/camera_image_color"),
-#                     ("depth_registered/image_rect", "/camera_image_depth"),
-#                     ("/points", "/pointcloud"),
-#                 ],
-#             ),
-#         ],
-#         output="screen",
-#         parameters=[{"use_sim_time": True}],
-#     )
