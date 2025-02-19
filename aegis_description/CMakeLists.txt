@@ -5,8 +5,11 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 
 install(
-  DIRECTORY config meshes launch urdf rviz
-  DESTINATION share/${PROJECT_NAME}
-)
+  DIRECTORY config
+            meshes
+            launch
+            urdf
+            rviz
+  DESTINATION share/${PROJECT_NAME})
 
 ament_package()

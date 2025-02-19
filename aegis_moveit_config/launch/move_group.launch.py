@@ -65,7 +65,6 @@ def generate_launch_description() -> LaunchDescription:
 
 
 def launch_setup(context: LaunchContext) -> list[Node]:
-
     mock_hardware = LaunchConfiguration("mock_hardware")
     launch_rviz = LaunchConfiguration("launch_rviz")
     # TODO(issue#5) enable real-time servo
@@ -114,7 +113,6 @@ def prepare_move_group_and_rviz_nodes(
     launch_rviz: LaunchConfiguration,
     paths: AegisPathsCfg,
 ) -> tuple[Node, Node]:
-
     robot_description_planning = {
         "robot_description_planning": paths.load_joint_limits_cfg()
     }
