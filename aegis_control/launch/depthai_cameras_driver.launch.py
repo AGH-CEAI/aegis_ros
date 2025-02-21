@@ -173,7 +173,9 @@ def create_spatial_bb_node(
     )
 
 
-def create_point_cloud_node(mock_hardware: LaunchConfiguration, name: str) -> LoadComposableNodes:
+def create_point_cloud_node(
+    mock_hardware: LaunchConfiguration, name: str
+) -> LoadComposableNodes:
     return LoadComposableNodes(
         condition=UnlessCondition(mock_hardware),
         target_container=name + "_container",
