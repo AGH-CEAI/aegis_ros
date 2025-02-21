@@ -9,10 +9,10 @@ from launch_ros.substitutions import FindPackageShare
 
 class DepthAIConfig:
     def __init__(self):
-        self.params_file = (
-            LaunchConfiguration("params_file", default="oak_d_pro_scene"),
+        self.name_pro_scene = LaunchConfiguration(
+            "name_pro_scene", default="oak_d_pro_scene"
         )
-        self.name_pro_scene = PathJoinSubstitution(
+        self.params_file = PathJoinSubstitution(
             [
                 FindPackageShare("aegis_control"),
                 "config",
@@ -50,7 +50,7 @@ class DepthAIConfig:
         self.cam_yaw_pro_scene = LaunchConfiguration("cam_yaw_pro_scene", default="0")
 
 
-def generate_launch_description():
+def generate_launch_description() -> LaunchDescription:
     return LaunchDescription([OpaqueFunction(function=launch_setup)])
 
 
@@ -67,7 +67,7 @@ def launch_setup(context) -> list[Node]:
     tf_params_pro_scene = {
         "camera": {
             "i_publish_tf_from_calibration": False,
-            "i_tf_tf_prefix": cfg.name_pro_scene,
+            "i_tf_tf_prefix": name_pro_scene_str,
             "i_tf_camera_model": cfg.cam_model_pro_scene,
             "i_tf_parent_frame": cfg.parent_frame_pro_scene.perform(context),
             "i_tf_base_frame": cfg.base_frame_pro_scene.perform(context),
@@ -95,7 +95,7 @@ def launch_setup(context) -> list[Node]:
 
 def create_camera_node(
     mock_hardware: LaunchConfiguration,
-    name: LaunchConfiguration,
+    name: str,
     tf_params: dict,
     params_file: LaunchConfiguration,
     log_level: str,
@@ -120,7 +120,7 @@ def create_camera_node(
 
 
 def create_rectify_node(
-    mock_hardware: LaunchConfiguration, name: LaunchConfiguration
+    mock_hardware: LaunchConfiguration, name: str
 ) -> LoadComposableNodes:
     return LoadComposableNodes(
         condition=UnlessCondition(mock_hardware),
@@ -148,7 +148,7 @@ def create_rectify_node(
 
 def create_spatial_bb_node(
     mock_hardware: LaunchConfiguration,
-    name: LaunchConfiguration,
+    name: str,
     params_file: LaunchConfiguration,
 ) -> LoadComposableNodes:
     return LoadComposableNodes(
