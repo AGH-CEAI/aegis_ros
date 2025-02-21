@@ -90,7 +90,7 @@ def launch_setup(context) -> list[Node]:
         ),
         create_rectify_node(cfg.mock_hardware, name_pro_scene_str),
         create_spatial_bb_node(cfg.mock_hardware, name_pro_scene_str, cfg.params_file),
-        create_point_cloud_node(cfg.mock_hardware, name_pro_scene),
+        create_point_cloud_node(cfg.mock_hardware, name_pro_scene_str),
     ]
 
 
