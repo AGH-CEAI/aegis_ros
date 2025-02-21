@@ -65,7 +65,6 @@ def generate_launch_description() -> LaunchDescription:
 
 
 def launch_setup(context: LaunchContext) -> list[Node]:
-
     mock_hardware = LaunchConfiguration("mock_hardware")
     launch_rviz = LaunchConfiguration("launch_rviz")
     # TODO(issue#5) enable real-time servo
@@ -114,7 +113,6 @@ def prepare_move_group_and_rviz_nodes(
     launch_rviz: LaunchConfiguration,
     paths: AegisPathsCfg,
 ) -> tuple[Node, Node]:
-
     robot_description_planning = {
         "robot_description_planning": paths.load_joint_limits_cfg()
     }
@@ -286,28 +284,4 @@ def prepare_scene_objects_manager_node(paths: AegisPathsCfg) -> Node:
 #             robot_description_semantic,
 #         ],
 #         output="screen",
-#     )
-
-# TODO(issue#6) enable RGBD it for real hardware
-# def rgbd_point_cloud_node() -> Node:
-#     return ComposableNodeContainer(
-#         name="container0",
-#         namespace="",
-#         package="rclcpp_components",
-#         executable="component_container",
-#         composable_node_descriptions=[
-#             ComposableNode(
-#                 package="depth_image_proc",
-#                 plugin="depth_image_proc::PointCloudXyzrgbNode",
-#                 name="point_cloud_xyzrgb_node",
-#                 remappings=[
-#                     ("rgb/camera_info", "/color_camera_info"),
-#                     ("rgb/image_rect_color", "/camera_image_color"),
-#                     ("depth_registered/image_rect", "/camera_image_depth"),
-#                     ("/points", "/pointcloud"),
-#                 ],
-#             ),
-#         ],
-#         output="screen",
-#         parameters=[{"use_sim_time": True}],
 #     )

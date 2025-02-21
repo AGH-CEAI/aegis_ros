@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * [PR-21](https://github.com/AGH-CEAI/aegis_ros/pull/21) - Initial version of the DepthAI driver with support for the OAK-D Pro camera.
+* [PR-24](https://github.com/AGH-CEAI/aegis_ros/pull/24) - Added a point cloud node.
 * [PR-9](https://github.com/AGH-CEAI/aegis_ros/pull/9) - Initial version of the `aegis_control` package.
 
 ### Changed

@@ -12,7 +12,6 @@ from launch_ros.descriptions import ParameterValue
 
 
 def generate_launch_description():
-
     tf_prefix = LaunchConfiguration("tf_prefix", default="")
     mock_hardware = LaunchConfiguration("mock_hardware", default="false")
 

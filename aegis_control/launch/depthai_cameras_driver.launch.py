@@ -90,6 +90,7 @@ def launch_setup(context) -> list[Node]:
         ),
         create_rectify_node(cfg.mock_hardware, name_pro_scene_str),
         create_spatial_bb_node(cfg.mock_hardware, name_pro_scene_str, cfg.params_file),
+        create_point_cloud_node(cfg.mock_hardware, name_pro_scene),
     ]
 
 
@@ -167,6 +168,26 @@ def create_spatial_bb_node(
                     ("spatial_bb", name + "/spatial_bb"),
                 ],
                 parameters=[params_file],
+            ),
+        ],
+    )
+
+
+def create_point_cloud_node(mock_hardware: LaunchConfiguration, name: str) -> LoadComposableNodes:
+    return LoadComposableNodes(
+        condition=UnlessCondition(mock_hardware),
+        target_container=name + "_container",
+        composable_node_descriptions=[
+            ComposableNode(
+                package="depth_image_proc",
+                plugin="depth_image_proc::PointCloudXyzrgbNode",
+                name=name + "_point_cloud_xyzrgb_node",
+                remappings=[
+                    ("rgb/camera_info", name + "/rgb/camera_info"),
+                    ("rgb/image_rect_color", name + "/rgb/image_rect"),
+                    ("depth_registered/image_rect", name + "/stereo/image_raw"),
+                    ("/points", name + "/pointcloud"),
+                ],
             ),
         ],
     )
