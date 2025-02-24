@@ -26,6 +26,9 @@ package aegis_control {
     class ft_sensor_driver << (L,#FF7700) LaunchFile >> {
         Node ros2_control::controllers_spawner()
     }
+    class gripper_driver << (L,#FF7700) LaunchFile >> {
+        Node ros2_control::controllers_spawner()
+    }
     class depthai_cameras_driver << (L,#FF7700) LaunchFile >> {
         Node depthai_ros_driver::oak_d_pro_scene()
         Node image_proc::oak_d_pro_scene_rectify_color_node()
@@ -38,6 +41,7 @@ package aegis_control {
             class net_ft_broadcaster << (Y,#ffffc9) YAML >> {}
             class update_rate << (Y,#ffffc9) YAML >> {}
             class ur_drivers << (Y,#ffffc9) YAML >> {}
+            class hande_gripper << (Y,#ffffc9) YAML >> {}
         }
         package cameras {
             class cameras << (Y,#ffffc9) YAML >> {}
@@ -102,6 +106,7 @@ aegis_description.robot_description *-- aegis_description.urdf.aegis_urdf
 
 aegis_control.start_drivers *-- aegis_control.ur_driver
 aegis_control.start_drivers *-- aegis_control.ft_sensor_driver
+aegis_control.start_drivers *-- aegis_control.gripper_driver
 aegis_control.start_drivers *-- aegis_control.depthai_cameras_driver
 aegis_control.start_drivers *-- aegis_control.config.controllers
 aegis_control.depthai_cameras_driver *-- aegis_control.config.cameras

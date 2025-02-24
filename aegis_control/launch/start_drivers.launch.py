@@ -56,11 +56,25 @@ def generate_launch_description() -> LaunchDescription:
         ),
     )
 
+    gripper_driver = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution(
+                [
+                    FindPackageShare("aegis_control"),
+                    "launch",
+                    "gripper_driver.launch.py",
+                ]
+            )
+        ),
+        launch_arguments=launch_args.items(),
+    )
+
     return LaunchDescription(
         [
             ur_driver,
             ft_sensor_driver,
             depthai_cameras_driver,
+            gripper_driver,
         ]
         + control_nodes
     )
@@ -94,11 +108,23 @@ def prepare_params_files() -> list[PathJoinSubstitution]:
             "net_ft_broadcaster.yaml",
         ]
     )
+    gripper_cfg = ParameterFile(
+        PathJoinSubstitution(
+            [
+                FindPackageShare("aegis_control"),
+                "config",
+                "controllers",
+                "hande_gripper.yaml",
+            ]
+        ),
+        allow_substs=True,
+    )
 
     return [
         ur_controllers_cfg,
         ur_update_rate_config_file,
         ft_sensor_controllers_cfg,
+        gripper_cfg,
     ]
 
 
