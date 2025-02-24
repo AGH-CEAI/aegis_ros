@@ -1,85 +1,108 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.actions import OpaqueFunction
+from launch.conditions import UnlessCondition
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch_ros.actions import ComposableNodeContainer, LoadComposableNodes
+from launch_ros.actions import Node, ComposableNodeContainer, LoadComposableNodes
 from launch_ros.descriptions import ComposableNode
 from launch_ros.substitutions import FindPackageShare
 
 
-def generate_launch_description():
-    declared_arguments = [
-        DeclareLaunchArgument("name_pro_scene", default_value="oak_d_pro_scene"),
-        DeclareLaunchArgument(
-            "params_file",
-            default_value=PathJoinSubstitution(
-                [
-                    FindPackageShare("aegis_control"),
-                    "config",
-                    "cameras",
-                    "depthai_cameras.yaml",
-                ]
-            ),
-        ),
-    ]
+class DepthAIConfig:
+    def __init__(self):
+        self.name_pro_scene = LaunchConfiguration(
+            "name_pro_scene", default="oak_d_pro_scene"
+        )
+        self.params_file = PathJoinSubstitution(
+            [
+                FindPackageShare("aegis_control"),
+                "config",
+                "cameras",
+                "depthai_cameras.yaml",
+            ]
+        )
+        # TODO(issue#26) create proper mock for the luxonis cameras
+        self.mock_hardware = LaunchConfiguration("mock_hardware", default="true")
 
-    return LaunchDescription(
-        declared_arguments + [OpaqueFunction(function=launch_setup)]
-    )
+        self.cam_model_pro_scene = LaunchConfiguration(
+            "camera_model_pro_scene", default="OAK-D-S2"
+        )
+        self.parent_frame_pro_scene = LaunchConfiguration(
+            "parent_frame_pro_scene", default="cell"
+        )
+        self.base_frame_pro_scene = LaunchConfiguration(
+            "base_frame_pro_scene", default="oak_d_pro_scene_frame"
+        )
+        self.cam_pos_x_pro_scene = LaunchConfiguration(
+            "cam_pos_x_pro_scene", default="0.014"
+        )
+        self.cam_pos_y_pro_scene = LaunchConfiguration(
+            "cam_pos_y_pro_scene", default="0.33"
+        )
+        self.cam_pos_z_pro_scene = LaunchConfiguration(
+            "cam_pos_z_pro_scene", default="1.972"
+        )
+        self.cam_roll_pro_scene = LaunchConfiguration(
+            "cam_roll_pro_scene", default="1.5708"
+        )
+        self.cam_pitch_pro_scene = LaunchConfiguration(
+            "cam_pitch_pro_scene", default="1.5708"
+        )
+        self.cam_yaw_pro_scene = LaunchConfiguration("cam_yaw_pro_scene", default="0")
 
 
-def launch_setup(context):
+def generate_launch_description() -> LaunchDescription:
+    return LaunchDescription([OpaqueFunction(function=launch_setup)])
+
+
+def launch_setup(context) -> list[Node]:
     # TODO(issue#22): Setup global log level configuration
     log_level = "info"
     if context.environment.get("DEPTHAI_DEBUG") == "1":
         log_level = "debug"
 
-    params_file = LaunchConfiguration("params_file")
+    cfg = DepthAIConfig()
+    name_pro_scene_str = cfg.name_pro_scene.perform(context)
 
     # TODO(issue#23): Investigate the necessity of tf parameters
-
-    name_pro_scene = LaunchConfiguration("name_pro_scene").perform(context)
-    cam_model_pro_scene = LaunchConfiguration(
-        "camera_model_pro_scene", default="OAK-D-S2"
-    )
-    parent_frame_pro_scene = LaunchConfiguration(
-        "parent_frame_pro_scene", default="cell"
-    )
-    base_frame_pro_scene = LaunchConfiguration(
-        "base_frame_pro_scene", default="oak_d_pro_scene_frame"
-    )
-    cam_pos_x_pro_scene = LaunchConfiguration("cam_pos_x_pro_scene", default="0.014")
-    cam_pos_y_pro_scene = LaunchConfiguration("cam_pos_y_pro_scene", default="0.33")
-    cam_pos_z_pro_scene = LaunchConfiguration("cam_pos_z_pro_scene", default="1.972")
-    cam_roll_pro_scene = LaunchConfiguration("cam_roll_pro_scene", default="1.5708")
-    cam_pitch_pro_scene = LaunchConfiguration("cam_pitch_pro_scene", default="1.5708")
-    cam_yaw_pro_scene = LaunchConfiguration("cam_yaw_pro_scene", default="0")
-
     tf_params_pro_scene = {
         "camera": {
             "i_publish_tf_from_calibration": False,
-            "i_tf_tf_prefix": name_pro_scene,
-            "i_tf_camera_model": cam_model_pro_scene,
-            "i_tf_parent_frame": parent_frame_pro_scene.perform(context),
-            "i_tf_base_frame": base_frame_pro_scene.perform(context),
-            "i_tf_cam_pos_x": cam_pos_x_pro_scene.perform(context),
-            "i_tf_cam_pos_y": cam_pos_y_pro_scene.perform(context),
-            "i_tf_cam_pos_z": cam_pos_z_pro_scene.perform(context),
-            "i_tf_cam_roll": cam_roll_pro_scene.perform(context),
-            "i_tf_cam_pitch": cam_pitch_pro_scene.perform(context),
-            "i_tf_cam_yaw": cam_yaw_pro_scene.perform(context),
+            "i_tf_tf_prefix": name_pro_scene_str,
+            "i_tf_camera_model": cfg.cam_model_pro_scene,
+            "i_tf_parent_frame": cfg.parent_frame_pro_scene.perform(context),
+            "i_tf_base_frame": cfg.base_frame_pro_scene.perform(context),
+            "i_tf_cam_pos_x": cfg.cam_pos_x_pro_scene.perform(context),
+            "i_tf_cam_pos_y": cfg.cam_pos_y_pro_scene.perform(context),
+            "i_tf_cam_pos_z": cfg.cam_pos_z_pro_scene.perform(context),
+            "i_tf_cam_roll": cfg.cam_roll_pro_scene.perform(context),
+            "i_tf_cam_pitch": cfg.cam_pitch_pro_scene.perform(context),
+            "i_tf_cam_yaw": cfg.cam_yaw_pro_scene.perform(context),
         }
     }
 
     return [
-        create_camera_node(name_pro_scene, tf_params_pro_scene, params_file, log_level),
-        create_rectify_node(name_pro_scene),
-        create_spatial_bb_node(name_pro_scene, params_file),
-        create_point_cloud_node(name_pro_scene),
+        create_camera_node(
+            cfg.mock_hardware,
+            name_pro_scene_str,
+            tf_params_pro_scene,
+            cfg.params_file,
+            log_level,
+        ),
+        create_rectify_node(cfg.mock_hardware, name_pro_scene_str),
+        create_spatial_bb_node(cfg.mock_hardware, name_pro_scene_str, cfg.params_file),
+        create_point_cloud_node(cfg.mock_hardware, name_pro_scene_str),
     ]
 
 
-def create_camera_node(name, tf_params, params_file, log_level):
+def create_camera_node(
+    mock_hardware: LaunchConfiguration,
+    name: str,
+    tf_params: dict,
+    params_file: LaunchConfiguration,
+    log_level: str,
+) -> LoadComposableNodes:
     return ComposableNodeContainer(
+        condition=UnlessCondition(mock_hardware),
         name=name + "_container",
         namespace="",
         package="rclcpp_components",
@@ -97,8 +120,11 @@ def create_camera_node(name, tf_params, params_file, log_level):
     )
 
 
-def create_rectify_node(name):
+def create_rectify_node(
+    mock_hardware: LaunchConfiguration, name: str
+) -> LoadComposableNodes:
     return LoadComposableNodes(
+        condition=UnlessCondition(mock_hardware),
         target_container=name + "_container",
         composable_node_descriptions=[
             ComposableNode(
@@ -121,8 +147,13 @@ def create_rectify_node(name):
     )
 
 
-def create_spatial_bb_node(name, params_file):
+def create_spatial_bb_node(
+    mock_hardware: LaunchConfiguration,
+    name: str,
+    params_file: LaunchConfiguration,
+) -> LoadComposableNodes:
     return LoadComposableNodes(
+        condition=UnlessCondition(mock_hardware),
         target_container=name + "_container",
         composable_node_descriptions=[
             ComposableNode(
@@ -142,8 +173,11 @@ def create_spatial_bb_node(name, params_file):
     )
 
 
-def create_point_cloud_node(name):
+def create_point_cloud_node(
+    mock_hardware: LaunchConfiguration, name: str
+) -> LoadComposableNodes:
     return LoadComposableNodes(
+        condition=UnlessCondition(mock_hardware),
         target_container=name + "_container",
         composable_node_descriptions=[
             ComposableNode(
