@@ -40,7 +40,8 @@ package aegis_control {
             class ur_drivers << (Y,#ffffc9) YAML >> {}
         }
         package cameras {
-            class cameras << (Y,#ffffc9) YAML >> {}
+            class depthai_cameras << (Y,#ffffc9) YAML >> {}
+            class yolo << (J,#707070) JSON >> {}
         }
     }
 }
@@ -116,4 +117,5 @@ hide << YAML >> members
 hide << urdf.xacro >> members
 hide << SRDF >> members
 hide << rviz >> members
+hide << JSON >> members
 @enduml
