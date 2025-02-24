@@ -54,6 +54,7 @@ def generate_launch_description() -> LaunchDescription:
                 ]
             )
         ),
+        launch_arguments=launch_args.items(),
     )
 
     return LaunchDescription(

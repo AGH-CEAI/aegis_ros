@@ -53,7 +53,7 @@ class DepthAIConfig:
         self.cam_yaw_pro_scene = LaunchConfiguration("cam_yaw_pro_scene", default="0")
 
 
-def generate_launch_description():
+def generate_launch_description() -> LaunchDescription:
     modify_config()
     return LaunchDescription([OpaqueFunction(function=launch_setup)])
 
@@ -199,7 +199,7 @@ def create_point_cloud_node(
     )
 
 
-def modify_config():
+def modify_config() -> None:
     # TODO(issue#27) Fix YOLO config not being applied correctly
     package_share_path = FindPackageShare("aegis_control").find("aegis_control")
 
@@ -215,7 +215,7 @@ def modify_config():
     yolo_cfg["model"]["model_name"] = model_path
 
     with open(yolo_cfg_path, "w") as file:
-        json.dump(yolo_cfg, file, indent=4)
+        json.dump(yolo_cfg, file, indent=2)
 
     with open(cam_cfg_path, "r") as file:
         cam_cfg = yaml.safe_load(file)
