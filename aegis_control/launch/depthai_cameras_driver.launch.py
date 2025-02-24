@@ -1,8 +1,11 @@
+import os
+import json
+import yaml
 from launch import LaunchDescription
 from launch.actions import OpaqueFunction
 from launch.conditions import UnlessCondition
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch_ros.actions import Node, ComposableNodeContainer, LoadComposableNodes
+from launch_ros.actions import ComposableNodeContainer, LoadComposableNodes, Node
 from launch_ros.descriptions import ComposableNode
 from launch_ros.substitutions import FindPackageShare
 
@@ -20,8 +23,8 @@ class DepthAIConfig:
                 "depthai_cameras.yaml",
             ]
         )
-        # TODO(issue#26) create proper mock for the luxonis cameras
-        self.mock_hardware = LaunchConfiguration("mock_hardware", default="true")
+        # TODO(issue#26) Introduce a mock for the DepthAI cameras
+        self.mock_hardware = LaunchConfiguration("mock_hardware", default="false")
 
         self.cam_model_pro_scene = LaunchConfiguration(
             "camera_model_pro_scene", default="OAK-D-S2"
@@ -51,6 +54,7 @@ class DepthAIConfig:
 
 
 def generate_launch_description() -> LaunchDescription:
+    modify_config()
     return LaunchDescription([OpaqueFunction(function=launch_setup)])
 
 
@@ -193,3 +197,32 @@ def create_point_cloud_node(
             ),
         ],
     )
+
+
+def modify_config() -> None:
+    # TODO(issue#31) Fix YOLO configuration not being applied correctly
+    package_share_path = FindPackageShare("aegis_control").find("aegis_control")
+
+    model_path = os.path.join(os.path.expanduser("~"), "ceai_models", "yolo.blob")
+    yolo_cfg_path = os.path.join(package_share_path, "config", "cameras", "yolo.json")
+    cam_cfg_path = os.path.join(
+        package_share_path, "config", "cameras", "depthai_cameras.yaml"
+    )
+
+    with open(yolo_cfg_path, "r") as file:
+        yolo_cfg = json.load(file)
+
+    yolo_cfg["model"]["model_name"] = model_path
+
+    with open(yolo_cfg_path, "w") as file:
+        json.dump(yolo_cfg, file, indent=2)
+
+    with open(cam_cfg_path, "r") as file:
+        cam_cfg = yaml.safe_load(file)
+
+    cam_cfg["/oak_d_pro_scene"]["ros__parameters"]["nn"]["i_nn_config_path"] = (
+        yolo_cfg_path
+    )
+
+    with open(cam_cfg_path, "w") as file:
+        yaml.safe_dump(cam_cfg, file)
