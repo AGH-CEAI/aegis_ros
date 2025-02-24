@@ -31,7 +31,7 @@ aegis_control/
 | [ur_driver.launch.py](./launch/ur_driver.launch.py)                           | Launches nodes from the [ur_robot_driver](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver) to control the UR5e robot.                         |
 
 ## Neural network
-For details on training and deploying YOLOv5 model, see the [tutorial](./docs/yolov5_tutorial.md)
+For details on training and deploying YOLOv5 model, see the [tutorial](./docs/yolov5_tutorial.md).
 
 ## Development notes
 

@@ -200,7 +200,7 @@ def create_point_cloud_node(
 
 
 def modify_config() -> None:
-    # TODO(issue#27) Fix YOLO config not being applied correctly
+    # TODO(issue#31) Fix YOLO configuration not being applied correctly
     package_share_path = FindPackageShare("aegis_control").find("aegis_control")
 
     model_path = os.path.join(os.path.expanduser("~"), "ceai_models", "yolo.blob")
