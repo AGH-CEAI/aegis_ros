@@ -41,7 +41,7 @@ package aegis_control {
         }
         package cameras {
             class depthai_cameras << (Y,#ffffc9) YAML >> {}
-            class yolo << (J,#707070) JSON >> {}
+            class yolo << (J,#ffffc9) JSON >> {}
         }
     }
 }
