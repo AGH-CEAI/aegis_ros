@@ -1,5 +1,6 @@
-from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch import LaunchDescription, LaunchContext, LaunchDescriptionEntity
+from launch.actions import IncludeLaunchDescription, OpaqueFunction
+
 from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
@@ -10,8 +11,20 @@ from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterFile
 from launch_ros.substitutions import FindPackageShare
 
+# Bypassing the launch system to access local import
+import os
+import sys
+
+run_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(run_path)
+from include.utils import get_node_from_include_launch_description, launch_after  # noqa E402
+
 
 def generate_launch_description() -> LaunchDescription:
+    return LaunchDescription([OpaqueFunction(function=launch_setup)])
+
+
+def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
     launch_args = {
         "tf_prefix": LaunchConfiguration("tf_prefix", default=""),
         "mock_hardware": LaunchConfiguration("mock_hardware", default="false"),
@@ -29,6 +42,10 @@ def generate_launch_description() -> LaunchDescription:
             )
         ),
         launch_arguments=launch_args.items(),
+    )
+    # ur_comm_tool is needed to delay the launch of the gripper_driver
+    ur_comm_tool_node = get_node_from_include_launch_description(
+        "ur_tool_comm", ur_driver, context
     )
 
     ft_sensor_driver = IncludeLaunchDescription(
@@ -70,15 +87,14 @@ def generate_launch_description() -> LaunchDescription:
         launch_arguments=launch_args.items(),
     )
 
-    return LaunchDescription(
-        [
-            ur_driver,
-            ft_sensor_driver,
-            depthai_cameras_driver,
-            gripper_driver,
-        ]
-        + control_nodes
-    )
+    return [
+        launch_after(
+            launch=gripper_driver,
+            after=ur_comm_tool_node,
+        ),
+        ft_sensor_driver,
+        depthai_cameras_driver,
+    ] + control_nodes
 
 
 def prepare_params_files() -> list[PathJoinSubstitution]:

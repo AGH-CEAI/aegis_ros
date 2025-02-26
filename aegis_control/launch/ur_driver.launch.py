@@ -27,7 +27,12 @@ class URConfig:
 
 
 def generate_launch_description() -> LaunchDescription:
-    return LaunchDescription([OpaqueFunction(function=launch_setup)])
+    # communication node must be accessed higher, to coordinate launch of gripper driver
+    tool_communication_node = prepare_tool_communication_node(URConfig())
+
+    return LaunchDescription(
+        [tool_communication_node, OpaqueFunction(function=launch_setup)]
+    )
 
 
 def launch_setup(context: LaunchContext) -> list[Node]:
@@ -39,7 +44,6 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     cfg = URConfig()
 
     dashboard_client_node = prepare_dashboard_client_node(mock_hardware, cfg)
-    tool_communication_node = prepare_tool_communication_node(cfg)
     urscript_interface = prepare_urscript_interface(cfg)
     controller_stopper_node = prepare_controller_stopper_node(mock_hardware)
 
@@ -72,26 +76,11 @@ def launch_setup(context: LaunchContext) -> list[Node]:
 
     return [
         dashboard_client_node,
-        tool_communication_node,
         controller_stopper_node,
         urscript_interface,
         controllers_spawner(controllers_active),
         controllers_spawner(controllers_inactive, active=False),
     ]
-
-
-def prepare_dashboard_client_node(
-    mock_hardware: LaunchConfiguration, cfg: URConfig
-) -> Node:
-    return Node(
-        package="ur_robot_driver",
-        condition=UnlessCondition(mock_hardware),
-        executable="dashboard_client",
-        name="dashboard_client",
-        output="screen",
-        emulate_tty=True,
-        parameters=[{"robot_ip": cfg.robot_ip}],
-    )
 
 
 def prepare_tool_communication_node(cfg: URConfig) -> Node:
@@ -107,6 +96,20 @@ def prepare_tool_communication_node(cfg: URConfig) -> Node:
                 "device_name": cfg.tool_device_name,
             }
         ],
+    )
+
+
+def prepare_dashboard_client_node(
+    mock_hardware: LaunchConfiguration, cfg: URConfig
+) -> Node:
+    return Node(
+        package="ur_robot_driver",
+        condition=UnlessCondition(mock_hardware),
+        executable="dashboard_client",
+        name="dashboard_client",
+        output="screen",
+        emulate_tty=True,
+        parameters=[{"robot_ip": cfg.robot_ip}],
     )
 
 
