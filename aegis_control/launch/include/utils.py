@@ -16,7 +16,7 @@ def controllers_spawner(
     condition: Condition = None,
 ) -> Node:
     """
-    Spawn a ros2_control controller using spawner node from the `controller_manager` package.
+    Spawn ros2_control controllers using spawner node from the `controller_manager` package.
 
     Args:
         controllers (List[str]): A list of controller names to be spawned.
