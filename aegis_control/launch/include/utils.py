@@ -1,6 +1,11 @@
 from typing import Optional
 from launch import Condition, LaunchContext, LaunchDescriptionEntity
-from launch.actions import IncludeLaunchDescription, LogInfo, RegisterEventHandler
+from launch.actions import (
+    ExecuteProcess,
+    IncludeLaunchDescription,
+    LogInfo,
+    RegisterEventHandler,
+)
 from launch.event_handlers import OnProcessStart
 from launch_ros.actions import Node
 
@@ -68,7 +73,7 @@ def get_node_from_include_launch_description(
 
 def launch_after(
     launch: LaunchDescriptionEntity,
-    after: LaunchDescriptionEntity,
+    after: ExecuteProcess,
 ) -> LaunchDescriptionEntity:
     """
     Registers an event handler to start a launch action after another one has started.
