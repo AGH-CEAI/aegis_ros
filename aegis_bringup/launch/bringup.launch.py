@@ -18,7 +18,6 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def launch_setup(context: LaunchContext) -> list[IncludeLaunchDescription]:
-
     namespace = LaunchConfiguration("namespace", default="")
     launch_args = {
         "tf_prefix": LaunchConfiguration("tf_prefix", default=""),
@@ -78,7 +77,6 @@ def set_namespace(namespace: LaunchConfiguration, description: list) -> list:
 
 
 def generate_launch_description() -> LaunchDescription:
-
     declared_arguments = []
 
     # TODO(issue#13) Debug the namespace and tf_prefix launch args

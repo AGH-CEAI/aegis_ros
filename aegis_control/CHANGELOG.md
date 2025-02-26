@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * [PR-25](https://github.com/AGH-CEAI/aegis_ros/pull/25) - Integration with `robotiq_hande_driver` package.
+* [PR-30](https://github.com/AGH-CEAI/aegis_ros/pull/30) - Implemented YOLOv5 model for spatial detection.
+* [PR-24](https://github.com/AGH-CEAI/aegis_ros/pull/24) - Implemented point cloud support.
 * [PR-21](https://github.com/AGH-CEAI/aegis_ros/pull/21) - Initial version of the DepthAI driver with support for the OAK-D Pro camera.
 * [PR-9](https://github.com/AGH-CEAI/aegis_ros/pull/9) - Initial version of the `aegis_control` package.
 

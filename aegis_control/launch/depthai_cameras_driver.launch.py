@@ -1,27 +1,25 @@
-from launch import LaunchDescription
+import json
+import yaml
+import tempfile
+from pathlib import Path
+from launch import LaunchDescription, LaunchContext
 from launch.actions import OpaqueFunction
 from launch.conditions import UnlessCondition
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch_ros.actions import Node, ComposableNodeContainer, LoadComposableNodes
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import ComposableNodeContainer, LoadComposableNodes, Node
 from launch_ros.descriptions import ComposableNode
-from launch_ros.substitutions import FindPackageShare
+from ament_index_python.packages import get_package_share_directory
 
 
 class DepthAIConfig:
     def __init__(self):
-        self.params_file = (
-            LaunchConfiguration("params_file", default="oak_d_pro_scene"),
+        self._modify_config()
+
+        self.name_pro_scene = LaunchConfiguration(
+            "name_pro_scene", default="oak_d_pro_scene"
         )
-        self.name_pro_scene = PathJoinSubstitution(
-            [
-                FindPackageShare("aegis_control"),
-                "config",
-                "cameras",
-                "depthai_cameras.yaml",
-            ]
-        )
-        # TODO(issue#26) create proper mock for the luxonis cameras
-        self.mock_hardware = LaunchConfiguration("mock_hardware", default="true")
+        # TODO(issue#26) Introduce a mock for the DepthAI cameras
+        self.mock_hardware = LaunchConfiguration("mock_hardware", default="false")
 
         self.cam_model_pro_scene = LaunchConfiguration(
             "camera_model_pro_scene", default="OAK-D-S2"
@@ -49,25 +47,59 @@ class DepthAIConfig:
         )
         self.cam_yaw_pro_scene = LaunchConfiguration("cam_yaw_pro_scene", default="0")
 
+    def _modify_config(self) -> None:
+        # TODO(issue#31) Fix YOLO configuration not being applied correctly
+        package_share_path = Path(get_package_share_directory("aegis_control"))
+        model_path = Path.home() / "ceai_models" / "yolo.blob"
+        yolo_src_cfg_path = package_share_path / "config" / "cameras" / "yolo.json"
+        cam_src_params_path = (
+            package_share_path / "config" / "cameras" / "depthai_cameras.yaml"
+        )
 
-def generate_launch_description():
+        self.yolo_cfg_path = Path(
+            tempfile.NamedTemporaryFile(suffix=".json", delete=False).name
+        )
+        self.cam_params_path = Path(
+            tempfile.NamedTemporaryFile(suffix=".yaml", delete=False).name
+        )
+
+        with open(yolo_src_cfg_path, "r") as file:
+            yolo_cfg = json.load(file)
+
+        yolo_cfg["model"]["model_name"] = str(model_path)
+
+        with open(self.yolo_cfg_path, "w") as file:
+            json.dump(yolo_cfg, file, indent=2)
+
+        with open(cam_src_params_path, "r") as file:
+            cam_params = yaml.safe_load(file)
+
+        cam_params["/oak_d_pro_scene"]["ros__parameters"]["nn"]["i_nn_config_path"] = (
+            str(self.yolo_cfg_path)
+        )
+
+        with open(self.cam_params_path, "w") as file:
+            yaml.safe_dump(cam_params, file)
+
+
+def generate_launch_description() -> LaunchDescription:
     return LaunchDescription([OpaqueFunction(function=launch_setup)])
 
 
-def launch_setup(context) -> list[Node]:
+def launch_setup(context: LaunchContext) -> list[Node]:
     # TODO(issue#22): Setup global log level configuration
     log_level = "info"
     if context.environment.get("DEPTHAI_DEBUG") == "1":
         log_level = "debug"
 
     cfg = DepthAIConfig()
-    name_pro_scene_str = cfg.name_pro_scene.perform(context)
+    name_pro_scene = cfg.name_pro_scene.perform(context)
 
     # TODO(issue#23): Investigate the necessity of tf parameters
     tf_params_pro_scene = {
         "camera": {
             "i_publish_tf_from_calibration": False,
-            "i_tf_tf_prefix": cfg.name_pro_scene,
+            "i_tf_tf_prefix": name_pro_scene,
             "i_tf_camera_model": cfg.cam_model_pro_scene,
             "i_tf_parent_frame": cfg.parent_frame_pro_scene.perform(context),
             "i_tf_base_frame": cfg.base_frame_pro_scene.perform(context),
@@ -83,21 +115,22 @@ def launch_setup(context) -> list[Node]:
     return [
         create_camera_node(
             cfg.mock_hardware,
-            name_pro_scene_str,
+            name_pro_scene,
             tf_params_pro_scene,
-            cfg.params_file,
+            cfg.cam_params_path,
             log_level,
         ),
-        create_rectify_node(cfg.mock_hardware, name_pro_scene_str),
-        create_spatial_bb_node(cfg.mock_hardware, name_pro_scene_str, cfg.params_file),
+        create_rectify_node(cfg.mock_hardware, name_pro_scene),
+        create_spatial_bb_node(cfg.mock_hardware, name_pro_scene, cfg.cam_params_path),
+        create_point_cloud_node(cfg.mock_hardware, name_pro_scene),
     ]
 
 
 def create_camera_node(
     mock_hardware: LaunchConfiguration,
-    name: LaunchConfiguration,
+    name: str,
     tf_params: dict,
-    params_file: LaunchConfiguration,
+    cam_params_path: LaunchConfiguration,
     log_level: str,
 ) -> LoadComposableNodes:
     return ComposableNodeContainer(
@@ -111,7 +144,7 @@ def create_camera_node(
                 package="depthai_ros_driver",
                 plugin="depthai_ros_driver::Camera",
                 name=name,
-                parameters=[params_file, tf_params],
+                parameters=[cam_params_path, tf_params],
             )
         ],
         arguments=["--ros-args", "--log-level", log_level],
@@ -120,7 +153,7 @@ def create_camera_node(
 
 
 def create_rectify_node(
-    mock_hardware: LaunchConfiguration, name: LaunchConfiguration
+    mock_hardware: LaunchConfiguration, name: str
 ) -> LoadComposableNodes:
     return LoadComposableNodes(
         condition=UnlessCondition(mock_hardware),
@@ -148,8 +181,8 @@ def create_rectify_node(
 
 def create_spatial_bb_node(
     mock_hardware: LaunchConfiguration,
-    name: LaunchConfiguration,
-    params_file: LaunchConfiguration,
+    name: str,
+    cam_params_path: LaunchConfiguration,
 ) -> LoadComposableNodes:
     return LoadComposableNodes(
         condition=UnlessCondition(mock_hardware),
@@ -166,7 +199,29 @@ def create_spatial_bb_node(
                     ("overlay", name + "/overlay"),
                     ("spatial_bb", name + "/spatial_bb"),
                 ],
-                parameters=[params_file],
+                parameters=[cam_params_path],
+            ),
+        ],
+    )
+
+
+def create_point_cloud_node(
+    mock_hardware: LaunchConfiguration, name: str
+) -> LoadComposableNodes:
+    return LoadComposableNodes(
+        condition=UnlessCondition(mock_hardware),
+        target_container=name + "_container",
+        composable_node_descriptions=[
+            ComposableNode(
+                package="depth_image_proc",
+                plugin="depth_image_proc::PointCloudXyzrgbNode",
+                name=name + "_point_cloud_xyzrgb_node",
+                remappings=[
+                    ("rgb/camera_info", name + "/rgb/camera_info"),
+                    ("rgb/image_rect_color", name + "/rgb/image_rect"),
+                    ("depth_registered/image_rect", name + "/stereo/image_raw"),
+                    ("/points", name + "/pointcloud"),
+                ],
             ),
         ],
     )

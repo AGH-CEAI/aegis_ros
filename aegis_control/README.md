@@ -30,6 +30,9 @@ aegis_control/
 | [start_drivers.launch.py](./launch/start_drivers.launch.py)                   | The main launch file to run the entire Aegis' `ros2_control` stack.                                                                                           |
 | [ur_driver.launch.py](./launch/ur_driver.launch.py)                           | Launches nodes from the [ur_robot_driver](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver) to control the UR5e robot.                         |
 
+## Neural network
+For details on training and deploying YOLOv5 model, see the [tutorial](./docs/yolov5_tutorial.md).
+
 ## Development notes
 
 - ROS 2 Humble ships with the older structure of the [Universal_Robots_ROS2_Driver](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver/tree/humble) Due to the complexity of our project (where we need to merge several other controllers into a single `control_manager` ode configuration), the `ur_driver.launch.py` file is based on version `2.5.1` of UR's `ur_robot_driver` [launch file](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver/blob/humble/ur_robot_driver/launch/ur_control.launch.py). The main difference is the removal of all unused parameters, which are set by default by the driver itself.
