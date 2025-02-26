@@ -13,18 +13,19 @@
 
   <!-- TODO: pass initial position from the YAML file analogous to the ur_definition -->
   <xacro:macro name="hande_gripper" params="parent prefix mock_hardware">
-    <xacro:robotiq_hande_gripper 
-      name="robotiq_hande_gripper" 
-      prefix="${prefix}" 
-      parent="${parent}" 
-      grip_pos_min="$(arg grip_pos_min)" 
-      grip_pos_max="$(arg grip_pos_max)" 
-      tty="$(arg tty)" 
-      baudrate="$(arg baudrate)" 
-      parity="$(arg parity)" 
-      data_bits="$(arg data_bits)" 
-      stop_bit="$(arg stop_bit)" 
-      slave_id="$(arg slave_id)" 
-      use_fake_hardware="${mock_hardware}"/>
+    <xacro:robotiq_hande_gripper
+      name="robotiq_hande_gripper"
+      prefix="${prefix}"
+      parent="${parent}"
+      grip_pos_min="$(arg grip_pos_min)"
+      grip_pos_max="$(arg grip_pos_max)"
+      tty="$(arg tty)"
+      baudrate="$(arg baudrate)"
+      parity="$(arg parity)"
+      data_bits="$(arg data_bits)"
+      stop_bit="$(arg stop_bit)"
+      slave_id="$(arg slave_id)"
+      use_fake_hardware="${mock_hardware}"
+    />
   </xacro:macro>
 </robot>
