@@ -453,6 +453,29 @@ Visualization Manager:
       Torque Arrow Scale: 1
       Torque Color: 204; 204; 51
       Value: false
+    - Class: rviz_default_plugins/Camera
+      Enabled: true
+      Far Plane Distance: 100
+      Image Rendering: background and overlay
+      Name: Camera
+      Overlay Alpha: 0.5
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /oak_d_pro_scene/rgb/image_rect
+      Value: true
+      Visibility:
+        Grid: true
+        Image: true
+        MarkerArray: true
+        MotionPlanning: true
+        PointCloud2: true
+        TF: true
+        Value: true
+        Wrench: true
+      Zoom Factor: 1
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -487,27 +510,32 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: false
-    - Class: rviz_default_plugins/Camera
-      Enabled: true
-      Far Plane Distance: 100
-      Image Rendering: background and overlay
-      Name: Camera
-      Overlay Alpha: 0.5
+    - Class: rviz_default_plugins/Image
+      Enabled: false
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: Image
+      Normalize Range: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /oak_d_pro_scene/rgb/image_rect
-      Value: true
-      Visibility:
-        Grid: true
-        MotionPlanning: true
-        PointCloud2: true
-        TF: true
-        Value: true
-        Wrench: true
-      Zoom Factor: 1
+        Value: /oak_d_pro_scene/overlay
+      Value: false
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: false
+      Name: MarkerArray
+      Namespaces:
+        {}
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /occupied_cells_vis_array
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -526,25 +554,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 4.76232385635376
+      Distance: 4.190845012664795
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.11557871848344803
-        Y: -0.2149348258972168
-        Z: 0.5267499089241028
+        X: -0.11182383447885513
+        Y: -0.09440480172634125
+        Z: 0.23323896527290344
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.27039822936058044
+      Pitch: 0.265398234128952
       Target Frame: ur_base
       Value: Orbit (rviz_default_plugins)
-      Yaw: 0.68178391456604
+      Yaw: 0.6917839050292969
     Saved: ~
 Window Geometry:
   Camera:
@@ -556,11 +584,13 @@ Window Geometry:
     collapsed: false
   Hide Left Dock: false
   Hide Right Dock: false
+  Image:
+    collapsed: false
   MotionPlanning:
     collapsed: false
   MotionPlanning - Trajectory Slider:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000002b400000505fc0200000008fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000003f00fffffffb000000100044006900730070006c006100790073010000003b00000180000000c700fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006701000001c1000002330000016900fffffffb0000000800480065006c0070000000029a0000006e0000006e00fffffffb0000000a0056006900650077007300000004510000010d000000a000fffffffb0000000c00430061006d00650072006101000003fa000001460000002800fffffffb0000000c00430061006d006500720061010000032c000002140000000000000000fb0000000c00430061006d00650072006101000003520000020c0000000000000000000007040000050500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000100000000000002b400000505fc0200000009fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000003f00fffffffb000000100044006900730070006c006100790073010000003b00000180000000c700fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006701000001c1000002330000016900fffffffb0000000800480065006c0070000000029a0000006e0000006e00fffffffb0000000a0056006900650077007300000004510000010d000000a000fffffffb0000000c00430061006d00650072006101000003fa000001460000002800fffffffb0000000c00430061006d006500720061010000032c000002140000000000000000fb0000000c00430061006d00650072006101000003520000020c0000000000000000fb0000000a0049006d0061006700650000000468000000d80000002800ffffff000007040000050500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
     collapsed: false
   Width: 2494
