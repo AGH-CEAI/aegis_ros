@@ -88,6 +88,7 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
     )
 
     return [
+        ur_driver,
         launch_after(
             launch=gripper_driver,
             after=ur_comm_tool_node,
