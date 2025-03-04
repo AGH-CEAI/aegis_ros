@@ -92,6 +92,7 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
         launch_after(
             launch=gripper_driver,
             after=ur_comm_tool_node,
+            delay_s=0.2,  # empirically tested
         ),
         ft_sensor_driver,
         depthai_cameras_driver,

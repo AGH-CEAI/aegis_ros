@@ -5,6 +5,7 @@ from launch.actions import (
     IncludeLaunchDescription,
     LogInfo,
     RegisterEventHandler,
+    TimerAction,
 )
 from launch.event_handlers import OnProcessStart
 from launch_ros.actions import Node
@@ -74,6 +75,7 @@ def get_node_from_include_launch_description(
 def launch_after(
     launch: LaunchDescriptionEntity,
     after: ExecuteProcess,
+    delay_s: float = 0.0,
 ) -> LaunchDescriptionEntity:
     """
     Registers an event handler to start a launch action after another one has started.
@@ -93,7 +95,10 @@ def launch_after(
                 LogInfo(
                     msg=f"{after.describe()} started, spawning {launch.describe()}"
                 ),
-                launch,
+                TimerAction(
+                    period=delay_s,
+                    actions=[launch],
+                ),
             ],
         )
     )
