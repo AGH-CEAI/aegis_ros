@@ -158,7 +158,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     scene_objects_manager_node = prepare_scene_objects_manager_node(paths)
     octomap_node = prepare_octomap_node(node_cfg)
 
-    nodes_to_start = [
+    return [
         move_group_node,
         rviz_node,
         tf_odom_node,
@@ -167,8 +167,6 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         # TODO(issue#5) enable real-time servo
         # servo_node(),
     ]
-
-    return nodes_to_start
 
 
 def get_robot_description_semantic(paths: AegisPathsCfg) -> dict:
