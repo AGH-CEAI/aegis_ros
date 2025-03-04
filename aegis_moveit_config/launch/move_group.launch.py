@@ -59,6 +59,9 @@ class AegisPathsCfg:
     def load_joint_limits_cfg(self) -> dict:
         return load_yaml(self.description_cfg_pkg_name, "config/ur5e/joint_limits.yaml")
 
+    def load_octomap_updater_cfg(self) -> dict:
+        return load_yaml(self.moveit_cfg_pkg_name, "config/octomap_updater.yaml")
+
 
 def generate_launch_description() -> LaunchDescription:
     return LaunchDescription([OpaqueFunction(function=launch_setup)])
@@ -70,49 +73,10 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     # TODO(issue#5) enable real-time servo
     # launch_servo = LaunchConfiguration("launch_servo")
 
-    aegis_paths = AegisPathsCfg()
+    paths = AegisPathsCfg()
 
-    move_group_node, rviz_node = prepare_move_group_and_rviz_nodes(
-        mock_hardware=mock_hardware,
-        mock_hardware_bool=str2bool(context.perform_substitution(mock_hardware)),
-        launch_rviz=launch_rviz,
-        paths=aegis_paths,
-    )
+    mock_hardware_bool = str2bool(context.perform_substitution(mock_hardware))
 
-    tf_odom_node = prepare_static_tf_node("world", "odom")
-    scene_objects_manager_node = prepare_scene_objects_manager_node(aegis_paths)
-
-    nodes_to_start = [
-        move_group_node,
-        rviz_node,
-        tf_odom_node,
-        scene_objects_manager_node,
-        # TODO(issue#5) enable real-time servo
-        # servo_node(),
-        # TODO(issue#6) enable RGBD it for real hardware
-        # rgbd_point_cloud_node(),
-    ]
-
-    return nodes_to_start
-
-
-def get_robot_description_semantic(paths: AegisPathsCfg) -> dict:
-    robot_description_semantic_content = Command(
-        [paths.xacro_path, " ", paths.srdf_path]
-    )
-    return {
-        "robot_description_semantic": ParameterValue(
-            robot_description_semantic_content, value_type=str
-        )
-    }
-
-
-def prepare_move_group_and_rviz_nodes(
-    mock_hardware: LaunchConfiguration,
-    mock_hardware_bool: bool,
-    launch_rviz: LaunchConfiguration,
-    paths: AegisPathsCfg,
-) -> tuple[Node, Node]:
     robot_description_planning = {
         "robot_description_planning": paths.load_joint_limits_cfg()
     }
@@ -125,13 +89,11 @@ def prepare_move_group_and_rviz_nodes(
             "start_state_max_bounds_error": 0.1,
         }
     }
-
     ompl_planning_yaml = paths.load_ompl_planning_cfg()
     ompl_planning_pipeline_config["move_group"].update(ompl_planning_yaml)
 
     # Trajectory Execution Configuration
     controllers_yaml = paths.load_controllers_cfg()
-
     # TODO(issue#11) Extract configuration for real/fake controller to an external YAML
     if mock_hardware_bool:
         # the scaled_joint_trajectory_controller does not work on fake hardware
@@ -157,6 +119,14 @@ def prepare_move_group_and_rviz_nodes(
         "publish_transforms_updates": True,
     }
 
+    octomap_parameters = {
+        "frame_id": "world",
+        "resolution": 0.01,
+        "max_range": 2.0,
+    }
+
+    octomap_updater_parameters = paths.load_octomap_updater_cfg()
+
     # TODO(issue#1) integrate the warehouse with the Aegis setup
     # warehouse_ros_config = {
     #     "warehouse_plugin": "warehouse_ros_sqlite::DatabaseConnection",
@@ -176,11 +146,40 @@ def prepare_move_group_and_rviz_nodes(
         "robot_description_planning": robot_description_planning,
         "robot_description_semantic": get_robot_description_semantic(paths),
         "trajectory_execution": trajectory_execution,
+        "octomap_parameters": octomap_parameters,
+        "octomap_updater_parameters": octomap_updater_parameters,
         "mock_hardware": mock_hardware,
         "warehouse_ros_config": warehouse_ros_config,
     }
 
-    return prepare_move_group_node(node_cfg), prepare_rviz_node(node_cfg, paths)
+    move_group_node = prepare_move_group_node(node_cfg)
+    rviz_node = prepare_rviz_node(node_cfg, paths)
+    tf_odom_node = prepare_static_tf_node("world", "odom")
+    scene_objects_manager_node = prepare_scene_objects_manager_node(paths)
+    octomap_node = prepare_octomap_node(node_cfg)
+
+    nodes_to_start = [
+        move_group_node,
+        rviz_node,
+        tf_odom_node,
+        scene_objects_manager_node,
+        octomap_node,
+        # TODO(issue#5) enable real-time servo
+        # servo_node(),
+    ]
+
+    return nodes_to_start
+
+
+def get_robot_description_semantic(paths: AegisPathsCfg) -> dict:
+    robot_description_semantic_content = Command(
+        [paths.xacro_path, " ", paths.srdf_path]
+    )
+    return {
+        "robot_description_semantic": ParameterValue(
+            robot_description_semantic_content, value_type=str
+        )
+    }
 
 
 def prepare_move_group_node(cfg: dict) -> Node:
@@ -196,6 +195,8 @@ def prepare_move_group_node(cfg: dict) -> Node:
             cfg["trajectory_execution"],
             cfg["moveit_controllers"],
             cfg["planning_scene_monitor_parameters"],
+            cfg["octomap_parameters"],
+            cfg["octomap_updater_parameters"],
             {"use_sim_time": cfg["mock_hardware"]},
             {"publish_robot_description": True},
             {"publish_robot_description_semantic": True},
@@ -258,6 +259,16 @@ def prepare_scene_objects_manager_node(paths: AegisPathsCfg) -> Node:
         name="scene_objects_manager",
         output="screen",
         arguments=["--cfg", paths.scene_objects_cfg, "--frame", "ur_base"],
+    )
+
+
+def prepare_octomap_node(cfg: dict) -> Node:
+    return Node(
+        package="octomap_server",
+        executable="octomap_server_node",
+        output="screen",
+        parameters=[cfg["octomap_parameters"]],
+        remappings=[("/cloud_in", "/oak_d_pro_scene/pointcloud")],
     )
 
 
