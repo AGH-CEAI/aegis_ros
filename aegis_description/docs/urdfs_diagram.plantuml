@@ -13,6 +13,7 @@ package aegis_description {
         class adapter_to_sensor << (X,cyan) xacro >> {}
         class ft_schunk_axia80 << (X,cyan) xacro >> {}
         class adapter_from_sensor << (X,cyan) xacro >> {}
+        class robotiq_hande_gripper << (X,cyan) xacro >> {}
     }
 
     package config {
@@ -30,7 +31,7 @@ package aegis_moveit_config {
     class aegis << (S,#c298e9) SRDF >> {}
 }
 
-package robotiq_hande_gripper {
+package robotiq_hande_description {
     class robotiq_hande_gripper << (X,cyan) xacro >> {}
 }
 
@@ -49,16 +50,17 @@ package ur_robot_driver {
 }
 
 
-aegis_description.aegis_urdf *-right- aegis_description.aegis
-aegis_description.aegis *-- aegis_description.modules
-aegis_description.aegis *-- robotiq_hande_gripper.robotiq_hande_gripper
+aegis_description.aegis -right-* aegis_description.aegis_urdf
+aegis_description.modules --* aegis_description.aegis
 
-aegis_description.modules.adapter_from_sensor *-- aegis_description.cylinders_inertial
-aegis_description.modules.adapter_to_sensor *-- aegis_description.cylinders_inertial
-aegis_description.modules.ft_schunk_axia80 *-down- net_ft_description.net_ft_sensor
-aegis_description.modules.ur_definition *-down- ur_description.ur_macro
-aegis_description.modules.ur_definition *-right- ur_robot_driver
-aegis_description.modules.ur_definition *-up- aegis_description.config
+ur_description.ur_macro -down-* aegis_description.modules.ur_definition
+ur_robot_driver -up-* aegis_description.modules.ur_definition
+aegis_description.config -up-* aegis_description.modules.ur_definition
+aegis_description.cylinders_inertial --* aegis_description.modules.adapter_to_sensor
+net_ft_description.net_ft_sensor -up-* aegis_description.modules.ft_schunk_axia80
+aegis_description.cylinders_inertial --* aegis_description.modules.adapter_from_sensor
+robotiq_hande_description.robotiq_hande_gripper -up-* aegis_description.modules.robotiq_hande_gripper
+
 
 hide members
 show << urdf.xacro >> fields

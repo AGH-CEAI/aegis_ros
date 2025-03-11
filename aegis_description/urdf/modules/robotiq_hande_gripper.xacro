@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:arg name="grip_pos_min" default="0"/>
+  <xacro:arg name="grip_pos_max" default="0.025"/>
+  <xacro:arg name="tty" default="/tmp/ttyUR"/>
+  <xacro:arg name="baudrate" default="115200"/>
+  <xacro:arg name="parity" default="N"/>
+  <xacro:arg name="data_bits" default="8"/>
+  <xacro:arg name="stop_bit" default="1"/>
+  <xacro:arg name="slave_id" default="9"/>
+
+  <xacro:include filename="$(find robotiq_hande_description)/urdf/robotiq_hande_gripper.xacro"/>
+
+  <!-- TODO(issue#34): pass initial position from the YAML file analogous to the ur_definition -->
+  <xacro:macro name="hande_gripper" params="parent prefix mock_hardware">
+    <xacro:robotiq_hande_gripper
+      name="robotiq_hande_gripper"
+      prefix="${prefix}"
+      parent="${parent}"
+      grip_pos_min="$(arg grip_pos_min)"
+      grip_pos_max="$(arg grip_pos_max)"
+      tty="$(arg tty)"
+      baudrate="$(arg baudrate)"
+      parity="$(arg parity)"
+      data_bits="$(arg data_bits)"
+      stop_bit="$(arg stop_bit)"
+      slave_id="$(arg slave_id)"
+      use_fake_hardware="${mock_hardware}"
+    />
+  </xacro:macro>
+</robot>

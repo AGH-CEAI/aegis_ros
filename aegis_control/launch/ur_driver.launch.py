@@ -38,8 +38,8 @@ def launch_setup(context: LaunchContext) -> list[Node]:
 
     cfg = URConfig()
 
+    tool_communication_node = prepare_tool_communication_node(URConfig())
     dashboard_client_node = prepare_dashboard_client_node(mock_hardware, cfg)
-    tool_communication_node = prepare_tool_communication_node(cfg)
     urscript_interface = prepare_urscript_interface(cfg)
     controller_stopper_node = prepare_controller_stopper_node(mock_hardware)
 
@@ -71,27 +71,13 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     controllers_inactive.remove(init_joint_controller)
 
     return [
-        dashboard_client_node,
         tool_communication_node,
-        controller_stopper_node,
+        dashboard_client_node,
         urscript_interface,
+        controller_stopper_node,
         controllers_spawner(controllers_active),
         controllers_spawner(controllers_inactive, active=False),
     ]
-
-
-def prepare_dashboard_client_node(
-    mock_hardware: LaunchConfiguration, cfg: URConfig
-) -> Node:
-    return Node(
-        package="ur_robot_driver",
-        condition=UnlessCondition(mock_hardware),
-        executable="dashboard_client",
-        name="dashboard_client",
-        output="screen",
-        emulate_tty=True,
-        parameters=[{"robot_ip": cfg.robot_ip}],
-    )
 
 
 def prepare_tool_communication_node(cfg: URConfig) -> Node:
@@ -107,6 +93,20 @@ def prepare_tool_communication_node(cfg: URConfig) -> Node:
                 "device_name": cfg.tool_device_name,
             }
         ],
+    )
+
+
+def prepare_dashboard_client_node(
+    mock_hardware: LaunchConfiguration, cfg: URConfig
+) -> Node:
+    return Node(
+        package="ur_robot_driver",
+        condition=UnlessCondition(mock_hardware),
+        executable="dashboard_client",
+        name="dashboard_client",
+        output="screen",
+        emulate_tty=True,
+        parameters=[{"robot_ip": cfg.robot_ip}],
     )
 
 
