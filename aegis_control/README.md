@@ -14,11 +14,12 @@ aegis_control/
 │         ├── update_rate.yaml
 │         └── ur_drivers.yaml
 │
-├── launch
-│   ├── depthai_cameras_driver.launch.py
-│   ├── ft_sensor_driver.launch.py
-│   ├── start_drivers.launch.py
-│   └── ur_driver.launch.py
+└── launch
+    ├── depthai_cameras_driver.launch.py
+    ├── ft_sensor_driver.launch.py
+    ├── gripper_driver.launch.py
+    ├── start_drivers.launch.py
+    └── ur_driver.launch.py
 ```
 
 | File/Directory                                                                | Description                                                                                                                                                   |
@@ -27,11 +28,12 @@ aegis_control/
 | `config/controllers/*.yaml`                                                   | All `controller_manager` node's parameters, which are composed in the `start_drivers.launch.py` file.                                                         |
 | [depthai_cameras_driver.launch.py](./launch/depthai_cameras_driver.launch.py) | Launches DepthAI nodes from the [depthai_ros_driver](https://github.com/luxonis/depthai-ros/tree/humble/depthai_ros_driver) to acquire data from the cameras. |
 | [ft_sensor_driver.launch.py](./launch/ft_sensor_driver.launch.py)             | Launches the [ros2_net_ft_driver](https://github.com/AGH-CEAI/ros2_net_ft_driver) to control the Schunk FT AXIA80 sensor.                                     |
+| [gripper_driver.launch.py](./launch/gripper_driver.launch.py)                 | Launches the [robotiq_hande_driver](https://github.com/AGH-CEAI/robotiq_hande_driver) to control the Robotiq Hand-E gripper.                                  |
 | [start_drivers.launch.py](./launch/start_drivers.launch.py)                   | The main launch file to run the entire Aegis' `ros2_control` stack.                                                                                           |
 | [ur_driver.launch.py](./launch/ur_driver.launch.py)                           | Launches nodes from the [ur_robot_driver](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver) to control the UR5e robot.                         |
 
 ## Neural network
-For details on training and deploying YOLOv5 model, see the [tutorial](./docs/yolov5_tutorial.md).
+For details on training and deploying YOLOv5 model on Luxonis cameras (DepthAI nodes), see the [tutorial](./docs/yolov5_tutorial.md).
 
 ## Development notes
 

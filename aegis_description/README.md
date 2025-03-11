@@ -34,8 +34,8 @@ aegis_description/
 ├── urdf
 │   ├── aegis.urdf.xacro
 │   └── aegis.xacro
-├── rviz
-│   └── preview.rviz
+└── rviz
+    └── preview.rviz
 ```
 
 Legend:

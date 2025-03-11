@@ -22,19 +22,6 @@ ros2 service call /dashboard_client/play std_srvs/srv/Trigger {}
 ros2 launch aegis_moveit_config aegis.launch.py launch_rviz:=true
 ```
 
-4. Run the hotfix publisher for the gripper state:
-```bash
-ros2 topic pub /joint_states sensor_msgs/msg/JointState \
-"header:
-  stamp:
-    sec: 1732819827
-    nanosec: 173021585
-  frame_id: ''
-name: ["hande_right_finger_joint", "hande_left_finger_joint"]
-position: [0.025, 0.025]
-velocity: [0.0, 0.0]
-effort: [0.0, 0.0]
-"
 ```
 
 ## Running with the O3DE simulation
