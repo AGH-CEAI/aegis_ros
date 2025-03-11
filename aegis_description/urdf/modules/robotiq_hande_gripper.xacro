@@ -11,7 +11,7 @@
 
   <xacro:include filename="$(find robotiq_hande_description)/urdf/robotiq_hande_gripper.xacro"/>
 
-  <!-- TODO: pass initial position from the YAML file analogous to the ur_definition -->
+  <!-- TODO(issue#34): pass initial position from the YAML file analogous to the ur_definition -->
   <xacro:macro name="hande_gripper" params="parent prefix mock_hardware">
     <xacro:robotiq_hande_gripper
       name="robotiq_hande_gripper"
