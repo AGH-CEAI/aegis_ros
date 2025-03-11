@@ -27,8 +27,6 @@ class URConfig:
 
 
 def generate_launch_description() -> LaunchDescription:
-    # communication node must be accessed higher, to coordinate launch of gripper driver
-
     return LaunchDescription([OpaqueFunction(function=launch_setup)])
 
 
