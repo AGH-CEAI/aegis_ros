@@ -28,11 +28,8 @@ class URConfig:
 
 def generate_launch_description() -> LaunchDescription:
     # communication node must be accessed higher, to coordinate launch of gripper driver
-    tool_communication_node = prepare_tool_communication_node(URConfig())
 
-    return LaunchDescription(
-        [tool_communication_node, OpaqueFunction(function=launch_setup)]
-    )
+    return LaunchDescription([OpaqueFunction(function=launch_setup)])
 
 
 def launch_setup(context: LaunchContext) -> list[Node]:
@@ -43,6 +40,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
 
     cfg = URConfig()
 
+    tool_communication_node = prepare_tool_communication_node(URConfig())
     dashboard_client_node = prepare_dashboard_client_node(mock_hardware, cfg)
     urscript_interface = prepare_urscript_interface(cfg)
     controller_stopper_node = prepare_controller_stopper_node(mock_hardware)
@@ -75,9 +73,10 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     controllers_inactive.remove(init_joint_controller)
 
     return [
+        tool_communication_node,
         dashboard_client_node,
-        controller_stopper_node,
         urscript_interface,
+        controller_stopper_node,
         controllers_spawner(controllers_active),
         controllers_spawner(controllers_inactive, active=False),
     ]

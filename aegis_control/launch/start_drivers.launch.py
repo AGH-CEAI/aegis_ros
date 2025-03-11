@@ -16,11 +16,7 @@ import sys
 
 run_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(run_path)
-from include.utils import (  # noqa E402
-    get_node_from_include_launch_description,
-    launch_after,
-    str2bool,
-)
+from include.utils import str2bool  # noqa E402
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -44,10 +40,6 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
             )
         ),
         launch_arguments=launch_args.items(),
-    )
-    # ur_comm_tool is needed to delay the launch of the gripper_driver
-    ur_comm_tool_node = get_node_from_include_launch_description(
-        "ur_tool_comm", ur_driver, context
     )
 
     ft_sensor_driver = IncludeLaunchDescription(
@@ -91,11 +83,7 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
 
     return [
         ur_driver,
-        launch_after(
-            launch=control_node,
-            after=ur_comm_tool_node,
-            delay_s=0.2,  # empirically tested
-        ),
+        control_node,
         gripper_driver,
         ft_sensor_driver,
         depthai_cameras_driver,
