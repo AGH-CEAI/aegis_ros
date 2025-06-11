@@ -45,6 +45,9 @@
       ur_configuration_controller:
         type: ur_controllers/URConfigurationController
 
+      admittance_controller:
+        type: admittance_controller/AdmittanceController
+
   speed_scaling_state_broadcaster:
     ros__parameters:
       state_publish_rate: 100.0
@@ -176,3 +179,81 @@
       pose_name: $(var tf_prefix)tcp_pose
       tf:
         child_frame_id: $(var tf_prefix)tool0_controller
+
+  admittance_controller:
+    ros__parameters:
+      joints:
+        - shoulder_pan_joint
+        - shoulder_lift_joint
+        - elbow_joint
+        - wrist_1_joint
+        - wrist_2_joint
+        - wrist_3_joint
+        - hande_left_finger_joint
+      command_interfaces:
+        - position
+      state_interfaces:
+        - position
+        - velocity
+      chainable_command_interfaces:
+        - position
+        - velocity
+      kinematics:
+        plugin_name: kinematics_interface_kdl/KinematicsInterfaceKDL
+        plugin_package: kinematics_interface
+        base: ur_base  # Assumed to be stationary
+        tip: tool_mount_link  # The end effector frame
+        alpha: 0.05
+      ft_sensor:
+        name: ft_sensor
+        frame:
+          id: fts_link  # Wrench measurements are in this frame
+        filter_coefficient: 0.1
+      control:
+        frame:
+          id: fts_link  # Admittance calcs (displacement etc) are done in this frame. Usually the tool or end-effector
+      fixed_world_frame:
+        frame:            # Gravity points down (neg. Z) in this frame (Usually: world or base_link)
+          id: ur_base
+      gravity_compensation:
+        frame:
+          id: fts_link
+        CoG:  # specifies the center of gravity of the end effector
+          pos:
+            - 0.0  # x
+            - 0.0  # y
+            - 0.0  # z
+          force: 15.  # mass * 9.81
+      admittance:
+        selected_axes:
+          - false  # x
+          - false  # y
+          - true  # z
+          - false  # rx
+          - false  # ry
+          - false  # rz
+        # Having ".0" at the end is MUST, otherwise there is a loading error
+        # F = M*a + D*v + S*(x - x_d)
+        mass:
+          - 8.0  # x
+          - 8.0  # y
+          - 8.0  # z
+          - 8.0  # rx
+          - 8.0  # ry
+          - 8.0  # rz
+        damping_ratio:  # damping can be used instead: zeta = D / (2 * sqrt( M * S ))
+          - 30.  # x
+          - 30.  # y
+          - 30.  # z
+          - 30.  # rx
+          - 30.  # ry
+          - 30.  # rz
+        stiffness:
+          - 60.  # x
+          - 60.  # y
+          - 60.  # z
+          - 60.  # rx
+          - 60.  # ry
+          - 60.  # rz
+      # general settings
+      enable_parameter_update_without_reactivation: true
