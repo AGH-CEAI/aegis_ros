@@ -60,12 +60,26 @@ def launch_setup(context: LaunchContext) -> list[IncludeLaunchDescription]:
         launch_arguments=launch_args.items(),
     )
 
+    director_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution(
+                [
+                    FindPackageShare("aegis_director"),
+                    "launch",
+                    "director.launch.py",
+                ]
+            )
+        ),
+        launch_arguments=launch_args.items(),
+    )
+
     return set_namespace(
         namespace,
         [
             robot_description_launch,
             drivers_launch,
             moveit_launch,
+            director_launch,
         ],
     )
 

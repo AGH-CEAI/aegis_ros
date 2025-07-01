@@ -8,6 +8,12 @@ package aegis_bringup {
     }
 }
 
+package aegis_director {
+    class director << (L,#FF7700) LaunchFile >> {
+        Node director()
+    }
+}
+
 package aegis_control {
     class start_drivers << (L,#FF7700) LaunchFile >> {
         Param tf_prefix
@@ -40,7 +46,7 @@ package aegis_control {
         package controllers {
             class net_ft_broadcaster << (Y,#ffffc9) YAML >> {}
             class update_rate << (Y,#ffffc9) YAML >> {}
-            class ur_drivers << (Y,#ffffc9) YAML >> {}
+            class ur_drivers << (Y,#ffffdirector_launchc9) YAML >> {}
             class hande_gripper << (Y,#ffffc9) YAML >> {}
         }
         package cameras {
@@ -101,6 +107,7 @@ package aegis_moveit_config {
 
 
 aegis_bringup.bringup *-left- aegis_control.start_drivers
+aegis_bringup.bringup *-left- aegis_director.director
 aegis_bringup.bringup *-- aegis_moveit_config.move_group
 aegis_bringup.bringup *-- aegis_description.robot_description
 aegis_description.robot_description *-- aegis_description.urdf.aegis_urdf
