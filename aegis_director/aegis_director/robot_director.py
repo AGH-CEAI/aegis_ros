@@ -8,15 +8,15 @@ from rclpy.node import Node
 from geometry_msgs.msg import Point, Pose, PoseStamped, Quaternion
 from sensor_msgs.msg import JointState
 
-from pymoveit2 import MoveIt2, MoveIt2State
+from pymoveit2 import MoveIt2, MoveIt2State, GripperInterface
 import aegis_director.aegis_robot as robot
 
 
 class RobotDirector:
-    def __init__(self, node: Node, synchronous: bool = True):
+    def __init__(self, synchronous: bool = True):
         self.synchronous = synchronous
-        self.node = node
-        self.callback_group = ReentrantCallbackGroup()
+        self.node = Node("director")
+        self.cb_group = ReentrantCallbackGroup()
 
         self.moveit2 = MoveIt2(
             node=self.node,
@@ -24,27 +24,43 @@ class RobotDirector:
             base_link_name=robot.base_link_name(),
             end_effector_name=robot.end_effector_name(),
             group_name=robot.MOVE_GROUP_ARM,
-            callback_group=self.callback_group,
+            callback_group=self.cb_group,
         )
         self.moveit2.planner_id = "RRTConnectkConfigDefault"
 
-        self.executor = rclpy.executors.MultiThreadedExecutor(2)
+        self.gripper_interface = GripperInterface(
+            node=self.node,
+            gripper_joint_names=robot.gripper_joint_names(),
+            open_gripper_joint_positions=robot.OPEN_GRIPPER_JOINT_POSITIONS,
+            closed_gripper_joint_positions=robot.CLOSED_GRIPPER_JOINT_POSITIONS,
+            gripper_group_name=robot.MOVE_GROUP_GRIPPER,
+            callback_group=self.cb_group,
+            gripper_command_action_name="gripper_action_controller/gripper_cmd",
+        )
+
+        self.executor = rclpy.executors.MultiThreadedExecutor()
         self.executor.add_node(self.node)
         self.executor_thread = Thread(target=self.executor.spin, daemon=True, args=())
         self.executor_thread.start()
-        self.node.create_rate(1.0).sleep()
+        # Sleep a while in order to get the first joint state
+        self.node.create_rate(10.0).sleep()
 
     def __del__(self):
         if self.executor_thread.is_alive():
             self.executor_thread.join()
         self.executor.shutdown()
+        self.node.destroy_node()
 
     def get_joint_states(self) -> dict[str, float]:
         js = self._get_joint_states()
         return {name: position for name, position in zip(js.name, js.position)}
 
     def _get_joint_states(self) -> JointState:
-        return self.moveit2.joint_state
+        js = self.moveit2.joint_state
+        while js is None:
+            self.node.create_rate(10.0).sleep()
+            js = self.moveit2.joint_state
+        return js
 
     def get_tcp_pose(self) -> dict[str, np.ndarray]:
         pose = self._get_tcp_pose()
@@ -91,7 +107,7 @@ class RobotDirector:
             tolerance=0.001,
             weight=1.0,
         )
-        self._wait_for_execution(cancel_after_secs)
+        self._wait_for_move_execution(cancel_after_secs)
 
     def pose_move(
         self,
@@ -127,17 +143,46 @@ class RobotDirector:
             cartesian_max_step=cartesian_max_step,
             cartesian_fraction_threshold=cartesian_fraction_threshold,
         )
-        self._wait_for_execution(cancel_after_secs)
+        self._wait_for_move_execution(cancel_after_secs)
 
-    def gripper_move(self):
+    def gripper_move(
+        self, width: Optional[float] = None, action: Optional[str] = None
+    ) -> None:
+        if action is not None:
+            self.node.get_logger().info(f"Using gripper action: {action}")
+            match action.lower():
+                case "open":
+                    self.gripper_interface.open(skip_if_noop=True)
+                case "close":
+                    self.gripper_interface.close(skip_if_noop=True)
+                case "toggle":
+                    self.gripper_interface.toggle()
+                case _:
+                    raise ValueError(
+                        "Invalid action. Use 'open', 'close', or 'toggle'."
+                    )
+            self.node.get_logger().info(f"Waiting for action: {action}")
+            self._wait_for_gripper_execution()
+            return
+
+        if width is None:
+            self.node.get_logger().info("No width provided, ignoring gripper action.")
+            return
+
+        min = robot.CLOSED_GRIPPER_JOINT_POSITIONS[0]
+        max = robot.OPEN_GRIPPER_JOINT_POSITIONS[1]
+        if not (min <= width <= max):
+            raise ValueError(f"Width must be between {min} and {max}.")
+        self.node.get_logger().info(f"Moving gripper to width: {width:.3f}.")
+        self.gripper_interface.move_to_position(width)
+        self._wait_for_gripper_execution()
+
+    def servo_move(self) -> None:
         # Placeholder for future implementation
-        pass
+        # from pymoveit2 import MoveIt2Servo
+        self.node.get_logger().warn("Servo movement is not implemented yet. Ignoring.")
 
-    def servo_move(self):
-        # Placeholder for future implementation
-        pass
-
-    def _wait_for_execution(self, cancel_after_secs: float = 0.0) -> None:
+    def _wait_for_move_execution(self, cancel_after_secs: float = 0.0) -> None:
         if self.synchronous:
             self.moveit2.wait_until_executed()
             return
@@ -163,3 +208,11 @@ class RobotDirector:
         self.node.get_logger().info(
             "Result error code: " + str(future.result().result.error_code)
         )
+
+    def _wait_for_gripper_execution(self) -> None:
+        # Due to a unknown bug in pymoveit2, we got a deadlock with the current configuration
+        # self.gripper_interface.wait_until_executed()
+        # This is a temporal workaround to avoid the deadlock.
+        import time
+
+        time.sleep(0.1)
