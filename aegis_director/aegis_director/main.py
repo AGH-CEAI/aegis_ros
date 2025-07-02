@@ -6,6 +6,7 @@ from rclpy.node import Node
 from aegis_director.robot_director import RobotDirector
 from aegis_director.utils import quaternion_to_euler, euler_to_quaternion
 
+
 def main(args=None):
     rclpy.init(args=args)
     node = Node("director")
@@ -38,12 +39,12 @@ def main(args=None):
     start_pose = director.get_tcp_pose()
     pos = start_pose["position"]
     quat = start_pose["orientation"]
-    
+
     new_pos = pos + np.array([-0.1, -0.1, 0.1])
     ori_rpy = quaternion_to_euler(quat)
     ori_rpy[2] += np.deg2rad(90.0)  # Rotate around Z-axis by 90 degrees
     ori_quat = euler_to_quaternion(*ori_rpy)
-    
+
     director.pose_move(
         position=new_pos,
         quat_xyzw=ori_quat,
@@ -74,4 +75,3 @@ def main(args=None):
 
 if __name__ == "__main__":
     main()
-
