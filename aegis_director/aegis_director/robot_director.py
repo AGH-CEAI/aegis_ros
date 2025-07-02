@@ -1,4 +1,5 @@
 from threading import Thread
+from typing import Optional, Union
 
 import numpy as np
 import rclpy
@@ -92,9 +93,41 @@ class RobotDirector:
         )
         self._wait_for_execution(cancel_after_secs)
 
-    def cartesian_move(self):
-        # Placeholder for future implementation
-        pass
+    def pose_move(
+        self,
+        position: Optional[
+            Union[Point, tuple[float, float, float], dict[str, float]]
+        ] = None,
+        quat_xyzw: Optional[
+            Union[Quaternion, tuple[float, float, float, float], dict[str, float]]
+        ] = None,
+        pose: Optional[Union[PoseStamped, Pose]] = None,
+        max_vel: float = 1.0,
+        max_accel: float = 1.0,
+        cartesian: bool = True,
+        cartesian_max_step: float = 0.01,
+        cartesian_fraction_threshold: float = 0.0,
+        cartesian_jump_threshold: float = 0.0,
+        cartesian_avoid_collisions: bool = True,
+        cancel_after_secs: float = 0.0,
+    ) -> None:
+        self.moveit2.max_velocity = max_vel
+        self.moveit2.max_acceleration = max_accel
+        self.moveit2.cartesian_avoid_collisions = cartesian_avoid_collisions
+        self.moveit2.cartesian_jump_threshold = cartesian_jump_threshold
+
+        self.node.get_logger().info(
+            f"Moving to {{position: {position}, quat: {quat_xyzw}}}, max_vel: {max_vel:.2f}, max_accel: {max_accel:.2f}}}"
+        )
+        self.moveit2.move_to_pose(
+            pose=pose,
+            position=position,
+            quat_xyzw=quat_xyzw,
+            cartesian=cartesian,
+            cartesian_max_step=cartesian_max_step,
+            cartesian_fraction_threshold=cartesian_fraction_threshold,
+        )
+        self._wait_for_execution(cancel_after_secs)
 
     def gripper_move(self):
         # Placeholder for future implementation
