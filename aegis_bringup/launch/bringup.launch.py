@@ -79,7 +79,7 @@ def launch_setup(context: LaunchContext) -> list[IncludeLaunchDescription]:
             robot_description_launch,
             drivers_launch,
             moveit_launch,
-            director_launch,
+            # director_launch,
         ],
     )
 
