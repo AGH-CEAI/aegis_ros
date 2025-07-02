@@ -11,6 +11,8 @@ def main(args=None):
     director = RobotDirector(synchronous=True)
     node = director.node
     cancel_after_s = 5.0
+    speed_percent = 0.5
+    accel_percent = 0.5
 
     node.get_logger().info("Joint states: {}".format(director.get_joint_states()))
 
@@ -31,8 +33,8 @@ def main(args=None):
 
     director.joint_move(
         joint_positions=joint_positions,
-        max_vel=1.0,
-        max_accel=1.0,
+        max_vel=speed_percent,
+        max_accel=accel_percent,
         cancel_after_secs=cancel_after_s,
     )
 
@@ -69,17 +71,17 @@ def main(args=None):
     time.sleep(3)
 
     joint_positions = {
-        "shoulder_pan_joint": np.deg2rad(0.0),
-        "shoulder_lift_joint": np.deg2rad(0.0),
-        "elbow_joint": np.deg2rad(0.0),
-        "wrist_1_joint": np.deg2rad(0.0),
-        "wrist_2_joint": np.deg2rad(0.0),
-        "wrist_3_joint": np.deg2rad(0.0),
+        "shoulder_pan_joint": np.deg2rad(-5.0),
+        "shoulder_lift_joint": np.deg2rad(-30.0),
+        "elbow_joint": np.deg2rad(30.0),
+        "wrist_1_joint": np.deg2rad(-7.0),
+        "wrist_2_joint": np.deg2rad(-7.0),
+        "wrist_3_joint": np.deg2rad(-10.0),
     }
     director.joint_move(
         joint_positions=joint_positions,
-        max_vel=1.0,
-        max_accel=1.0,
+        max_vel=speed_percent,
+        max_accel=accel_percent,
         cancel_after_secs=cancel_after_s,
     )
 
