@@ -1,3 +1,4 @@
+import time
 from threading import Thread
 from typing import Optional, Union
 
@@ -210,9 +211,7 @@ class RobotDirector:
         )
 
     def _wait_for_gripper_execution(self) -> None:
-        # Due to a unknown bug in pymoveit2, we got a deadlock with the current configuration
+        # TODO(issue#39) Due to a unknown bug in pymoveit2, we got a deadlock with the current configuration
         # self.gripper_interface.wait_until_executed()
         # This is a temporal workaround to avoid the deadlock.
-        import time
-
         time.sleep(0.1)
