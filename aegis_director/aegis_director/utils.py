@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def euler_to_quaternion(r, p, y) -> np.ndarray:
+def euler_to_quaternion(r: float, p: float, y: float) -> np.ndarray:
     # Source: https://docs.ros.org/en/humble/Tutorials/Intermediate/Tf2/Writing-A-Tf2-Broadcaster-Py.html
     r /= 2.0
     p /= 2.0
@@ -26,7 +26,7 @@ def euler_to_quaternion(r, p, y) -> np.ndarray:
     return q_xyzw
 
 
-def quaternion_to_euler(q_xyzw) -> np.ndarray:
+def quaternion_to_euler(q_xyzw: np.ndarray) -> np.ndarray:
     # Source: https://automaticaddison.com/how-to-convert-a-quaternion-into-euler-angles-in-python/
     x, y, z, w = q_xyzw
     t0 = +2.0 * (w * x + y * z)

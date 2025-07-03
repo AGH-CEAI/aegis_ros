@@ -46,7 +46,7 @@ package aegis_control {
         package controllers {
             class net_ft_broadcaster << (Y,#ffffc9) YAML >> {}
             class update_rate << (Y,#ffffc9) YAML >> {}
-            class ur_drivers << (Y,#ffffdirector_launchc9) YAML >> {}
+            class ur_drivers << (Y,#ffffc9) YAML >> {}
             class hande_gripper << (Y,#ffffc9) YAML >> {}
         }
         package cameras {
