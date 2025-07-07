@@ -17,7 +17,6 @@ setup(
     maintainer_email="macal@agh.edu.pl",
     description="A package to coordinate the robot's procedural workflow",
     license="Apache-2.0",
-    tests_require=["pytest"],
     entry_points={
         "console_scripts": ["director = aegis_director.main:main"],
     },
