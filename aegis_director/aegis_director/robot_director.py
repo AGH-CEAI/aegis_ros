@@ -52,9 +52,17 @@ class RobotDirector:
         self.executor.shutdown()
         self.node.destroy_node()
 
-    def get_joint_states(self) -> dict[str, float]:
+    def get_joint_positions(self) -> dict[str, float]:
         js = self._get_joint_states()
         return {name: position for name, position in zip(js.name, js.position)}
+
+    def get_joint_velocities(self) -> dict[str, float]:
+        js = self._get_joint_states()
+        return {name: position for name, position in zip(js.name, js.velocity)}
+
+    def get_joint_effort(self) -> dict[str, float]:
+        js = self._get_joint_states()
+        return {name: position for name, position in zip(js.name, js.effort)}
 
     def _get_joint_states(self) -> JointState:
         js = self.moveit2.joint_state

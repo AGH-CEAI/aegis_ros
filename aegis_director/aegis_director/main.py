@@ -14,7 +14,7 @@ def main(args=None):
     speed_percent = 0.5
     accel_percent = 0.5
 
-    node.get_logger().info("Joint states: {}".format(director.get_joint_states()))
+    node.get_logger().info("Joint positions: {}".format(director.get_joint_positions()))
 
     joint_positions = {
         "shoulder_pan_joint": np.deg2rad(-8.0),
@@ -26,7 +26,7 @@ def main(args=None):
     }
 
     director.gripper_move(action="open")
-    node.get_logger().info("Joint states: {}".format(director.get_joint_states()))
+    node.get_logger().info("Joint positions: {}".format(director.get_joint_positions()))
 
     node.get_logger().info("Sleeping for 3 seconds...")
     time.sleep(3)
@@ -39,12 +39,12 @@ def main(args=None):
     )
 
     director.gripper_move(action="close")
-    node.get_logger().info("Joint states: {}".format(director.get_joint_states()))
+    node.get_logger().info("Joint positions: {}".format(director.get_joint_positions()))
 
     node.get_logger().info("TCP pose: {}".format(director.get_tcp_pose()))
 
     director.gripper_move(width=0.01)
-    node.get_logger().info("Joint states: {}".format(director.get_joint_states()))
+    node.get_logger().info("Joint positions: {}".format(director.get_joint_positions()))
 
     start_pose = director.get_tcp_pose()
     pos = start_pose["position"]
@@ -65,7 +65,7 @@ def main(args=None):
     )
 
     director.gripper_move(action="toggle")
-    node.get_logger().info("Joint states: {}".format(director.get_joint_states()))
+    node.get_logger().info("Joint positions: {}".format(director.get_joint_positions()))
 
     node.get_logger().info("Sleeping for 3 seconds...")
     time.sleep(3)
@@ -86,7 +86,7 @@ def main(args=None):
     )
 
     director.gripper_move(width=0.025)
-    node.get_logger().info("Joint states: {}".format(director.get_joint_states()))
+    node.get_logger().info("Joint positions: {}".format(director.get_joint_positions()))
 
     rclpy.shutdown()
     exit(0)
