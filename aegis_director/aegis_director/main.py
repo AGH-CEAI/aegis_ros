@@ -2,8 +2,7 @@ import time
 import numpy as np
 
 import rclpy
-from aegis_director.robot_director import RobotDirector
-from aegis_director.utils import quaternion_to_euler, euler_to_quaternion
+from aegis_director import RobotDirector, quaternion_to_euler, euler_to_quaternion
 
 
 def main(args=None):
