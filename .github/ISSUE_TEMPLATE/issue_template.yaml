@@ -1,0 +1,27 @@
+name: Issue template
+description: Minimal information about an issue
+title: "[BUG] "
+labels: []
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Description
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Please describe the issue.
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: List any references (links, issues, etc.)
+      placeholder: "- Reference 1\n- Reference 2"
