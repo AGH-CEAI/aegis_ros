@@ -1,12 +1,18 @@
-from typing import List
+from typing import NamedTuple, List
+
+
+class GripperJointPositions(NamedTuple):
+    left: float
+    right: float
+
 
 MOVE_GROUP_ARM: str = "aegis_arm"
 MOVE_GROUP_GRIPPER: str = "aegis_manipulator"
 
 prefix: str = ""
 
-OPEN_GRIPPER_JOINT_POSITIONS: List[float] = [0.025, 0.025]
-CLOSED_GRIPPER_JOINT_POSITIONS: List[float] = [0.0, 0.0]
+OPEN_GRIPPER_JOINT_POSITIONS = GripperJointPositions(0.025, 0.025)
+CLOSED_GRIPPER_JOINT_POSITIONS = GripperJointPositions(0.0, 0.0)
 
 
 def joint_names(prefix: str = prefix) -> List[str]:
