@@ -178,8 +178,8 @@ class RobotDirector:
             self.node.get_logger().info("No width provided, ignoring gripper action.")
             return
 
-        min = robot.CLOSED_GRIPPER_JOINT_POSITIONS[0]
-        max = robot.OPEN_GRIPPER_JOINT_POSITIONS[1]
+        min = robot.CLOSED_GRIPPER_JOINT_POSITIONS.left
+        max = robot.OPEN_GRIPPER_JOINT_POSITIONS.left
         if not (min <= width <= max):
             raise ValueError(f"Width must be between {min} and {max}.")
         self.node.get_logger().info(f"Moving gripper to width: {width:.3f}.")
