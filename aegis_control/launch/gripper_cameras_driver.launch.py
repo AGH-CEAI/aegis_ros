@@ -107,128 +107,171 @@ def _launch_node(context: LaunchContext):
     """Return the action to launch `pylon_ros2_camera_wrapper`.
     This is required to evaluate `respawn` as boolean.
     """
-    
+
     # adapt if needed
     debug = False
 
     # launch configuration variables
-    node_name = LaunchConfiguration('node_name')
-    camera_id = LaunchConfiguration('camera_id')
-    device_user_id = LaunchConfiguration('device_user_id')
+    node_name_front = LaunchConfiguration("node_name_front")
+    node_name_back = LaunchConfiguration("node_name_back")
+    camera_id = LaunchConfiguration("camera_id")
+    device_user_id_front = LaunchConfiguration("device_user_id_front")
+    device_user_id_back = LaunchConfiguration("device_user_id_back")
 
-    config_file = LaunchConfiguration('config_file')
+    config_file = LaunchConfiguration("config_file")
 
-    mtu_size = LaunchConfiguration('mtu_size')
-    startup_user_set = LaunchConfiguration('startup_user_set')
-    enable_status_publisher = LaunchConfiguration('enable_status_publisher')
-    enable_current_params_publisher = LaunchConfiguration('enable_current_params_publisher')
+    mtu_size = LaunchConfiguration("mtu_size")
+    startup_user_set = LaunchConfiguration("startup_user_set")
+    enable_status_publisher = LaunchConfiguration("enable_status_publisher")
+    enable_current_params_publisher = LaunchConfiguration(
+        "enable_current_params_publisher"
+    )
 
-    respawn = LaunchConfiguration('respawn')
+    respawn = LaunchConfiguration("respawn")
     respawn_str = respawn.perform(context)
-    respawn_bool = respawn_str.lower() == 'true'
+    respawn_bool = respawn_str.lower() == "true"
 
     # log format
-    os.environ['RCUTILS_CONSOLE_OUTPUT_FORMAT'] = '{time} [{name}] [{severity}] {message}'
+    os.environ["RCUTILS_CONSOLE_OUTPUT_FORMAT"] = (
+        "{time} [{name}] [{severity}] {message}"
+    )
 
     # see https://navigation.ros.org/tutorials/docs/get_backtrace.html
     if debug:
-        launch_prefix = ['xterm -e gdb -ex run --args']
+        launch_prefix = ["xterm -e gdb -ex run --args"]
     else:
-        launch_prefix = ''
+        launch_prefix = ""
 
     return [
-            Node(
-                package='pylon_ros2_camera_wrapper',
-                namespace="",
-                executable='pylon_ros2_camera_wrapper',
-                name=node_name,
-                output='screen',
-                respawn=respawn_bool,
-                emulate_tty=True,
-                prefix=launch_prefix,
-                parameters=[
-                    config_file,
-                    {
-                        'gige/mtu_size': mtu_size,
-                        'startup_user_set': startup_user_set,
-                        'enable_status_publisher': enable_status_publisher,
-                        'enable_current_params_publisher': enable_current_params_publisher,
-                        'device_user_id': device_user_id,
-                    }
-                ]
-            ),
-        ]
+        Node(
+            package="pylon_ros2_camera_wrapper",
+            namespace="",
+            executable="pylon_ros2_camera_wrapper",
+            name=node_name_front,
+            output="screen",
+            respawn=respawn_bool,
+            emulate_tty=True,
+            prefix=launch_prefix,
+            parameters=[
+                config_file,
+                {
+                    "gige/mtu_size": mtu_size,
+                    "startup_user_set": startup_user_set,
+                    "enable_status_publisher": enable_status_publisher,
+                    "enable_current_params_publisher": enable_current_params_publisher,
+                    "device_user_id": device_user_id_front,
+                },
+            ],
+        ),
+        Node(
+            package="pylon_ros2_camera_wrapper",
+            namespace="",
+            executable="pylon_ros2_camera_wrapper",
+            name=node_name_back,
+            output="screen",
+            respawn=respawn_bool,
+            emulate_tty=True,
+            prefix=launch_prefix,
+            parameters=[
+                config_file,
+                {
+                    "gige/mtu_size": mtu_size,
+                    "startup_user_set": startup_user_set,
+                    "enable_status_publisher": enable_status_publisher,
+                    "enable_current_params_publisher": enable_current_params_publisher,
+                    "device_user_id": device_user_id_back,
+                },
+            ],
+        ),
+    ]
+
 
 def generate_launch_description():
-
     default_config_file = os.path.join(
-        get_package_share_directory('pylon_ros2_camera_wrapper'),
-        'config',
-        'default.yaml'
+        get_package_share_directory("pylon_ros2_camera_wrapper"),
+        "config",
+        "default.yaml",
     )
 
-    # launch arguments
-    declare_node_name_cmd = DeclareLaunchArgument(
-        'node_name',
-        default_value='camera_front',
-        description='Name of the wrapper node.'
+    declare_node_name_front_cmd = DeclareLaunchArgument(
+        "node_name_front",
+        default_value="camera_front",
+        description="Name of the wrapper node.",
+    )
+
+    declare_node_name_back_cmd = DeclareLaunchArgument(
+        "node_name_back",
+        default_value="camera_back",
+        description="Name of the wrapper node.",
     )
 
     declare_camera_id_cmd = DeclareLaunchArgument(
-        'camera_id',
-        default_value='my_camera',
-        description='Id of the camera. Used as node namespace.'
+        "camera_id",
+        default_value="my_camera",
+        description="Id of the camera. Used as node namespace.",
     )
 
-    declare_device_user_id_cmd = DeclareLaunchArgument(
-        'device_user_id',
-        default_value='basler_front',
-        description='Device user id of the camera.'
+    declare_device_user_id_front_cmd = DeclareLaunchArgument(
+        "device_user_id_front",
+        default_value="basler_front",
+        description="Device user id of the camera.",
+    )
+
+    declare_device_user_id_back_cmd = DeclareLaunchArgument(
+        "device_user_id_back",
+        default_value="basler_back",
+        description="Device user id of the camera.",
     )
 
     declare_config_file_cmd = DeclareLaunchArgument(
-        'config_file',
+        "config_file",
         default_value=default_config_file,
-        description='Camera parameters structured in a .yaml file.'
+        description="Camera parameters structured in a .yaml file.",
     )
 
     declare_mtu_size_cmd = DeclareLaunchArgument(
-        'mtu_size',
-        default_value='1500',
-        description='Maximum transfer unit size. To enable jumbo frames, set it to a high value (8192 recommended)'
+        "mtu_size",
+        default_value="1500",
+        description="Maximum transfer unit size. To enable jumbo frames, set it to a high value (8192 recommended)",
     )
 
     declare_startup_user_set_cmd = DeclareLaunchArgument(
-        'startup_user_set',
+        "startup_user_set",
         # possible value: Default, UserSet1, UserSet2, UserSet3, CurrentSetting
-        default_value='CurrentSetting',
-        description='Specific user set defining user parameters to run the camera.'
+        default_value="CurrentSetting",
+        description="Specific user set defining user parameters to run the camera.",
     )
 
     declare_enable_status_publisher_cmd = DeclareLaunchArgument(
-        'enable_status_publisher',
-        default_value='true',
-        description='Enable/Disable the status publishing.'
+        "enable_status_publisher",
+        default_value="true",
+        description="Enable/Disable the status publishing.",
     )
 
     declare_enable_current_params_publisher_cmd = DeclareLaunchArgument(
-        'enable_current_params_publisher',
-        default_value='true',
-        description='Enable/Disable the current parameter publishing.'
+        "enable_current_params_publisher",
+        default_value="true",
+        description="Enable/Disable the current parameter publishing.",
     )
 
     declare_respawn_cmd = DeclareLaunchArgument(
-        'respawn',
-        default_value='false',
-        description='If true, the node will be respawned if it exits.'
+        "respawn",
+        default_value="false",
+        description="If true, the node will be respawned if it exits.",
     )
 
     # Define LaunchDescription variable and return it
     ld = LaunchDescription()
 
-    ld.add_action(declare_node_name_cmd)
+    # ld.add_action(declare_node_name_cmd)
+    ld.add_action(declare_node_name_front_cmd)
+    ld.add_action(declare_node_name_back_cmd)
+
     ld.add_action(declare_camera_id_cmd)
-    ld.add_action(declare_device_user_id_cmd)
+    
+    # ld.add_action(declare_device_user_id_cmd)
+    ld.add_action(declare_device_user_id_front_cmd)
+    ld.add_action(declare_device_user_id_back_cmd)
 
     ld.add_action(declare_config_file_cmd)
     ld.add_action(declare_mtu_size_cmd)
