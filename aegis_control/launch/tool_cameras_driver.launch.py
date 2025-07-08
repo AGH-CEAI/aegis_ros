@@ -1,94 +1,3 @@
-# import json
-# import yaml
-# import tempfile
-# from pathlib import Path
-# from launch import LaunchDescription, LaunchContext
-# from launch.actions import OpaqueFunction
-# from launch.conditions import UnlessCondition
-# from launch.substitutions import LaunchConfiguration
-# from launch_ros.actions import ComposableNodeContainer, LoadComposableNodes, Node
-# from launch_ros.descriptions import ComposableNode
-# from ament_index_python.packages import get_package_share_directory
-
-# from launch import LaunchDescription
-
-# # Bypassing the launch system to access local import
-# import os
-# import sys
-
-# run_path = os.path.dirname(os.path.realpath(__file__))
-# sys.path.append(run_path)
-# from include.utils import controllers_spawner  # noqa E402
-
-
-# def generate_launch_description() -> LaunchDescription:
-#     return LaunchDescription([OpaqueFunction(function=launch_setup)])
-
-
-# def launch_setup(context: LaunchContext) -> list[Node]:
-#     # TODO(issue#22): Setup global log level configuration
-#     log_level = "info"
-#     if context.environment.get("GRIPPER_CAMERA_DEBUG") == "1":
-#         log_level = "debug"
-
-#     mock_hardware = LaunchConfiguration("mock_hardware", default="false")
-
-#     params_camera_back = {
-#         "camera_id": "camera_back",
-#         "device_user_id": "basler1"
-#     }
-
-#     params_camera_front = {
-#         "camera_id": "camera_front",
-#         "device_user_id": "basler2"
-#     }
-
-#     return [
-#         create_camera_node(
-#             mock_hardware,
-#             params_camera_back["camera_id"],
-#             params_camera_back,
-#             log_level,
-#         ),
-#         create_camera_node(
-#             mock_hardware,
-#             params_camera_front["camera_id"],
-#             params_camera_front,
-#             log_level,
-#         ),
-#         # create_rectify_node(cfg.mock_hardware, name_pro_scene),
-#         # create_rectify_node(cfg.mock_hardware, name_pro_scene),
-#     ]
-
-
-# def create_camera_node(
-#     mock_hardware: LaunchConfiguration,
-#     name: str,
-#     cam_params: dict,
-#     log_level: str,
-# ) -> LoadComposableNodes:
-#     return ComposableNodeContainer(
-#         condition=UnlessCondition(mock_hardware),
-#         name=name + "_container",
-#         namespace="",
-#         package="rclcpp_components",
-#         executable="component_container",
-#         composable_node_descriptions=[
-#             ComposableNode(
-#                 package="pylon_ros2_camera_wrapper",
-#                 plugin="pylon_ros2_camera.launch.py",
-#                 name="pylon_ros2_camera.launch.py",
-#                 parameters=[cam_params],
-#             )
-#         ],
-#         arguments=["--ros-args", "--log-level", log_level],
-#         output="both",
-#     )
-
-
-# # ros2 launch pylon_ros2_camera_wrapper pylon_ros2_camera.launch.py camera_id:=camera_back device_user_id:=basler1
-# # ros2 launch pylon_ros2_camera_wrapper pylon_ros2_camera.launch.py camera_id:=camera_front device_user_id:=basler2
-
 #!/usr/bin/env python3
 
 import os
@@ -274,7 +183,7 @@ def generate_launch_description():
     ld.add_action(declare_node_name_back_cmd)
 
     ld.add_action(declare_camera_id_cmd)
-    
+
     # ld.add_action(declare_device_user_id_cmd)
     ld.add_action(declare_device_user_id_front_cmd)
     ld.add_action(declare_device_user_id_back_cmd)
