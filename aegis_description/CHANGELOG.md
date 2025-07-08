@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-42](https://github.com/AGH-CEAI/aegis_ros/pull/42) - Updated joints limits.
 * [PR-25](https://github.com/AGH-CEAI/aegis_ros/pull/25) - Updated Hand-E URDFs to incorporate ros2_control configuration.
 * [PR-20] (https://github.com/AGH-CEAI/aegis_ros/pull/20) - Automatic initialization of the virtual serial port.
 * [PR-17](https://github.com/AGH-CEAI/aegis_ros/pull/17) - Set default F/T sensor ip address.
