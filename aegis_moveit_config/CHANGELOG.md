@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-42](https://github.com/AGH-CEAI/aegis_ros/pull/42) - Changed default pose from "zero" to "home"; moved OMPL config from launch to yaml.
 * [PR-9](https://github.com/AGH-CEAI/aegis_ros/pull/9) - Launch and URDF files completely revamped.
 
 ### Deprecated
