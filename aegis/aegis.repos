@@ -15,3 +15,7 @@ repositories:
     type: git
     url: https://github.com/AGH-CEAI/scene_objects_manager
     version: 96a370865c7ac15622a74123e93a1b96b26dcee7
+  pymoveit2:
+    type: git
+    url: https://github.com/AndrejOrsula/pymoveit2.git
+    version: 4b1260aeada4268fd92770e889be4a9bf59fbcf8
