@@ -68,13 +68,13 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
         launch_arguments=launch_args.items(),
     )
 
-    gripper_cameras_driver = IncludeLaunchDescription(
+    tool_cameras_driver = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
                 [
                     FindPackageShare("aegis_control"),
                     "launch",
-                    "gripper_cameras_driver.launch.py",
+                    "tool_cameras_driver.launch.py",
                 ]
             )
         ),
@@ -100,7 +100,7 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
         gripper_driver,
         ft_sensor_driver,
         depthai_cameras_driver,
-        gripper_cameras_driver,
+        tool_cameras_driver,
     ]
 
 

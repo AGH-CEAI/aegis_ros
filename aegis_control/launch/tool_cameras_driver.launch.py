@@ -188,20 +188,20 @@ def _launch_node(context: LaunchContext):
 
 def generate_launch_description():
     default_config_file = os.path.join(
-        get_package_share_directory("pylon_ros2_camera_wrapper"),
+        get_package_share_directory("aegis_control"),
         "config",
-        "default.yaml",
+        "basler_cameras.yaml",
     )
 
     declare_node_name_front_cmd = DeclareLaunchArgument(
         "node_name_front",
-        default_value="camera_front",
+        default_value="tool_camera_front",
         description="Name of the wrapper node.",
     )
 
     declare_node_name_back_cmd = DeclareLaunchArgument(
         "node_name_back",
-        default_value="camera_back",
+        default_value="tool_camera_back",
         description="Name of the wrapper node.",
     )
 
