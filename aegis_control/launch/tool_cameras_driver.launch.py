@@ -100,6 +100,7 @@ from launch.actions import DeclareLaunchArgument
 from launch.actions import OpaqueFunction
 from launch.launch_context import LaunchContext
 from launch.substitutions import LaunchConfiguration
+from launch.conditions import UnlessCondition
 from launch_ros.actions import Node
 
 
@@ -110,6 +111,8 @@ def _launch_node(context: LaunchContext):
 
     # adapt if needed
     debug = False
+
+    mock_hardware = LaunchConfiguration("mock_hardware", default="false")
 
     # launch configuration variables
     node_name_front = LaunchConfiguration("node_name_front")
@@ -147,6 +150,7 @@ def _launch_node(context: LaunchContext):
             package="pylon_ros2_camera_wrapper",
             namespace="",
             executable="pylon_ros2_camera_wrapper",
+            condition=UnlessCondition(mock_hardware),
             name=node_name_front,
             output="screen",
             respawn=respawn_bool,
@@ -167,6 +171,7 @@ def _launch_node(context: LaunchContext):
             package="pylon_ros2_camera_wrapper",
             namespace="",
             executable="pylon_ros2_camera_wrapper",
+            condition=UnlessCondition(mock_hardware),
             name=node_name_back,
             output="screen",
             respawn=respawn_bool,
