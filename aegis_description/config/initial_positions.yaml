@@ -1,9 +1,10 @@
 # Default initial positions for Aegis' ros2_control fake system
 
-shoulder_pan_joint: 0
-shoulder_lift_joint: 0
-elbow_joint: 0
-wrist_1_joint: 0
-wrist_2_joint: 0
-wrist_3_joint: 0
-hande_left_finger_joint: 0
+# All degrees values are in radians
+shoulder_pan_joint: 0 # 0 deg
+shoulder_lift_joint: -2.094395 # -120 deg
+elbow_joint: 2.094395 # 120 deg
+wrist_1_joint: -1.570796 # -90 deg
+wrist_2_joint: -1.570796 # -90 deg
+wrist_3_joint: 0 # 0 deg
+hande_left_finger_joint: 0.025 # m
