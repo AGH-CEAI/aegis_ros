@@ -190,6 +190,7 @@ def generate_launch_description():
     default_config_file = os.path.join(
         get_package_share_directory("aegis_control"),
         "config",
+        "cameras",
         "basler_cameras.yaml",
     )
 
