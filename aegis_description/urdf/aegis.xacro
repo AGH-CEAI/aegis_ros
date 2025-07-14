@@ -20,5 +20,6 @@
     <xacro:hande_gripper parent="adapter_from_sensor_end" prefix="${prefix}" mock_hardware="${mock_hardware}"/>
 
     <xacro:basler_camera_mounting parent="adapter_to_camera_mounting_back" prefix="${prefix}"/>
+    <!-- <xacro:basler_camera_mounting parent="adapter_to_camera_mounting_front" prefix="${prefix}"/> -->
   </xacro:macro>
 </robot>

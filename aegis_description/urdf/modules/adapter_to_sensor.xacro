@@ -17,15 +17,15 @@
 
     <link name="${prefix}adapter_to_sensor">
       <visual>
-        <origin xyz="0 0 ${0.5 * height1}" rpy="0 0 0"/>
+        <origin xyz="0 0 0.021" rpy="0 ${pi} ${pi}"/>
         <geometry>
-          <cylinder radius="${radius1}" length="${height1}"/>
+           <mesh filename="package://aegis_description/meshes/adapter_to_sensor.dae" scale="0.001 0.001 0.001"/>
         </geometry>
         <material name="black">
           <color rgba="0.04 0.04 0.04 1"/>
         </material>
       </visual>
-      <visual>
+      <!-- <visual>
         <origin xyz="0 0 ${height1 + 0.5 * height2}" rpy="0 0 0"/>
         <geometry>
           <cylinder radius="${radius2}" length="${height2}"/>
@@ -33,7 +33,7 @@
         <material name="black">
           <color rgba="0.04 0.04 0.04 1"/>
         </material>
-      </visual>
+      </visual> -->
       <xacro:cylinders_inertial r1="${radius1}" l1="${height1}" r2="${radius2}" l2="${height2}" m="${mass}"/>
       <collision>
         <origin xyz="0 0 ${0.5 * (height1 + height2)}" rpy="0 0 0"/>
@@ -52,11 +52,19 @@
     <link name="${prefix}adapter_to_sensor_end"/>
 
     <joint name="${prefix}adapter_to_camera_mounting_back_joint" type="fixed">
-      <origin xyz="0 ${radius2} 0" rpy="0 0 0"/>
+      <origin xyz="0 ${radius2} 0" rpy="0 ${pi} 0"/>
       <parent link="${prefix}adapter_to_sensor"/>
       <child link="${prefix}adapter_to_camera_mounting_back"/>
     </joint>
 
     <link name="${prefix}adapter_to_camera_mounting_back"/>
+
+    <joint name="${prefix}adapter_to_camera_mounting_front_joint" type="fixed">
+      <origin xyz="0 ${radius2} 0" rpy="0 ${pi} 0"/>
+      <parent link="${prefix}adapter_to_sensor"/>
+      <child link="${prefix}adapter_to_camera_mounting_front"/>
+    </joint>
+
+    <link name="${prefix}adapter_to_camera_mounting_front"/>
   </xacro:macro>
 </robot>
