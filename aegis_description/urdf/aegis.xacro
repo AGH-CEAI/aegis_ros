@@ -8,6 +8,8 @@
   <xacro:include filename="$(find aegis_description)/urdf/modules/adapter_from_sensor.xacro"/>
   <xacro:include filename="$(find aegis_description)/urdf/modules/robotiq_hande_gripper.xacro"/>
 
+  <xacro:include filename="$(find aegis_description)/urdf/modules/basler_camera_mounting.xacro"/>
+
   <xacro:macro name="aegis_robot" params="parent tf_prefix prefix mock_hardware">
     <xacro:cell parent="${parent}"/>
     <xacro:luxonis_oakd_pro_scene parent="cell"/>
@@ -16,5 +18,7 @@
     <xacro:ft_sensor_schunk_axia80 parent="adapter_to_sensor_end" prefix="${prefix}" mock_hardware="${mock_hardware}"/>
     <xacro:adapter_from_sensor parent="tool_mount_link" prefix="${prefix}"/>
     <xacro:hande_gripper parent="adapter_from_sensor_end" prefix="${prefix}" mock_hardware="${mock_hardware}"/>
+
+    <xacro:basler_camera_mounting parent="adapter_to_camera_mounting_back" prefix="${prefix}"/>
   </xacro:macro>
 </robot>
