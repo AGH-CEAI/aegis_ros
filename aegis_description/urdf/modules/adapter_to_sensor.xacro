@@ -9,6 +9,10 @@
     <xacro:property name="radius2" value="0.04255"/>
     <xacro:property name="height2" value="0.0094"/>
 
+    <xacro:property name="height_to_adapter" value="0.01456"/>
+    <xacro:property name="height_total" value="0.02080"/>
+    <xacro:property name="width" value="0.08580"/>
+
     <joint name="${prefix}adapter_to_sensor_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <parent link="${parent}"/>
@@ -52,19 +56,19 @@
     <link name="${prefix}adapter_to_sensor_end"/>
 
     <joint name="${prefix}adapter_to_camera_mounting_back_joint" type="fixed">
-      <origin xyz="0 ${radius2} 0" rpy="0 ${pi} 0"/>
+      <origin xyz="0 0 ${height_to_adapter}" rpy="0 ${pi} 0"/>
       <parent link="${prefix}adapter_to_sensor"/>
       <child link="${prefix}adapter_to_camera_mounting_back"/>
     </joint>
 
     <link name="${prefix}adapter_to_camera_mounting_back"/>
 
-    <joint name="${prefix}adapter_to_camera_mounting_front_joint" type="fixed">
+    <!-- <joint name="${prefix}adapter_to_camera_mounting_front_joint" type="fixed">
       <origin xyz="0 ${radius2} 0" rpy="0 ${pi} 0"/>
       <parent link="${prefix}adapter_to_sensor"/>
       <child link="${prefix}adapter_to_camera_mounting_front"/>
     </joint>
 
-    <link name="${prefix}adapter_to_camera_mounting_front"/>
+    <link name="${prefix}adapter_to_camera_mounting_front"/> -->
   </xacro:macro>
 </robot>
