@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- <xacro:include filename="$(find aegis_description)/urdf/cylinders_inertial.xacro"/> -->
+
+  <xacro:macro name="basler_camera" params="prefix parent side">
+    <xacro:property name="mass" value="0.217"/>
+    <xacro:property name="width" value="0.07002"/>
+    <xacro:property name="height" value="0.001353"/>
+    <!-- <xacro:property name="radius2" value="0.0315"/>
+    <xacro:property name="height2" value="0.007"/> -->
+    <xacro:property name="camera_mounting_offset" value="0.0387"/>
+    <xacro:property name="camera_height" value="0.02900"/>
+
+
+    <joint name="basler_camera_joint_${side}" type="fixed">
+      <origin xyz="0 ${0.5 * camera_height} ${-camera_mounting_offset}" rpy="0 0 0"/>
+      <parent link="${parent}"/>
+      <child link="${prefix}basler_camera_${side}"/>
+    </joint>
+
+    <link name="${prefix}basler_camera_${side}">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://aegis_description/meshes/basler_camera.dae" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+      <!-- <xacro:cylinders_inertial r1="${radius1}" l1="${height1}" r2="${radius2}" l2="${height2}" m="${mass}"/>
+      <collision>
+        <geometry>
+          <cylinder radius="${radius1}" length="${height1 + height2}"/>
+        </geometry>
+      </collision> -->
+    </link>
+
+    <!-- <joint name="${prefix}adapter_from_sensor_end_joint" type="fixed">
+      <origin xyz="0 0 ${height2}" rpy="0 0 0"/>
+      <parent link="${prefix}adapter_from_sensor"/>
+      <child link="${prefix}adapter_from_sensor_end"/>
+    </joint>
+
+    <link name="${prefix}adapter_from_sensor_end"/> -->
+  </xacro:macro>
+</robot>

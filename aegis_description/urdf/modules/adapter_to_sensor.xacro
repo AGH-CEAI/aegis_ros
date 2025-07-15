@@ -11,7 +11,7 @@
 
     <xacro:property name="height_to_adapter" value="0.01456"/>
     <xacro:property name="height_total" value="0.02080"/>
-    <xacro:property name="width" value="0.08580"/>
+    <xacro:property name="width" value="0.0860"/>
 
     <joint name="${prefix}adapter_to_sensor_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0"/>

@@ -4,10 +4,21 @@
 
   <xacro:macro name="basler_camera_mounting" params="prefix parent side">
     <xacro:property name="mass" value="0.217"/>
-    <xacro:property name="mounting_width" value="0.07002"/>
+    <xacro:property name="mounting_width" value="0.07000"/>
     <xacro:property name="mounting_height" value="0.001353"/>
+    <!-- <xacro:property name="mounting_insert_depth" value="0.0076"/> -->
+    
     <!-- <xacro:property name="radius2" value="0.0315"/>
     <xacro:property name="height2" value="0.007"/> -->
+    <!-- <xacro:property name="mounting_dist_a" value="0.09070"/>
+    <xacro:property name="mounting_dist_b" value="-0.0460"/>
+
+    <xacro:property name="mounting_dist_c_x" value="-0.03471"/>
+    <xacro:property name="mounting_dist_c_z" value="-0.04136"/> -->
+    <xacro:property name="mounting_yaw" value="-0.6981"/>
+    <xacro:property name="mounting_dist_z" value="-0.06607"/>
+    <xacro:property name="mounting_dist_x" value="0.119084"/>
+        
 
     <joint name="basler_camera_mounting_joint_${side}" type="fixed">
       <origin xyz="0 0 ${0.5 * mounting_height}" rpy="0 0 0"/>
@@ -37,5 +48,16 @@
     </joint>
 
     <link name="${prefix}adapter_from_sensor_end"/> -->
+
+    <joint name="${prefix}mounting_to_camera_${side}_joint" type="fixed">
+      <origin 
+        xyz="${mounting_dist_x} 0 ${mounting_dist_z}" 
+        rpy="${mounting_yaw} 0 ${-0.5 * pi}"/>
+      <parent link="${prefix}basler_camera_mounting_${side}"/>
+      <child link="${prefix}mounting_to_camera_${side}"/>
+    </joint>
+
+    <link name="${prefix}mounting_to_camera_${side}"/>
+
   </xacro:macro>
 </robot>

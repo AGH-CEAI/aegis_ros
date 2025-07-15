@@ -9,6 +9,7 @@
   <xacro:include filename="$(find aegis_description)/urdf/modules/robotiq_hande_gripper.xacro"/>
 
   <xacro:include filename="$(find aegis_description)/urdf/modules/basler_camera_mounting.xacro"/>
+  <xacro:include filename="$(find aegis_description)/urdf/modules/basler_camera.xacro"/>
 
   <xacro:macro name="aegis_robot" params="parent tf_prefix prefix mock_hardware">
     <xacro:cell parent="${parent}"/>
@@ -21,5 +22,9 @@
 
     <xacro:basler_camera_mounting parent="adapter_to_camera_mounting_back" prefix="${prefix}" side="back"/>
     <xacro:basler_camera_mounting parent="adapter_to_camera_mounting_front" prefix="${prefix}" side="front"/>
+
+    <xacro:basler_camera parent="mounting_to_camera_back" prefix="${prefix}" side="back"/>
+    <xacro:basler_camera parent="mounting_to_camera_front" prefix="${prefix}" side="front"/>
+
   </xacro:macro>
 </robot>
