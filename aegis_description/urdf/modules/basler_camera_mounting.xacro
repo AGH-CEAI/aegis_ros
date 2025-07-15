@@ -2,20 +2,20 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- <xacro:include filename="$(find aegis_description)/urdf/cylinders_inertial.xacro"/> -->
 
-  <xacro:macro name="basler_camera_mounting" params="prefix parent">
+  <xacro:macro name="basler_camera_mounting" params="prefix parent side">
     <xacro:property name="mass" value="0.217"/>
     <xacro:property name="mounting_width" value="0.07002"/>
     <xacro:property name="mounting_height" value="0.001353"/>
     <!-- <xacro:property name="radius2" value="0.0315"/>
     <xacro:property name="height2" value="0.007"/> -->
 
-    <joint name="basler_camera_mounting_joint" type="fixed">
+    <joint name="basler_camera_mounting_joint_${side}" type="fixed">
       <origin xyz="0 0 ${0.5 * mounting_height}" rpy="0 0 0"/>
       <parent link="${parent}"/>
-      <child link="${prefix}basler_camera_mounting"/>
+      <child link="${prefix}basler_camera_mounting_${side}"/>
     </joint>
 
-    <link name="${prefix}basler_camera_mounting">
+    <link name="${prefix}basler_camera_mounting_${side}">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
