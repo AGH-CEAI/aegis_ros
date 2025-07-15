@@ -9,8 +9,8 @@
     <xacro:property name="radius2" value="0.04255"/>
     <xacro:property name="height2" value="0.0094"/>
 
-    <xacro:property name="height_to_adapter" value="0.01456"/>
-    <xacro:property name="height_total" value="0.02080"/>
+    <xacro:property name="height_to_adapter" value="0.0135"/>
+    <xacro:property name="height_total" value="0.0210"/>
     <xacro:property name="width" value="0.0860"/>
 
     <joint name="${prefix}adapter_to_sensor_joint" type="fixed">
@@ -21,7 +21,7 @@
 
     <link name="${prefix}adapter_to_sensor">
       <visual>
-        <origin xyz="0 0 0.021" rpy="0 ${pi} ${pi}"/>
+        <origin xyz="0 0 ${height_total}" rpy="0 ${pi} ${pi}"/>
         <geometry>
            <mesh filename="package://aegis_description/meshes/adapter_to_sensor.dae" scale="0.001 0.001 0.001"/>
         </geometry>
@@ -31,15 +31,15 @@
       </visual>
       <xacro:cylinders_inertial r1="${radius1}" l1="${height1}" r2="${radius2}" l2="${height2}" m="${mass}"/>
       <collision>
-        <origin xyz="0 0 ${0.5 * (height1 + height2)}" rpy="0 0 0"/>
+        <origin xyz="0 0 ${0.5 * height_total}" rpy="0 0 0"/>
         <geometry>
-          <cylinder radius="${radius2}" length="${height1 + height2}"/>
+          <box size="${width} ${width} ${height_total}" />
         </geometry>
       </collision>
     </link>
 
     <joint name="${prefix}adapter_to_sensor_end_joint" type="fixed">
-      <origin xyz="0 0 ${height1 + height2}" rpy="0 0 0"/>
+      <origin xyz="0 0 ${height_total}" rpy="0 0 0"/>
       <parent link="${prefix}adapter_to_sensor"/>
       <child link="${prefix}adapter_to_sensor_end"/>
     </joint>

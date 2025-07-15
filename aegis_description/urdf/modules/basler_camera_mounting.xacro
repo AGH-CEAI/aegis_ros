@@ -5,7 +5,9 @@
   <xacro:macro name="basler_camera_mounting" params="prefix parent side">
     <xacro:property name="mass" value="0.217"/>
     <xacro:property name="mounting_width" value="0.07000"/>
-    <xacro:property name="mounting_height" value="0.001353"/>
+    <xacro:property name="mounting_height" value="0.01360"/>
+    <xacro:property name="mounting_size_x" value="0.09070"/>
+    <xacro:property name="mounting_size_z" value="0.09773"/>
     <!-- <xacro:property name="mounting_insert_depth" value="0.0076"/> -->
     
     <!-- <xacro:property name="radius2" value="0.0315"/>
@@ -21,7 +23,7 @@
         
 
     <joint name="basler_camera_mounting_joint_${side}" type="fixed">
-      <origin xyz="0 0 ${0.5 * mounting_height}" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <parent link="${parent}"/>
       <child link="${prefix}basler_camera_mounting_${side}"/>
     </joint>
@@ -33,21 +35,14 @@
           <mesh filename="package://aegis_description/meshes/basler_camera_mounting.dae" scale="0.001 0.001 0.001"/>
         </geometry>
       </visual>
-      <!-- <xacro:cylinders_inertial r1="${radius1}" l1="${height1}" r2="${radius2}" l2="${height2}" m="${mass}"/>
+      <!-- <xacro:cylinders_inertial r1="${radius1}" l1="${height1}" r2="${radius2}" l2="${height2}" m="${mass}"/> -->
       <collision>
+        <origin xyz="${1.0 * mounting_size_x} 0 ${-1.0 * mounting_height}" rpy="0 0 0"/>
         <geometry>
-          <cylinder radius="${radius1}" length="${height1 + height2}"/>
+         <box size="${mounting_size_x} ${mounting_width} ${3.0 * mounting_height}" />
         </geometry>
-      </collision> -->
+      </collision>
     </link>
-
-    <!-- <joint name="${prefix}adapter_from_sensor_end_joint" type="fixed">
-      <origin xyz="0 0 ${height2}" rpy="0 0 0"/>
-      <parent link="${prefix}adapter_from_sensor"/>
-      <child link="${prefix}adapter_from_sensor_end"/>
-    </joint>
-
-    <link name="${prefix}adapter_from_sensor_end"/> -->
 
     <joint name="${prefix}mounting_to_camera_${side}_joint" type="fixed">
       <origin 

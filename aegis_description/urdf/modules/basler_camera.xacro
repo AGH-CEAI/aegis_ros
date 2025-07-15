@@ -8,8 +8,8 @@
     <!-- <xacro:property name="width" value="0.07002"/>
     <xacro:property name="height" value="0.001353"/> -->
     <xacro:property name="camera_mounting_offset" value="0.0387"/>
-    <xacro:property name="camera_height" value="0.02900"/>
-    <xacro:property name="camera_length" value="0.05400"/>
+    <xacro:property name="camera_height" value="0.0290"/>
+    <xacro:property name="camera_length" value="0.0603"/>
 
     <xacro:property name="lens_radius" value="0.01660"/>
     <xacro:property name="lens_height" value="0.02890"/>
@@ -39,7 +39,7 @@
       </visual>
       <!-- <xacro:cylinders_inertial r1="${radius1}" l1="${height1}" r2="${radius2}" l2="${height2}" m="${mass}"/> -->
       <collision>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 0 ${0.5 * camera_length}" rpy="0 0 0"/>
         <geometry>
             <box size="${camera_height} ${camera_height} ${camera_length}" />
         </geometry>
