@@ -3,14 +3,9 @@
   <!-- <xacro:include filename="$(find aegis_description)/urdf/cylinders_inertial.xacro"/> -->
 
   <xacro:macro name="computar_lens" params="prefix parent side">
-    <xacro:property name="camera_mass" value="0.217"/>
     <xacro:property name="lens_mass" value="0.063"/>
-    <xacro:property name="camera_mounting_offset" value="0.0387"/>
-    <xacro:property name="camera_height" value="0.0290"/>
-    <xacro:property name="camera_length" value="0.0603"/>
     <xacro:property name="lens_radius" value="0.01660"/>
     <xacro:property name="lens_height" value="0.02890"/>
-    <xacro:property name="lens_offset" value="-0.0145"/>
 
     <joint name="computar_lens_joint_${side}" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0"/>
