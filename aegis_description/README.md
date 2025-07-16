@@ -6,6 +6,7 @@ This package contains a description of the Aegis robot station, which consists o
 - SCHUNK FT Sensor AXIA 80
 - Robotiq Hand-E Gripper
 - Luxonis OAK-D Pro PoE
+- Basler ace acA1920-40gc
 
 ## Preview
 
