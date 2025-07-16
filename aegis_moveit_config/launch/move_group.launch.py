@@ -82,15 +82,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     }
 
     # Planning Configuration
-    ompl_planning_pipeline_config = {
-        "move_group": {
-            "planning_plugin": "ompl_interface/OMPLPlanner",
-            "request_adapters": """default_planner_request_adapters/AddTimeOptimalParameterization default_planner_request_adapters/FixWorkspaceBounds default_planner_request_adapters/FixStartStateBounds default_planner_request_adapters/FixStartStateCollision default_planner_request_adapters/FixStartStatePathConstraints""",
-            "start_state_max_bounds_error": 0.1,
-        }
-    }
-    ompl_planning_yaml = paths.load_ompl_planning_cfg()
-    ompl_planning_pipeline_config["move_group"].update(ompl_planning_yaml)
+    ompl_planning_pipeline_cfg = paths.load_ompl_planning_cfg()
 
     # Trajectory Execution Configuration
     controllers_yaml = paths.load_controllers_cfg()
@@ -140,7 +132,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     node_cfg = {
         "launch_rviz": launch_rviz,
         "moveit_controllers": moveit_controllers,
-        "ompl_planning_pipeline_config": ompl_planning_pipeline_config,
+        "ompl_planning_pipeline_config": ompl_planning_pipeline_cfg,
         "planning_scene_monitor_parameters": planning_scene_monitor_parameters,
         "robot_description_kinematics_file": paths.kinematics_cfg,
         "robot_description_planning": robot_description_planning,

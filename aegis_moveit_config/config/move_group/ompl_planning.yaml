@@ -1,4 +1,16 @@
-planner_configs:
-  RRTConnectkConfigDefault:
-    type: geometric::RRTConnect
-    range: 0.0
+move_group:
+  planning_plugin: ompl_interface/OMPLPlanner
+  planner_configs:
+    RRTConnectkConfigDefault:
+      type: geometric::RRTConnect
+      range: 0.0
+  start_state_max_bounds_error: 0.1
+
+  # Request adapters are described in the MoveIt2 docs:
+  # https://moveit.picknik.ai/humble/doc/concepts/motion_planning.html#motion-planning-adapters
+  request_adapters: >-
+    default_planner_request_adapters/AddTimeOptimalParameterization
+    default_planner_request_adapters/FixWorkspaceBounds
+    default_planner_request_adapters/FixStartStateBounds
+    default_planner_request_adapters/FixStartStateCollision
+    default_planner_request_adapters/FixStartStatePathConstraints
