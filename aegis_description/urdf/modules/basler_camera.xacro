@@ -25,15 +25,6 @@
           <mesh filename="package://aegis_description/meshes/basler_camera.dae" scale="0.001 0.001 0.001"/>
         </geometry>
       </visual>
-      <visual>
-        <origin xyz="0 0 ${lens_offset}" rpy="0 0 ${pi}"/>
-        <geometry>
-          <cylinder radius="${lens_radius}" length="${lens_height}"/>
-        </geometry>
-        <material name="black">
-          <color rgba="0.04 0.04 0.04 1"/>
-        </material>
-      </visual>
       <!-- <xacro:cylinders_inertial r1="${radius1}" l1="${height1}" r2="${radius2}" l2="${height2}" m="${mass}"/> -->
       <collision>
         <origin xyz="0 0 ${0.5 * camera_length}" rpy="0 0 0"/>
@@ -41,12 +32,14 @@
           <box size="${camera_height} ${camera_height} ${camera_length}"/>
         </geometry>
       </collision>
-      <collision>
-        <origin xyz="0 0 ${lens_offset}" rpy="0 0 ${pi}"/>
-        <geometry>
-          <cylinder radius="${lens_radius}" length="${lens_height}"/>
-        </geometry>
-      </collision>
     </link>
+
+    <joint name="${prefix}camera_to_lens_${side}_joint" type="fixed">
+      <origin xyz="0 0 ${lens_offset}" rpy="0 0 0"/>
+      <parent link="${prefix}basler_camera_${side}"/>
+      <child link="${prefix}camera_to_lens_${side}"/>
+    </joint>
+
+    <link name="${prefix}camera_to_lens_${side}"/>
   </xacro:macro>
 </robot>
