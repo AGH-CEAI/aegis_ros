@@ -26,7 +26,6 @@ def _launch_node(context: LaunchContext):
     # launch configuration variables
     node_name_front = LaunchConfiguration("node_name_front")
     node_name_back = LaunchConfiguration("node_name_back")
-    camera_id = LaunchConfiguration("camera_id")
     device_user_id_front = LaunchConfiguration("device_user_id_front")
     device_user_id_back = LaunchConfiguration("device_user_id_back")
 

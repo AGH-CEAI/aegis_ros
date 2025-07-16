@@ -9,11 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-43](https://github.com/AGH-CEAI/aegis_ros/pull/43) - Added tool cameras (Basler) to the robot model.
 * [PR-8](https://github.com/AGH-CEAI/aegis_ros/pull/8) - Added the cell and the OAK-D Pro scene camera to the robot model.
 * [PR-7](https://github.com/AGH-CEAI/aegis_ros/pull/7) - Initial version of the Aegis ROS 2 packages.
 
 ### Changed
 
+* [PR-43](https://github.com/AGH-CEAI/aegis_ros/pull/43) - Updated adapter to sensor component.
 * [PR-42](https://github.com/AGH-CEAI/aegis_ros/pull/42) - Updated joints limits.
 * [PR-25](https://github.com/AGH-CEAI/aegis_ros/pull/25) - Updated Hand-E URDFs to incorporate ros2_control configuration.
 * [PR-20] (https://github.com/AGH-CEAI/aegis_ros/pull/20) - Automatic initialization of the virtual serial port.

@@ -25,6 +25,5 @@
 
     <xacro:basler_camera parent="mounting_to_camera_back" prefix="${prefix}" side="back"/>
     <xacro:basler_camera parent="mounting_to_camera_front" prefix="${prefix}" side="front"/>
-
   </xacro:macro>
 </robot>

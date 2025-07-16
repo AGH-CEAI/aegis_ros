@@ -38,7 +38,7 @@
       <collision>
         <origin xyz="0 0 ${0.5 * camera_length}" rpy="0 0 0"/>
         <geometry>
-            <box size="${camera_height} ${camera_height} ${camera_length}" />
+            <box size="${camera_height} ${camera_height} ${camera_length}"/>
         </geometry>
       </collision>
       <collision>

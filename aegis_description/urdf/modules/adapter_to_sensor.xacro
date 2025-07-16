@@ -23,7 +23,7 @@
       <visual>
         <origin xyz="0 0 ${height_total}" rpy="0 ${pi} ${pi}"/>
         <geometry>
-           <mesh filename="package://aegis_description/meshes/adapter_to_sensor.dae" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://aegis_description/meshes/adapter_to_sensor.dae" scale="0.001 0.001 0.001"/>
         </geometry>
         <material name="black">
           <color rgba="0.04 0.04 0.04 1"/>
@@ -33,7 +33,7 @@
       <collision>
         <origin xyz="0 0 ${0.5 * height_total}" rpy="0 0 0"/>
         <geometry>
-          <box size="${width} ${width} ${height_total}" />
+          <box size="${width} ${width} ${height_total}"/>
         </geometry>
       </collision>
     </link>

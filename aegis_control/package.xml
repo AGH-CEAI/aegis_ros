@@ -16,9 +16,9 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
   <exec_depend>controller_manager</exec_depend>
   <exec_depend>depthai_ros_driver</exec_depend>
+  <exec_depend>pylon_ros2_camera_wrapper</exec_depend>
   <exec_depend>ur_robot_driver</exec_depend>
   <exec_depend>xacro</exec_depend>
-  <exec_depend>pylon_ros2_camera_wrapper</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
