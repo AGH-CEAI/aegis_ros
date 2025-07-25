@@ -61,5 +61,13 @@
     </joint>
 
     <link name="${prefix}adapter_to_camera_mounting_front"/>
+
+    <joint name="adapter_to_mount_joint" type="fixed">
+      <origin xyz="0 0 ${height_to_adapter}" rpy="0 ${pi} ${pi / 2}"/>
+      <parent link="${prefix}adapter_to_sensor"/>
+      <child link="${prefix}mount"/>
+    </joint>
+
+    <link name="${prefix}mount"/>
   </xacro:macro>
 </robot>
