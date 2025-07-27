@@ -1,8 +1,7 @@
-/oak_d_pro_scene:
+/cam_scene:
   ros__parameters:
     camera:
       i_ip: 169.254.1.10
-      i_mx_id: 184430108157970F00
       i_nn_type: spatial
       i_pipeline_type: RGBD
     nn:
@@ -17,3 +16,8 @@
   spatial_bb_node:
     ros__parameters:
       desqueeze: true
+/cam_tool:
+  ros__parameters:
+    camera:
+      i_ip: 192.168.100.11
+      i_pipeline_type: StereoToF
