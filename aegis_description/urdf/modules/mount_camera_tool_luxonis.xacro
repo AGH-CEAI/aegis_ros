@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-
   <xacro:macro name="mount_camera_tool_luxonis" params="prefix parent">
     <xacro:property name="mass" value="0.4"/>
     <xacro:property name="mounting_dist_x" value="0.091"/>
