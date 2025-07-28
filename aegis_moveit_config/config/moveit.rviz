@@ -5,7 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded: ~
       Splitter Ratio: 0.5
-    Tree Height: 325
+    Tree Height: 265
   - Class: rviz_common/Help
     Name: Help
   - Class: rviz_common/Views
@@ -34,6 +34,32 @@ Visualization Manager:
       Plane Cell Count: 10
       Reference Frame: world
       Value: true
+    - Alpha: 1
+      Class: rviz_default_plugins/RobotModel
+      Collision Enabled: false
+      Description File: ""
+      Description Source: Topic
+      Description Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /robot_description
+      Enabled: false
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+      Mass Properties:
+        Inertia: false
+        Mass: false
+      Name: RobotModel
+      TF Prefix: ""
+      Update Interval: 0
+      Value: false
+      Visual Enabled: true
     - Acceleration_Scaling_Factor: 0.1
       Class: moveit_rviz_plugin/MotionPlanning
       Enabled: true
@@ -74,6 +100,14 @@ Visualization Manager:
             Alpha: 1
             Show Axes: false
             Show Trail: false
+          adapter_to_camera_mounting_back:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          adapter_to_camera_mounting_front:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
           adapter_to_sensor:
             Alpha: 1
             Show Axes: false
@@ -96,7 +130,115 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          basler_camera_back:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          basler_camera_front:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          basler_camera_mounting_back:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          basler_camera_mounting_front:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          cam_scene_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_scene_left_camera_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_scene_left_camera_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_scene_model_origin:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          cam_scene_rgb_camera_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_scene_rgb_camera_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_scene_right_camera_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_scene_right_camera_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_tool_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_tool_left_camera_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_tool_left_camera_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_tool_model_origin:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          cam_tool_rgb_camera_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_tool_rgb_camera_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_tool_right_camera_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_tool_right_camera_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          camera_to_lens_back:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          camera_to_lens_front:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          camera_tool:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
           cell:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          computar_lens_back:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          computar_lens_front:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -119,59 +261,43 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          hande_end:
+          mount:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          hande_left_finger:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          hande_link:
+          mount_camera:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          hande_right_finger:
+          mounting_to_camera_back:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          mounting_to_camera_front:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          robotiq_hande_coupler:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          oak_d_pro_scene_frame:
+          robotiq_hande_end:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          oak_d_pro_scene_left_camera_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          oak_d_pro_scene_left_camera_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          oak_d_pro_scene_model_origin:
+          robotiq_hande_left_finger:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          oak_d_pro_scene_rgb_camera_frame:
+          robotiq_hande_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          oak_d_pro_scene_rgb_camera_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          oak_d_pro_scene_right_camera_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          oak_d_pro_scene_right_camera_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          robotiq_coupler:
+            Value: true
+          robotiq_hande_right_finger:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -272,6 +398,14 @@ Visualization Manager:
             Alpha: 1
             Show Axes: false
             Show Trail: false
+          adapter_to_camera_mounting_back:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          adapter_to_camera_mounting_front:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
           adapter_to_sensor:
             Alpha: 1
             Show Axes: false
@@ -294,7 +428,115 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          basler_camera_back:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          basler_camera_front:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          basler_camera_mounting_back:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          basler_camera_mounting_front:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          cam_scene_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_scene_left_camera_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_scene_left_camera_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_scene_model_origin:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          cam_scene_rgb_camera_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_scene_rgb_camera_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_scene_right_camera_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_scene_right_camera_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_tool_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_tool_left_camera_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_tool_left_camera_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_tool_model_origin:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          cam_tool_rgb_camera_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_tool_rgb_camera_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_tool_right_camera_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          cam_tool_right_camera_optical_frame:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          camera_to_lens_back:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          camera_to_lens_front:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          camera_tool:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
           cell:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          computar_lens_back:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          computar_lens_front:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -317,59 +559,43 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          hande_end:
+          mount:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          hande_left_finger:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          hande_link:
+          mount_camera:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          hande_right_finger:
+          mounting_to_camera_back:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          mounting_to_camera_front:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          robotiq_hande_coupler:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          oak_d_pro_scene_frame:
+          robotiq_hande_end:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          oak_d_pro_scene_left_camera_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          oak_d_pro_scene_left_camera_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          oak_d_pro_scene_model_origin:
+          robotiq_hande_left_finger:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          oak_d_pro_scene_rgb_camera_frame:
+          robotiq_hande_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          oak_d_pro_scene_rgb_camera_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          oak_d_pro_scene_right_camera_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          oak_d_pro_scene_right_camera_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          robotiq_coupler:
+            Value: true
+          robotiq_hande_right_finger:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -464,14 +690,41 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /oak_d_pro_scene/rgb/image_rect
+        Value: /cam_scene/rgb/image_rect
       Value: true
       Visibility:
+        Camera: true
         Grid: true
         Image: true
         MarkerArray: true
         MotionPlanning: true
         PointCloud2: true
+        RobotModel: true
+        TF: true
+        Value: true
+        Wrench: true
+      Zoom Factor: 1
+    - Class: rviz_default_plugins/Camera
+      Enabled: true
+      Far Plane Distance: 100
+      Image Rendering: background and overlay
+      Name: Camera
+      Overlay Alpha: 0.5
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /cam_tool/right/image_raw
+      Value: true
+      Visibility:
+        Camera: true
+        Grid: true
+        Image: true
+        MarkerArray: true
+        MotionPlanning: true
+        PointCloud2: true
+        RobotModel: true
         TF: true
         Value: true
         Wrench: true
@@ -506,9 +759,21 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Best Effort
-        Value: /oak_d_pro_scene/pointcloud
+        Value: /cam_scene/pointcloud
       Use Fixed Frame: true
       Use rainbow: true
+      Value: false
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: false
+      Name: MarkerArray
+      Namespaces:
+        {}
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /occupied_cells_vis_array
       Value: false
     - Class: rviz_default_plugins/Image
       Enabled: false
@@ -522,7 +787,7 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /oak_d_pro_scene/overlay
+        Value: /cam_scene/overlay
       Value: false
     - Class: rviz_default_plugins/MarkerArray
       Enabled: false
@@ -534,7 +799,21 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /occupied_cells_vis_array
+        Value: /cam_scene/spatial_bb
+      Value: false
+    - Class: rviz_default_plugins/Image
+      Enabled: false
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: Image
+      Normalize Range: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /cam_tool/tof/image_raw
       Value: false
   Enabled: true
   Global Options:
@@ -554,25 +833,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 4.190845012664795
+      Distance: 2.6335902214050293
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.11182383447885513
-        Y: -0.09440480172634125
-        Z: 0.23323896527290344
+        X: -0.22968479990959167
+        Y: 0.02344070002436638
+        Z: 0.23995013535022736
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.265398234128952
+      Pitch: 0.2853982448577881
       Target Frame: ur_base
       Value: Orbit (rviz_default_plugins)
-      Yaw: 0.6917839050292969
+      Yaw: 0.8467841148376465
     Saved: ~
 Window Geometry:
   Camera:
@@ -590,7 +869,7 @@ Window Geometry:
     collapsed: false
   MotionPlanning - Trajectory Slider:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000002b400000505fc0200000009fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000003f00fffffffb000000100044006900730070006c006100790073010000003b00000180000000c700fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006701000001c1000002330000016900fffffffb0000000800480065006c0070000000029a0000006e0000006e00fffffffb0000000a0056006900650077007300000004510000010d000000a000fffffffb0000000c00430061006d00650072006101000003fa000001460000002800fffffffb0000000c00430061006d006500720061010000032c000002140000000000000000fb0000000c00430061006d00650072006101000003520000020c0000000000000000fb0000000a0049006d0061006700650000000468000000d80000002800ffffff000007040000050500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000100000000000002b400000505fc020000000efb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000003f00fffffffb000000100044006900730070006c006100790073010000003b00000144000000c700fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e00670100000185000001690000016900fffffffb0000000800480065006c0070000000029a0000006e0000006e00fffffffb0000000a0056006900650077007300000004510000010d000000a000fffffffb0000000c00430061006d00650072006101000002f4000000e10000002800fffffffb0000000c00430061006d00650072006101000003db000001650000002800fffffffb0000000c00430061006d00650072006101000003520000020c0000000000000000fb0000000a0049006d0061006700650000000469000000620000002800fffffffb0000000a0049006d00610067006500000004c7000000790000002800fffffffb0000000a0049006d0061006700650000000468000000d80000000000000000fb0000000c00430061006d006500720061010000044b000000f50000000000000000fb0000000a0049006d0061006700650000000476000000ca0000000000000000fb0000000a0049006d0061006700650000000469000000d70000000000000000000007040000050500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
     collapsed: false
   Width: 2494
