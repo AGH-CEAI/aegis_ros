@@ -258,7 +258,7 @@ def prepare_octomap_node(cfg: dict) -> Node:
         executable="octomap_server_node",
         output="screen",
         parameters=[cfg["octomap_parameters"]],
-        remappings=[("/cloud_in", "/oak_d_pro_scene/pointcloud")],
+        remappings=[("/cloud_in", "/cam_scene/pointcloud")],
     )
 
 
