@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* [PR-43](https://github.com/AGH-CEAI/aegis_ros/pull/43) - Added tool cameras (Basler) to the robot model.
-* [PR-8](https://github.com/AGH-CEAI/aegis_ros/pull/8) - Added the cell and the OAK-D Pro scene camera to the robot model.
+* [PR-44](https://github.com/AGH-CEAI/aegis_ros/pull/44) - Added Luxonis OAK-D SR tool camera to the robot model.
+* [PR-43](https://github.com/AGH-CEAI/aegis_ros/pull/43) - Added Basler ace tool cameras to the robot model.
+* [PR-8](https://github.com/AGH-CEAI/aegis_ros/pull/8) - Added the cell and the Luxonis OAK-D Pro scene camera to the robot model.
 * [PR-7](https://github.com/AGH-CEAI/aegis_ros/pull/7) - Initial version of the Aegis ROS 2 packages.
 
 ### Changed
@@ -19,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [PR-42](https://github.com/AGH-CEAI/aegis_ros/pull/42) - Updated joints limits.
 * [PR-25](https://github.com/AGH-CEAI/aegis_ros/pull/25) - Updated Hand-E URDFs to incorporate ros2_control configuration.
 * [PR-20] (https://github.com/AGH-CEAI/aegis_ros/pull/20) - Automatic initialization of the virtual serial port.
-* [PR-17](https://github.com/AGH-CEAI/aegis_ros/pull/17) - Set default F/T sensor ip address.
+* [PR-17](https://github.com/AGH-CEAI/aegis_ros/pull/17) - Set default F/T sensor IP address.
 * [PR-9](https://github.com/AGH-CEAI/aegis_ros/pull/9) - Launch and URDF files completely revamped.
 
 ### Deprecated
@@ -28,6 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-* [PR-21](https://github.com/AGH-CEAI/aegis_ros/pull/21) - Switched the OAK-D Pro camera description to the official Luxonis repository.
+* [PR-21](https://github.com/AGH-CEAI/aegis_ros/pull/21) - Switched the Luxonis OAK-D Pro camera description to the official Luxonis repository.
 
 ### Security

@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* [PR-43](https://github.com/AGH-CEAI/aegis_ros/pull/43) - Integration with tool cameras - Basler.
+* [PR-44](https://github.com/AGH-CEAI/aegis_ros/pull/44) - Integration with Luxonis tool camera.
+* [PR-43](https://github.com/AGH-CEAI/aegis_ros/pull/43) - Integration with Balser tool cameras.
 * [PR-25](https://github.com/AGH-CEAI/aegis_ros/pull/25) - Integration with `robotiq_hande_driver` package.
 * [PR-30](https://github.com/AGH-CEAI/aegis_ros/pull/30) - Implemented YOLOv5 model for spatial detection.
 * [PR-24](https://github.com/AGH-CEAI/aegis_ros/pull/24) - Implemented point cloud support.
