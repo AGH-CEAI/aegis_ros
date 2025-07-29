@@ -1,12 +1,18 @@
 # aegis_description
 
 This package contains a description of the Aegis robot station, which consists of the following modules:
-- The robot cell
-- UR5e series
-- SCHUNK FT Sensor AXIA 80
+- Cell
+- UR5e Series Robot
+- Adapter Robot-Sensor
+- Adapter Sensor-Manipulator
+- Mount for Basler Tool Camera
+- Mount for Luxonis Tool Camera
+- SCHUNK AXIA 80 FT Sensor
 - Robotiq Hand-E Gripper
-- Luxonis OAK-D Pro PoE
-- Basler ace acA1920-40gc
+- Luxonis OAK-D Pro Camera
+- Luxonis OAK-D SR Camera
+- Basler ace acA1920-40gc Camera
+- Computar Lens for Basler Tool Camera
 
 ## Preview
 
