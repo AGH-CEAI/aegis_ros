@@ -142,9 +142,6 @@ def launch_setup(context: LaunchContext) -> list[Node]:
             cfg.cam_params_path,
             log_level,
         ),
-        create_rectify_node(cfg.mock_hardware, cam_scene_name),
-        create_spatial_bb_node(cfg.mock_hardware, cam_scene_name, cfg.cam_params_path),
-        create_point_cloud_node(cfg.mock_hardware, cam_scene_name),
         create_camera_node(
             cfg.mock_hardware,
             cam_tool_name,
@@ -152,6 +149,11 @@ def launch_setup(context: LaunchContext) -> list[Node]:
             cfg.cam_params_path,
             log_level,
         ),
+        create_rectify_node(cfg.mock_hardware, cam_scene_name, "/rgb"),
+        create_rectify_node(cfg.mock_hardware, cam_tool_name, "/right"),
+        create_rectify_node(cfg.mock_hardware, cam_tool_name, "/left"),
+        create_spatial_bb_node(cfg.mock_hardware, cam_scene_name, cfg.cam_params_path),
+        create_point_cloud_node(cfg.mock_hardware, cam_scene_name),
     ]
 
 
@@ -182,7 +184,7 @@ def create_camera_node(
 
 
 def create_rectify_node(
-    mock_hardware: LaunchConfiguration, name: str
+    mock_hardware: LaunchConfiguration, name: str, type: str
 ) -> LoadComposableNodes:
     return LoadComposableNodes(
         condition=UnlessCondition(mock_hardware),
@@ -193,15 +195,15 @@ def create_rectify_node(
                 plugin="image_proc::RectifyNode",
                 name=name + "_rectify_color_node",
                 remappings=[
-                    ("image", name + "/rgb/image_raw"),
-                    ("camera_info", name + "/rgb/camera_info"),
-                    ("image_rect", name + "/rgb/image_rect"),
-                    ("image_rect/compressed", name + "/rgb/image_rect/compressed"),
+                    ("image", name + type + "/image_raw"),
+                    ("camera_info", name + type + "/camera_info"),
+                    ("image_rect", name + type + "/image_rect"),
+                    ("image_rect/compressed", name + type + "/image_rect/compressed"),
                     (
                         "image_rect/compressedDepth",
-                        name + "/rgb/image_rect/compressedDepth",
+                        name + type + "/image_rect/compressedDepth",
                     ),
-                    ("image_rect/theora", name + "/rgb/image_rect/theora"),
+                    ("image_rect/theora", name + type + "/image_rect/theora"),
                 ],
             )
         ],
