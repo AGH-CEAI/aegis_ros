@@ -5,8 +5,8 @@ This package contains a description of the Aegis robot station, which consists o
 - UR5e Series Robot
 - Adapter Robot-Sensor
 - Adapter Sensor-Manipulator
-- Mount for Basler Tool Camera
 - Mount for Luxonis Tool Camera
+- Mount for Basler Tool Camera
 - SCHUNK AXIA 80 FT Sensor
 - Robotiq Hand-E Gripper
 - Luxonis OAK-D Pro Camera

@@ -8,12 +8,17 @@ package aegis_description {
 
     package modules {
         class cell << (X,cyan) xacro >> {}
-        class luxonis_oakd_pro_scene << (X,cyan) xacro >> {}
         class ur_definition << (X,cyan) xacro >> {}
         class adapter_to_sensor << (X,cyan) xacro >> {}
-        class ft_schunk_axia80 << (X,cyan) xacro >> {}
         class adapter_from_sensor << (X,cyan) xacro >> {}
+        class mount_camera_tool_luxonis << (X,cyan) xacro >> {}
+        class mount_camera_tool_basler << (X,cyan) xacro >> {}
+        class ft_schunk_axia80 << (X,cyan) xacro >> {}
         class robotiq_hande_gripper << (X,cyan) xacro >> {}
+        class camera_scene_luxonis << (X,cyan) xacro >> {}
+        class camera_tool_luxonis << (X,cyan) xacro >> {}
+        class camera_tool_basler << (X,cyan) xacro >> {}
+        class lens_computar << (X,cyan) xacro >> {}
     }
 
     package config {

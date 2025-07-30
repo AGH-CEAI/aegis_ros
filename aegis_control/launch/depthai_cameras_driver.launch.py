@@ -186,6 +186,7 @@ def create_camera_node(
 def create_rectify_node(
     mock_hardware: LaunchConfiguration, name: str, type: str
 ) -> LoadComposableNodes:
+    side = "" if type == "/rgb" else "_" + type[1:]
     return LoadComposableNodes(
         condition=UnlessCondition(mock_hardware),
         target_container=name + "_container",
@@ -193,7 +194,7 @@ def create_rectify_node(
             ComposableNode(
                 package="image_proc",
                 plugin="image_proc::RectifyNode",
-                name=name + "_rectify_color_node",
+                name=name + side + "_rectify_color_node",
                 remappings=[
                     ("image", name + type + "/image_raw"),
                     ("camera_info", name + type + "/camera_info"),
