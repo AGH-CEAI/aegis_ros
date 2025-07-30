@@ -104,7 +104,7 @@ def generate_launch_description():
         get_package_share_directory("aegis_control"),
         "config",
         "cameras",
-        "basler_cameras.yaml",
+        "pylon_cameras.yaml",
     )
 
     declare_node_name_front_cmd = DeclareLaunchArgument(
