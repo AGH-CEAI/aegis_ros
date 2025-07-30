@@ -18,7 +18,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://aegis_description/meshes/basler_camera.dae" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://aegis_description/meshes/camera_tool_basler.dae" scale="0.001 0.001 0.001"/>
         </geometry>
       </visual>
       <!-- <xacro:cylinders_inertial r1="${radius1}" l1="${height1}" r2="${radius2}" l2="${height2}" m="${mass}"/> -->
