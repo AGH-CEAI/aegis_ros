@@ -174,27 +174,20 @@ def generate_launch_description():
         description="If true, the node will be respawned if it exits.",
     )
 
-    # Define LaunchDescription variable and return it
-    ld = LaunchDescription()
-
-    # ld.add_action(declare_node_name_cmd)
-    ld.add_action(declare_node_name_front_cmd)
-    ld.add_action(declare_node_name_back_cmd)
-
-    ld.add_action(declare_camera_id_cmd)
-
-    # ld.add_action(declare_device_user_id_cmd)
-    ld.add_action(declare_device_user_id_front_cmd)
-    ld.add_action(declare_device_user_id_back_cmd)
-
-    ld.add_action(declare_config_file_cmd)
-    ld.add_action(declare_mtu_size_cmd)
-    ld.add_action(declare_startup_user_set_cmd)
-    ld.add_action(declare_enable_status_publisher_cmd)
-    ld.add_action(declare_enable_current_params_publisher_cmd)
-
-    ld.add_action(declare_respawn_cmd)
-
-    ld.add_action(OpaqueFunction(function=_launch_node))
-
-    return ld
+    return LaunchDescription([
+        # declare_node_name_cmd,
+        declare_node_name_front_cmd,
+        declare_node_name_back_cmd,
+        declare_camera_id_cmd,
+        
+        # declare_device_user_id_cmd.
+        declare_device_user_id_front_cmd,
+        declare_device_user_id_back_cmd,
+        declare_config_file_cmd,
+        declare_mtu_size_cmd,
+        declare_startup_user_set_cmd,
+        declare_enable_status_publisher_cmd,
+        declare_enable_current_params_publisher_cmd,
+        declare_respawn_cmd,
+        
+        OpaqueFunction(function=_launch_node)])
