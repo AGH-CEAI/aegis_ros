@@ -9,12 +9,15 @@ setup(
     data_files=[
         ("share/ament_index/resource_index/packages", [f"resource/{package_name}"]),
         (f"share/{package_name}", ["package.xml"]),
-        (f'share/{package_name}/config', [
-            'config/cam_scene.yaml',
-            'config/cam_tool_front.yaml',
-            'config/cam_tool_right.yaml',
-            'config/cam_tool_left.yaml'
-        ])
+        (
+            f"share/{package_name}/config",
+            [
+                "config/cam_scene.yaml",
+                "config/cam_tool_front.yaml",
+                "config/cam_tool_right.yaml",
+                "config/cam_tool_left.yaml",
+            ],
+        ),
     ],
     install_requires=["setuptools"],
     zip_safe=True,
@@ -25,6 +28,6 @@ setup(
     entry_points={
         "console_scripts": [
             "calib_data_collect = aegis_utils.calib_data_collect:main",
-            ],
+        ],
     },
 )
