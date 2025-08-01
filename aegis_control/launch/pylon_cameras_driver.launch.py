@@ -13,93 +13,6 @@ from launch.conditions import UnlessCondition
 from launch_ros.actions import Node
 
 
-def _launch_node(context: LaunchContext):
-    """Return the action to launch `pylon_ros2_camera_wrapper`.
-    This is required to evaluate `respawn` as boolean.
-    """
-
-    # adapt if needed
-    debug = False
-
-    mock_hardware = LaunchConfiguration("mock_hardware", default="false")
-
-    # launch configuration variables
-    node_name_left = LaunchConfiguration("node_name_left")
-    node_name_right = LaunchConfiguration("node_name_right")
-    device_user_id_left = LaunchConfiguration("device_user_id_left")
-    device_user_id_right = LaunchConfiguration("device_user_id_right")
-
-    config_file = LaunchConfiguration("config_file")
-
-    mtu_size = LaunchConfiguration("mtu_size")
-    startup_user_set = LaunchConfiguration("startup_user_set")
-    enable_status_publisher = LaunchConfiguration("enable_status_publisher")
-    enable_current_params_publisher = LaunchConfiguration(
-        "enable_current_params_publisher"
-    )
-
-    respawn = LaunchConfiguration("respawn")
-    respawn_str = respawn.perform(context)
-    respawn_bool = respawn_str.lower() == "true"
-
-    # log format
-    os.environ["RCUTILS_CONSOLE_OUTPUT_FORMAT"] = (
-        "{time} [{name}] [{severity}] {message}"
-    )
-
-    # see https://navigation.ros.org/tutorials/docs/get_backtrace.html
-    launch_prefix = ["xterm -e gdb -ex run --args"] if debug else ""
-
-    node_camera_left = Node(
-        package="pylon_ros2_camera_wrapper",
-        namespace="",
-        executable="pylon_ros2_camera_wrapper",
-        condition=UnlessCondition(mock_hardware),
-        name=node_name_left,
-        output="screen",
-        respawn=respawn_bool,
-        emulate_tty=True,
-        prefix=launch_prefix,
-        parameters=[
-            config_file,
-            {
-                "gige/mtu_size": mtu_size,
-                "startup_user_set": startup_user_set,
-                "enable_status_publisher": enable_status_publisher,
-                "enable_current_params_publisher": enable_current_params_publisher,
-                "device_user_id": device_user_id_left,
-            },
-        ],
-    )
-
-    node_camera_right = Node(
-        package="pylon_ros2_camera_wrapper",
-        namespace="",
-        executable="pylon_ros2_camera_wrapper",
-        condition=UnlessCondition(mock_hardware),
-        name=node_name_right,
-        output="screen",
-        respawn=respawn_bool,
-        emulate_tty=True,
-        prefix=launch_prefix,
-        parameters=[
-            config_file,
-            {
-                "gige/mtu_size": mtu_size,
-                "startup_user_set": startup_user_set,
-                "enable_status_publisher": enable_status_publisher,
-                "enable_current_params_publisher": enable_current_params_publisher,
-                "device_user_id": device_user_id_right,
-            },
-        ],
-    )
-
-    return [
-        node_camera_left,
-        node_camera_right,
-    ]
-
-
 def generate_launch_description():
     default_config_file = os.path.join(
         get_package_share_directory("aegis_control"),
@@ -190,6 +103,93 @@ def generate_launch_description():
             declare_enable_status_publisher_cmd,
             declare_enable_current_params_publisher_cmd,
             declare_respawn_cmd,
-            OpaqueFunction(function=_launch_node),
+            OpaqueFunction(function=launch_node),
         ]
     )
+
+
+def launch_node(context: LaunchContext):
+    """Return the action to launch `pylon_ros2_camera_wrapper`.
+    This is required to evaluate `respawn` as boolean.
+    """
+
+    # adapt if needed
+    debug = False
+
+    mock_hardware = LaunchConfiguration("mock_hardware", default="false")
+
+    # launch configuration variables
+    node_name_left = LaunchConfiguration("node_name_left")
+    node_name_right = LaunchConfiguration("node_name_right")
+    device_user_id_left = LaunchConfiguration("device_user_id_left")
+    device_user_id_right = LaunchConfiguration("device_user_id_right")
+
+    config_file = LaunchConfiguration("config_file")
+
+    mtu_size = LaunchConfiguration("mtu_size")
+    startup_user_set = LaunchConfiguration("startup_user_set")
+    enable_status_publisher = LaunchConfiguration("enable_status_publisher")
+    enable_current_params_publisher = LaunchConfiguration(
+        "enable_current_params_publisher"
+    )
+
+    respawn = LaunchConfiguration("respawn")
+    respawn_str = respawn.perform(context)
+    respawn_bool = respawn_str.lower() == "true"
+
+    # log format
+    os.environ["RCUTILS_CONSOLE_OUTPUT_FORMAT"] = (
+        "{time} [{name}] [{severity}] {message}"
+    )
+
+    # see https://navigation.ros.org/tutorials/docs/get_backtrace.html
+    launch_prefix = ["xterm -e gdb -ex run --args"] if debug else ""
+
+    node_camera_left = Node(
+        package="pylon_ros2_camera_wrapper",
+        namespace="",
+        executable="pylon_ros2_camera_wrapper",
+        condition=UnlessCondition(mock_hardware),
+        name=node_name_left,
+        output="screen",
+        respawn=respawn_bool,
+        emulate_tty=True,
+        prefix=launch_prefix,
+        parameters=[
+            config_file,
+            {
+                "gige/mtu_size": mtu_size,
+                "startup_user_set": startup_user_set,
+                "enable_status_publisher": enable_status_publisher,
+                "enable_current_params_publisher": enable_current_params_publisher,
+                "device_user_id": device_user_id_left,
+            },
+        ],
+    )
+
+    node_camera_right = Node(
+        package="pylon_ros2_camera_wrapper",
+        namespace="",
+        executable="pylon_ros2_camera_wrapper",
+        condition=UnlessCondition(mock_hardware),
+        name=node_name_right,
+        output="screen",
+        respawn=respawn_bool,
+        emulate_tty=True,
+        prefix=launch_prefix,
+        parameters=[
+            config_file,
+            {
+                "gige/mtu_size": mtu_size,
+                "startup_user_set": startup_user_set,
+                "enable_status_publisher": enable_status_publisher,
+                "enable_current_params_publisher": enable_current_params_publisher,
+                "device_user_id": device_user_id_right,
+            },
+        ],
+    )
+
+    return [
+        node_camera_left,
+        node_camera_right,
+    ]
