@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-
   <xacro:macro name="lens_computar" params="prefix parent side">
     <xacro:property name="lens_mass" value="0.063"/>
     <xacro:property name="lens_radius" value="0.01660"/>
@@ -25,9 +24,9 @@
       <inertial>
         <mass value="${lens_mass}"/>
         <inertia
-            ixx="${(lens_mass/12.0) * (3*lens_radius*lens_radius + lens_height*lens_height)}"
-            iyy="${(lens_mass/2.0) * (lens_radius*lens_radius)}"
-            izz="${(lens_mass/12.0) * (3*lens_radius*lens_radius + lens_height*lens_height)}"/>
+          ixx="${(lens_mass/12.0) * (3*lens_radius*lens_radius + lens_height*lens_height)}"
+          iyy="${(lens_mass/2.0) * (lens_radius*lens_radius)}"
+          izz="${(lens_mass/12.0) * (3*lens_radius*lens_radius + lens_height*lens_height)}"/>
       </inertial>
       <collision>
         <origin xyz="0 0 0" rpy="0 0 ${pi}"/>

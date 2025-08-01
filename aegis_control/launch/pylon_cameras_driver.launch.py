@@ -49,7 +49,7 @@ def _launch_node(context: LaunchContext):
 
     # see https://navigation.ros.org/tutorials/docs/get_backtrace.html
     launch_prefix = ["xterm -e gdb -ex run --args"] if debug else ""
-    
+
     node_camera_left = Node(
         package="pylon_ros2_camera_wrapper",
         namespace="",
@@ -191,7 +191,6 @@ def generate_launch_description():
             declare_enable_status_publisher_cmd,
             declare_enable_current_params_publisher_cmd,
             declare_respawn_cmd,
-            
-            OpaqueFunction(function=_launch_node)
+            OpaqueFunction(function=_launch_node),
         ]
     )
