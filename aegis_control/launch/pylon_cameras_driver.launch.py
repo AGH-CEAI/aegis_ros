@@ -181,7 +181,6 @@ def generate_launch_description():
             declare_node_name_left_cmd,
             declare_node_name_right_cmd,
             declare_camera_id_cmd,
-            
             # declare_device_user_id_cmd.
             declare_device_user_id_left_cmd,
             declare_device_user_id_right_cmd,
