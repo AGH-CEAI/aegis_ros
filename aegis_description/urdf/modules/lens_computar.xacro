@@ -23,10 +23,15 @@
       </visual>
       <inertial>
         <mass value="${lens_mass}"/>
+        <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
         <inertia
           ixx="${(lens_mass/12.0) * (3*lens_radius*lens_radius + lens_height*lens_height)}"
+          ixy="0.0"
+          ixz="0.0"
           iyy="${(lens_mass/2.0) * (lens_radius*lens_radius)}"
-          izz="${(lens_mass/12.0) * (3*lens_radius*lens_radius + lens_height*lens_height)}"/>
+          iyz="0.0"
+          izz="${(lens_mass/12.0) * (3*lens_radius*lens_radius + lens_height*lens_height)}"
+        />
       </inertial>
       <collision>
         <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
