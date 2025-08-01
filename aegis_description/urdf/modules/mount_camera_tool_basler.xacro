@@ -24,7 +24,10 @@
           <mesh filename="package://aegis_description/meshes/mount_camera_tool_basler.dae" scale="0.001 0.001 0.001"/>
         </geometry>
       </visual>
-      <!-- <xacro:cylinders_inertial r1="${radius1}" l1="${height1}" r2="${radius2}" l2="${height2}" m="${mass}"/> -->
+      <inertial>
+        <mass value="${mass}"/>
+        <inertia ixx="1.16e-3" ixy="0.0" ixz="0.37e-3" iyy="1.96e-3" iyz="0.0" izz="1.06e-3"/>
+      </inertial>
       <collision>
         <origin xyz="${1.0 * mounting_size_x} 0 ${-1.0 * mounting_height}" rpy="0 0 0"/>
         <geometry>
