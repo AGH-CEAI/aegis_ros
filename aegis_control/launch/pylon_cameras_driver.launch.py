@@ -24,10 +24,10 @@ def _launch_node(context: LaunchContext):
     mock_hardware = LaunchConfiguration("mock_hardware", default="false")
 
     # launch configuration variables
-    node_name_front = LaunchConfiguration("node_name_front")
-    node_name_back = LaunchConfiguration("node_name_back")
-    device_user_id_front = LaunchConfiguration("device_user_id_front")
-    device_user_id_back = LaunchConfiguration("device_user_id_back")
+    node_name_left = LaunchConfiguration("node_name_left")
+    node_name_right = LaunchConfiguration("node_name_right")
+    device_user_id_left = LaunchConfiguration("device_user_id_left")
+    device_user_id_right = LaunchConfiguration("device_user_id_right")
 
     config_file = LaunchConfiguration("config_file")
 
@@ -48,54 +48,55 @@ def _launch_node(context: LaunchContext):
     )
 
     # see https://navigation.ros.org/tutorials/docs/get_backtrace.html
-    if debug:
-        launch_prefix = ["xterm -e gdb -ex run --args"]
-    else:
-        launch_prefix = ""
+    launch_prefix = ["xterm -e gdb -ex run --args"] if debug else ""
+    
+    node_camera_left = Node(
+        package="pylon_ros2_camera_wrapper",
+        namespace="",
+        executable="pylon_ros2_camera_wrapper",
+        condition=UnlessCondition(mock_hardware),
+        name=node_name_left,
+        output="screen",
+        respawn=respawn_bool,
+        emulate_tty=True,
+        prefix=launch_prefix,
+        parameters=[
+            config_file,
+            {
+                "gige/mtu_size": mtu_size,
+                "startup_user_set": startup_user_set,
+                "enable_status_publisher": enable_status_publisher,
+                "enable_current_params_publisher": enable_current_params_publisher,
+                "device_user_id": device_user_id_left,
+            },
+        ],
+    )
+
+    node_camera_right = Node(
+        package="pylon_ros2_camera_wrapper",
+        namespace="",
+        executable="pylon_ros2_camera_wrapper",
+        condition=UnlessCondition(mock_hardware),
+        name=node_name_right,
+        output="screen",
+        respawn=respawn_bool,
+        emulate_tty=True,
+        prefix=launch_prefix,
+        parameters=[
+            config_file,
+            {
+                "gige/mtu_size": mtu_size,
+                "startup_user_set": startup_user_set,
+                "enable_status_publisher": enable_status_publisher,
+                "enable_current_params_publisher": enable_current_params_publisher,
+                "device_user_id": device_user_id_right,
+            },
+        ],
+    )
 
     return [
-        Node(
-            package="pylon_ros2_camera_wrapper",
-            namespace="",
-            executable="pylon_ros2_camera_wrapper",
-            condition=UnlessCondition(mock_hardware),
-            name=node_name_front,
-            output="screen",
-            respawn=respawn_bool,
-            emulate_tty=True,
-            prefix=launch_prefix,
-            parameters=[
-                config_file,
-                {
-                    "gige/mtu_size": mtu_size,
-                    "startup_user_set": startup_user_set,
-                    "enable_status_publisher": enable_status_publisher,
-                    "enable_current_params_publisher": enable_current_params_publisher,
-                    "device_user_id": device_user_id_front,
-                },
-            ],
-        ),
-        Node(
-            package="pylon_ros2_camera_wrapper",
-            namespace="",
-            executable="pylon_ros2_camera_wrapper",
-            condition=UnlessCondition(mock_hardware),
-            name=node_name_back,
-            output="screen",
-            respawn=respawn_bool,
-            emulate_tty=True,
-            prefix=launch_prefix,
-            parameters=[
-                config_file,
-                {
-                    "gige/mtu_size": mtu_size,
-                    "startup_user_set": startup_user_set,
-                    "enable_status_publisher": enable_status_publisher,
-                    "enable_current_params_publisher": enable_current_params_publisher,
-                    "device_user_id": device_user_id_back,
-                },
-            ],
-        ),
+        node_camera_left,
+        node_camera_right,
     ]
 
 
@@ -107,15 +108,15 @@ def generate_launch_description():
         "pylon_cameras.yaml",
     )
 
-    declare_node_name_front_cmd = DeclareLaunchArgument(
-        "node_name_front",
-        default_value="tool_camera_front",
+    declare_node_name_left_cmd = DeclareLaunchArgument(
+        "node_name_left",
+        default_value="cam_tool_left",
         description="Name of the wrapper node.",
     )
 
-    declare_node_name_back_cmd = DeclareLaunchArgument(
-        "node_name_back",
-        default_value="tool_camera_back",
+    declare_node_name_right_cmd = DeclareLaunchArgument(
+        "node_name_right",
+        default_value="cam_tool_right",
         description="Name of the wrapper node.",
     )
 
@@ -125,15 +126,15 @@ def generate_launch_description():
         description="Id of the camera. Used as node namespace.",
     )
 
-    declare_device_user_id_front_cmd = DeclareLaunchArgument(
-        "device_user_id_front",
-        default_value="basler_front",
+    declare_device_user_id_left_cmd = DeclareLaunchArgument(
+        "device_user_id_left",
+        default_value="basler_left",
         description="Device user id of the camera.",
     )
 
-    declare_device_user_id_back_cmd = DeclareLaunchArgument(
-        "device_user_id_back",
-        default_value="basler_back",
+    declare_device_user_id_right_cmd = DeclareLaunchArgument(
+        "device_user_id_right",
+        default_value="basler_right",
         description="Device user id of the camera.",
     )
 
@@ -174,20 +175,23 @@ def generate_launch_description():
         description="If true, the node will be respawned if it exits.",
     )
 
-    return LaunchDescription([
-        # declare_node_name_cmd,
-        declare_node_name_front_cmd,
-        declare_node_name_back_cmd,
-        declare_camera_id_cmd,
-        
-        # declare_device_user_id_cmd.
-        declare_device_user_id_front_cmd,
-        declare_device_user_id_back_cmd,
-        declare_config_file_cmd,
-        declare_mtu_size_cmd,
-        declare_startup_user_set_cmd,
-        declare_enable_status_publisher_cmd,
-        declare_enable_current_params_publisher_cmd,
-        declare_respawn_cmd,
-        
-        OpaqueFunction(function=_launch_node)])
+    return LaunchDescription(
+        [
+            # declare_node_name_cmd,
+            declare_node_name_left_cmd,
+            declare_node_name_right_cmd,
+            declare_camera_id_cmd,
+            
+            # declare_device_user_id_cmd.
+            declare_device_user_id_left_cmd,
+            declare_device_user_id_right_cmd,
+            declare_config_file_cmd,
+            declare_mtu_size_cmd,
+            declare_startup_user_set_cmd,
+            declare_enable_status_publisher_cmd,
+            declare_enable_current_params_publisher_cmd,
+            declare_respawn_cmd,
+            
+            OpaqueFunction(function=_launch_node)
+        ]
+    )
