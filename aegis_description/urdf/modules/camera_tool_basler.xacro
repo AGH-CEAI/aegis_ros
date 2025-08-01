@@ -22,7 +22,7 @@
       </visual>
       <inertial>
         <mass value="${camera_mass}"/>
-        <inertia ixx="3.403e-1" ixy="2.2385e-5" ixz="1.08974e-2" iyy="3.403e-1" iyz="3.883342" izz="3.9606138e+1"/>
+        <inertia ixx="0.3403" ixy="0.0" ixz="0.0" iyy="0.3403" iyz="0.0" izz="0.039606138"/>
       </inertial>
       <collision>
         <origin xyz="0 0 ${0.5 * camera_length}" rpy="0 0 0"/>
