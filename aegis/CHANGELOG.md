@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* [PR-25](https://github.com/AGH-CEAI/aegis_ros/pull/25) - Integration with `robotiq_hande_driver` package.
+* [PR-43](https://github.com/AGH-CEAI/aegis_ros/pull/43) - Integration with [`pylon-ros-camera`](https://github.com/basler/pylon-ros-camera) package.
+* [PR-37](https://github.com/AGH-CEAI/aegis_ros/pull/37) - Integration with [`pymoveit2`](https://github.com/AndrejOrsula/pymoveit2) package.
+* [PR-25](https://github.com/AGH-CEAI/aegis_ros/pull/25) - Integration with [`robotiq_hande_driver`](https://github.com/AGH-CEAI/robotiq_hande_driver) package.
 * [PR-7](https://github.com/AGH-CEAI/aegis_ros/pull/7) - Initial version of the Aegis ROS 2 packages.
 
 ### Changed
