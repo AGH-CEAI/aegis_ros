@@ -15,25 +15,22 @@ from aegis_director.robot_director import RobotDirector
 
 
 CAMERA_CONFIG = {
-    "scene": {
-        "pos_config": "cam_scene.yaml",
-        "topic": "/cam_scene/rgb/image_rect"
-    },
+    "scene": {"pos_config": "cam_scene.yaml", "topic": "/cam_scene/rgb/image_rect"},
     "tool_front_right": {
         "pos_config": "cam_tool_front.yaml",
-        "topic": "/cam_tool/right/image_rect"
+        "topic": "/cam_tool/right/image_rect",
     },
     "tool_front_left": {
         "pos_config": "cam_tool_front.yaml",
-        "topic": "/cam_tool/left/image_rect"
+        "topic": "/cam_tool/left/image_rect",
     },
     "tool_right": {
         "pos_config": "cam_tool_right.yaml",
-        "topic": "/cam_tool_right/image_raw"
+        "topic": "/cam_tool_right/image_raw",
     },
     "tool_left": {
         "pos_config": "cam_tool_left.yaml",
-        "topic": "/cam_tool_left/image_raw"
+        "topic": "/cam_tool_left/image_raw",
     },
 }
 
@@ -101,7 +98,7 @@ class CalibCollectNode(Node):
     def image_callback(self, msg):
         try:
             with self.mutex:
-                self.image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+                self.image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
                 self.timestamp = get_timestamp(msg.header.stamp)
         except Exception as e:
             self.get_logger().error(f"Failed to convert image: {e}")
@@ -122,28 +119,34 @@ class CalibCollectNode(Node):
         cv2.imwrite(path, image)
         self.get_logger().info(f"Saved image to: {path}")
 
-
     def save_tcp(self, tcp_pose, path):
         with open(path, "w") as f:
-            yaml.dump({
-                "tcp_pose": {
-                    "position": tcp_pose["position"].tolist(),
-                    "orientation": tcp_pose["orientation"].tolist(),
-                }
-            }, f)
+            yaml.dump(
+                {
+                    "tcp_pose": {
+                        "position": tcp_pose["position"].tolist(),
+                        "orientation": tcp_pose["orientation"].tolist(),
+                    }
+                },
+                f,
+            )
         self.get_logger().info(f"Saved TCP pose to: {path}")
 
     def log(self, msg):
         self.get_logger().info(msg)
 
 
-def run_procedure(node: CalibCollectNode, robot: ROSInterface, positions, save_dir, camera_name):
+def run_procedure(
+    node: CalibCollectNode, robot: ROSInterface, positions, save_dir, camera_name
+):
     robot.move_to_home()
     time.sleep(2)
 
     for i, joint_dict in enumerate(positions):
         node.log(f"Moving to view position {i}")
-        robot.robot_director.joint_move(joint_positions=joint_dict, max_vel=0.5, max_accel=0.5)
+        robot.robot_director.joint_move(
+            joint_positions=joint_dict, max_vel=0.5, max_accel=0.5
+        )
         time.sleep(3)
 
         time_start = node.get_clock().now().nanoseconds / 1e9
@@ -168,15 +171,20 @@ def run_procedure(node: CalibCollectNode, robot: ROSInterface, positions, save_d
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-c", "--camera", type=str, required=True,
+        "-c",
+        "--camera",
+        type=str,
+        required=True,
         choices=CAMERA_CONFIG.keys(),
-        help="Which camera: scene, tool_front_right, tool_front_left, tool_right, tool_left"
+        help="Which camera: scene, tool_front_right, tool_front_left, tool_right, tool_left",
     )
     args = parser.parse_args()
 
     package_share_path = os.path.join(get_package_share_directory("aegis_utils"))
     camera_info = CAMERA_CONFIG[args.camera]
-    pos_config_path = os.path.join(package_share_path, "config", camera_info["pos_config"])
+    pos_config_path = os.path.join(
+        package_share_path, "config", camera_info["pos_config"]
+    )
     image_topic = camera_info["topic"]
 
     save_dir = os.path.join(
