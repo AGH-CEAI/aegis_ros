@@ -1,7 +1,9 @@
 import rclpy
 from rclpy.node import Node
+from rclpy.executors import SingleThreadedExecutor
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
+import threading
 import cv2
 import time
 import os
@@ -17,19 +19,40 @@ CAMERA_CONFIG = {
         "pos_config": "cam_scene.yaml",
         "topic": "/cam_scene/rgb/image_rect"
     },
-    "tool_front": {
+    "tool_front_right": {
         "pos_config": "cam_tool_front.yaml",
-        "topic": "/cam_tool/front/image_rect"
+        "topic": "/cam_tool/right/image_rect"
+    },
+    "tool_front_left": {
+        "pos_config": "cam_tool_front.yaml",
+        "topic": "/cam_tool/left/image_rect"
     },
     "tool_right": {
         "pos_config": "cam_tool_right.yaml",
-        "topic": "/cam_tool/right/image_rect"
+        "topic": "/cam_tool_right/image_raw"
     },
     "tool_left": {
         "pos_config": "cam_tool_left.yaml",
-        "topic": "/cam_tool/left/image_rect"
+        "topic": "/cam_tool_left/image_raw"
     },
 }
+
+
+def load_positions(config_file_path):
+    with open(config_file_path, "r") as f:
+        data = yaml.safe_load(f)
+    return data.get("positions", data)
+
+
+def get_timestamp(stamp):
+    return stamp.sec + stamp.nanosec * 1e-9
+
+
+def get_package_src_directory(package_name):
+    curr = os.path.dirname(os.path.abspath(__file__))
+    while curr != "/" and "src" not in os.listdir(curr):
+        curr = os.path.dirname(curr)
+    return os.path.join(curr, "src", "aegis_ros", package_name)
 
 
 class ROSInterface:
@@ -69,49 +92,77 @@ class CalibCollectNode(Node):
         super().__init__("calib_collect_node")
         self.bridge = CvBridge()
         self.image = None
+        self.timestamp = None
+        self.mutex = threading.Lock()
         self.save_dir = save_dir
-        os.makedirs(save_dir, exist_ok=True)
         self.sub = self.create_subscription(Image, image_topic, self.image_callback, 10)
         self.get_logger().info(f"Subscribed to image topic: {image_topic}")
 
     def image_callback(self, msg):
         try:
-            self.image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+            with self.mutex:
+                self.image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+                self.timestamp = get_timestamp(msg.header.stamp)
         except Exception as e:
             self.get_logger().error(f"Failed to convert image: {e}")
 
-    def wait_for_data(self, timeout_sec=3.0):
-        start_time = time.time()
-        while self.image is None and (time.time() - start_time) < timeout_sec:
-            rclpy.spin_once(self, timeout_sec=0.1)
-        return self.image is not None
+    def get_image(self, time_start, timeout=3.0):
+        while self.get_clock().now().nanoseconds / 1e9 - time_start < timeout:
+            with self.mutex:
+                if self.image is not None and self.timestamp is not None:
+                    if self.timestamp > time_start:
+                        return self.image.copy()
+            time.sleep(1)
+        return None
 
-    def save_data(self, name, tcp_pose):
-        if self.image is not None:
-            image_path = os.path.join(self.save_dir, name)
-            cv2.imwrite(image_path, self.image)
-            self.get_logger().info(f"Saved image to: {image_path}")
-            if tcp_pose is not None:
-                tcp_path = os.path.splitext(image_path)[0] + ".yaml"
-                with open(tcp_path, "w") as f:
-                    yaml.dump({
-                        "tcp_pose": {
-                            "position": tcp_pose["position"].tolist(),
-                            "orientation": tcp_pose["orientation"].tolist(),
-                        }
-                    }, f)
-                self.get_logger().info(f"Saved TCP pose to: {tcp_path}")
-        else:
+    def save_image(self, image, path):
+        if image is None:
             self.get_logger().warn("No image to save")
+            return
+        cv2.imwrite(path, image)
+        self.get_logger().info(f"Saved image to: {path}")
+
+
+    def save_tcp(self, tcp_pose, path):
+        with open(path, "w") as f:
+            yaml.dump({
+                "tcp_pose": {
+                    "position": tcp_pose["position"].tolist(),
+                    "orientation": tcp_pose["orientation"].tolist(),
+                }
+            }, f)
+        self.get_logger().info(f"Saved TCP pose to: {path}")
 
     def log(self, msg):
         self.get_logger().info(msg)
 
 
-def load_positions(config_file_path):
-    with open(config_file_path, "r") as f:
-        data = yaml.safe_load(f)
-    return data["positions"] if "positions" in data else data
+def run_procedure(node: CalibCollectNode, robot: ROSInterface, positions, save_dir, camera_name):
+    robot.move_to_home()
+    time.sleep(2)
+
+    for i, joint_dict in enumerate(positions):
+        node.log(f"Moving to view position {i}")
+        robot.robot_director.joint_move(joint_positions=joint_dict, max_vel=0.5, max_accel=0.5)
+        time.sleep(3)
+
+        time_start = node.get_clock().now().nanoseconds / 1e9
+        node.log("Waiting for image...")
+        image = node.get_image(time_start)
+        if image is not None:
+            tcp_pose = robot.robot_director.get_tcp_pose()
+            img_path = os.path.join(save_dir, f"{camera_name}_view_{i}.png")
+            tcp_path = os.path.splitext(img_path)[0] + ".yaml"
+            node.save_image(image, img_path)
+            node.save_tcp(tcp_pose, tcp_path)
+        else:
+            node.log("No image received in time")
+
+        time.sleep(1)
+
+    node.log("Moving back to home")
+    robot.move_to_home()
+    time.sleep(2)
 
 
 def main():
@@ -119,7 +170,7 @@ def main():
     parser.add_argument(
         "-c", "--camera", type=str, required=True,
         choices=CAMERA_CONFIG.keys(),
-        help="Which camera: scene, tool_front, tool_right, tool_left"
+        help="Which camera: scene, tool_front_right, tool_front_left, tool_right, tool_left"
     )
     args = parser.parse_args()
 
@@ -127,39 +178,29 @@ def main():
     camera_info = CAMERA_CONFIG[args.camera]
     pos_config_path = os.path.join(package_share_path, "config", camera_info["pos_config"])
     image_topic = camera_info["topic"]
-    save_dir = os.path.join("./calibration_data", args.camera)
+
+    save_dir = os.path.join(
+        get_package_src_directory("aegis_utils"),
+        "calibration_data",
+        args.camera,
+    )
+    os.makedirs(save_dir, exist_ok=True)
 
     robot = ROSInterface()
     collect_node = CalibCollectNode(image_topic, save_dir)
+    executor = SingleThreadedExecutor()
+    executor.add_node(collect_node)
+    spin_thread = threading.Thread(target=executor.spin, daemon=True)
+    spin_thread.start()
 
     try:
         positions = load_positions(pos_config_path)
-
-        robot.move_to_home()
-        time.sleep(2)
-
-        for i, joint_dict in enumerate(positions):
-            collect_node.log(f"Moving to view position {i}")
-            robot.robot_director.joint_move(
-                joint_positions=joint_dict, max_vel=0.5, max_accel=0.5
-            )
-
-            time.sleep(3)
-
-            collect_node.log(f"Capturing data at position {i}")
-            if collect_node.wait_for_data():
-                tcp_pose = robot.robot_director.get_tcp_pose()
-                collect_node.save_data(f"{args.camera}_view_{i}.png", tcp_pose)
-            else:
-                collect_node.log(f"No data received at position {i}")
-
-        collect_node.log("Moving back to home")
-        robot.move_to_home()
-        time.sleep(2)
-
+        run_procedure(collect_node, robot, positions, save_dir, args.camera)
     finally:
         collect_node.destroy_node()
         rclpy.shutdown()
+        executor.shutdown()
+        spin_thread.join()
 
 
 if __name__ == "__main__":
