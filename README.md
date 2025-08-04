@@ -65,6 +65,20 @@ colcon build --symlink-install
 source ./install/local_setup.bash
 ```
 
+### Driver installation - Basler cameras (Manually)
+
+Due to licence conditions each user must download drivers for basler cameras directly from their page.
+Download from [pylon Camera Software Suite](https://www.baslerweb.com/en/products/software/basler-pylon-camera-software-suite) `pylon` and `blaze` and install packages inside the container. [See more here](https://github.com/basler/pylon-ros-camera/tree/humble). Extract downloaded files and execute:
+
+```bash
+sudo apt update
+sudo apt-get install -y libxcb-cursor-dev
+sudo apt-get install ./pylon_*.deb ./codemeter*.deb
+sudo apt-get install ./pylon-supplementary-package-for-blaze-*.deb
+echo $PYLON_ROOT
+```
+You should see `/opt/pylon` in terminal. Build project and ignore warnings that may appear.
+
 ### Run
 
 See the [aegis_bringup](./aegis_bringup/README.md) package.

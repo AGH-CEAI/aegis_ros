@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="camera_tool_basler" params="prefix parent side">
+    <xacro:property name="camera_mass" value="0.217"/>
+    <xacro:property name="camera_mounting_offset" value="-0.0387"/>
+    <xacro:property name="camera_height" value="0.0290"/>
+    <xacro:property name="camera_length" value="0.0603"/>
+    <xacro:property name="lens_offset" value="-0.0145"/>
+
+    <joint name="basler_camera_joint_${side}" type="fixed">
+      <origin xyz="0 ${0.5 * camera_height} ${camera_mounting_offset}" rpy="0 0 0"/>
+      <parent link="${parent}"/>
+      <child link="${prefix}basler_camera_${side}"/>
+    </joint>
+
+    <link name="${prefix}basler_camera_${side}">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://aegis_description/meshes/camera_tool_basler.dae" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+      <inertial>
+        <mass value="${camera_mass}"/>
+        <inertia ixx="0.3403" ixy="0.0" ixz="0.0" iyy="0.3403" iyz="0.0" izz="0.039606138"/>
+      </inertial>
+      <collision>
+        <origin xyz="0 0 ${0.5 * camera_length}" rpy="0 0 0"/>
+        <geometry>
+          <box size="${camera_height} ${camera_height} ${camera_length}"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}camera_to_lens_${side}_joint" type="fixed">
+      <origin xyz="0 0 ${lens_offset}" rpy="0 0 0"/>
+      <parent link="${prefix}basler_camera_${side}"/>
+      <child link="${prefix}camera_to_lens_${side}"/>
+    </joint>
+
+    <link name="${prefix}camera_to_lens_${side}"/>
+  </xacro:macro>
+</robot>
