@@ -134,23 +134,19 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         }
     }
 
-    camera_scene_node = (
-        create_camera_node(
-            cfg.mock_hardware,
-            cam_scene_name,
-            tf_params_cam_scene,
-            cfg.cam_params_path,
-            log_level,
-        ),
+    camera_scene_node = create_camera_node(
+        cfg.mock_hardware,
+        cam_scene_name,
+        tf_params_cam_scene,
+        cfg.cam_params_path,
+        log_level,
     )
-    camera_tool_node = (
-        create_camera_node(
-            cfg.mock_hardware,
-            cam_tool_name,
-            tf_params_cam_tool,
-            cfg.cam_params_path,
-            log_level,
-        ),
+    camera_tool_node = create_camera_node(
+        cfg.mock_hardware,
+        cam_tool_name,
+        tf_params_cam_tool,
+        cfg.cam_params_path,
+        log_level,
     )
     rectify_scene_node = create_rectify_node(cfg.mock_hardware, cam_scene_name, "/rgb")
     rectify_tool_right_node = create_rectify_node(
