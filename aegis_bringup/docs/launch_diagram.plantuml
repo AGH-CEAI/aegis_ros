@@ -126,8 +126,8 @@ aegis_control.start_drivers *-- aegis_control.gripper_driver
 aegis_control.start_drivers *-- aegis_control.depthai_cameras_driver
 aegis_control.start_drivers *-- aegis_control.pylon_cameras_driver
 aegis_control.start_drivers *-- aegis_control.config.controllers
-aegis_control.depthai_cameras_driver *-- aegis_control.config.cameras
-aegis_control.pylon_cameras_driver *-- aegis_control.config.cameras
+aegis_control.depthai_cameras_driver *-right- aegis_control.config.cameras
+aegis_control.pylon_cameras_driver *-right- aegis_control.config.cameras
 
 aegis_moveit_config.move_group *-- aegis_moveit_config.config
 aegis_moveit_config.move_group *-- aegis_description.config.ur5e
