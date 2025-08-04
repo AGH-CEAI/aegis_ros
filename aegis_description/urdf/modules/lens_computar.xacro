@@ -1,19 +1,17 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <!-- <xacro:include filename="$(find aegis_description)/urdf/cylinders_inertial.xacro"/> -->
-
-  <xacro:macro name="computar_lens" params="prefix parent side">
+  <xacro:macro name="lens_computar" params="prefix parent side">
     <xacro:property name="lens_mass" value="0.063"/>
     <xacro:property name="lens_radius" value="0.01660"/>
     <xacro:property name="lens_height" value="0.02890"/>
 
-    <joint name="computar_lens_joint_${side}" type="fixed">
+    <joint name="lens_computar_joint_${side}" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <parent link="${parent}"/>
-      <child link="${prefix}computar_lens_${side}"/>
+      <child link="${prefix}lens_computar_${side}"/>
     </joint>
 
-    <link name="${prefix}computar_lens_${side}">
+    <link name="${prefix}lens_computar_${side}">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
         <geometry>
@@ -23,6 +21,18 @@
           <color rgba="0.04 0.04 0.04 1"/>
         </material>
       </visual>
+      <inertial>
+        <mass value="${lens_mass}"/>
+        <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+        <inertia
+          ixx="${(lens_mass/12.0) * (3*lens_radius*lens_radius + lens_height*lens_height)}"
+          ixy="0.0"
+          ixz="0.0"
+          iyy="${(lens_mass/2.0) * (lens_radius*lens_radius)}"
+          iyz="0.0"
+          izz="${(lens_mass/12.0) * (3*lens_radius*lens_radius + lens_height*lens_height)}"
+        />
+      </inertial>
       <collision>
         <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
         <geometry>
