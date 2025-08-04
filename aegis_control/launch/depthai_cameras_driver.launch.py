@@ -134,7 +134,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         }
     }
 
-    return [
+    camera_scene_node = (
         create_camera_node(
             cfg.mock_hardware,
             cam_scene_name,
@@ -142,6 +142,8 @@ def launch_setup(context: LaunchContext) -> list[Node]:
             cfg.cam_params_path,
             log_level,
         ),
+    )
+    camera_tool_node = (
         create_camera_node(
             cfg.mock_hardware,
             cam_tool_name,
@@ -149,11 +151,27 @@ def launch_setup(context: LaunchContext) -> list[Node]:
             cfg.cam_params_path,
             log_level,
         ),
-        create_rectify_node(cfg.mock_hardware, cam_scene_name, "/rgb"),
-        create_rectify_node(cfg.mock_hardware, cam_tool_name, "/right"),
-        create_rectify_node(cfg.mock_hardware, cam_tool_name, "/left"),
-        create_spatial_bb_node(cfg.mock_hardware, cam_scene_name, cfg.cam_params_path),
-        create_point_cloud_node(cfg.mock_hardware, cam_scene_name),
+    )
+    rectify_scene_node = create_rectify_node(cfg.mock_hardware, cam_scene_name, "/rgb")
+    rectify_tool_right_node = create_rectify_node(
+        cfg.mock_hardware, cam_tool_name, "/right"
+    )
+    rectify_tool_left_node = create_rectify_node(
+        cfg.mock_hardware, cam_tool_name, "/left"
+    )
+    spatial_bb_node = create_spatial_bb_node(
+        cfg.mock_hardware, cam_scene_name, cfg.cam_params_path
+    )
+    point_cloud_node = create_point_cloud_node(cfg.mock_hardware, cam_scene_name)
+
+    return [
+        camera_scene_node,
+        camera_tool_node,
+        rectify_scene_node,
+        rectify_tool_right_node,
+        rectify_tool_left_node,
+        spatial_bb_node,
+        point_cloud_node,
     ]
 
 
