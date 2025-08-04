@@ -9,11 +9,12 @@ This tool captures images from a specified camera as the robot moves through a s
 
 ### Supported camera names:
 - `scene`
-- `tool_front`
+- `tool_front_right`
+- `tool_front_left`
 - `tool_right`
 - `tool_left`
 
 ### Example usage:
 ```bash
-ros2 run aegis_utils calibrate -c tool_front
+ros2 run aegis_utils calibrate -c tool_front_right
 ```
