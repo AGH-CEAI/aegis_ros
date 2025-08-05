@@ -9,13 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* [PR-44](https://github.com/AGH-CEAI/aegis_ros/pull/44) - Added Luxonis OAK-D SR tool camera to the robot model.
-* [PR-43](https://github.com/AGH-CEAI/aegis_ros/pull/43) - Added Basler ace tool cameras to the robot model.
+* [PR-44](https://github.com/AGH-CEAI/aegis_ros/pull/44) - Added Luxonis OAK-D SR tool camera and its mount to the robot model.
+* [PR-43](https://github.com/AGH-CEAI/aegis_ros/pull/43) - Added Basler ace tool cameras and their mounts to the robot model.
 * [PR-8](https://github.com/AGH-CEAI/aegis_ros/pull/8) - Added the cell and the Luxonis OAK-D Pro scene camera to the robot model.
 * [PR-7](https://github.com/AGH-CEAI/aegis_ros/pull/7) - Initial version of the Aegis ROS 2 packages.
 
 ### Changed
 
+* [PR-44](https://github.com/AGH-CEAI/aegis_ros/pull/44) - Updated adapter to sensor component and SCHUNK AXIA 80 F/T sensor.
 * [PR-43](https://github.com/AGH-CEAI/aegis_ros/pull/43) - Updated adapter to sensor component.
 * [PR-42](https://github.com/AGH-CEAI/aegis_ros/pull/42) - Updated joints limits.
 * [PR-25](https://github.com/AGH-CEAI/aegis_ros/pull/25) - Updated Hand-E URDFs to incorporate ros2_control configuration.

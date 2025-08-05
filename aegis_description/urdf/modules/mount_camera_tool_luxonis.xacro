@@ -18,6 +18,11 @@
           <mesh filename="package://aegis_description/meshes/mount_camera_tool_luxonis.dae" scale="1 1 1"/>
         </geometry>
       </visual>
+      <!-- TODO(issue#46): Fix inertial parameters for tool cameras -->
+      <inertial>
+        <mass value="${mass}"/>
+        <inertia ixx="27.3e-6" ixy="0" ixz="4.19e-6" iyy="19.7e-6" iyz="0" izz="43.38e-6"/>
+      </inertial>
       <collision>
         <origin xyz="0.084 0 -0.01" rpy="0 0 0"/>
         <geometry>

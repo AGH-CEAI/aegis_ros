@@ -1,10 +1,10 @@
 @startuml
+left to right direction
 package aegis_description {
     class aegis_urdf << (U,#bcffc8) urdf.xacro >> {
         arg mock_hardware="false"
     }
     class aegis << (X,cyan) xacro >> {}
-    class cylinders_inertial << (X,cyan) xacro >> {}
 
     package modules {
         class cell << (X,cyan) xacro >> {}
@@ -58,13 +58,11 @@ package ur_robot_driver {
 aegis_description.aegis -right-* aegis_description.aegis_urdf
 aegis_description.modules --* aegis_description.aegis
 
-ur_description.ur_macro -down-* aegis_description.modules.ur_definition
+ur_description.ur_macro -left-* aegis_description.modules.ur_definition
 ur_robot_driver -up-* aegis_description.modules.ur_definition
 aegis_description.config -up-* aegis_description.modules.ur_definition
-aegis_description.cylinders_inertial --* aegis_description.modules.adapter_to_sensor
 net_ft_description.net_ft_sensor -up-* aegis_description.modules.ft_schunk_axia80
-aegis_description.cylinders_inertial --* aegis_description.modules.adapter_from_sensor
-robotiq_hande_description.robotiq_hande_gripper -up-* aegis_description.modules.robotiq_hande_gripper
+robotiq_hande_description.robotiq_hande_gripper -down-* aegis_description.modules.robotiq_hande_gripper
 
 
 hide members

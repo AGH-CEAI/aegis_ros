@@ -1,4 +1,5 @@
 @startuml
+left to right direction
 package aegis_bringup {
     class bringup << (L,#FF7700) LaunchFile >> {
         Arg mock_hardware="false"
@@ -44,6 +45,10 @@ package aegis_control {
         Node depthai_filters::cam_scene_spatial_bb_node()
         Node depth_image_proc::cam_scene_point_cloud_xyzrgb_node()
     }
+    class pylon_cameras_driver << (L,#FF7700) LaunchFile >> {
+        Node pylon_ros2_camera_wrapper::node_camera_right()
+        Node pylon_ros2_camera_wrapper::node_camera_left()
+    }
 
     package config {
         package controllers {
@@ -54,6 +59,7 @@ package aegis_control {
         }
         package cameras {
             class depthai_cameras << (Y,#ffffc9) YAML >> {}
+            class pylon_cameras << (Y,#ffffc9) YAML >> {}
             class yolo << (J,#ffffc9) JSON >> {}
         }
     }
@@ -119,8 +125,11 @@ aegis_control.start_drivers *-- aegis_control.ur_driver
 aegis_control.start_drivers *-- aegis_control.ft_sensor_driver
 aegis_control.start_drivers *-- aegis_control.gripper_driver
 aegis_control.start_drivers *-- aegis_control.depthai_cameras_driver
+aegis_control.start_drivers *-- aegis_control.pylon_cameras_driver
 aegis_control.start_drivers *-- aegis_control.config.controllers
-aegis_control.depthai_cameras_driver *-- aegis_control.config.cameras
+aegis_control.depthai_cameras_driver *-up- aegis_control.config.cameras.depthai_cameras
+aegis_control.depthai_cameras_driver *-up- aegis_control.config.cameras.yolo
+aegis_control.pylon_cameras_driver *-left- aegis_control.config.cameras.pylon_cameras
 
 aegis_moveit_config.move_group *-- aegis_moveit_config.config
 aegis_moveit_config.move_group *-- aegis_description.config.ur5e
