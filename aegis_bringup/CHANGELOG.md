@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-44](https://github.com/AGH-CEAI/aegis_ros/pull/44) - Updated launch files diagram.
 * [PR-25](https://github.com/AGH-CEAI/aegis_ros/pull/25) - Updated launch files diagram.
 * [PR-17](https://github.com/AGH-CEAI/aegis_ros/pull/17) - Updated launch files diagram.
 * [PR-16](https://github.com/AGH-CEAI/aegis_ros/pull/16) - Updated launch files diagram.

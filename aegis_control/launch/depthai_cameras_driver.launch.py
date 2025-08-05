@@ -15,37 +15,42 @@ class DepthAIConfig:
     def __init__(self):
         self._modify_config()
 
-        self.name_pro_scene = LaunchConfiguration(
-            "name_pro_scene", default="oak_d_pro_scene"
-        )
         # TODO(issue#26) Introduce a mock for the DepthAI cameras
         self.mock_hardware = LaunchConfiguration("mock_hardware", default="false")
 
-        self.cam_model_pro_scene = LaunchConfiguration(
-            "camera_model_pro_scene", default="OAK-D-S2"
+        self.cam_scene_name = LaunchConfiguration("cam_scene_name", default="cam_scene")
+        self.cam_scene_model = LaunchConfiguration(
+            "cam_scene_model", default="OAK-D-S2"
         )
-        self.parent_frame_pro_scene = LaunchConfiguration(
-            "parent_frame_pro_scene", default="cell"
+        self.cam_scene_parent_frame = LaunchConfiguration(
+            "cam_scene_parent_frame", default="cell"
         )
-        self.base_frame_pro_scene = LaunchConfiguration(
-            "base_frame_pro_scene", default="oak_d_pro_scene_frame"
+        self.cam_scene_base_frame = LaunchConfiguration(
+            "cam_scene_base_frame", default="cam_scene_frame"
         )
-        self.cam_pos_x_pro_scene = LaunchConfiguration(
-            "cam_pos_x_pro_scene", default="0.014"
+        self.cam_scene_x = LaunchConfiguration("cam_scene_x", default="0.014")
+        self.cam_scene_y = LaunchConfiguration("cam_scene_y", default="0.33")
+        self.cam_scene_z = LaunchConfiguration("cam_scene_z", default="1.972")
+        self.cam_scene_roll = LaunchConfiguration("cam_scene_roll", default="1.5708")
+        self.cam_scene_pitch = LaunchConfiguration("cam_scene_pitch", default="1.5708")
+        self.cam_scene_yaw = LaunchConfiguration("cam_scene_yaw", default="0")
+
+        self.cam_tool_name = LaunchConfiguration("cam_tool_name", default="cam_tool")
+        self.cam_tool_model = LaunchConfiguration(
+            "cam_tool_model", default="OAK-D-SR-POE"
         )
-        self.cam_pos_y_pro_scene = LaunchConfiguration(
-            "cam_pos_y_pro_scene", default="0.33"
+        self.cam_tool_parent_frame = LaunchConfiguration(
+            "cam_tool_parent_frame", default="camera_tool"
         )
-        self.cam_pos_z_pro_scene = LaunchConfiguration(
-            "cam_pos_z_pro_scene", default="1.972"
+        self.cam_tool_base_frame = LaunchConfiguration(
+            "cam_tool_base_frame", default="cam_tool_frame"
         )
-        self.cam_roll_pro_scene = LaunchConfiguration(
-            "cam_roll_pro_scene", default="1.5708"
-        )
-        self.cam_pitch_pro_scene = LaunchConfiguration(
-            "cam_pitch_pro_scene", default="1.5708"
-        )
-        self.cam_yaw_pro_scene = LaunchConfiguration("cam_yaw_pro_scene", default="0")
+        self.cam_tool_x = LaunchConfiguration("cam_tool_x", default="0.003")
+        self.cam_tool_y = LaunchConfiguration("cam_tool_y", default="-0.019")
+        self.cam_tool_z = LaunchConfiguration("cam_tool_z", default="-0.039")
+        self.cam_tool_roll = LaunchConfiguration("cam_tool_roll", default="0")
+        self.cam_tool_pitch = LaunchConfiguration("cam_tool_pitch", default="1.5701")
+        self.cam_tool_yaw = LaunchConfiguration("cam_tool_yaw", default="0")
 
     def _modify_config(self) -> None:
         # TODO(issue#31) Fix YOLO configuration not being applied correctly
@@ -74,8 +79,8 @@ class DepthAIConfig:
         with open(cam_src_params_path, "r") as file:
             cam_params = yaml.safe_load(file)
 
-        cam_params["/oak_d_pro_scene"]["ros__parameters"]["nn"]["i_nn_config_path"] = (
-            str(self.yolo_cfg_path)
+        cam_params["/cam_scene"]["ros__parameters"]["nn"]["i_nn_config_path"] = str(
+            self.yolo_cfg_path
         )
 
         with open(self.cam_params_path, "w") as file:
@@ -93,36 +98,76 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         log_level = "debug"
 
     cfg = DepthAIConfig()
-    name_pro_scene = cfg.name_pro_scene.perform(context)
+    cam_scene_name = cfg.cam_scene_name.perform(context)
+    cam_tool_name = cfg.cam_tool_name.perform(context)
 
     # TODO(issue#23): Investigate the necessity of tf parameters
-    tf_params_pro_scene = {
+    tf_params_cam_scene = {
         "camera": {
             "i_publish_tf_from_calibration": False,
-            "i_tf_tf_prefix": name_pro_scene,
-            "i_tf_camera_model": cfg.cam_model_pro_scene,
-            "i_tf_parent_frame": cfg.parent_frame_pro_scene.perform(context),
-            "i_tf_base_frame": cfg.base_frame_pro_scene.perform(context),
-            "i_tf_cam_pos_x": cfg.cam_pos_x_pro_scene.perform(context),
-            "i_tf_cam_pos_y": cfg.cam_pos_y_pro_scene.perform(context),
-            "i_tf_cam_pos_z": cfg.cam_pos_z_pro_scene.perform(context),
-            "i_tf_cam_roll": cfg.cam_roll_pro_scene.perform(context),
-            "i_tf_cam_pitch": cfg.cam_pitch_pro_scene.perform(context),
-            "i_tf_cam_yaw": cfg.cam_yaw_pro_scene.perform(context),
+            "i_tf_tf_prefix": cam_scene_name,
+            "i_tf_camera_model": cfg.cam_scene_model,
+            "i_tf_parent_frame": cfg.cam_scene_parent_frame.perform(context),
+            "i_tf_base_frame": cfg.cam_scene_base_frame.perform(context),
+            "i_tf_cam_pos_x": cfg.cam_scene_x.perform(context),
+            "i_tf_cam_pos_y": cfg.cam_scene_y.perform(context),
+            "i_tf_cam_pos_z": cfg.cam_scene_z.perform(context),
+            "i_tf_cam_roll": cfg.cam_scene_roll.perform(context),
+            "i_tf_cam_pitch": cfg.cam_scene_pitch.perform(context),
+            "i_tf_cam_yaw": cfg.cam_scene_yaw.perform(context),
         }
     }
 
+    tf_params_cam_tool = {
+        "camera": {
+            "i_publish_tf_from_calibration": False,
+            "i_tf_tf_prefix": cam_tool_name,
+            "i_tf_camera_model": cfg.cam_tool_model,
+            "i_tf_parent_frame": cfg.cam_tool_parent_frame.perform(context),
+            "i_tf_base_frame": cfg.cam_tool_base_frame.perform(context),
+            "i_tf_cam_pos_x": cfg.cam_tool_x.perform(context),
+            "i_tf_cam_pos_y": cfg.cam_tool_y.perform(context),
+            "i_tf_cam_pos_z": cfg.cam_tool_z.perform(context),
+            "i_tf_cam_roll": cfg.cam_tool_roll.perform(context),
+            "i_tf_cam_pitch": cfg.cam_tool_pitch.perform(context),
+            "i_tf_cam_yaw": cfg.cam_tool_yaw.perform(context),
+        }
+    }
+
+    camera_scene_node = create_camera_node(
+        cfg.mock_hardware,
+        cam_scene_name,
+        tf_params_cam_scene,
+        cfg.cam_params_path,
+        log_level,
+    )
+    camera_tool_node = create_camera_node(
+        cfg.mock_hardware,
+        cam_tool_name,
+        tf_params_cam_tool,
+        cfg.cam_params_path,
+        log_level,
+    )
+    rectify_scene_node = create_rectify_node(cfg.mock_hardware, cam_scene_name, "/rgb")
+    rectify_tool_right_node = create_rectify_node(
+        cfg.mock_hardware, cam_tool_name, "/right"
+    )
+    rectify_tool_left_node = create_rectify_node(
+        cfg.mock_hardware, cam_tool_name, "/left"
+    )
+    spatial_bb_node = create_spatial_bb_node(
+        cfg.mock_hardware, cam_scene_name, cfg.cam_params_path
+    )
+    point_cloud_node = create_point_cloud_node(cfg.mock_hardware, cam_scene_name)
+
     return [
-        create_camera_node(
-            cfg.mock_hardware,
-            name_pro_scene,
-            tf_params_pro_scene,
-            cfg.cam_params_path,
-            log_level,
-        ),
-        create_rectify_node(cfg.mock_hardware, name_pro_scene),
-        create_spatial_bb_node(cfg.mock_hardware, name_pro_scene, cfg.cam_params_path),
-        create_point_cloud_node(cfg.mock_hardware, name_pro_scene),
+        camera_scene_node,
+        camera_tool_node,
+        rectify_scene_node,
+        rectify_tool_right_node,
+        rectify_tool_left_node,
+        spatial_bb_node,
+        point_cloud_node,
     ]
 
 
@@ -153,8 +198,9 @@ def create_camera_node(
 
 
 def create_rectify_node(
-    mock_hardware: LaunchConfiguration, name: str
+    mock_hardware: LaunchConfiguration, name: str, type: str
 ) -> LoadComposableNodes:
+    side = "" if type == "/rgb" else "_" + type[1:]
     return LoadComposableNodes(
         condition=UnlessCondition(mock_hardware),
         target_container=name + "_container",
@@ -162,17 +208,17 @@ def create_rectify_node(
             ComposableNode(
                 package="image_proc",
                 plugin="image_proc::RectifyNode",
-                name=name + "_rectify_color_node",
+                name=name + side + "_rectify_color_node",
                 remappings=[
-                    ("image", name + "/rgb/image_raw"),
-                    ("camera_info", name + "/rgb/camera_info"),
-                    ("image_rect", name + "/rgb/image_rect"),
-                    ("image_rect/compressed", name + "/rgb/image_rect/compressed"),
+                    ("image", name + type + "/image_raw"),
+                    ("camera_info", name + type + "/camera_info"),
+                    ("image_rect", name + type + "/image_rect"),
+                    ("image_rect/compressed", name + type + "/image_rect/compressed"),
                     (
                         "image_rect/compressedDepth",
-                        name + "/rgb/image_rect/compressedDepth",
+                        name + type + "/image_rect/compressedDepth",
                     ),
-                    ("image_rect/theora", name + "/rgb/image_rect/theora"),
+                    ("image_rect/theora", name + type + "/image_rect/theora"),
                 ],
             )
         ],

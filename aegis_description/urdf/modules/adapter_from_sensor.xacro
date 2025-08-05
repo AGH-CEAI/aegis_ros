@@ -1,6 +1,18 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:include filename="$(find aegis_description)/urdf/cylinders_inertial.xacro"/>
+  <xacro:macro name="cylinders_inertial" params="r1 l1 r2 l2 m">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia
+        ixx="${0.08333 * m * (3 * (r1 * r1 + r2 * r2) + l1 * l1 + l2 * l2)}"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="${0.08333 * m * (3 * (r1 * r1 + r2 * r2) + l1 * l1 + l2 * l2)}"
+        iyz="0.0"
+        izz="${0.5 * m * (r1 * r1 + r2 * r2)}"
+      />
+    </inertial>
+  </xacro:macro>
 
   <xacro:macro name="adapter_from_sensor" params="prefix parent">
     <xacro:property name="mass" value="0.217"/>

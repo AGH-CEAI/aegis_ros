@@ -27,7 +27,7 @@
       internal_filter_rate="$(arg internal_filter_rate)"
       use_hardware_biasing="$(arg use_hardware_biasing)"
     >
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
     </xacro:net_ft_sensor>
   </xacro:macro>
 </robot>
