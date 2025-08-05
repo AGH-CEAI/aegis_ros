@@ -20,6 +20,7 @@
           <mesh filename="package://aegis_description/meshes/camera_tool_basler.dae" scale="0.001 0.001 0.001"/>
         </geometry>
       </visual>
+      <!-- TODO(issue#46): Fix inertial parameters for tool cameras -->
       <inertial>
         <mass value="${camera_mass}"/>
         <inertia ixx="0.3403" ixy="0.0" ixz="0.0" iyy="0.3403" iyz="0.0" izz="0.039606138"/>
