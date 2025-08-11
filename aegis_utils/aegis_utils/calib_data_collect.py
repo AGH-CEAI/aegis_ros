@@ -1,15 +1,18 @@
-import rclpy
-from rclpy.node import Node
-from rclpy.executors import SingleThreadedExecutor
-from sensor_msgs.msg import Image
-from cv_bridge import CvBridge
-import threading
-import cv2
-import time
-import os
-import yaml
 import argparse
+import os
+import threading
+import time
 from typing import Optional
+
+import cv2
+import yaml
+from cv_bridge import CvBridge
+from sensor_msgs.msg import Image
+
+import rclpy
+from rclpy.executors import SingleThreadedExecutor
+from rclpy.node import Node
+
 from ament_index_python.packages import get_package_share_directory
 from aegis_director.robot_director import RobotDirector
 
