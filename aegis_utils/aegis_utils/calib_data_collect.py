@@ -48,41 +48,10 @@ def get_timestamp(stamp):
     return stamp.sec + stamp.nanosec * 1e-9
 
 
-class ROSInterface:
-    _instance: Optional["ROSInterface"] = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(ROSInterface, cls).__new__(cls)
-        return cls._instance
-
-    def __init__(self):
-        if hasattr(self, "_initialized") and self._initialized:
-            return
-        rclpy.init()
-        self.robot_director = RobotDirector(synchronous=True)
-        joint_state = self.robot_director._get_joint_states()
-        self.joint_names = list(joint_state.name)[1:]
-        self.dof_home = {
-            "shoulder_pan_joint": 0.0,
-            "shoulder_lift_joint": -2.09,
-            "elbow_joint": 2.09,
-            "wrist_1_joint": -1.57,
-            "wrist_2_joint": -1.57,
-            "wrist_3_joint": 0.0,
-            "robotiq_hande_left_finger_joint": 0.025,
-        }
-        self._initialized = True
-
-    def move_to_home(self):
-        self.robot_director.joint_move(
-            joint_positions=self.dof_home, max_vel=0.5, max_accel=0.5
-        )
-
-
 class CalibCollectNode(Node):
-    def __init__(self, image_topic, data_dir):
+    def __init__(self, robot, image_topic, data_dir):
         super().__init__("calib_collect_node")
+        self.robot = robot
         self.bridge = CvBridge()
         self.image = None
         self.timestamp = None
@@ -90,6 +59,21 @@ class CalibCollectNode(Node):
         self.data_dir = data_dir
         self.sub = self.create_subscription(Image, image_topic, self.image_callback, 10)
         self.get_logger().info(f"Subscribed to image topic: {image_topic}")
+
+    def move_to_home(self):
+        self.robot.joint_move(
+            joint_positions={
+                "shoulder_pan_joint": 0.0,
+                "shoulder_lift_joint": -2.09,
+                "elbow_joint": 2.09,
+                "wrist_1_joint": -1.57,
+                "wrist_2_joint": -1.57,
+                "wrist_3_joint": 0.0,
+                "robotiq_hande_left_finger_joint": 0.025,
+            }, 
+            max_vel=0.5,
+            max_accel=0.5
+        )
 
     def image_callback(self, msg):
         try:
@@ -133,14 +117,14 @@ class CalibCollectNode(Node):
 
 
 def collect_data(
-    node: CalibCollectNode, robot: ROSInterface, positions, data_dir, camera_name
+    node: CalibCollectNode, robot, positions, data_dir, camera_name
 ):
-    robot.move_to_home()
+    node.move_to_home()
     time.sleep(2)
 
     for i, joint_dict in enumerate(positions):
         node.log(f"Moving to view position {i}")
-        robot.robot_director.joint_move(
+        robot.joint_move(
             joint_positions=joint_dict, max_vel=0.5, max_accel=0.5
         )
         time.sleep(3)
@@ -149,7 +133,7 @@ def collect_data(
         node.log("Waiting for image...")
         image = node.get_image(time_start)
         if image is not None:
-            tcp_pose = robot.robot_director.get_tcp_pose()
+            tcp_pose = robot.get_tcp_pose()
             img_path = os.path.join(data_dir, f"{camera_name}_view_{i}.png")
             tcp_path = os.path.splitext(img_path)[0] + ".yaml"
             node.save_image(image, img_path)
@@ -160,7 +144,7 @@ def collect_data(
         time.sleep(1)
 
     node.log("Moving back to home")
-    robot.move_to_home()
+    node.move_to_home()
     time.sleep(2)
 
 
@@ -197,8 +181,9 @@ def main():
 
     os.makedirs(data_dir, exist_ok=True)
 
-    robot = ROSInterface()
-    collect_node = CalibCollectNode(image_topic, data_dir)
+    rclpy.init()
+    robot = RobotDirector(synchronous=True)
+    collect_node = CalibCollectNode(robot, image_topic, data_dir)
     executor = SingleThreadedExecutor()
     executor.add_node(collect_node)
     spin_thread = threading.Thread(target=executor.spin, daemon=True)
