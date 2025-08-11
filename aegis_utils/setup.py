@@ -23,7 +23,7 @@ setup(
     zip_safe=True,
     maintainer="Jakub Plachno",
     maintainer_email="sivral@proton.me",
-    description="A package",
+    description="A package containing utility functions for the Aegis robot station",
     license="Apache-2.0",
     entry_points={
         "console_scripts": [

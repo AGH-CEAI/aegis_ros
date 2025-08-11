@@ -3,7 +3,7 @@
 <package format="3">
   <name>aegis_utils</name>
   <version>0.0.0</version>
-  <description>A package containing utility functions for the Aegis robot station.</description>
+  <description>A package containing utility functions for the Aegis robot station</description>
   <maintainer email="ceai@agh.edu.pl">AGH Center of Excellence in Artificial Intelligence</maintainer>
 
   <license>Apache-2.0</license>
