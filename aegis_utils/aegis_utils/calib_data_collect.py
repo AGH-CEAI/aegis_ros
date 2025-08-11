@@ -45,13 +45,6 @@ def get_timestamp(stamp):
     return stamp.sec + stamp.nanosec * 1e-9
 
 
-def get_package_src_directory(package_name):
-    curr = os.path.dirname(os.path.abspath(__file__))
-    while curr != "/" and "src" not in os.listdir(curr):
-        curr = os.path.dirname(curr)
-    return os.path.join(curr, "src", "aegis_ros", package_name)
-
-
 class ROSInterface:
     _instance: Optional["ROSInterface"] = None
 
@@ -85,13 +78,13 @@ class ROSInterface:
 
 
 class CalibCollectNode(Node):
-    def __init__(self, image_topic, save_dir):
+    def __init__(self, image_topic, data_dir):
         super().__init__("calib_collect_node")
         self.bridge = CvBridge()
         self.image = None
         self.timestamp = None
         self.mutex = threading.Lock()
-        self.save_dir = save_dir
+        self.data_dir = data_dir
         self.sub = self.create_subscription(Image, image_topic, self.image_callback, 10)
         self.get_logger().info(f"Subscribed to image topic: {image_topic}")
 
@@ -136,8 +129,8 @@ class CalibCollectNode(Node):
         self.get_logger().info(msg)
 
 
-def run_procedure(
-    node: CalibCollectNode, robot: ROSInterface, positions, save_dir, camera_name
+def collect_data(
+    node: CalibCollectNode, robot: ROSInterface, positions, data_dir, camera_name
 ):
     robot.move_to_home()
     time.sleep(2)
@@ -154,7 +147,7 @@ def run_procedure(
         image = node.get_image(time_start)
         if image is not None:
             tcp_pose = robot.robot_director.get_tcp_pose()
-            img_path = os.path.join(save_dir, f"{camera_name}_view_{i}.png")
+            img_path = os.path.join(data_dir, f"{camera_name}_view_{i}.png")
             tcp_path = os.path.splitext(img_path)[0] + ".yaml"
             node.save_image(image, img_path)
             node.save_tcp(tcp_pose, tcp_path)
@@ -178,6 +171,13 @@ def main():
         choices=CAMERA_CONFIG.keys(),
         help="Which camera: scene, tool_front_right, tool_front_left, tool_right, tool_left",
     )
+    parser.add_argument(
+        "-p",
+        "--path",
+        type=str,
+        default=None,
+        help="Optional path to calibration data folder",
+    )
     args = parser.parse_args()
 
     package_share_path = os.path.join(get_package_share_directory("aegis_utils"))
@@ -187,15 +187,15 @@ def main():
     )
     image_topic = camera_info["topic"]
 
-    save_dir = os.path.join(
-        get_package_src_directory("aegis_utils"),
-        "calibration_data",
-        args.camera,
-    )
-    os.makedirs(save_dir, exist_ok=True)
+    if args.path:
+        data_dir = os.path.join(os.path.expanduser(args.path), args.camera)
+    else:
+        data_dir = os.path.expanduser(f"~/ceai_ws/calibration_data/{args.camera}")
+
+    os.makedirs(data_dir, exist_ok=True)
 
     robot = ROSInterface()
-    collect_node = CalibCollectNode(image_topic, save_dir)
+    collect_node = CalibCollectNode(image_topic, data_dir)
     executor = SingleThreadedExecutor()
     executor.add_node(collect_node)
     spin_thread = threading.Thread(target=executor.spin, daemon=True)
@@ -203,7 +203,7 @@ def main():
 
     try:
         positions = load_positions(pos_config_path)
-        run_procedure(collect_node, robot, positions, save_dir, args.camera)
+        collect_data(collect_node, robot, positions, data_dir, args.camera)
     finally:
         collect_node.destroy_node()
         rclpy.shutdown()
