@@ -2,7 +2,6 @@ import argparse
 import os
 import threading
 import time
-from typing import Optional
 
 import cv2
 import yaml
@@ -49,14 +48,14 @@ def get_timestamp(stamp):
 
 
 class CalibCollectNode(Node):
-    def __init__(self, robot, image_topic, data_dir):
+    def __init__(self, robot, image_topic, data_path):
         super().__init__("calib_collect_node")
         self.robot = robot
         self.bridge = CvBridge()
         self.image = None
         self.timestamp = None
         self.mutex = threading.Lock()
-        self.data_dir = data_dir
+        self.data_path = data_path
         self.sub = self.create_subscription(Image, image_topic, self.image_callback, 10)
         self.get_logger().info(f"Subscribed to image topic: {image_topic}")
 
@@ -70,9 +69,9 @@ class CalibCollectNode(Node):
                 "wrist_2_joint": -1.57,
                 "wrist_3_joint": 0.0,
                 "robotiq_hande_left_finger_joint": 0.025,
-            }, 
+            },
             max_vel=0.5,
-            max_accel=0.5
+            max_accel=0.5,
         )
 
     def image_callback(self, msg):
@@ -116,17 +115,13 @@ class CalibCollectNode(Node):
         self.get_logger().info(msg)
 
 
-def collect_data(
-    node: CalibCollectNode, robot, positions, data_dir, camera_name
-):
+def collect_data(node: CalibCollectNode, robot, positions, data_path, camera_name):
     node.move_to_home()
     time.sleep(2)
 
     for i, joint_dict in enumerate(positions):
         node.log(f"Moving to view position {i}")
-        robot.joint_move(
-            joint_positions=joint_dict, max_vel=0.5, max_accel=0.5
-        )
+        robot.joint_move(joint_positions=joint_dict, max_vel=0.5, max_accel=0.5)
         time.sleep(3)
 
         time_start = node.get_clock().now().nanoseconds / 1e9
@@ -134,7 +129,7 @@ def collect_data(
         image = node.get_image(time_start)
         if image is not None:
             tcp_pose = robot.get_tcp_pose()
-            img_path = os.path.join(data_dir, f"{camera_name}_view_{i}.png")
+            img_path = os.path.join(data_path, f"{camera_name}_view_{i}.png")
             tcp_path = os.path.splitext(img_path)[0] + ".yaml"
             node.save_image(image, img_path)
             node.save_tcp(tcp_pose, tcp_path)
@@ -175,15 +170,15 @@ def main():
     image_topic = camera_info["topic"]
 
     if args.path:
-        data_dir = os.path.join(os.path.expanduser(args.path), args.camera)
+        data_path = os.path.join(os.path.expanduser(args.path), args.camera)
     else:
-        data_dir = os.path.expanduser(f"~/ceai_ws/calibration_data/{args.camera}")
+        data_path = os.path.expanduser(f"~/ceai_ws/calibration_data/{args.camera}")
 
-    os.makedirs(data_dir, exist_ok=True)
+    os.makedirs(data_path, exist_ok=True)
 
     rclpy.init()
     robot = RobotDirector(synchronous=True)
-    collect_node = CalibCollectNode(robot, image_topic, data_dir)
+    collect_node = CalibCollectNode(robot, image_topic, data_path)
     executor = SingleThreadedExecutor()
     executor.add_node(collect_node)
     spin_thread = threading.Thread(target=executor.spin, daemon=True)
@@ -191,7 +186,7 @@ def main():
 
     try:
         positions = load_positions(pos_config_path)
-        collect_data(collect_node, robot, positions, data_dir, args.camera)
+        collect_data(collect_node, robot, positions, data_path, args.camera)
     finally:
         collect_node.destroy_node()
         rclpy.shutdown()
