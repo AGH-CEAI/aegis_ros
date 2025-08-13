@@ -42,3 +42,13 @@ ros2 run aegis_utils calib_data_collect -c tool_front_right -p ~/Documents/calib
 > ```yaml
 > i_laser_dot_brightness: 0
 > ```
+
+## Calibration of camera intrinsics
+This tool computes the intrinsic parameters of a camera using previously collected calibration images.
+It processes a set of chessboard pattern images and saves the resulting camera matrix and distortion coefficients.
+
+### Example usage
+It accepts the same arguments and uses the same default data path as the data collection tool described above. For example:
+```bash
+ros2 run aegis_utils calib_intrinsics -c tool_front_right
+```
