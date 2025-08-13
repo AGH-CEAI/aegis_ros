@@ -2,17 +2,20 @@ import argparse
 import os
 import threading
 import time
+from typing import List, Dict, Optional
 
 import cv2
+import numpy as np
 import yaml
 from cv_bridge import CvBridge
-from sensor_msgs.msg import Image
 
 import rclpy
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
-
 from ament_index_python.packages import get_package_share_directory
+from builtin_interfaces.msg import Time
+from sensor_msgs.msg import Image
+
 from aegis_director.robot_director import RobotDirector
 
 
@@ -37,18 +40,18 @@ CAMERA_CONFIG = {
 }
 
 
-def load_positions(config_file_path):
+def load_positions(config_file_path: str) -> List[Dict[str, float]]:
     with open(config_file_path, "r") as f:
         data = yaml.safe_load(f)
     return data.get("positions", data)
 
 
-def get_timestamp(stamp):
+def get_timestamp(stamp: Time) -> float:
     return stamp.sec + stamp.nanosec * 1e-9
 
 
 class CalibCollectNode(Node):
-    def __init__(self, robot, image_topic, data_path):
+    def __init__(self, robot: RobotDirector, image_topic: str, data_path: str) -> None:
         super().__init__("calib_collect_node")
         self.robot = robot
         self.bridge = CvBridge()
@@ -59,7 +62,7 @@ class CalibCollectNode(Node):
         self.sub = self.create_subscription(Image, image_topic, self.image_callback, 10)
         self.get_logger().info(f"Subscribed to image topic: {image_topic}")
 
-    def move_to_home(self):
+    def move_to_home(self) -> None:
         self.robot.joint_move(
             joint_positions={
                 "shoulder_pan_joint": 0.0,
@@ -74,7 +77,7 @@ class CalibCollectNode(Node):
             max_accel=0.5,
         )
 
-    def image_callback(self, msg):
+    def image_callback(self, msg: Image) -> None:
         try:
             with self.mutex:
                 self.image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
@@ -82,7 +85,9 @@ class CalibCollectNode(Node):
         except Exception as e:
             self.get_logger().error(f"Failed to convert image: {e}")
 
-    def get_image(self, time_start, timeout=3.0):
+    def get_image(
+        self, time_start: float, timeout: float = 3.0
+    ) -> Optional[np.ndarray]:
         while self.get_clock().now().nanoseconds / 1e9 - time_start < timeout:
             with self.mutex:
                 if self.image is not None and self.timestamp is not None:
@@ -91,14 +96,14 @@ class CalibCollectNode(Node):
             time.sleep(1)
         return None
 
-    def save_image(self, image, path):
+    def save_image(self, image: Optional[np.ndarray], path: str) -> None:
         if image is None:
             self.get_logger().warn("No image to save")
             return
         cv2.imwrite(path, image)
         self.get_logger().info(f"Saved image to: {path}")
 
-    def save_tcp(self, tcp_pose, path):
+    def save_tcp(self, tcp_pose: Dict[str, List[float]], path: str) -> None:
         with open(path, "w") as f:
             yaml.dump(
                 {
@@ -111,11 +116,17 @@ class CalibCollectNode(Node):
             )
         self.get_logger().info(f"Saved TCP pose to: {path}")
 
-    def log(self, msg):
+    def log(self, msg: str) -> None:
         self.get_logger().info(msg)
 
 
-def collect_data(node: CalibCollectNode, robot, positions, data_path, camera_name):
+def collect_data(
+    node: CalibCollectNode,
+    robot: RobotDirector,
+    positions: List[Dict[str, float]],
+    data_path: str,
+    camera_name: str,
+) -> None:
     node.move_to_home()
     time.sleep(2)
 
@@ -143,7 +154,7 @@ def collect_data(node: CalibCollectNode, robot, positions, data_path, camera_nam
     time.sleep(2)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-c",
