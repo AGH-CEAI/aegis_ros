@@ -28,6 +28,7 @@ setup(
     entry_points={
         "console_scripts": [
             "calib_data_collect = aegis_utils.calib_data_collect:main",
+            "calib_intrinsics = aegis_utils.calib_intrinsics:main",
         ],
     },
 )
