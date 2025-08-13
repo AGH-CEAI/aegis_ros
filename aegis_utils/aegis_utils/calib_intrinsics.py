@@ -14,7 +14,7 @@ CAMERA_CONFIG = {
     "scene": {},
 }
 
-def calibrate_intrinsics(data_path):
+def calibrate_intrinsics(data_path: str) -> None:
     squares_x = 9
     squares_y = 6
     square_size = 0.03
@@ -81,7 +81,7 @@ def calibrate_intrinsics(data_path):
     print(f"Intrinsics saved to {intrinsics_path}")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-c",
