@@ -14,6 +14,7 @@ CAMERA_CONFIG = {
     "scene": {},
 }
 
+
 def calibrate_intrinsics(data_path: str) -> None:
     squares_x = 9
     squares_y = 6
@@ -21,7 +22,9 @@ def calibrate_intrinsics(data_path: str) -> None:
     marker_size = 0.022
 
     aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_1000)
-    board = cv2.aruco.CharucoBoard((squares_x, squares_y), square_size, marker_size, aruco_dict)
+    board = cv2.aruco.CharucoBoard(
+        (squares_x, squares_y), square_size, marker_size, aruco_dict
+    )
     board.setLegacyPattern(True)
 
     images = natsorted(glob.glob(os.path.join(os.path.expanduser(data_path), "*.png")))
@@ -41,8 +44,12 @@ def calibrate_intrinsics(data_path: str) -> None:
 
         corners, ids, _ = cv2.aruco.detectMarkers(img_gray, aruco_dict)
         if ids is not None and len(ids) > 0:
-            retval, charuco_corners, charuco_ids = cv2.aruco.interpolateCornersCharuco(corners, ids, img_gray, board)
-            print(f"{retval} ChArUco corners were detected in image {os.path.basename(fname)}")
+            retval, charuco_corners, charuco_ids = cv2.aruco.interpolateCornersCharuco(
+                corners, ids, img_gray, board
+            )
+            print(
+                f"{retval} ChArUco corners were detected in image {os.path.basename(fname)}"
+            )
             if charuco_ids is not None and len(charuco_ids) > 3:
                 all_corners.append(charuco_corners)
                 all_ids.append(charuco_ids)
@@ -59,7 +66,7 @@ def calibrate_intrinsics(data_path: str) -> None:
         board=board,
         imageSize=image_size,
         cameraMatrix=None,
-        distCoeffs=None
+        distCoeffs=None,
     )
 
     print("Camera matrix (K):\n", camera_matrix)
@@ -71,10 +78,12 @@ def calibrate_intrinsics(data_path: str) -> None:
         "square_size": square_size,
         "marker_size": marker_size,
         "squares_x": squares_x,
-        "squares_y": squares_y
+        "squares_y": squares_y,
     }
 
-    intrinsics_path = os.path.join(data_path, f"{os.path.basename(data_path)}_camera_intrinsics.json")
+    intrinsics_path = os.path.join(
+        data_path, f"{os.path.basename(data_path)}_camera_intrinsics.json"
+    )
     with open(intrinsics_path, "w") as f:
         json.dump(calib_data, f, indent=4)
 
