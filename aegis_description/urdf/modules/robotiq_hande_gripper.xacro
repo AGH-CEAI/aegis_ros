@@ -10,6 +10,10 @@
   <xacro:arg name="slave_id" default="9"/>
   <xacro:arg name="frequency_hz" default="100"/>
 
+  <xacro:arg name="create_socat_tty" default="true"/>
+  <xacro:arg name="ip_adress" default="aegis_ur"/>
+  <xacro:arg name="port" default="54321"/>
+
   <xacro:include filename="$(find robotiq_hande_description)/urdf/robotiq_hande_gripper.xacro"/>
 
   <!-- TODO(issue#34): pass initial position from the YAML file analogous to the ur_definition -->
@@ -27,6 +31,9 @@
       stop_bit="$(arg stop_bit)"
       slave_id="$(arg slave_id)"
       frequency_hz="$(arg frequency_hz)"
+      create_socat_tty="$(arg create_socat_tty)"
+      ip_adress="$(arg ip_adress)"
+      port="$(arg port)"
       use_fake_hardware="${mock_hardware}"
     />
   </xacro:macro>
