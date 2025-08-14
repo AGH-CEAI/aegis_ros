@@ -1,7 +1,6 @@
 import argparse
-import glob
 import json
-import os
+from pathlib import Path
 
 import cv2
 from natsort import natsorted
@@ -15,7 +14,7 @@ CAMERA_CONFIG = {
 }
 
 
-def calibrate_intrinsics(data_path: str) -> None:
+def calibrate_intrinsics(data_path: Path) -> None:
     squares_x = 9
     squares_y = 6
     square_size = 0.03
@@ -27,9 +26,9 @@ def calibrate_intrinsics(data_path: str) -> None:
     )
     board.setLegacyPattern(True)
 
-    images = natsorted(glob.glob(os.path.join(os.path.expanduser(data_path), "*.png")))
+    image_paths = natsorted(data_path.glob("*_image_*.png"))
 
-    if len(images) == 0:
+    if not image_paths:
         print(f"No images found in {data_path}")
         return
 
@@ -37,8 +36,8 @@ def calibrate_intrinsics(data_path: str) -> None:
     all_ids = []
     image_size = None
 
-    for fname in images:
-        img = cv2.imread(fname)
+    for image_path in image_paths:
+        img = cv2.imread(str(image_path))
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         image_size = img_gray.shape[::-1]
 
@@ -48,7 +47,7 @@ def calibrate_intrinsics(data_path: str) -> None:
                 corners, ids, img_gray, board
             )
             print(
-                f"{retval} ChArUco corners were detected in image {os.path.basename(fname)}"
+                f"{retval} ChArUco corners were detected in image {image_path.name}"
             )
             if charuco_ids is not None and len(charuco_ids) > 3:
                 all_corners.append(charuco_corners)
@@ -81,9 +80,7 @@ def calibrate_intrinsics(data_path: str) -> None:
         "squares_y": squares_y,
     }
 
-    intrinsics_path = os.path.join(
-        data_path, f"{os.path.basename(data_path)}_camera_intrinsics.json"
-    )
+    intrinsics_path = data_path / f"{data_path.name}_camera_intrinsics.json"
     with open(intrinsics_path, "w") as f:
         json.dump(calib_data, f, indent=4)
 
@@ -110,9 +107,9 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.path:
-        data_path = os.path.join(os.path.expanduser(args.path), args.camera)
+        data_path = Path(args.path).expanduser() / args.camera
     else:
-        data_path = os.path.expanduser(f"~/ceai_ws/calibration_data/{args.camera}")
+        data_path = Path("~/ceai_ws/calibration_data").expanduser() / args.camera
 
     calibrate_intrinsics(data_path)
 
