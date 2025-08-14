@@ -17,7 +17,12 @@ CAMERA_CONFIG = {
 
 
 def calibrate_intrinsics(
-    data_path: Path, squares_x, squares_y, square_size, marker_size, aruco_dict
+    data_path: Path,
+    squares_x: int,
+    squares_y: int,
+    square_size: float,
+    marker_size: float,
+    aruco_dict: cv2.aruco_Dictionary,
 ) -> None:
     board = cv2.aruco.CharucoBoard(
         (squares_x, squares_y),
