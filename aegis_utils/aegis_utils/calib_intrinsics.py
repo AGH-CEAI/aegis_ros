@@ -119,9 +119,9 @@ def main() -> None:
         board_cfg = yaml.safe_load(f)
 
     if args.camera.startswith("tool"):
-        board_params = board_cfg["tool_camera"]
+        board_params = board_cfg["tool"]
     else:
-        board_params = board_cfg["scene_camera"]
+        board_params = board_cfg["scene"]
 
     squares_x = board_params["squares_x"]
     squares_y = board_params["squares_y"]
