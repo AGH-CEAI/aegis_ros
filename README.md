@@ -18,6 +18,7 @@ A complete suite of ROS 2 packages for the Aegis UR5e cobot station.
 * [aegis_description](./aegis_description/README.md): The description and configuration files of the Aegis robot station.
 * [aegis_director](./aegis_director/README.md): The "main" function for the robot workflow.
 * [aegis_moveit_config](./aegis_moveit_config/README.md): The configuration to run the [MoveIt 2](https://moveit.picknik.ai/main/index.html) framework.
+* [aegis_utils](./aegis_utils/README.md): Various utility functions and tools.
 
 ---
 

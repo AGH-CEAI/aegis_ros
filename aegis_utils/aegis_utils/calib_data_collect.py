@@ -1,19 +1,19 @@
 import argparse
-import os
 import threading
 import time
+from pathlib import Path
 from typing import List, Dict, Optional
 
 import cv2
 import numpy as np
 import yaml
-from cv_bridge import CvBridge
 
 import rclpy
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
 from ament_index_python.packages import get_package_share_directory
 from builtin_interfaces.msg import Time
+from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 
 from aegis_director.robot_director import RobotDirector
@@ -40,7 +40,7 @@ CAMERA_CONFIG = {
 }
 
 
-def load_positions(config_file_path: str) -> List[Dict[str, float]]:
+def load_positions(config_file_path: Path) -> List[Dict[str, float]]:
     with open(config_file_path, "r") as f:
         data = yaml.safe_load(f)
     return data.get("positions", data)
@@ -51,7 +51,7 @@ def get_timestamp(stamp: Time) -> float:
 
 
 class CalibCollectNode(Node):
-    def __init__(self, robot: RobotDirector, image_topic: str, data_path: str) -> None:
+    def __init__(self, robot: RobotDirector, image_topic: str, data_path: Path) -> None:
         super().__init__("calib_collect_node")
         self.robot = robot
         self.bridge = CvBridge()
@@ -96,14 +96,14 @@ class CalibCollectNode(Node):
             time.sleep(1)
         return None
 
-    def save_image(self, image: Optional[np.ndarray], path: str) -> None:
+    def save_image(self, image: Optional[np.ndarray], path: Path) -> None:
         if image is None:
             self.get_logger().warn("No image to save")
             return
         cv2.imwrite(path, image)
         self.get_logger().info(f"Saved image to: {path}")
 
-    def save_tcp(self, tcp_pose: Dict[str, List[float]], path: str) -> None:
+    def save_tcp(self, tcp_pose: Dict[str, List[float]], path: Path) -> None:
         with open(path, "w") as f:
             yaml.dump(
                 {
@@ -124,7 +124,7 @@ def collect_data(
     node: CalibCollectNode,
     robot: RobotDirector,
     positions: List[Dict[str, float]],
-    data_path: str,
+    data_path: Path,
     camera_name: str,
 ) -> None:
     node.move_to_home()
@@ -140,9 +140,9 @@ def collect_data(
         image = node.get_image(time_start)
         if image is not None:
             tcp_pose = robot.get_tcp_pose()
-            img_path = os.path.join(data_path, f"{camera_name}_view_{i}.png")
-            tcp_path = os.path.splitext(img_path)[0] + ".yaml"
-            node.save_image(image, img_path)
+            image_path = data_path / f"{camera_name}_image_{i}.png"
+            tcp_path = data_path / f"{camera_name}_tcp_{i}.yaml"
+            node.save_image(image, image_path)
             node.save_tcp(tcp_pose, tcp_path)
         else:
             node.log("No image received in time")
@@ -173,19 +173,17 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    package_share_path = os.path.join(get_package_share_directory("aegis_utils"))
-    camera_info = CAMERA_CONFIG[args.camera]
-    pos_config_path = os.path.join(
-        package_share_path, "config", camera_info["pos_config"]
-    )
-    image_topic = camera_info["topic"]
-
     if args.path:
-        data_path = os.path.join(os.path.expanduser(args.path), args.camera)
+        data_path = Path(args.path).expanduser() / args.camera
     else:
-        data_path = os.path.expanduser(f"~/ceai_ws/calibration_data/{args.camera}")
+        data_path = Path("~/ceai_ws/calibration_data").expanduser() / args.camera
 
-    os.makedirs(data_path, exist_ok=True)
+    data_path.mkdir(parents=True, exist_ok=True)
+
+    package_share_path = Path(get_package_share_directory("aegis_utils"))
+    camera_info = CAMERA_CONFIG[args.camera]
+    pos_config_path = package_share_path / "config" / camera_info["pos_config"]
+    image_topic = camera_info["topic"]
 
     rclpy.init()
     robot = RobotDirector(synchronous=True)

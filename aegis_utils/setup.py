@@ -16,6 +16,7 @@ setup(
                 "config/cam_tool_front.yaml",
                 "config/cam_tool_right.yaml",
                 "config/cam_tool_left.yaml",
+                "config/charuco_board.yaml",
             ],
         ),
     ],
@@ -28,6 +29,7 @@ setup(
     entry_points={
         "console_scripts": [
             "calib_data_collect = aegis_utils.calib_data_collect:main",
+            "calib_intrinsics = aegis_utils.calib_intrinsics:main",
         ],
     },
 )
