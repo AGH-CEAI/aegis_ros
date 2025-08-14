@@ -4,6 +4,8 @@ from pathlib import Path
 
 import cv2
 from natsort import natsorted
+import yaml
+
 
 CAMERA_CONFIG = {
     "tool_front_right": {},
@@ -14,20 +16,18 @@ CAMERA_CONFIG = {
 }
 
 
-def calibrate_intrinsics(data_path: Path) -> None:
-    squares_x = 9
-    squares_y = 6
-    square_size = 0.03
-    marker_size = 0.022
-
-    aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_1000)
+def calibrate_intrinsics(
+    data_path: Path, squares_x, squares_y, square_size, marker_size, aruco_dict
+) -> None:
     board = cv2.aruco.CharucoBoard(
-        (squares_x, squares_y), square_size, marker_size, aruco_dict
+        (squares_x, squares_y),
+        square_size,
+        marker_size,
+        aruco_dict,
     )
     board.setLegacyPattern(True)
 
     image_paths = natsorted(data_path.glob("*_image_*.png"))
-
     if not image_paths:
         print(f"No images found in {data_path}")
         return
@@ -46,16 +46,14 @@ def calibrate_intrinsics(data_path: Path) -> None:
             retval, charuco_corners, charuco_ids = cv2.aruco.interpolateCornersCharuco(
                 corners, ids, img_gray, board
             )
-            print(
-                f"{retval} ChArUco corners were detected in image {image_path.name}"
-            )
+            print(f"{retval} ChArUco corners were detected in image {image_path.name}")
             if charuco_ids is not None and len(charuco_ids) > 3:
                 all_corners.append(charuco_corners)
                 all_ids.append(charuco_ids)
 
     print(f"Found {len(all_corners)} valid images for calibration")
 
-    if len(all_corners) == 0:
+    if not all_corners:
         print("No valid data for calibration")
         return
 
@@ -111,7 +109,26 @@ def main() -> None:
     else:
         data_path = Path("~/ceai_ws/calibration_data").expanduser() / args.camera
 
-    calibrate_intrinsics(data_path)
+    board_path = Path(__file__).parent.parent / "config" / "charuco_board.yaml"
+    with open(board_path, "r") as f:
+        board_cfg = yaml.safe_load(f)
+
+    if args.camera.startswith("tool"):
+        board_params = board_cfg["tool_camera"]
+    else:
+        board_params = board_cfg["scene_camera"]
+
+    squares_x = board_params["squares_x"]
+    squares_y = board_params["squares_y"]
+    square_size = board_params["square_size"]
+    marker_size = board_params["marker_size"]
+    aruco_dict = cv2.aruco.getPredefinedDictionary(
+        getattr(cv2.aruco, board_params["aruco_dict"])
+    )
+
+    calibrate_intrinsics(
+        data_path, squares_x, squares_y, square_size, marker_size, aruco_dict
+    )
 
 
 if __name__ == "__main__":
