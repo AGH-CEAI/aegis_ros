@@ -16,6 +16,7 @@ setup(
                 "config/cam_tool_front.yaml",
                 "config/cam_tool_right.yaml",
                 "config/cam_tool_left.yaml",
+                "config/charuco_board.yaml",
             ],
         ),
     ],
