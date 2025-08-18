@@ -8,11 +8,11 @@ import yaml
 
 
 CAMERA_CONFIG = {
+    "scene": {},
     "tool_front_right": {},
     "tool_front_left": {},
     "tool_right": {},
     "tool_left": {},
-    "scene": {},
 }
 
 
@@ -33,6 +33,7 @@ def calibrate_intrinsics(
     board.setLegacyPattern(True)
 
     image_paths = natsorted(data_path.glob("*_image_*.png"))
+
     if not image_paths:
         print(f"No images found in {data_path}")
         return
@@ -51,15 +52,15 @@ def calibrate_intrinsics(
             retval, charuco_corners, charuco_ids = cv2.aruco.interpolateCornersCharuco(
                 corners, ids, img_gray, board
             )
-            print(f"{retval} ChArUco corners were detected in image {image_path.name}")
+            print(f"{retval} ChArUco corners were detected in view {image_path.name}")
             if charuco_ids is not None and len(charuco_ids) > 3:
                 all_corners.append(charuco_corners)
                 all_ids.append(charuco_ids)
 
-    print(f"Found {len(all_corners)} valid images for calibration")
+    print(f"Found {len(all_corners)} valid views for intrinsic calibration")
 
     if not all_corners:
-        print("No valid data for calibration")
+        print("No valid views for calibration")
         return
 
     ret, camera_matrix, dist_coeffs, rvecs, tvecs = cv2.aruco.calibrateCameraCharuco(
@@ -83,7 +84,7 @@ def calibrate_intrinsics(
         "squares_y": squares_y,
     }
 
-    intrinsics_path = data_path / f"{data_path.name}_camera_intrinsics.json"
+    intrinsics_path = data_path / f"{data_path.name}_intrinsics.json"
     with open(intrinsics_path, "w") as f:
         json.dump(calib_data, f, indent=4)
 
