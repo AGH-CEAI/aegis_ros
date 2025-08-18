@@ -42,7 +42,8 @@ def pose_to_matrix(position: np.ndarray, orientation_quat: np.ndarray) -> np.nda
     return T
 
 
-def calibrate_extrinsics(data_path: Path,
+def calibrate_extrinsics(
+    data_path: Path,
     squares_x: int,
     squares_y: int,
     square_size: float,
@@ -68,7 +69,9 @@ def calibrate_extrinsics(data_path: Path,
         print(f"No TCP poses found in {data_path}")
         return
     if len(image_paths) != len(tcp_paths):
-        print(f"Number of images ({len(image_paths)}) and TCP poses ({len(tcp_paths)}) do not match!")
+        print(
+            f"Number of images ({len(image_paths)}) and TCP poses ({len(tcp_paths)}) do not match!"
+        )
         print("Check the dataset before running extrinsic calibration")
         return
     if not intrinsics_path.is_file():
@@ -99,7 +102,9 @@ def calibrate_extrinsics(data_path: Path,
             print(f"No ArUco markers detected in {image_path}\nSkipping")
             continue
 
-        retval, charuco_corners, charuco_ids = cv2.aruco.interpolateCornersCharuco(corners, ids, img_gray, board)
+        retval, charuco_corners, charuco_ids = cv2.aruco.interpolateCornersCharuco(
+            corners, ids, img_gray, board
+        )
         if retval < 4:
             print(f"Not enough Charuco corners detected in view {image_path}\nSkipping")
             continue
@@ -134,9 +139,11 @@ def calibrate_extrinsics(data_path: Path,
         return
 
     R_tcp2cam, t_tcp2cam = cv2.calibrateHandEye(
-        tcp_poses_R, tcp_poses_t,
-        target_poses_R, target_poses_t,
-        method=cv2.CALIB_HAND_EYE_TSAI
+        tcp_poses_R,
+        tcp_poses_t,
+        target_poses_R,
+        target_poses_t,
+        method=cv2.CALIB_HAND_EYE_TSAI,
     )
 
     T_tcp2cam = np.eye(4)
@@ -197,6 +204,7 @@ def main():
     calibrate_extrinsics(
         data_path, squares_x, squares_y, square_size, marker_size, aruco_dict
     )
+
 
 if __name__ == "__main__":
     main()
