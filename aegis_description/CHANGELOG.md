@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-49](https://github.com/AGH-CEAI/aegis_ros/pull/49) - Updated Hand-E gripper parameters.
 * [PR-44](https://github.com/AGH-CEAI/aegis_ros/pull/44) - Updated adapter to sensor component and SCHUNK AXIA 80 F/T sensor.
 * [PR-43](https://github.com/AGH-CEAI/aegis_ros/pull/43) - Updated adapter to sensor component.
 * [PR-42](https://github.com/AGH-CEAI/aegis_ros/pull/42) - Updated joints limits.

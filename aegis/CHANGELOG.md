@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-49](https://github.com/AGH-CEAI/aegis_ros/pull/27) - Updated `robotiq_hande_description` and `robotiq_hande_driver` packages.
 * [PR-25](https://github.com/AGH-CEAI/aegis_ros/pull/25) - Updated `robotiq_hande_description` package.
 
 ### Deprecated
