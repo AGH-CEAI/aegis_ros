@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-49](https://github.com/AGH-CEAI/aegis_ros/pull/27) - Disabled the tool communication in the `ur_driver` in favor of `robotiq_hande_driver`'s `SocatManager`.
 * [PR-27](https://github.com/AGH-CEAI/aegis_ros/pull/27) - DepthAI nodes can be disabled with `mock_hardware` flag.
 * [PR-20] (https://github.com/AGH-CEAI/aegis_ros/pull/20) - Automatic initialization of the virtual serial port.
 * [PR-17](https://github.com/AGH-CEAI/aegis_ros/pull/17) - Added launch file for the ros2_net_ft_driver.
