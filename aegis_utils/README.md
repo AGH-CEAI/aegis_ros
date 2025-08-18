@@ -45,10 +45,22 @@ ros2 run aegis_utils calib_data_collect -c tool_front_right -p ~/Documents/calib
 
 ## Calibration of camera intrinsics
 This tool computes the intrinsic parameters of a camera using previously collected calibration images.
-It processes a set of chessboard pattern images and saves the resulting camera matrix and distortion coefficients.
+
+It outputs the resulting camera matrix and distortion coefficients and saves it to the calibration data folder.
 
 ### Example usage
 It accepts the same arguments and uses the same default data path as the data collection tool described above. For example:
 ```bash
 ros2 run aegis_utils calib_intrinsics -c tool_front_right
+```
+
+## Calibration of camera extrinsics
+This tool computes the extrinsic parameters of a camera using previously collected calibration images, TCP poses and the computed camera intrinsics.
+
+It outputs the resulting transformation matrix form the robot TCP to the camera frame and saves it to the calibration data folder.
+
+### Example usage
+It accepts the same arguments and uses the same default data path as the data collection tool described above. For example:
+```bash
+ros2 run aegis_utils calib_extrinsics -c tool_front_right
 ```
