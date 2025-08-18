@@ -30,6 +30,7 @@ setup(
         "console_scripts": [
             "calib_data_collect = aegis_utils.calib_data_collect:main",
             "calib_intrinsics = aegis_utils.calib_intrinsics:main",
+            "calib_extrinsics = aegis_utils.calib_extrinsics:main",
         ],
     },
 )
