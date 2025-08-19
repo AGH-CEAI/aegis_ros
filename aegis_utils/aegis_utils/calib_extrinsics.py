@@ -3,11 +3,10 @@ import json
 from pathlib import Path
 
 import cv2
-from natsort import natsorted
 import numpy as np
-from scipy.spatial.transform import Rotation as R
 import yaml
-
+from natsort import natsorted
+from scipy.spatial.transform import Rotation as R
 
 CAMERA_CONFIG = {
     "scene": {},

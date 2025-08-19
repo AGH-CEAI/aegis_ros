@@ -3,9 +3,8 @@ import json
 from pathlib import Path
 
 import cv2
-from natsort import natsorted
 import yaml
-
+from natsort import natsorted
 
 CAMERA_CONFIG = {
     "scene": {},
