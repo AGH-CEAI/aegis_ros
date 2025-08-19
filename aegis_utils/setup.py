@@ -24,7 +24,7 @@ setup(
         "opencv-python",
         "opencv-contrib-python",
         "natsort",
-        'scipy',
+        "scipy",
         "setuptools",
     ],
     zip_safe=True,
