@@ -15,7 +15,7 @@ CAMERA_CONFIG = {
 }
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-c",
