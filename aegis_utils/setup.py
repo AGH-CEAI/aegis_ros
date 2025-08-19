@@ -20,7 +20,13 @@ setup(
             ],
         ),
     ],
-    install_requires=["setuptools"],
+    install_requires=[
+        "opencv-python",
+        "opencv-contrib-python",
+        "natsort",
+        "scipy",
+        "setuptools",
+    ],
     zip_safe=True,
     maintainer="Jakub Plachno",
     maintainer_email="sivral@proton.me",
@@ -30,6 +36,7 @@ setup(
         "console_scripts": [
             "calib_data_collect = aegis_utils.calib_data_collect:main",
             "calib_intrinsics = aegis_utils.calib_intrinsics:main",
+            "calib_extrinsics = aegis_utils.calib_extrinsics:main",
         ],
     },
 )

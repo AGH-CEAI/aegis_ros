@@ -3,17 +3,36 @@ import json
 from pathlib import Path
 
 import cv2
-from natsort import natsorted
 import yaml
-
+from natsort import natsorted
 
 CAMERA_CONFIG = {
+    "scene": {},
     "tool_front_right": {},
     "tool_front_left": {},
     "tool_right": {},
     "tool_left": {},
-    "scene": {},
 }
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-c",
+        "--camera",
+        type=str,
+        required=True,
+        choices=CAMERA_CONFIG.keys(),
+        help="Which camera: scene, tool_front_right, tool_front_left, tool_right, tool_left",
+    )
+    parser.add_argument(
+        "-p",
+        "--path",
+        type=str,
+        default=None,
+        help="Optional path to calibration data folder",
+    )
+    return parser.parse_args()
 
 
 def calibrate_intrinsics(
@@ -33,6 +52,7 @@ def calibrate_intrinsics(
     board.setLegacyPattern(True)
 
     image_paths = natsorted(data_path.glob("*_image_*.png"))
+
     if not image_paths:
         print(f"No images found in {data_path}")
         return
@@ -51,15 +71,15 @@ def calibrate_intrinsics(
             retval, charuco_corners, charuco_ids = cv2.aruco.interpolateCornersCharuco(
                 corners, ids, img_gray, board
             )
-            print(f"{retval} ChArUco corners were detected in image {image_path.name}")
+            print(f"{retval} ChArUco corners were detected in view {image_path.name}")
             if charuco_ids is not None and len(charuco_ids) > 3:
                 all_corners.append(charuco_corners)
                 all_ids.append(charuco_ids)
 
-    print(f"Found {len(all_corners)} valid images for calibration")
+    print(f"Found {len(all_corners)} valid views for intrinsic calibration")
 
     if not all_corners:
-        print("No valid data for calibration")
+        print("No valid views for calibration")
         return
 
     ret, camera_matrix, dist_coeffs, rvecs, tvecs = cv2.aruco.calibrateCameraCharuco(
@@ -83,7 +103,7 @@ def calibrate_intrinsics(
         "squares_y": squares_y,
     }
 
-    intrinsics_path = data_path / f"{data_path.name}_camera_intrinsics.json"
+    intrinsics_path = data_path / f"{data_path.name}_intrinsics.json"
     with open(intrinsics_path, "w") as f:
         json.dump(calib_data, f, indent=4)
 
@@ -91,23 +111,7 @@ def calibrate_intrinsics(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-c",
-        "--camera",
-        type=str,
-        required=True,
-        choices=CAMERA_CONFIG.keys(),
-        help="Which camera: scene, tool_front_right, tool_front_left, tool_right, tool_left",
-    )
-    parser.add_argument(
-        "-p",
-        "--path",
-        type=str,
-        default=None,
-        help="Optional path to calibration data folder",
-    )
-    args = parser.parse_args()
+    args = parse_args()
 
     if args.path:
         data_path = Path(args.path).expanduser() / args.camera

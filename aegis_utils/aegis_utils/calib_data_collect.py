@@ -2,22 +2,19 @@ import argparse
 import threading
 import time
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 
 import cv2
 import numpy as np
-import yaml
-
 import rclpy
-from rclpy.executors import SingleThreadedExecutor
-from rclpy.node import Node
+import yaml
+from aegis_director.robot_director import RobotDirector
 from ament_index_python.packages import get_package_share_directory
 from builtin_interfaces.msg import Time
 from cv_bridge import CvBridge
+from rclpy.executors import SingleThreadedExecutor
+from rclpy.node import Node
 from sensor_msgs.msg import Image
-
-from aegis_director.robot_director import RobotDirector
-
 
 CAMERA_CONFIG = {
     "scene": {"pos_config": "cam_scene.yaml", "topic": "/cam_scene/rgb/image_rect"},
@@ -38,6 +35,26 @@ CAMERA_CONFIG = {
         "topic": "/cam_tool_left/image_raw",
     },
 }
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-c",
+        "--camera",
+        type=str,
+        required=True,
+        choices=CAMERA_CONFIG.keys(),
+        help="Which camera: scene, tool_front_right, tool_front_left, tool_right, tool_left",
+    )
+    parser.add_argument(
+        "-p",
+        "--path",
+        type=str,
+        default=None,
+        help="Optional path to calibration data folder",
+    )
+    return parser.parse_args()
 
 
 def load_positions(config_file_path: Path) -> List[Dict[str, float]]:
@@ -155,23 +172,7 @@ def collect_data(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-c",
-        "--camera",
-        type=str,
-        required=True,
-        choices=CAMERA_CONFIG.keys(),
-        help="Which camera: scene, tool_front_right, tool_front_left, tool_right, tool_left",
-    )
-    parser.add_argument(
-        "-p",
-        "--path",
-        type=str,
-        default=None,
-        help="Optional path to calibration data folder",
-    )
-    args = parser.parse_args()
+    args = parse_args()
 
     if args.path:
         data_path = Path(args.path).expanduser() / args.camera
