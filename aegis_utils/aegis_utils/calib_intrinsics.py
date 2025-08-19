@@ -15,6 +15,26 @@ CAMERA_CONFIG = {
 }
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-c",
+        "--camera",
+        type=str,
+        required=True,
+        choices=CAMERA_CONFIG.keys(),
+        help="Which camera: scene, tool_front_right, tool_front_left, tool_right, tool_left",
+    )
+    parser.add_argument(
+        "-p",
+        "--path",
+        type=str,
+        default=None,
+        help="Optional path to calibration data folder",
+    )
+    return parser.parse_args()
+
+
 def calibrate_intrinsics(
     data_path: Path,
     squares_x: int,
@@ -91,23 +111,7 @@ def calibrate_intrinsics(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-c",
-        "--camera",
-        type=str,
-        required=True,
-        choices=CAMERA_CONFIG.keys(),
-        help="Which camera: scene, tool_front_right, tool_front_left, tool_right, tool_left",
-    )
-    parser.add_argument(
-        "-p",
-        "--path",
-        type=str,
-        default=None,
-        help="Optional path to calibration data folder",
-    )
-    args = parser.parse_args()
+    args = parse_args()
 
     if args.path:
         data_path = Path(args.path).expanduser() / args.camera
