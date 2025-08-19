@@ -60,7 +60,7 @@ def process_view(
     board: cv2.aruco_CharucoBoard,
     aruco_dict: cv2.aruco_Dictionary,
     camera_matrix: np.ndarray,
-    dist_coeffs: np.ndarray
+    dist_coeffs: np.ndarray,
 ) -> Optional[Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
     try:
         image_idx = int(image_path.stem.split("_")[-1])
@@ -151,7 +151,9 @@ def calibrate_extrinsics(
     valid_views = 0
 
     for image_path, tcp_path in zip(image_paths, tcp_paths):
-        poses = process_view(image_path, tcp_path, board, aruco_dict, camera_matrix, dist_coeffs)
+        poses = process_view(
+            image_path, tcp_path, board, aruco_dict, camera_matrix, dist_coeffs
+        )
         if poses is None:
             continue
         R_robot2tcp, t_robot2tcp, R_cam2target, t_cam2target = poses
