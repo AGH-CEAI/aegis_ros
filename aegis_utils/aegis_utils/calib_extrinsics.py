@@ -1,6 +1,7 @@
 import argparse
 import json
 from pathlib import Path
+from typing import Tuple
 
 import cv2
 import numpy as np
@@ -17,7 +18,7 @@ CAMERA_CONFIG = {
 }
 
 
-def load_tcp(tcp_path: Path):
+def load_tcp(tcp_path: Path) -> Tuple[np.ndarray, np.ndarray]:
     with open(tcp_path, "r") as f:
         data = yaml.safe_load(f)
     pos = np.array(data["tcp_pose"]["position"], dtype=float)
@@ -25,7 +26,7 @@ def load_tcp(tcp_path: Path):
     return pos, ori
 
 
-def load_intrinsics(intrinsics_path: Path):
+def load_intrinsics(intrinsics_path: Path) -> Tuple[np.ndarray, np.ndarray]:
     with open(intrinsics_path, "r") as f:
         data = json.load(f)
     camera_matrix = np.array(data["camera_matrix"], dtype=float)
@@ -159,7 +160,7 @@ def calibrate_extrinsics(
     print(f"Extrinsics saved to {extrinsics_path}")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-c",
