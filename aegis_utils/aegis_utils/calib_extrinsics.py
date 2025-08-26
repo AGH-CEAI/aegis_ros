@@ -38,6 +38,14 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def get_latest_folder(base_path: Path, camera: str) -> Optional[Path]:
+    folders = glob.glob(str(base_path / f"{camera}_*"))
+    if not folders:
+        return None
+    latest_folder = sorted(folders, reverse=True)[0]
+    return Path(latest_folder)
+
+
 def load_tcp(tcp_path: Path) -> Tuple[np.ndarray, np.ndarray]:
     with open(tcp_path, "r") as f:
         data = yaml.safe_load(f)
@@ -196,21 +204,15 @@ def calibrate_extrinsics(
 def main() -> None:
     args = parse_args()
 
-    if args.path:
-        data_path = Path(args.path).expanduser() / args.camera
-        if not data_path.exists():
-            print("No calibration data folder found")
-            return
-    else:
-        data_paths = sorted(
-            glob.glob(str(Path("~/ceai_ws").expanduser() / "calib_data_*")),
-            reverse=True,
-        )
-        if data_paths:
-            data_path = Path(data_paths[0]) / args.camera
-        else:
-            print("No calibration data folder found")
-            return
+    base_path = (
+        Path(args.path).expanduser()
+        if args.path
+        else Path("~/ceai_ws/calib_data").expanduser()
+    )
+    data_path = get_latest_folder(base_path, args.camera)
+    if not data_path:
+        print("No calibration data folder found")
+        return
 
     board_path = Path(__file__).parent.parent / "config" / "charuco_board.yaml"
     with open(board_path, "r") as f:

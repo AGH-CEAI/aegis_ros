@@ -174,12 +174,14 @@ def collect_data(
 
 def main() -> None:
     args = parse_args()
+    timestamp = datetime.now().strftime("%y-%m-%d_%H-%M-%S")
 
     if args.path:
-        data_path = Path(args.path).expanduser() / args.camera
+        data_path = Path(args.path).expanduser() / f"{args.camera}_{timestamp}"
     else:
-        timestamp = datetime.now().strftime("%y-%m-%d_%H-%M-%S")
-        data_path = Path(f"~/ceai_ws/calib_data_{timestamp}").expanduser() / args.camera
+        data_path = (
+            Path("~/ceai_ws/calib_data").expanduser() / f"{args.camera}_{timestamp}"
+        )
 
     data_path.mkdir(parents=True, exist_ok=True)
 
