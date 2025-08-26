@@ -35,7 +35,9 @@ class DepthAIConfig:
         self.cam_scene_pitch = LaunchConfiguration("cam_scene_pitch", default="1.5708")
         self.cam_scene_yaw = LaunchConfiguration("cam_scene_yaw", default="0")
 
-        self.cam_tool_name = LaunchConfiguration("cam_tool_name", default="cam_tool_front")
+        self.cam_tool_name = LaunchConfiguration(
+            "cam_tool_name", default="cam_tool_front"
+        )
         self.cam_tool_model = LaunchConfiguration(
             "cam_tool_model", default="OAK-D-SR-POE"
         )

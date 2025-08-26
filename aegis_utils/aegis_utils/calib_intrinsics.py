@@ -120,8 +120,8 @@ def main() -> None:
             return
     else:
         data_paths = sorted(
-            glob.glob(str(Path("~/ceai_ws").expanduser() / "calib_data_*")), 
-            reverse=True
+            glob.glob(str(Path("~/ceai_ws").expanduser() / "calib_data_*")),
+            reverse=True,
         )
         if data_paths:
             data_path = Path(data_paths[0]) / args.camera
