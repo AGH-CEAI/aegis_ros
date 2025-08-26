@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-53](https://github.com/AGH-CEAI/aegis_ros/pull/53) - Change calibration data paths.
+
 ### Deprecated
 
 ### Removed
