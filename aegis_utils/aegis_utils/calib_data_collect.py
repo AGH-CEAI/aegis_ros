@@ -1,6 +1,7 @@
 import argparse
 import threading
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -117,7 +118,7 @@ class CalibCollectNode(Node):
         if image is None:
             self.get_logger().warn("No image to save")
             return
-        cv2.imwrite(path, image)
+        cv2.imwrite(str(path), image)
         self.get_logger().info(f"Saved image to: {path}")
 
     def save_tcp(self, tcp_pose: Dict[str, List[float]], path: Path) -> None:
@@ -157,8 +158,8 @@ def collect_data(
         image = node.get_image(time_start)
         if image is not None:
             tcp_pose = robot.get_tcp_pose()
-            image_path = data_path / f"{camera_name}_image_{i}.png"
-            tcp_path = data_path / f"{camera_name}_tcp_{i}.yaml"
+            image_path = data_path / f"{camera_name}_image_{i:02}.png"
+            tcp_path = data_path / f"{camera_name}_tcp_{i:02}.yaml"
             node.save_image(image, image_path)
             node.save_tcp(tcp_pose, tcp_path)
         else:
@@ -177,7 +178,8 @@ def main() -> None:
     if args.path:
         data_path = Path(args.path).expanduser() / args.camera
     else:
-        data_path = Path("~/ceai_ws/calibration_data").expanduser() / args.camera
+        timestamp = datetime.now().strftime("%y-%m-%d_%H-%M-%S")
+        data_path = Path(f"~/ceai_ws/calib_data_{timestamp}").expanduser() / args.camera
 
     data_path.mkdir(parents=True, exist_ok=True)
 

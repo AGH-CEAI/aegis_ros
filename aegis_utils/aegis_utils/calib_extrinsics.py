@@ -1,4 +1,5 @@
 import argparse
+import glob
 import json
 from pathlib import Path
 from typing import Optional, Tuple
@@ -6,7 +7,6 @@ from typing import Optional, Tuple
 import cv2
 import numpy as np
 import yaml
-from natsort import natsorted
 from scipy.spatial.transform import Rotation as R
 
 CAMERA_CONFIG = {
@@ -123,8 +123,8 @@ def calibrate_extrinsics(
     )
     board.setLegacyPattern(True)
 
-    image_paths = natsorted(data_path.glob("*_image_*.png"))
-    tcp_paths = natsorted(data_path.glob("*_tcp_*.yaml"))
+    image_paths = sorted(data_path.glob("*_image_*.png"))
+    tcp_paths = sorted(data_path.glob("*_tcp_*.yaml"))
     intrinsics_path = data_path / f"{data_path.name}_intrinsics.json"
 
     if not image_paths:
@@ -198,8 +198,19 @@ def main() -> None:
 
     if args.path:
         data_path = Path(args.path).expanduser() / args.camera
+        if not data_path.exists():
+            print("No calibration data folder found")
+            return
     else:
-        data_path = Path("~/ceai_ws/calibration_data").expanduser() / args.camera
+        data_paths = sorted(
+            glob.glob(str(Path("~/ceai_ws").expanduser() / "calib_data_*")), 
+            reverse=True
+        )
+        if data_paths:
+            data_path = Path(data_paths[0]) / args.camera
+        else:
+            print("No calibration data folder found")
+            return
 
     board_path = Path(__file__).parent.parent / "config" / "charuco_board.yaml"
     with open(board_path, "r") as f:
