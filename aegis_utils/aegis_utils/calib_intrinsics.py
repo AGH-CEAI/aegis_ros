@@ -133,10 +133,10 @@ def main() -> None:
     with open(board_path, "r") as f:
         board_cfg = yaml.safe_load(f)
 
-    if args.camera.startswith("tool"):
-        board_params = board_cfg["tool"]
+    if args.camera.startswith("tool_front"):
+        board_params = board_cfg["big"]
     else:
-        board_params = board_cfg["scene"]
+        board_params = board_cfg["small"]
 
     squares_x = board_params["squares_x"]
     squares_y = board_params["squares_y"]

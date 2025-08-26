@@ -18,14 +18,14 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image
 
 CAMERA_CONFIG = {
-    "scene": {"pos_config": "cam_scene.yaml", "topic": "/cam_scene/rgb/image_rect"},
+    "scene": {"pos_config": "cam_scene.yaml", "topic": "/cam_scene/rgb/image_raw"},
     "tool_front_right": {
         "pos_config": "cam_tool_front.yaml",
-        "topic": "/cam_tool/right/image_rect",
+        "topic": "/cam_tool_front/right/image_raw",
     },
     "tool_front_left": {
         "pos_config": "cam_tool_front.yaml",
-        "topic": "/cam_tool/left/image_rect",
+        "topic": "/cam_tool_front/left/image_raw",
     },
     "tool_right": {
         "pos_config": "cam_tool_right.yaml",

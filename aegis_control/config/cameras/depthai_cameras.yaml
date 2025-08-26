@@ -16,7 +16,7 @@
   spatial_bb_node:
     ros__parameters:
       desqueeze: true
-/cam_tool:
+/cam_tool_front:
   ros__parameters:
     camera:
       i_mx_id: 14442C10A19F37D200
