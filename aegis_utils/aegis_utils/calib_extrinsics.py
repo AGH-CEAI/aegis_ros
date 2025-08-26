@@ -133,7 +133,7 @@ def calibrate_extrinsics(
 
     image_paths = sorted(data_path.glob("*_image_*.png"))
     tcp_paths = sorted(data_path.glob("*_tcp_*.yaml"))
-    intrinsics_path = data_path / f"{data_path.name}_intrinsics.json"
+    intrinsics_path = data_path / f"{data_path.name[:-18]}_intrinsics.json"
 
     if not image_paths:
         print(f"No images found in {data_path}")
@@ -194,7 +194,7 @@ def calibrate_extrinsics(
     print("Transformation matrix (TCP to camera)\n")
     print(T_tcp2cam)
 
-    extrinsics_path = data_path / f"{data_path.name}_extrinsics.json"
+    extrinsics_path = data_path / f"{data_path.name[:-18]}_extrinsics.json"
     with open(extrinsics_path, "w") as f:
         json.dump({"T_tcp2cam": T_tcp2cam.tolist()}, f, indent=2)
 

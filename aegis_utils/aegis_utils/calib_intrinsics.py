@@ -112,7 +112,7 @@ def calibrate_intrinsics(
         "squares_y": squares_y,
     }
 
-    intrinsics_path = data_path / f"{data_path.name}_intrinsics.json"
+    intrinsics_path = data_path / f"{data_path.name[-18]}_intrinsics.json"
     with open(intrinsics_path, "w") as f:
         json.dump(calib_data, f, indent=4)
 
