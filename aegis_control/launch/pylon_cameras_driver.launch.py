@@ -188,8 +188,26 @@ def launch_node(context: LaunchContext):
             },
         ],
     )
+    
+    node_image_proc_camera_right = Node(
+        package="image_proc",
+        namespace="",
+        executable="image_proc",
+        name="image_proc_right",
+        output="screen",
+        parameters=[
+            {
+                "~input_transport": "raw"
+            }
+        ],
+        remappings=[
+            ("image", "/cam_tool_right/image_raw"),
+            ("camera_info", "/cam_tool_right/camera_info")
+        ]
+    ) 
 
     return [
         node_camera_left,
         node_camera_right,
+        node_image_proc_camera_right
     ]
