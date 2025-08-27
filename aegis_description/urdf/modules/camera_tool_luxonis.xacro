@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:arg name="tool_camera_name" default="cam_tool"/>
+  <xacro:arg name="tool_camera_name" default="cam_tool_front"/>
   <xacro:arg name="tool_camera_model" default="OAK-D-SR-POE"/>
   <xacro:arg name="tool_camera_base_frame" default="cam_tool_frame"/>
   <xacro:arg name="tool_camera_rs_compat" default="false"/>

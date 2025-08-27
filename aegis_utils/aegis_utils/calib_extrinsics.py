@@ -1,4 +1,5 @@
 import argparse
+import glob
 import json
 from pathlib import Path
 from typing import Optional, Tuple
@@ -6,7 +7,7 @@ from typing import Optional, Tuple
 import cv2
 import numpy as np
 import yaml
-from natsort import natsorted
+from ament_index_python.packages import get_package_share_directory
 from scipy.spatial.transform import Rotation as R
 
 CAMERA_CONFIG = {
@@ -36,6 +37,14 @@ def parse_args() -> argparse.Namespace:
         help="Optional path to calibration data folder",
     )
     return parser.parse_args()
+
+
+def get_latest_folder(base_path: Path, camera: str) -> Optional[Path]:
+    folders = glob.glob(str(base_path / f"{camera}_*"))
+    if not folders:
+        return None
+    latest_folder = sorted(folders, reverse=True)[0]
+    return Path(latest_folder)
 
 
 def load_tcp(tcp_path: Path) -> Tuple[np.ndarray, np.ndarray]:
@@ -123,9 +132,10 @@ def calibrate_extrinsics(
     )
     board.setLegacyPattern(True)
 
-    image_paths = natsorted(data_path.glob("*_image_*.png"))
-    tcp_paths = natsorted(data_path.glob("*_tcp_*.yaml"))
-    intrinsics_path = data_path / f"{data_path.name}_intrinsics.json"
+    cam_name = data_path.name[:-18]
+    image_paths = sorted(data_path.glob("*_image_*.png"))
+    tcp_paths = sorted(data_path.glob("*_tcp_*.yaml"))
+    intrinsics_path = data_path / f"{cam_name}_intrinsics.json"
 
     if not image_paths:
         print(f"No images found in {data_path}")
@@ -186,7 +196,7 @@ def calibrate_extrinsics(
     print("Transformation matrix (TCP to camera)\n")
     print(T_tcp2cam)
 
-    extrinsics_path = data_path / f"{data_path.name}_extrinsics.json"
+    extrinsics_path = data_path / f"{data_path.name[:-18]}_extrinsics.json"
     with open(extrinsics_path, "w") as f:
         json.dump({"T_tcp2cam": T_tcp2cam.tolist()}, f, indent=2)
 
@@ -196,19 +206,26 @@ def calibrate_extrinsics(
 def main() -> None:
     args = parse_args()
 
-    if args.path:
-        data_path = Path(args.path).expanduser() / args.camera
-    else:
-        data_path = Path("~/ceai_ws/calibration_data").expanduser() / args.camera
+    base_path = (
+        Path(args.path).expanduser()
+        if args.path
+        else Path("~/ceai_ws/calib_data").expanduser()
+    )
+    data_path = get_latest_folder(base_path, args.camera)
+    if not data_path:
+        print(f"No calibration data folder found in {base_path} directory")
+        return
 
-    board_path = Path(__file__).parent.parent / "config" / "charuco_board.yaml"
+    package_share_path = Path(get_package_share_directory("aegis_utils"))
+    board_path = package_share_path / "config" / "charuco_board.yaml"
+
     with open(board_path, "r") as f:
         board_cfg = yaml.safe_load(f)
 
-    if args.camera.startswith("tool"):
-        board_params = board_cfg["tool"]
+    if args.camera.startswith("tool_front"):
+        board_params = board_cfg["big"]
     else:
-        board_params = board_cfg["scene"]
+        board_params = board_cfg["small"]
 
     squares_x = board_params["squares_x"]
     squares_y = board_params["squares_y"]

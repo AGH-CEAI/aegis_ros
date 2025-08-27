@@ -1,6 +1,7 @@
 import argparse
 import threading
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -17,14 +18,14 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image
 
 CAMERA_CONFIG = {
-    "scene": {"pos_config": "cam_scene.yaml", "topic": "/cam_scene/rgb/image_rect"},
+    "scene": {"pos_config": "cam_scene.yaml", "topic": "/cam_scene/rgb/image_raw"},
     "tool_front_right": {
         "pos_config": "cam_tool_front.yaml",
-        "topic": "/cam_tool/right/image_rect",
+        "topic": "/cam_tool_front/right/image_raw",
     },
     "tool_front_left": {
         "pos_config": "cam_tool_front.yaml",
-        "topic": "/cam_tool/left/image_rect",
+        "topic": "/cam_tool_front/left/image_raw",
     },
     "tool_right": {
         "pos_config": "cam_tool_right.yaml",
@@ -117,7 +118,7 @@ class CalibCollectNode(Node):
         if image is None:
             self.get_logger().warn("No image to save")
             return
-        cv2.imwrite(path, image)
+        cv2.imwrite(str(path), image)
         self.get_logger().info(f"Saved image to: {path}")
 
     def save_tcp(self, tcp_pose: Dict[str, List[float]], path: Path) -> None:
@@ -157,8 +158,8 @@ def collect_data(
         image = node.get_image(time_start)
         if image is not None:
             tcp_pose = robot.get_tcp_pose()
-            image_path = data_path / f"{camera_name}_image_{i}.png"
-            tcp_path = data_path / f"{camera_name}_tcp_{i}.yaml"
+            image_path = data_path / f"{camera_name}_image_{i:02}.png"
+            tcp_path = data_path / f"{camera_name}_tcp_{i:02}.yaml"
             node.save_image(image, image_path)
             node.save_tcp(tcp_pose, tcp_path)
         else:
@@ -173,11 +174,14 @@ def collect_data(
 
 def main() -> None:
     args = parse_args()
+    timestamp = datetime.now().strftime("%y-%m-%d_%H-%M-%S")
 
     if args.path:
-        data_path = Path(args.path).expanduser() / args.camera
+        data_path = Path(args.path).expanduser() / f"{args.camera}_{timestamp}"
     else:
-        data_path = Path("~/ceai_ws/calibration_data").expanduser() / args.camera
+        data_path = (
+            Path("~/ceai_ws/calib_data").expanduser() / f"{args.camera}_{timestamp}"
+        )
 
     data_path.mkdir(parents=True, exist_ok=True)
 

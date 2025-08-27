@@ -23,7 +23,6 @@ setup(
     install_requires=[
         "opencv-python",
         "opencv-contrib-python",
-        "natsort",
         "scipy",
         "setuptools",
     ],

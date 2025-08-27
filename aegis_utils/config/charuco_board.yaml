@@ -1,11 +1,11 @@
-tool:
+big:
   squares_x: 9
   squares_y: 6
   square_size: 0.03
   marker_size: 0.022
   aruco_dict: DICT_6X6_1000
 
-scene:
+small:
   squares_x: 7
   squares_y: 4
   square_size: 0.02
