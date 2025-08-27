@@ -6,6 +6,8 @@ from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.actions import OpaqueFunction
 from launch.launch_context import LaunchContext
 from launch.substitutions import LaunchConfiguration
@@ -19,6 +21,12 @@ def generate_launch_description():
         "config",
         "cameras",
         "pylon_cameras.yaml",
+    )
+    
+    image_proc_launch_file_path = os.path.join(
+        get_package_share_directory('image_proc'),
+        'launch',
+        'image_proc.launch.py'
     )
 
     declare_node_name_left_cmd = DeclareLaunchArgument(
@@ -87,6 +95,11 @@ def generate_launch_description():
         default_value="false",
         description="If true, the node will be respawned if it exits.",
     )
+    
+    launch_desc_src_cam_tool_right = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(image_proc_launch_file_path),
+            launch_arguments={'namespace': 'cam_tool_right'}.items()
+        ),
 
     return LaunchDescription(
         [
@@ -104,6 +117,7 @@ def generate_launch_description():
             declare_enable_current_params_publisher_cmd,
             declare_respawn_cmd,
             OpaqueFunction(function=launch_node),
+            launch_desc_src_cam_tool_right
         ]
     )
 
@@ -189,16 +203,16 @@ def launch_node(context: LaunchContext):
         ],
     )
     
-    node_image_proc_camera_right = Node(
-        package="image_proc",
-        namespace="cam_tool_right",
-        executable="image_proc",
-        name="image_proc_right",
-        output="screen",
-    ) 
+    # node_image_proc_camera_right = Node(
+    #     package="image_proc",
+    #     namespace="cam_tool_right",
+    #     executable="image_proc",
+    #     name="image_proc_right",
+    #     output="screen",
+    # ) 
 
     return [
         node_camera_left,
         node_camera_right,
-        node_image_proc_camera_right
+        # node_image_proc_camera_right
     ]
