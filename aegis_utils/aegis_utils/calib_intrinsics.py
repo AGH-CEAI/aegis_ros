@@ -6,6 +6,7 @@ from typing import Optional
 
 import cv2
 import yaml
+from ament_index_python.packages import get_package_share_directory
 
 CAMERA_CONFIG = {
     "scene": {},
@@ -112,7 +113,8 @@ def calibrate_intrinsics(
         "squares_y": squares_y,
     }
 
-    intrinsics_path = data_path / f"{data_path.name[-18]}_intrinsics.json"
+    cam_name = data_path.name[:-18]
+    intrinsics_path = data_path / f"{cam_name}_intrinsics.json"
     with open(intrinsics_path, "w") as f:
         json.dump(calib_data, f, indent=4)
 
@@ -129,10 +131,12 @@ def main() -> None:
     )
     data_path = get_latest_folder(base_path, args.camera)
     if not data_path:
-        print("No calibration data folder found")
+        print(f"No calibration data folder found in {base_path} directory")
         return
 
-    board_path = Path(__file__).parent.parent / "config" / "charuco_board.yaml"
+    package_share_path = Path(get_package_share_directory("aegis_utils"))
+    board_path = package_share_path / "config" / "charuco_board.yaml"
+
     with open(board_path, "r") as f:
         board_cfg = yaml.safe_load(f)
 
