@@ -29,11 +29,11 @@ CAMERA_CONFIG = {
     },
     "tool_right": {
         "pos_config": "cam_tool_right.yaml",
-        "topic": "/cam_tool_right/image_raw",
+        "topic": "/cam_tool_right/image_color",
     },
     "tool_left": {
         "pos_config": "cam_tool_left.yaml",
-        "topic": "/cam_tool_left/image_raw",
+        "topic": "/cam_tool_left/image_color",
     },
 }
 
