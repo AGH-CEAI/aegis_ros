@@ -10,7 +10,9 @@ from launch.actions import OpaqueFunction
 from launch.launch_context import LaunchContext
 from launch.substitutions import LaunchConfiguration
 from launch.conditions import UnlessCondition
-from launch_ros.actions import Node
+from launch_ros.actions import LoadComposableNodes, Node
+from launch_ros.descriptions import ComposableNode
+from launch_ros.actions import ComposableNodeContainer
 
 
 def generate_launch_description():
@@ -189,7 +191,36 @@ def launch_node(context: LaunchContext):
         ],
     )
 
+    rectify_tool_node = create_rectify_node()
+
     return [
         node_camera_left,
         node_camera_right,
+        rectify_tool_node,
     ]
+
+
+# TODO(issue#55) Add rectifying nodes
+def create_rectify_node() -> LoadComposableNodes:
+    return ComposableNodeContainer(
+        name="cam_tool_rectify_container",
+        namespace="",
+        package="rclcpp_components",
+        executable="component_container",
+        composable_node_descriptions=[
+            ComposableNode(
+                package="image_proc",
+                plugin="image_proc::DebayerNode",
+                name="cam_tool_left_debayer_node",
+                namespace="cam_tool_left",
+            ),
+            ComposableNode(
+                package="image_proc",
+                plugin="image_proc::DebayerNode",
+                name="cam_tool_right_debayer_node",
+                namespace="cam_tool_right",
+            ),
+        ],
+        arguments=["--ros-args", "--log-level", "info"],
+        output="both",
+    )
