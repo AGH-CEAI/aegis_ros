@@ -200,7 +200,7 @@ def launch_node(context: LaunchContext):
     ]
 
 
-# TODO: add rectifying Nodes, issue #55
+# TODO(issue#55) Add rectifying nodes
 def create_rectify_node() -> LoadComposableNodes:
     return ComposableNodeContainer(
         name="cam_tool_rectify_container",
