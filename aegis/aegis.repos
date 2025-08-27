@@ -18,7 +18,7 @@ repositories:
   pymoveit2:
     type: git
     url: https://github.com/AndrejOrsula/pymoveit2.git
-    version: 4b1260aeada4268fd92770e889be4a9bf59fbcf8
+    version: 4.1.1
   pylon_ros_camera:
     type: git
     url: https://github.com/basler/pylon-ros-camera.git
