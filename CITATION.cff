@@ -11,7 +11,7 @@ authors:
     given-names: Jakub
 title: "Aegis Robotic Station ROS 2 Meta Repository"
 version: v202509011041
-# identifiers:
-#   - type: doi
-#     value: 10.5281/zenodo.15047935
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.17018771
 date-released: 2025-08-27
