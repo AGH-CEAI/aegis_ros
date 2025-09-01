@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-57](https://github.com/AGH-CEAI/aegis_ros/pull/57) - Increased the position limit of the wrist 1 joint.
 * [PR-53](https://github.com/AGH-CEAI/aegis_ros/pull/53) - Renamed `cam_tool` to `cam_tool_front`.
 * [PR-52](https://github.com/AGH-CEAI/aegis_ros/pull/52) - Renamed `ip_adress` to `socat_ip_address` and `port` to `socat_port`.
 * [PR-49](https://github.com/AGH-CEAI/aegis_ros/pull/49) - Updated Hand-E gripper parameters.
