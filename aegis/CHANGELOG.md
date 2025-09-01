@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-* [PR-52](https://github.com/AGH-CEAI/aegis_ros/pull/52) - Fixed changelogs and registered project repository in the [Zenodo](https://zenodo.org/).
+* [PR-58](https://github.com/AGH-CEAI/aegis_ros/pull/58) - Fixed changelogs and registered project repository in the [Zenodo](https://zenodo.org/).
 
 ## [v202508271325]
 
