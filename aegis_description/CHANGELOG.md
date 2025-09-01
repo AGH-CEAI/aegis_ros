@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [v202509011041]
+
+### Fixed
+
+* [PR-58](https://github.com/AGH-CEAI/aegis_ros/pull/58) - Fixed changelogs.
+
+## [v202508271325]
+
+### Added
 
 * [PR-44](https://github.com/AGH-CEAI/aegis_ros/pull/44) - Added Luxonis OAK-D SR tool camera and its mount to the robot model.
 * [PR-43](https://github.com/AGH-CEAI/aegis_ros/pull/43) - Added Basler ace tool cameras and their mounts to the robot model.
@@ -27,12 +42,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [PR-17](https://github.com/AGH-CEAI/aegis_ros/pull/17) - Set default F/T sensor IP address.
 * [PR-9](https://github.com/AGH-CEAI/aegis_ros/pull/9) - Launch and URDF files completely revamped.
 
-### Deprecated
-
-### Removed
-
 ### Fixed
 
 * [PR-21](https://github.com/AGH-CEAI/aegis_ros/pull/21) - Switched the Luxonis OAK-D Pro camera description to the official Luxonis repository.
-
-### Security

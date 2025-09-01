@@ -8,15 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-
-* [PR-37](https://github.com/AGH-CEAI/aegis_ros/pull/37) - Initial version of the `aegis_director` package.
-
 ### Changed
-
 ### Deprecated
-
 ### Removed
+### Fixed
+### Security
+
+## [v202509011041]
 
 ### Fixed
 
-### Security
+* [PR-58](https://github.com/AGH-CEAI/aegis_ros/pull/58) - Fixed changelogs.
+
+## [v202508271325]
+
+### Added
+
+* [PR-37](https://github.com/AGH-CEAI/aegis_ros/pull/37) - Initial version of the `aegis_director` package.
