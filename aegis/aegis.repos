@@ -6,11 +6,11 @@ repositories:
   robotiq_hande_description:
     type: git
     url: https://github.com/AGH-CEAI/robotiq_hande_description
-    version: b687bc55a52622004bbb72d1437288e9c69ce261
+    version: v0.2.0-humble
   robotiq_hande_driver:
     type: git
     url: https://github.com/AGH-CEAI/robotiq_hande_driver
-    version: 834c9b0b62d7df3d98f927245a3ab8d81065fe78
+    version: v0.2.0-humble
   scene_objects_manager:
     type: git
     url: https://github.com/AGH-CEAI/scene_objects_manager
@@ -18,7 +18,7 @@ repositories:
   pymoveit2:
     type: git
     url: https://github.com/AndrejOrsula/pymoveit2.git
-    version: 4b1260aeada4268fd92770e889be4a9bf59fbcf8
+    version: 4.1.1
   pylon_ros_camera:
     type: git
     url: https://github.com/basler/pylon-ros-camera.git

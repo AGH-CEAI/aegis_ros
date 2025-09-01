@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [v202509011041]
+
+### Fixed
+
+* [PR-58](https://github.com/AGH-CEAI/aegis_ros/pull/58) - Fixed changelogs.
+
+## [v202508271325]
+
+### Added
 
 * [PR-9](https://github.com/AGH-CEAI/aegis_ros/pull/9) - Introduced `mock_hardware` and `launch_rviz` launch args.
 * [PR-7](https://github.com/AGH-CEAI/aegis_ros/pull/7) - Initial version of the Aegis ROS 2 packages.
@@ -19,11 +34,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [PR-17](https://github.com/AGH-CEAI/aegis_ros/pull/17) - Updated launch files diagram.
 * [PR-16](https://github.com/AGH-CEAI/aegis_ros/pull/16) - Updated launch files diagram.
 * [PR-9](https://github.com/AGH-CEAI/aegis_ros/pull/9) - Launch and URDF files completely revamped.
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
