@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [v202509011041]
+
+### Fixed
+
+* [PR-52](https://github.com/AGH-CEAI/aegis_ros/pull/52) - Fixed changelogs.
+
+## [v202508271325]
+
+### Added
 
 * [PR-54](https://github.com/AGH-CEAI/aegis_ros/pull/54) - Process tool cameras' images (Basler).
 * [PR-44](https://github.com/AGH-CEAI/aegis_ros/pull/44) - Integration with Luxonis tool camera.
@@ -26,11 +41,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [PR-20] (https://github.com/AGH-CEAI/aegis_ros/pull/20) - Automatic initialization of the virtual serial port.
 * [PR-17](https://github.com/AGH-CEAI/aegis_ros/pull/17) - Added launch file for the ros2_net_ft_driver.
 * [PR-16](https://github.com/AGH-CEAI/aegis_ros/pull/16) - Smoother controller_manager node config composition.
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security

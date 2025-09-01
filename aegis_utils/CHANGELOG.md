@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [v202509011041]
+
+### Fixed
+
+* [PR-52](https://github.com/AGH-CEAI/aegis_ros/pull/52) - Fixed changelogs.
+
+## [v202508271325]
+
+### Added
 
 * [PR-51](https://github.com/AGH-CEAI/aegis_ros/pull/51) - Added calibration of camera extrinsics program.
 * [PR-50](https://github.com/AGH-CEAI/aegis_ros/pull/50) - Added calibration of camera intrinsics program.
@@ -16,11 +31,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * [PR-53](https://github.com/AGH-CEAI/aegis_ros/pull/53) - Change calibration data paths.
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
