@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 import yaml
 from ament_index_python.packages import get_package_share_directory
-from scipy.spatial.transform import Rotation as R
+from scipy.spatial.transform import Rotation
 
 CAMERA_CONFIG = {
     "scene": {},
@@ -70,7 +70,9 @@ def process_view(
     aruco_dict: cv2.aruco_Dictionary,
     camera_matrix: np.ndarray,
     dist_coeffs: np.ndarray,
-) -> Optional[Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
+) -> Optional[
+    Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]
+]:
     try:
         image_idx = int(image_path.stem.split("_")[-1])
         tcp_idx = int(tcp_path.stem.split("_")[-1])
@@ -108,12 +110,16 @@ def process_view(
 
     tcp_pos, tcp_ori = load_tcp(tcp_path)
 
-    R_robot2tcp = R.from_quat(tcp_ori).as_matrix()
-    t_robot2tcp = tcp_pos.reshape(3, 1)
+    R_base2tcp = Rotation.from_quat(tcp_ori).as_matrix()
+    t_base2tcp = tcp_pos.reshape(3, 1)
+
+    R_tcp2base = R_base2tcp.T
+    t_tcp2base = -R_base2tcp.T @ t_base2tcp
+
     R_cam2target, _ = cv2.Rodrigues(rvec)
     t_cam2target = tvec.reshape(3, 1)
 
-    return R_robot2tcp, t_robot2tcp, R_cam2target, t_cam2target
+    return R_base2tcp, t_base2tcp, R_tcp2base, t_tcp2base, R_cam2target, t_cam2target
 
 
 def calibrate_extrinsics(
@@ -136,6 +142,7 @@ def calibrate_extrinsics(
     image_paths = sorted(data_path.glob("*_image_*.png"))
     tcp_paths = sorted(data_path.glob("*_tcp_*.yaml"))
     intrinsics_path = data_path / f"{cam_name}_intrinsics.json"
+    extrinsics_path = data_path / f"{cam_name}_extrinsics.json"
 
     if not image_paths:
         print(f"No images found in {data_path}")
@@ -153,25 +160,32 @@ def calibrate_extrinsics(
 
     camera_matrix, dist_coeffs = load_intrinsics(intrinsics_path)
 
-    tcp_poses_R = []
-    tcp_poses_t = []
-    target_poses_R = []
-    target_poses_t = []
+    base2tcp_list_R = []
+    base2tcp_list_t = []
+    tcp2base_list_R = []
+    tcp2base_list_t = []
+    cam2target_list_R = []
+    cam2target_list_t = []
 
     valid_views = 0
 
     for image_path, tcp_path in zip(image_paths, tcp_paths):
-        poses = process_view(
+        transforms = process_view(
             image_path, tcp_path, board, aruco_dict, camera_matrix, dist_coeffs
         )
-        if poses is None:
+        if transforms is None:
             continue
-        R_robot2tcp, t_robot2tcp, R_cam2target, t_cam2target = poses
 
-        tcp_poses_R.append(R_robot2tcp)
-        tcp_poses_t.append(t_robot2tcp)
-        target_poses_R.append(R_cam2target)
-        target_poses_t.append(t_cam2target)
+        R_base2tcp, t_base2tcp, R_tcp2base, t_tcp2base, R_cam2target, t_cam2target = (
+            transforms
+        )
+
+        base2tcp_list_R.append(R_base2tcp)
+        base2tcp_list_t.append(t_base2tcp)
+        tcp2base_list_R.append(R_tcp2base)
+        tcp2base_list_t.append(t_tcp2base)
+        cam2target_list_R.append(R_cam2target)
+        cam2target_list_t.append(t_cam2target)
 
         valid_views += 1
 
@@ -181,24 +195,48 @@ def calibrate_extrinsics(
         print("Not enough valid views for calibration")
         return
 
-    R_tcp2cam, t_tcp2cam = cv2.calibrateHandEye(
-        tcp_poses_R,
-        tcp_poses_t,
-        target_poses_R,
-        target_poses_t,
-        method=cv2.CALIB_HAND_EYE_TSAI,
-    )
+    if cam_name == "scene":
+        R_base2cam, t_base2cam = cv2.calibrateHandEye(
+            tcp2base_list_R,
+            tcp2base_list_t,
+            cam2target_list_R,
+            cam2target_list_t,
+            method=cv2.CALIB_HAND_EYE_TSAI,
+        )
 
-    T_tcp2cam = np.eye(4)
-    T_tcp2cam[:3, :3] = R_tcp2cam
-    T_tcp2cam[:3, 3] = t_tcp2cam.ravel()
+        T_base2cam = np.eye(4)
+        T_base2cam[:3, :3] = R_base2cam
+        T_base2cam[:3, 3] = t_base2cam.ravel()
+        T_cam2base = np.linalg.inv(T_base2cam)
+        to_save = {
+            "T_base2cam": T_base2cam.tolist(),
+            "T_cam2base": T_cam2base.tolist(),
+        }
+        print("Transformation matrix (base to camera):\n", T_base2cam)
+        print("Transformation matrix (camera to base):\n", T_cam2base)
 
-    print("Transformation matrix (TCP to camera)\n")
-    print(T_tcp2cam)
+    else:
+        R_tcp2cam, t_tcp2cam = cv2.calibrateHandEye(
+            base2tcp_list_R,
+            base2tcp_list_t,
+            cam2target_list_R,
+            cam2target_list_t,
+            method=cv2.CALIB_HAND_EYE_TSAI,
+        )
 
-    extrinsics_path = data_path / f"{data_path.name[:-18]}_extrinsics.json"
+        T_tcp2cam = np.eye(4)
+        T_tcp2cam[:3, :3] = R_tcp2cam
+        T_tcp2cam[:3, 3] = t_tcp2cam.ravel()
+        T_cam2tcp = np.linalg.inv(T_tcp2cam)
+        to_save = {
+            "T_tcp2cam": T_tcp2cam.tolist(),
+            "T_cam2tcp": T_cam2tcp.tolist(),
+        }
+        print("Transformation matrix (TCP to camera):\n", T_tcp2cam)
+        print("Transformation matrix (camera to TCP):\n", T_cam2tcp)
+
     with open(extrinsics_path, "w") as f:
-        json.dump({"T_tcp2cam": T_tcp2cam.tolist()}, f, indent=2)
+        json.dump(to_save, f, indent=2)
 
     print(f"Extrinsics saved to {extrinsics_path}")
 

@@ -61,6 +61,7 @@ def calibrate_intrinsics(
     )
     board.setLegacyPattern(True)
 
+    cam_name = data_path.name[:-18]
     image_paths = sorted(data_path.glob("*_image_*.png"))
 
     if not image_paths:
@@ -113,7 +114,6 @@ def calibrate_intrinsics(
         "squares_y": squares_y,
     }
 
-    cam_name = data_path.name[:-18]
     intrinsics_path = data_path / f"{cam_name}_intrinsics.json"
     with open(intrinsics_path, "w") as f:
         json.dump(calib_data, f, indent=4)
