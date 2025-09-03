@@ -17,6 +17,43 @@ CAMERA_CONFIG = {
 }
 
 
+def main() -> None:
+    args = parse_args()
+
+    base_path = (
+        Path(args.path).expanduser()
+        if args.path
+        else Path("~/ceai_ws/calib_data").expanduser()
+    )
+    data_path = get_latest_folder(base_path, args.camera)
+    if not data_path:
+        print(f"No calibration data folder found in {base_path} directory")
+        return
+
+    package_share_path = Path(get_package_share_directory("aegis_utils"))
+    board_path = package_share_path / "config" / "charuco_board.yaml"
+
+    with open(board_path, "r") as f:
+        board_cfg = yaml.safe_load(f)
+
+    if args.camera.startswith("tool_front"):
+        board_params = board_cfg["big"]
+    else:
+        board_params = board_cfg["small"]
+
+    squares_x = board_params["squares_x"]
+    squares_y = board_params["squares_y"]
+    square_size = board_params["square_size"]
+    marker_size = board_params["marker_size"]
+    aruco_dict = cv2.aruco.getPredefinedDictionary(
+        getattr(cv2.aruco, board_params["aruco_dict"])
+    )
+
+    calibrate_intrinsics(
+        data_path, squares_x, squares_y, square_size, marker_size, aruco_dict
+    )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -119,43 +156,6 @@ def calibrate_intrinsics(
         json.dump(calib_data, f, indent=4)
 
     print(f"Intrinsics saved to {intrinsics_path}")
-
-
-def main() -> None:
-    args = parse_args()
-
-    base_path = (
-        Path(args.path).expanduser()
-        if args.path
-        else Path("~/ceai_ws/calib_data").expanduser()
-    )
-    data_path = get_latest_folder(base_path, args.camera)
-    if not data_path:
-        print(f"No calibration data folder found in {base_path} directory")
-        return
-
-    package_share_path = Path(get_package_share_directory("aegis_utils"))
-    board_path = package_share_path / "config" / "charuco_board.yaml"
-
-    with open(board_path, "r") as f:
-        board_cfg = yaml.safe_load(f)
-
-    if args.camera.startswith("tool_front"):
-        board_params = board_cfg["big"]
-    else:
-        board_params = board_cfg["small"]
-
-    squares_x = board_params["squares_x"]
-    squares_y = board_params["squares_y"]
-    square_size = board_params["square_size"]
-    marker_size = board_params["marker_size"]
-    aruco_dict = cv2.aruco.getPredefinedDictionary(
-        getattr(cv2.aruco, board_params["aruco_dict"])
-    )
-
-    calibrate_intrinsics(
-        data_path, squares_x, squares_y, square_size, marker_size, aruco_dict
-    )
 
 
 if __name__ == "__main__":

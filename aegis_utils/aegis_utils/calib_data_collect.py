@@ -38,36 +38,6 @@ CAMERA_CONFIG = {
 }
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-c",
-        "--camera",
-        type=str,
-        required=True,
-        choices=CAMERA_CONFIG.keys(),
-        help="Which camera: scene, tool_front_right, tool_front_left, tool_right, tool_left",
-    )
-    parser.add_argument(
-        "-p",
-        "--path",
-        type=str,
-        default=None,
-        help="Optional path to calibration data folder",
-    )
-    return parser.parse_args()
-
-
-def load_positions(config_file_path: Path) -> List[Dict[str, float]]:
-    with open(config_file_path, "r") as f:
-        data = yaml.safe_load(f)
-    return data.get("positions", data)
-
-
-def get_timestamp(stamp: Time) -> float:
-    return stamp.sec + stamp.nanosec * 1e-9
-
-
 class CalibCollectNode(Node):
     def __init__(self, robot: RobotDirector, image_topic: str, data_path: Path) -> None:
         super().__init__("calib_collect_node")
@@ -99,9 +69,12 @@ class CalibCollectNode(Node):
         try:
             with self.mutex:
                 self.image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
-                self.timestamp = get_timestamp(msg.header.stamp)
+                self.timestamp = self.get_timestamp(msg.header.stamp)
         except Exception as e:
             self.get_logger().error(f"Failed to convert image: {e}")
+
+    def get_timestamp(stamp: Time) -> float:
+        return stamp.sec + stamp.nanosec * 1e-9
 
     def get_image(
         self, time_start: float, timeout: float = 3.0
@@ -138,40 +111,6 @@ class CalibCollectNode(Node):
         self.get_logger().info(msg)
 
 
-def collect_data(
-    node: CalibCollectNode,
-    robot: RobotDirector,
-    positions: List[Dict[str, float]],
-    data_path: Path,
-    camera_name: str,
-) -> None:
-    node.move_to_home()
-    time.sleep(2)
-
-    for i, joint_dict in enumerate(positions):
-        node.log(f"Moving to view position {i}")
-        robot.joint_move(joint_positions=joint_dict, max_vel=0.5, max_accel=0.5)
-        time.sleep(3)
-
-        time_start = node.get_clock().now().nanoseconds / 1e9
-        node.log("Waiting for image...")
-        image = node.get_image(time_start)
-        if image is not None:
-            tcp_pose = robot.get_tcp_pose()
-            image_path = data_path / f"{camera_name}_image_{i:02}.png"
-            tcp_path = data_path / f"{camera_name}_tcp_{i:02}.yaml"
-            node.save_image(image, image_path)
-            node.save_tcp(tcp_pose, tcp_path)
-        else:
-            node.log("No image received in time")
-
-        time.sleep(1)
-
-    node.log("Moving back to home")
-    node.move_to_home()
-    time.sleep(2)
-
-
 def main() -> None:
     args = parse_args()
     timestamp = datetime.now().strftime("%y-%m-%d_%H-%M-%S")
@@ -206,6 +145,66 @@ def main() -> None:
         rclpy.shutdown()
         executor.shutdown()
         spin_thread.join()
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-c",
+        "--camera",
+        type=str,
+        required=True,
+        choices=CAMERA_CONFIG.keys(),
+        help="Which camera: scene, tool_front_right, tool_front_left, tool_right, tool_left",
+    )
+    parser.add_argument(
+        "-p",
+        "--path",
+        type=str,
+        default=None,
+        help="Optional path to calibration data folder",
+    )
+    return parser.parse_args()
+
+
+def load_positions(config_file_path: Path) -> List[Dict[str, float]]:
+    with open(config_file_path, "r") as f:
+        data = yaml.safe_load(f)
+    return data.get("positions", data)
+
+
+def collect_data(
+    node: CalibCollectNode,
+    robot: RobotDirector,
+    positions: List[Dict[str, float]],
+    data_path: Path,
+    camera_name: str,
+) -> None:
+    node.move_to_home()
+    time.sleep(2)
+
+    for i, joint_dict in enumerate(positions):
+        node.log(f"Moving to view position {i}")
+        robot.joint_move(joint_positions=joint_dict, max_vel=0.5, max_accel=0.5)
+        time.sleep(3)
+
+        time_start = node.get_clock().now().nanoseconds / 1e9
+        node.log("Waiting for image...")
+        image = node.get_image(time_start)
+        if image is not None:
+            tcp_pose = robot.get_tcp_pose()
+            image_path = data_path / f"{camera_name}_image_{i:02}.png"
+            tcp_path = data_path / f"{camera_name}_tcp_{i:02}.yaml"
+            node.save_image(image, image_path)
+            node.save_tcp(tcp_pose, tcp_path)
+        else:
+            node.log("No image received in time")
+
+        time.sleep(1)
+
+    node.log("Moving back to home")
+    node.move_to_home()
+    time.sleep(2)
 
 
 if __name__ == "__main__":

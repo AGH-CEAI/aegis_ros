@@ -19,6 +19,43 @@ CAMERA_CONFIG = {
 }
 
 
+def main() -> None:
+    args = parse_args()
+
+    base_path = (
+        Path(args.path).expanduser()
+        if args.path
+        else Path("~/ceai_ws/calib_data").expanduser()
+    )
+    data_path = get_latest_folder(base_path, args.camera)
+    if not data_path:
+        print(f"No calibration data folder found in {base_path} directory")
+        return
+
+    package_share_path = Path(get_package_share_directory("aegis_utils"))
+    board_path = package_share_path / "config" / "charuco_board.yaml"
+
+    with open(board_path, "r") as f:
+        board_cfg = yaml.safe_load(f)
+
+    if args.camera.startswith("tool_front"):
+        board_params = board_cfg["big"]
+    else:
+        board_params = board_cfg["small"]
+
+    squares_x = board_params["squares_x"]
+    squares_y = board_params["squares_y"]
+    square_size = board_params["square_size"]
+    marker_size = board_params["marker_size"]
+    aruco_dict = cv2.aruco.getPredefinedDictionary(
+        getattr(cv2.aruco, board_params["aruco_dict"])
+    )
+
+    calibrate_extrinsics(
+        data_path, squares_x, squares_y, square_size, marker_size, aruco_dict
+    )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -45,81 +82,6 @@ def get_latest_folder(base_path: Path, camera: str) -> Optional[Path]:
         return None
     latest_folder = sorted(folders, reverse=True)[0]
     return Path(latest_folder)
-
-
-def load_tcp(tcp_path: Path) -> Tuple[np.ndarray, np.ndarray]:
-    with open(tcp_path, "r") as f:
-        data = yaml.safe_load(f)
-    pos = np.array(data["tcp_pose"]["position"], dtype=float)
-    ori = np.array(data["tcp_pose"]["orientation"], dtype=float)
-    return pos, ori
-
-
-def load_intrinsics(intrinsics_path: Path) -> Tuple[np.ndarray, np.ndarray]:
-    with open(intrinsics_path, "r") as f:
-        data = json.load(f)
-    camera_matrix = np.array(data["camera_matrix"], dtype=float)
-    dist_coeffs = np.array(data["dist_coeffs"], dtype=float)
-    return camera_matrix, dist_coeffs
-
-
-def process_view(
-    image_path: Path,
-    tcp_path: Path,
-    board: cv2.aruco_CharucoBoard,
-    aruco_dict: cv2.aruco_Dictionary,
-    camera_matrix: np.ndarray,
-    dist_coeffs: np.ndarray,
-) -> Optional[
-    Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]
-]:
-    try:
-        image_idx = int(image_path.stem.split("_")[-1])
-        tcp_idx = int(tcp_path.stem.split("_")[-1])
-    except ValueError:
-        print(f"Invalid index in filenames: {image_path}, {tcp_path}\nSkipping")
-        return None
-
-    if image_idx != tcp_idx:
-        print(f"Index mismatch: {image_path} vs {tcp_path}\nSkipping")
-        return None
-
-    img = cv2.imread(str(image_path))
-    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    corners, ids, _ = cv2.aruco.detectMarkers(img_gray, aruco_dict)
-
-    if ids is None or len(ids) == 0:
-        print(f"No ArUco markers detected in {image_path}\nSkipping")
-        return None
-
-    retval, charuco_corners, charuco_ids = cv2.aruco.interpolateCornersCharuco(
-        corners, ids, img_gray, board
-    )
-
-    if retval < 4:
-        print(f"Not enough Charuco corners detected in view {image_path}\nSkipping")
-        return None
-
-    valid, rvec, tvec = cv2.aruco.estimatePoseBoard(
-        charuco_corners, charuco_ids, board, camera_matrix, dist_coeffs, None, None
-    )
-
-    if not valid:
-        print(f"Could not estimate pose for {image_path}\nSkipping")
-        return None
-
-    tcp_pos, tcp_ori = load_tcp(tcp_path)
-
-    R_base2tcp = Rotation.from_quat(tcp_ori).as_matrix()
-    t_base2tcp = tcp_pos.reshape(3, 1)
-
-    R_tcp2base = R_base2tcp.T
-    t_tcp2base = -R_base2tcp.T @ t_base2tcp
-
-    R_cam2target, _ = cv2.Rodrigues(rvec)
-    t_cam2target = tvec.reshape(3, 1)
-
-    return R_base2tcp, t_base2tcp, R_tcp2base, t_tcp2base, R_cam2target, t_cam2target
 
 
 def calibrate_extrinsics(
@@ -241,41 +203,79 @@ def calibrate_extrinsics(
     print(f"Extrinsics saved to {extrinsics_path}")
 
 
-def main() -> None:
-    args = parse_args()
+def load_intrinsics(intrinsics_path: Path) -> Tuple[np.ndarray, np.ndarray]:
+    with open(intrinsics_path, "r") as f:
+        data = json.load(f)
+    camera_matrix = np.array(data["camera_matrix"], dtype=float)
+    dist_coeffs = np.array(data["dist_coeffs"], dtype=float)
+    return camera_matrix, dist_coeffs
 
-    base_path = (
-        Path(args.path).expanduser()
-        if args.path
-        else Path("~/ceai_ws/calib_data").expanduser()
+
+def process_view(
+    image_path: Path,
+    tcp_path: Path,
+    board: cv2.aruco_CharucoBoard,
+    aruco_dict: cv2.aruco_Dictionary,
+    camera_matrix: np.ndarray,
+    dist_coeffs: np.ndarray,
+) -> Optional[
+    Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]
+]:
+    try:
+        image_idx = int(image_path.stem.split("_")[-1])
+        tcp_idx = int(tcp_path.stem.split("_")[-1])
+    except ValueError:
+        print(f"Invalid index in filenames: {image_path}, {tcp_path}\nSkipping")
+        return None
+
+    if image_idx != tcp_idx:
+        print(f"Index mismatch: {image_path} vs {tcp_path}\nSkipping")
+        return None
+
+    img = cv2.imread(str(image_path))
+    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    corners, ids, _ = cv2.aruco.detectMarkers(img_gray, aruco_dict)
+
+    if ids is None or len(ids) == 0:
+        print(f"No ArUco markers detected in {image_path}\nSkipping")
+        return None
+
+    retval, charuco_corners, charuco_ids = cv2.aruco.interpolateCornersCharuco(
+        corners, ids, img_gray, board
     )
-    data_path = get_latest_folder(base_path, args.camera)
-    if not data_path:
-        print(f"No calibration data folder found in {base_path} directory")
-        return
 
-    package_share_path = Path(get_package_share_directory("aegis_utils"))
-    board_path = package_share_path / "config" / "charuco_board.yaml"
+    if retval < 4:
+        print(f"Not enough Charuco corners detected in view {image_path}\nSkipping")
+        return None
 
-    with open(board_path, "r") as f:
-        board_cfg = yaml.safe_load(f)
-
-    if args.camera.startswith("tool_front"):
-        board_params = board_cfg["big"]
-    else:
-        board_params = board_cfg["small"]
-
-    squares_x = board_params["squares_x"]
-    squares_y = board_params["squares_y"]
-    square_size = board_params["square_size"]
-    marker_size = board_params["marker_size"]
-    aruco_dict = cv2.aruco.getPredefinedDictionary(
-        getattr(cv2.aruco, board_params["aruco_dict"])
+    valid, rvec, tvec = cv2.aruco.estimatePoseBoard(
+        charuco_corners, charuco_ids, board, camera_matrix, dist_coeffs, None, None
     )
 
-    calibrate_extrinsics(
-        data_path, squares_x, squares_y, square_size, marker_size, aruco_dict
-    )
+    if not valid:
+        print(f"Could not estimate pose for {image_path}\nSkipping")
+        return None
+
+    tcp_pos, tcp_ori = load_tcp(tcp_path)
+
+    R_base2tcp = Rotation.from_quat(tcp_ori).as_matrix()
+    t_base2tcp = tcp_pos.reshape(3, 1)
+
+    R_tcp2base = R_base2tcp.T
+    t_tcp2base = -R_base2tcp.T @ t_base2tcp
+
+    R_cam2target, _ = cv2.Rodrigues(rvec)
+    t_cam2target = tvec.reshape(3, 1)
+
+    return R_base2tcp, t_base2tcp, R_tcp2base, t_tcp2base, R_cam2target, t_cam2target
+
+
+def load_tcp(tcp_path: Path) -> Tuple[np.ndarray, np.ndarray]:
+    with open(tcp_path, "r") as f:
+        data = yaml.safe_load(f)
+    pos = np.array(data["tcp_pose"]["position"], dtype=float)
+    ori = np.array(data["tcp_pose"]["orientation"], dtype=float)
+    return pos, ori
 
 
 if __name__ == "__main__":
