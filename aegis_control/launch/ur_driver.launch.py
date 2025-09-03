@@ -48,7 +48,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         "io_and_status_controller",
         "speed_scaling_state_broadcaster",
         "ur_force_torque_sensor_broadcaster",
-        # "tcp_pose_broadcaster", # TODO(issue#12): debug why this doesn't work
+        "tcp_pose_broadcaster",  # TODO(issue#12): debug why this doesn't work
         "ur_configuration_controller",
     ]
     controllers_inactive = [
@@ -57,9 +57,10 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         "forward_velocity_controller",
         "forward_position_controller",
         # TODO(issue#12): debug why these controllers don't work
-        # "force_mode_controller",
-        # "passthrough_trajectory_controller",
-        # "freedrive_mode_controller",
+        "force_mode_controller",
+        "passthrough_trajectory_controller",
+        "freedrive_mode_controller",
+        "tool_contact_controller",
     ]
 
     init_joint_controller = (
@@ -69,6 +70,9 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     )
     controllers_active.append(init_joint_controller)
     controllers_inactive.remove(init_joint_controller)
+
+    if mock_hardware_bool:
+        controllers_active.remove("tcp_pose_broadcaster")
 
     return [
         tool_communication_node,
@@ -136,6 +140,7 @@ def prepare_controller_stopper_node(mock_hardware: LaunchConfiguration) -> Node:
                     "force_torque_sensor_broadcaster",
                     "joint_state_broadcaster",
                     "speed_scaling_state_broadcaster",
+                    "tcp_pose_broadcaster",
                     "ur_configuration_controller",
                 ]
             },
