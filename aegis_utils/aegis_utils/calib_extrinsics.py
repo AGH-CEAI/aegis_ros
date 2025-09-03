@@ -21,13 +21,15 @@ CAMERA_CONFIG = {
 
 def main() -> None:
     args = parse_args()
+    cam_name = args.camera
+    path_name = args.path
 
     base_path = (
-        Path(args.path).expanduser()
+        Path(path_name).expanduser()
         if args.path
         else Path("~/ceai_ws/calib_data").expanduser()
     )
-    data_path = get_latest_folder(base_path, args.camera)
+    data_path = get_latest_folder(base_path, cam_name)
     if not data_path:
         print(f"No calibration data folder found in {base_path} directory")
         return
@@ -38,7 +40,7 @@ def main() -> None:
     with open(board_path, "r") as f:
         board_cfg = yaml.safe_load(f)
 
-    if args.camera.startswith("tool_front"):
+    if cam_name.startswith("tool_front"):
         board_params = board_cfg["big"]
     else:
         board_params = board_cfg["small"]
@@ -52,7 +54,7 @@ def main() -> None:
     )
 
     calibrate_extrinsics(
-        data_path, squares_x, squares_y, square_size, marker_size, aruco_dict
+        cam_name, data_path, squares_x, squares_y, square_size, marker_size, aruco_dict
     )
 
 
@@ -85,6 +87,7 @@ def get_latest_folder(base_path: Path, camera: str) -> Optional[Path]:
 
 
 def calibrate_extrinsics(
+    cam_name: str,
     data_path: Path,
     squares_x: int,
     squares_y: int,
@@ -100,7 +103,6 @@ def calibrate_extrinsics(
     )
     board.setLegacyPattern(True)
 
-    cam_name = data_path.name[:-18]
     image_paths = sorted(data_path.glob("*_image_*.png"))
     tcp_paths = sorted(data_path.glob("*_tcp_*.yaml"))
     intrinsics_path = data_path / f"{cam_name}_intrinsics.json"

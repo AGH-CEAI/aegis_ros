@@ -73,7 +73,7 @@ class CalibCollectNode(Node):
         except Exception as e:
             self.get_logger().error(f"Failed to convert image: {e}")
 
-    def get_timestamp(stamp: Time) -> float:
+    def get_timestamp(self, stamp: Time) -> float:
         return stamp.sec + stamp.nanosec * 1e-9
 
     def get_image(
@@ -113,19 +113,22 @@ class CalibCollectNode(Node):
 
 def main() -> None:
     args = parse_args()
+    cam_name = args.camera
+    path_name = args.path
+
     timestamp = datetime.now().strftime("%y-%m-%d_%H-%M-%S")
 
-    if args.path:
-        data_path = Path(args.path).expanduser() / f"{args.camera}_{timestamp}"
+    if path_name:
+        data_path = Path(path_name).expanduser() / f"{cam_name}_{timestamp}"
     else:
         data_path = (
-            Path("~/ceai_ws/calib_data").expanduser() / f"{args.camera}_{timestamp}"
+            Path("~/ceai_ws/calib_data").expanduser() / f"{cam_name}_{timestamp}"
         )
 
     data_path.mkdir(parents=True, exist_ok=True)
 
     package_share_path = Path(get_package_share_directory("aegis_utils"))
-    camera_info = CAMERA_CONFIG[args.camera]
+    camera_info = CAMERA_CONFIG[cam_name]
     pos_config_path = package_share_path / "config" / camera_info["pos_config"]
     image_topic = camera_info["topic"]
 
@@ -139,7 +142,7 @@ def main() -> None:
 
     try:
         positions = load_positions(pos_config_path)
-        collect_data(collect_node, robot, positions, data_path, args.camera)
+        collect_data(collect_node, robot, cam_name, data_path, positions)
     finally:
         collect_node.destroy_node()
         rclpy.shutdown()
@@ -176,9 +179,9 @@ def load_positions(config_file_path: Path) -> List[Dict[str, float]]:
 def collect_data(
     node: CalibCollectNode,
     robot: RobotDirector,
-    positions: List[Dict[str, float]],
-    data_path: Path,
     camera_name: str,
+    data_path: Path,
+    positions: List[Dict[str, float]],
 ) -> None:
     node.move_to_home()
     time.sleep(2)
