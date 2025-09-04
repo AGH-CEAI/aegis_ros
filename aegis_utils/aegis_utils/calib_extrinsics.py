@@ -165,16 +165,17 @@ def calibrate_extrinsics(
         return
 
     if cam_name == "scene":
-        to_save = calibrate_eye_to_hand(
+        calib_data = calibrate_eye_to_hand(
             tcp2base_list_R, tcp2base_list_t, cam2target_list_R, cam2target_list_t
         )
     else:
-        to_save = calibrate_eye_in_hand(
+        calib_data = calibrate_eye_in_hand(
             base2tcp_list_R, base2tcp_list_t, cam2target_list_R, cam2target_list_t
         )
 
     with open(extrinsics_path, "w") as f:
-        json.dump(to_save, f, indent=2)
+        json.dump(calib_data, f, indent=2)
+        f.write("\n")
 
     print(f"Extrinsics saved to {extrinsics_path}")
 
@@ -274,12 +275,12 @@ def calibrate_eye_to_hand(
     print("Transformation matrix (base to camera):\n", T_base2cam)
     print("Transformation matrix (camera to base):\n", T_cam2base)
 
-    to_save = {
+    calib_data = {
         "T_base2cam": T_base2cam.tolist(),
         "T_cam2base": T_cam2base.tolist(),
     }
 
-    return to_save
+    return calib_data
 
 
 def calibrate_eye_in_hand(
@@ -302,12 +303,12 @@ def calibrate_eye_in_hand(
     print("Transformation matrix (TCP to camera):\n", T_tcp2cam)
     print("Transformation matrix (camera to TCP):\n", T_cam2tcp)
 
-    to_save = {
+    calib_data = {
         "T_tcp2cam": T_tcp2cam.tolist(),
         "T_cam2tcp": T_cam2tcp.tolist(),
     }
 
-    return to_save
+    return calib_data
 
 
 def make_homogeneous(R: np.ndarray, t: np.ndarray) -> np.ndarray:

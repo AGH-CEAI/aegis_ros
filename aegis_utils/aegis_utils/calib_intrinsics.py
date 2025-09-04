@@ -155,7 +155,8 @@ def calibrate_intrinsics(
 
     intrinsics_path = data_path / f"{cam_name}_intrinsics.json"
     with open(intrinsics_path, "w") as f:
-        json.dump(calib_data, f, indent=4)
+        json.dump(calib_data, f, indent=2)
+        f.write("\n")
 
     print(f"Intrinsics saved to {intrinsics_path}")
 
