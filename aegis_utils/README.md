@@ -64,3 +64,8 @@ It accepts the same arguments and uses the same default data path as the data co
 ```bash
 ros2 run aegis_utils calib_extrinsics -c tool_front_right
 ```
+
+## Calibration results
+For now, the JSON files containing intrinsic and extrinsic calibration results for each of the cameras are located in:
+
+`aegis_utils/aegis_utils/config/`
