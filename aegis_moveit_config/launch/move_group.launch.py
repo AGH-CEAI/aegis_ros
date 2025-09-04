@@ -16,6 +16,14 @@ from ur_moveit_config.launch_common import load_yaml
 def str2bool(x: str) -> bool:
     return x.lower() in ("true")
 
+def deep_dict_update(d_target: dict, d_update: dict) -> dict:
+    for k, v in d_update.items():
+        if (k in d_target and isinstance(d_target[k], dict) and isinstance(v, dict)):
+            deep_dict_update(d_target[k], v)
+        else:
+            d_target[k] = v
+    return d_target
+
 
 class AegisPathsCfg:
     """Contains paths to the configuration files."""
@@ -81,7 +89,13 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     mock_hardware_bool = str2bool(context.perform_substitution(mock_hardware))
 
     # Planning joints limits
-    robot_description_planning = get_robot_description_planning(paths) 
+    robot_description_planning = {
+        "robot_description_planning": deep_dict_update(
+            paths.load_joint_limits_cfg(),
+            paths.load_planning_joint_limits_cfg(),
+        )
+    }
+
 
     # Planning Configuration
     ompl_planning_pipeline_cfg = paths.load_ompl_planning_cfg()
@@ -165,14 +179,6 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         # TODO(issue#5) enable real-time servo
         # servo_node(),
     ]
-
-def get_robot_description_planning(paths: AegisPathsCfg) -> dict:
-    return {
-        "robot_description_planning": {
-            **paths.load_joint_limits_cfg(),
-            **paths.load_planning_joint_limits_cfg(),
-        }
-    }
 
 def get_robot_description_semantic(paths: AegisPathsCfg) -> dict:
     robot_description_semantic_content = Command(
