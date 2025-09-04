@@ -86,6 +86,10 @@ You should see `/opt/pylon` in terminal. Build project and ignore warnings that 
 
 See the [aegis_bringup](./aegis_bringup/README.md) package.
 
+### Camera calibration
+
+See the [aegis_utils](./aegis_utils/README.md) package.
+
 
 ---
 ## Development notes
