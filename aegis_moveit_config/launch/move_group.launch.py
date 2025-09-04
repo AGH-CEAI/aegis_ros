@@ -16,9 +16,10 @@ from ur_moveit_config.launch_common import load_yaml
 def str2bool(x: str) -> bool:
     return x.lower() in ("true")
 
+
 def deep_dict_update(d_target: dict, d_update: dict) -> dict:
     for k, v in d_update.items():
-        if (k in d_target and isinstance(d_target[k], dict) and isinstance(v, dict)):
+        if k in d_target and isinstance(d_target[k], dict) and isinstance(v, dict):
             deep_dict_update(d_target[k], v)
         else:
             d_target[k] = v
@@ -66,9 +67,11 @@ class AegisPathsCfg:
 
     def load_joint_limits_cfg(self) -> dict:
         return load_yaml(self.description_cfg_pkg_name, "config/ur5e/joint_limits.yaml")
-    
+
     def load_planning_joint_limits_cfg(self) -> dict:
-        return load_yaml(self.moveit_cfg_pkg_name, "config/move_group/planning_joint_limits.yaml")
+        return load_yaml(
+            self.moveit_cfg_pkg_name, "config/move_group/planning_joint_limits.yaml"
+        )
 
     def load_octomap_updater_cfg(self) -> dict:
         return load_yaml(self.moveit_cfg_pkg_name, "config/octomap_updater.yaml")
@@ -96,7 +99,6 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         )
     }
 
-
     # Planning Configuration
     ompl_planning_pipeline_cfg = paths.load_ompl_planning_cfg()
 
@@ -118,7 +120,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         "trajectory_execution.allowed_execution_duration_scaling": 1.2,
         "trajectory_execution.allowed_goal_duration_margin": 0.5,
         "trajectory_execution.allowed_start_tolerance": 0.01,
-        # UR Driver is not compatible with the MoveIt's Trajectory Execution Monitoring (TEM) 
+        # UR Driver is not compatible with the MoveIt's Trajectory Execution Monitoring (TEM)
         # See # https://docs.universal-robots.com/Universal_Robots_ROS2_Documentation/doc/ur_robot_driver/ur_moveit_config/doc/index.html#id2
         # Execution time monitoring can be incompatible with the scaled JTC
         "trajectory_execution.execution_duration_monitoring": False,
@@ -179,6 +181,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         # TODO(issue#5) enable real-time servo
         # servo_node(),
     ]
+
 
 def get_robot_description_semantic(paths: AegisPathsCfg) -> dict:
     robot_description_semantic_content = Command(
