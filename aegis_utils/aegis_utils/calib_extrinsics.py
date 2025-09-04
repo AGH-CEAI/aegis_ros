@@ -2,7 +2,7 @@ import argparse
 import glob
 import json
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Dict, List, NamedTuple, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -17,6 +17,15 @@ CAMERA_CONFIG = {
     "tool_right": {},
     "tool_left": {},
 }
+
+
+class ViewTransforms(NamedTuple):
+    R_base2tcp: np.ndarray
+    t_base2tcp: np.ndarray
+    R_tcp2base: np.ndarray
+    t_tcp2base: np.ndarray
+    R_cam2target: np.ndarray
+    t_cam2target: np.ndarray
 
 
 def main() -> None:
@@ -140,16 +149,12 @@ def calibrate_extrinsics(
         if transforms is None:
             continue
 
-        R_base2tcp, t_base2tcp, R_tcp2base, t_tcp2base, R_cam2target, t_cam2target = (
-            transforms
-        )
-
-        base2tcp_list_R.append(R_base2tcp)
-        base2tcp_list_t.append(t_base2tcp)
-        tcp2base_list_R.append(R_tcp2base)
-        tcp2base_list_t.append(t_tcp2base)
-        cam2target_list_R.append(R_cam2target)
-        cam2target_list_t.append(t_cam2target)
+        base2tcp_list_R.append(transforms.R_base2tcp)
+        base2tcp_list_t.append(transforms.t_base2tcp)
+        tcp2base_list_R.append(transforms.R_tcp2base)
+        tcp2base_list_t.append(transforms.t_tcp2base)
+        cam2target_list_R.append(transforms.R_cam2target)
+        cam2target_list_t.append(transforms.t_cam2target)
 
         valid_views += 1
 
@@ -160,44 +165,13 @@ def calibrate_extrinsics(
         return
 
     if cam_name == "scene":
-        R_base2cam, t_base2cam = cv2.calibrateHandEye(
-            tcp2base_list_R,
-            tcp2base_list_t,
-            cam2target_list_R,
-            cam2target_list_t,
-            method=cv2.CALIB_HAND_EYE_TSAI,
+        to_save = calibrate_eye_to_hand(
+            tcp2base_list_R, tcp2base_list_t, cam2target_list_R, cam2target_list_t
         )
-
-        T_base2cam = np.eye(4)
-        T_base2cam[:3, :3] = R_base2cam
-        T_base2cam[:3, 3] = t_base2cam.ravel()
-        T_cam2base = np.linalg.inv(T_base2cam)
-        to_save = {
-            "T_base2cam": T_base2cam.tolist(),
-            "T_cam2base": T_cam2base.tolist(),
-        }
-        print("Transformation matrix (base to camera):\n", T_base2cam)
-        print("Transformation matrix (camera to base):\n", T_cam2base)
-
     else:
-        R_tcp2cam, t_tcp2cam = cv2.calibrateHandEye(
-            base2tcp_list_R,
-            base2tcp_list_t,
-            cam2target_list_R,
-            cam2target_list_t,
-            method=cv2.CALIB_HAND_EYE_TSAI,
+        to_save = calibrate_eye_in_hand(
+            base2tcp_list_R, base2tcp_list_t, cam2target_list_R, cam2target_list_t
         )
-
-        T_tcp2cam = np.eye(4)
-        T_tcp2cam[:3, :3] = R_tcp2cam
-        T_tcp2cam[:3, 3] = t_tcp2cam.ravel()
-        T_cam2tcp = np.linalg.inv(T_tcp2cam)
-        to_save = {
-            "T_tcp2cam": T_tcp2cam.tolist(),
-            "T_cam2tcp": T_cam2tcp.tolist(),
-        }
-        print("Transformation matrix (TCP to camera):\n", T_tcp2cam)
-        print("Transformation matrix (camera to TCP):\n", T_cam2tcp)
 
     with open(extrinsics_path, "w") as f:
         json.dump(to_save, f, indent=2)
@@ -220,9 +194,7 @@ def process_view(
     aruco_dict: cv2.aruco_Dictionary,
     camera_matrix: np.ndarray,
     dist_coeffs: np.ndarray,
-) -> Optional[
-    Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]
-]:
+) -> Optional[ViewTransforms]:
     try:
         image_idx = int(image_path.stem.split("_")[-1])
         tcp_idx = int(tcp_path.stem.split("_")[-1])
@@ -269,7 +241,9 @@ def process_view(
     R_cam2target, _ = cv2.Rodrigues(rvec)
     t_cam2target = tvec.reshape(3, 1)
 
-    return R_base2tcp, t_base2tcp, R_tcp2base, t_tcp2base, R_cam2target, t_cam2target
+    return ViewTransforms(
+        R_base2tcp, t_base2tcp, R_tcp2base, t_tcp2base, R_cam2target, t_cam2target
+    )
 
 
 def load_tcp(tcp_path: Path) -> Tuple[np.ndarray, np.ndarray]:
@@ -278,6 +252,69 @@ def load_tcp(tcp_path: Path) -> Tuple[np.ndarray, np.ndarray]:
     pos = np.array(data["tcp_pose"]["position"], dtype=float)
     ori = np.array(data["tcp_pose"]["orientation"], dtype=float)
     return pos, ori
+
+
+def calibrate_eye_to_hand(
+    tcp2base_list_R: List[np.ndarray],
+    tcp2base_list_t: List[np.ndarray],
+    cam2target_list_R: List[np.ndarray],
+    cam2target_list_t: List[np.ndarray],
+) -> Dict[str, List]:
+    R_base2cam, t_base2cam = cv2.calibrateHandEye(
+        tcp2base_list_R,
+        tcp2base_list_t,
+        cam2target_list_R,
+        cam2target_list_t,
+        method=cv2.CALIB_HAND_EYE_TSAI,
+    )
+
+    T_base2cam = make_homogeneous(R_base2cam, t_base2cam)
+    T_cam2base = np.linalg.inv(T_base2cam)
+
+    print("Transformation matrix (base to camera):\n", T_base2cam)
+    print("Transformation matrix (camera to base):\n", T_cam2base)
+
+    to_save = {
+        "T_base2cam": T_base2cam.tolist(),
+        "T_cam2base": T_cam2base.tolist(),
+    }
+
+    return to_save
+
+
+def calibrate_eye_in_hand(
+    base2tcp_list_R: List[np.ndarray],
+    base2tcp_list_t: List[np.ndarray],
+    cam2target_list_R: List[np.ndarray],
+    cam2target_list_t: List[np.ndarray],
+) -> Dict[str, List[List[float]]]:
+    R_tcp2cam, t_tcp2cam = cv2.calibrateHandEye(
+        base2tcp_list_R,
+        base2tcp_list_t,
+        cam2target_list_R,
+        cam2target_list_t,
+        method=cv2.CALIB_HAND_EYE_TSAI,
+    )
+
+    T_tcp2cam = make_homogeneous(R_tcp2cam, t_tcp2cam)
+    T_cam2tcp = np.linalg.inv(T_tcp2cam)
+
+    print("Transformation matrix (TCP to camera):\n", T_tcp2cam)
+    print("Transformation matrix (camera to TCP):\n", T_cam2tcp)
+
+    to_save = {
+        "T_tcp2cam": T_tcp2cam.tolist(),
+        "T_cam2tcp": T_cam2tcp.tolist(),
+    }
+
+    return to_save
+
+
+def make_homogeneous(R: np.ndarray, t: np.ndarray) -> np.ndarray:
+    T = np.eye(4)
+    T[:3, :3] = R
+    T[:3, 3] = t.ravel()
+    return T
 
 
 if __name__ == "__main__":
