@@ -48,7 +48,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         "io_and_status_controller",
         "speed_scaling_state_broadcaster",
         "ur_force_torque_sensor_broadcaster",
-        "tcp_pose_broadcaster",  # TODO(issue#12): debug why this doesn't work
+        "tcp_pose_broadcaster",
         "ur_configuration_controller",
     ]
     controllers_inactive = [
@@ -56,7 +56,6 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         "joint_trajectory_controller",
         "forward_velocity_controller",
         "forward_position_controller",
-        # TODO(issue#12): debug why these controllers don't work
         "force_mode_controller",
         "passthrough_trajectory_controller",
         "freedrive_mode_controller",

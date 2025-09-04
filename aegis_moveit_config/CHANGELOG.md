@@ -8,7 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+* [PR-60](https://github.com/AGH-CEAI/aegis_ros/pull/60) - Added maximum acceleration limits config for Moveit planning.
+
 ### Changed
+
+
+* [PR-60](https://github.com/AGH-CEAI/aegis_ros/pull/60) - Disabled MoveIt's Trajectory Execution Monitoring (TEM) - it is now possible to scale down robot speeds without trajectory errors.
+
 ### Deprecated
 ### Removed
 ### Fixed
