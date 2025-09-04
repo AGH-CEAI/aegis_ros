@@ -259,7 +259,7 @@ def calibrate_eye_to_hand(
     tcp2base_list_t: List[np.ndarray],
     cam2target_list_R: List[np.ndarray],
     cam2target_list_t: List[np.ndarray],
-) -> Dict[str, List]:
+) -> Dict[str, List[List[float]]]:
     R_base2cam, t_base2cam = cv2.calibrateHandEye(
         tcp2base_list_R,
         tcp2base_list_t,
