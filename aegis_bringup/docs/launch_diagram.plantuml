@@ -106,8 +106,9 @@ package aegis_moveit_config {
     package config {
         class aegis << (S,#c298e9) SRDF >> {}
         package move_group {
-            class ompl_planning << (Y,#ffffc9) YAML >> {}
             class kinematics << (Y,#ffffc9) YAML >> {}
+            class ompl_planning << (Y,#ffffc9) YAML >> {}
+            class planning_joint_limits << (Y,#ffffc9) YAML >> {}
         }
         class moveit << (R,#ffffff) rviz >> {}
         class controlers_description << (Y,#ffffc9) YAML >> {}
