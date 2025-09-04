@@ -58,6 +58,9 @@ class AegisPathsCfg:
 
     def load_joint_limits_cfg(self) -> dict:
         return load_yaml(self.description_cfg_pkg_name, "config/ur5e/joint_limits.yaml")
+    
+    def load_planning_joint_limits_cfg(self) -> dict:
+        return load_yaml(self.moveit_cfg_pkg_name, "config/move_group/planning_joint_limits.yaml")
 
     def load_octomap_updater_cfg(self) -> dict:
         return load_yaml(self.moveit_cfg_pkg_name, "config/octomap_updater.yaml")
@@ -77,9 +80,8 @@ def launch_setup(context: LaunchContext) -> list[Node]:
 
     mock_hardware_bool = str2bool(context.perform_substitution(mock_hardware))
 
-    robot_description_planning = {
-        "robot_description_planning": paths.load_joint_limits_cfg()
-    }
+    # Planning joints limits
+    robot_description_planning = get_robot_description_planning(paths) 
 
     # Planning Configuration
     ompl_planning_pipeline_cfg = paths.load_ompl_planning_cfg()
@@ -160,6 +162,13 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         # servo_node(),
     ]
 
+def get_robot_description_planning(paths: AegisPathsCfg) -> dict:
+    return {
+        "robot_description_planning": {
+            **paths.load_joint_limits_cfg(),
+            **paths.load_planning_joint_limits_cfg(),
+        }
+    }
 
 def get_robot_description_semantic(paths: AegisPathsCfg) -> dict:
     robot_description_semantic_content = Command(
