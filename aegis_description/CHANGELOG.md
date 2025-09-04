@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 
+* [PR-60](https://github.com/AGH-CEAI/aegis_ros/pull/60) - Decreased the default velocity and acceleration scaling factor to 5%.
 * [PR-57](https://github.com/AGH-CEAI/aegis_ros/pull/57) - Increased the position limit of the wrist 1 joint.
 
 ### Deprecated
