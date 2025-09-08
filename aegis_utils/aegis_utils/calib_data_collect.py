@@ -29,43 +29,13 @@ CAMERA_CONFIG = {
     },
     "tool_right": {
         "pos_config": "cam_tool_right.yaml",
-        "topic": "/cam_tool_right/image_raw",
+        "topic": "/cam_tool_right/image_color",
     },
     "tool_left": {
         "pos_config": "cam_tool_left.yaml",
-        "topic": "/cam_tool_left/image_raw",
+        "topic": "/cam_tool_left/image_color",
     },
 }
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-c",
-        "--camera",
-        type=str,
-        required=True,
-        choices=CAMERA_CONFIG.keys(),
-        help="Which camera: scene, tool_front_right, tool_front_left, tool_right, tool_left",
-    )
-    parser.add_argument(
-        "-p",
-        "--path",
-        type=str,
-        default=None,
-        help="Optional path to calibration data folder",
-    )
-    return parser.parse_args()
-
-
-def load_positions(config_file_path: Path) -> List[Dict[str, float]]:
-    with open(config_file_path, "r") as f:
-        data = yaml.safe_load(f)
-    return data.get("positions", data)
-
-
-def get_timestamp(stamp: Time) -> float:
-    return stamp.sec + stamp.nanosec * 1e-9
 
 
 class CalibCollectNode(Node):
@@ -99,9 +69,12 @@ class CalibCollectNode(Node):
         try:
             with self.mutex:
                 self.image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
-                self.timestamp = get_timestamp(msg.header.stamp)
+                self.timestamp = self.get_timestamp(msg.header.stamp)
         except Exception as e:
             self.get_logger().error(f"Failed to convert image: {e}")
+
+    def get_timestamp(self, stamp: Time) -> float:
+        return stamp.sec + stamp.nanosec * 1e-9
 
     def get_image(
         self, time_start: float, timeout: float = 3.0
@@ -138,12 +111,77 @@ class CalibCollectNode(Node):
         self.get_logger().info(msg)
 
 
+def main() -> None:
+    args = parse_args()
+    cam_name = args.camera
+    path_name = args.path
+
+    timestamp = datetime.now().strftime("%y-%m-%d_%H-%M-%S")
+
+    if path_name:
+        data_path = Path(path_name).expanduser() / f"{cam_name}_{timestamp}"
+    else:
+        data_path = (
+            Path("~/ceai_ws/calib_data").expanduser() / f"{cam_name}_{timestamp}"
+        )
+
+    data_path.mkdir(parents=True, exist_ok=True)
+
+    package_share_path = Path(get_package_share_directory("aegis_utils"))
+    camera_info = CAMERA_CONFIG[cam_name]
+    pos_config_path = package_share_path / "config" / camera_info["pos_config"]
+    image_topic = camera_info["topic"]
+
+    rclpy.init()
+    robot = RobotDirector(synchronous=True)
+    collect_node = CalibCollectNode(robot, image_topic, data_path)
+    executor = SingleThreadedExecutor()
+    executor.add_node(collect_node)
+    spin_thread = threading.Thread(target=executor.spin, daemon=True)
+    spin_thread.start()
+
+    try:
+        positions = load_positions(pos_config_path)
+        collect_data(collect_node, robot, cam_name, data_path, positions)
+    finally:
+        collect_node.destroy_node()
+        rclpy.shutdown()
+        executor.shutdown()
+        spin_thread.join()
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-c",
+        "--camera",
+        type=str,
+        required=True,
+        choices=CAMERA_CONFIG.keys(),
+        help="Which camera: scene, tool_front_right, tool_front_left, tool_right, tool_left",
+    )
+    parser.add_argument(
+        "-p",
+        "--path",
+        type=str,
+        default=None,
+        help="Optional path to calibration data folder",
+    )
+    return parser.parse_args()
+
+
+def load_positions(config_file_path: Path) -> List[Dict[str, float]]:
+    with open(config_file_path, "r") as f:
+        data = yaml.safe_load(f)
+    return data.get("positions", data)
+
+
 def collect_data(
     node: CalibCollectNode,
     robot: RobotDirector,
-    positions: List[Dict[str, float]],
-    data_path: Path,
     camera_name: str,
+    data_path: Path,
+    positions: List[Dict[str, float]],
 ) -> None:
     node.move_to_home()
     time.sleep(2)
@@ -170,42 +208,6 @@ def collect_data(
     node.log("Moving back to home")
     node.move_to_home()
     time.sleep(2)
-
-
-def main() -> None:
-    args = parse_args()
-    timestamp = datetime.now().strftime("%y-%m-%d_%H-%M-%S")
-
-    if args.path:
-        data_path = Path(args.path).expanduser() / f"{args.camera}_{timestamp}"
-    else:
-        data_path = (
-            Path("~/ceai_ws/calib_data").expanduser() / f"{args.camera}_{timestamp}"
-        )
-
-    data_path.mkdir(parents=True, exist_ok=True)
-
-    package_share_path = Path(get_package_share_directory("aegis_utils"))
-    camera_info = CAMERA_CONFIG[args.camera]
-    pos_config_path = package_share_path / "config" / camera_info["pos_config"]
-    image_topic = camera_info["topic"]
-
-    rclpy.init()
-    robot = RobotDirector(synchronous=True)
-    collect_node = CalibCollectNode(robot, image_topic, data_path)
-    executor = SingleThreadedExecutor()
-    executor.add_node(collect_node)
-    spin_thread = threading.Thread(target=executor.spin, daemon=True)
-    spin_thread.start()
-
-    try:
-        positions = load_positions(pos_config_path)
-        collect_data(collect_node, robot, positions, data_path, args.camera)
-    finally:
-        collect_node.destroy_node()
-        rclpy.shutdown()
-        executor.shutdown()
-        spin_thread.join()
 
 
 if __name__ == "__main__":

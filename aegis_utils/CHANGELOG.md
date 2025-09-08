@@ -9,18 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-61](https://github.com/AGH-CEAI/aegis_ros/pull/61) - Added intrinsic and extrinsic calibration results.
+* [PR-57](https://github.com/AGH-CEAI/aegis_ros/pull/57) - Added calibration positions for data collection.
+
+### Changed
+### Deprecated
+### Removed
+### Fixed
+
+* [PR-59](https://github.com/AGH-CEAI/aegis_ros/pull/59) - Fixed handling of scene camera in calibration of camera extrinsics program.
+
+### Security
+
+## [v202509011041]
+
+### Fixed
+
+* [PR-58](https://github.com/AGH-CEAI/aegis_ros/pull/58) - Fixed changelogs.
+
+## [v202508271325]
+
+### Added
+
 * [PR-51](https://github.com/AGH-CEAI/aegis_ros/pull/51) - Added calibration of camera extrinsics program.
 * [PR-50](https://github.com/AGH-CEAI/aegis_ros/pull/50) - Added calibration of camera intrinsics program.
-* [PR-47](https://github.com/AGH-CEAI/aegis_ros/pull/47) - Initial version of the `aegis_utils` package. Added calibration data collection program and corresponding positions configuration for Luxonis OAK-D SR tool camera.
+* [PR-47](https://github.com/AGH-CEAI/aegis_ros/pull/47) - Initial version of the `aegis_utils` package. Added calibration data collection program and calibration positions for data collection.
 
 ### Changed
 
 * [PR-53](https://github.com/AGH-CEAI/aegis_ros/pull/53) - Change calibration data paths.
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security

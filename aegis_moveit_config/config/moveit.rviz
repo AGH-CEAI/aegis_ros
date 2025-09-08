@@ -60,7 +60,7 @@ Visualization Manager:
       Update Interval: 0
       Value: false
       Visual Enabled: true
-    - Acceleration_Scaling_Factor: 0.1
+    - Acceleration_Scaling_Factor: 0.05
       Class: moveit_rviz_plugin/MotionPlanning
       Enabled: true
       Move Group Namespace: ""
@@ -645,7 +645,7 @@ Visualization Manager:
         Show Robot Collision: false
         Show Robot Visual: true
       Value: true
-      Velocity_Scaling_Factor: 0.1
+      Velocity_Scaling_Factor: 0.05
     - Class: rviz_default_plugins/TF
       Enabled: false
       Frame Timeout: 15

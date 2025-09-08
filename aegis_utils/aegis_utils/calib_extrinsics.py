@@ -2,13 +2,13 @@ import argparse
 import glob
 import json
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Dict, List, NamedTuple, Optional, Tuple
 
 import cv2
 import numpy as np
 import yaml
 from ament_index_python.packages import get_package_share_directory
-from scipy.spatial.transform import Rotation as R
+from scipy.spatial.transform import Rotation
 
 CAMERA_CONFIG = {
     "scene": {},
@@ -17,6 +17,54 @@ CAMERA_CONFIG = {
     "tool_right": {},
     "tool_left": {},
 }
+
+
+class ViewTransforms(NamedTuple):
+    R_base2tcp: np.ndarray
+    t_base2tcp: np.ndarray
+    R_tcp2base: np.ndarray
+    t_tcp2base: np.ndarray
+    R_cam2target: np.ndarray
+    t_cam2target: np.ndarray
+
+
+def main() -> None:
+    args = parse_args()
+    cam_name = args.camera
+    path_name = args.path
+
+    base_path = (
+        Path(path_name).expanduser()
+        if args.path
+        else Path("~/ceai_ws/calib_data").expanduser()
+    )
+    data_path = get_latest_folder(base_path, cam_name)
+    if not data_path:
+        print(f"No calibration data folder found in {base_path} directory")
+        return
+
+    package_share_path = Path(get_package_share_directory("aegis_utils"))
+    board_path = package_share_path / "config" / "charuco_board.yaml"
+
+    with open(board_path, "r") as f:
+        board_cfg = yaml.safe_load(f)
+
+    if cam_name.startswith("tool_front"):
+        board_params = board_cfg["big"]
+    else:
+        board_params = board_cfg["small"]
+
+    squares_x = board_params["squares_x"]
+    squares_y = board_params["squares_y"]
+    square_size = board_params["square_size"]
+    marker_size = board_params["marker_size"]
+    aruco_dict = cv2.aruco.getPredefinedDictionary(
+        getattr(cv2.aruco, board_params["aruco_dict"])
+    )
+
+    calibrate_extrinsics(
+        cam_name, data_path, squares_x, squares_y, square_size, marker_size, aruco_dict
+    )
 
 
 def parse_args() -> argparse.Namespace:
@@ -47,12 +95,89 @@ def get_latest_folder(base_path: Path, camera: str) -> Optional[Path]:
     return Path(latest_folder)
 
 
-def load_tcp(tcp_path: Path) -> Tuple[np.ndarray, np.ndarray]:
-    with open(tcp_path, "r") as f:
-        data = yaml.safe_load(f)
-    pos = np.array(data["tcp_pose"]["position"], dtype=float)
-    ori = np.array(data["tcp_pose"]["orientation"], dtype=float)
-    return pos, ori
+def calibrate_extrinsics(
+    cam_name: str,
+    data_path: Path,
+    squares_x: int,
+    squares_y: int,
+    square_size: float,
+    marker_size: float,
+    aruco_dict: cv2.aruco_Dictionary,
+) -> None:
+    board = cv2.aruco.CharucoBoard(
+        (squares_x, squares_y),
+        square_size,
+        marker_size,
+        aruco_dict,
+    )
+    board.setLegacyPattern(True)
+
+    image_paths = sorted(data_path.glob("*_image_*.png"))
+    tcp_paths = sorted(data_path.glob("*_tcp_*.yaml"))
+    intrinsics_path = data_path / f"{cam_name}_intrinsics.json"
+    extrinsics_path = data_path / f"{cam_name}_extrinsics.json"
+
+    if not image_paths:
+        print(f"No images found in {data_path}")
+        return
+    if not tcp_paths:
+        print(f"No TCP poses found in {data_path}")
+        return
+    if not intrinsics_path.is_file():
+        print(f"Intrinsics file not found in {intrinsics_path}")
+        return
+    if len(image_paths) != len(tcp_paths):
+        print(
+            f"Number of images ({len(image_paths)}) and TCP poses ({len(tcp_paths)}) do not match!"
+        )
+
+    camera_matrix, dist_coeffs = load_intrinsics(intrinsics_path)
+
+    base2tcp_list_R = []
+    base2tcp_list_t = []
+    tcp2base_list_R = []
+    tcp2base_list_t = []
+    cam2target_list_R = []
+    cam2target_list_t = []
+
+    valid_views = 0
+
+    for image_path, tcp_path in zip(image_paths, tcp_paths):
+        transforms = process_view(
+            image_path, tcp_path, board, aruco_dict, camera_matrix, dist_coeffs
+        )
+        if transforms is None:
+            continue
+
+        base2tcp_list_R.append(transforms.R_base2tcp)
+        base2tcp_list_t.append(transforms.t_base2tcp)
+        tcp2base_list_R.append(transforms.R_tcp2base)
+        tcp2base_list_t.append(transforms.t_tcp2base)
+        cam2target_list_R.append(transforms.R_cam2target)
+        cam2target_list_t.append(transforms.t_cam2target)
+
+        valid_views += 1
+
+    print(f"Processed {valid_views} valid views for extrinsic calibration")
+
+    if valid_views < 3:
+        print("Not enough valid views for calibration")
+        return
+
+    if cam_name == "scene":
+        calib_data = calibrate_eye_to_hand(
+            tcp2base_list_R, tcp2base_list_t, cam2target_list_R, cam2target_list_t
+        )
+    else:
+        calib_data = calibrate_eye_in_hand(
+            base2tcp_list_R, base2tcp_list_t, cam2target_list_R, cam2target_list_t
+        )
+
+    with open(extrinsics_path, "w") as f:
+        json.dump(calib_data, f, indent=2)
+        f.write("\n")
+
+    print(f"Extrinsics saved to {extrinsics_path}")
 
 
 def load_intrinsics(intrinsics_path: Path) -> Tuple[np.ndarray, np.ndarray]:
@@ -70,7 +195,7 @@ def process_view(
     aruco_dict: cv2.aruco_Dictionary,
     camera_matrix: np.ndarray,
     dist_coeffs: np.ndarray,
-) -> Optional[Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
+) -> Optional[ViewTransforms]:
     try:
         image_idx = int(image_path.stem.split("_")[-1])
         tcp_idx = int(tcp_path.stem.split("_")[-1])
@@ -108,136 +233,89 @@ def process_view(
 
     tcp_pos, tcp_ori = load_tcp(tcp_path)
 
-    R_robot2tcp = R.from_quat(tcp_ori).as_matrix()
-    t_robot2tcp = tcp_pos.reshape(3, 1)
+    R_base2tcp = Rotation.from_quat(tcp_ori).as_matrix()
+    t_base2tcp = tcp_pos.reshape(3, 1)
+
+    R_tcp2base = R_base2tcp.T
+    t_tcp2base = -R_base2tcp.T @ t_base2tcp
+
     R_cam2target, _ = cv2.Rodrigues(rvec)
     t_cam2target = tvec.reshape(3, 1)
 
-    return R_robot2tcp, t_robot2tcp, R_cam2target, t_cam2target
-
-
-def calibrate_extrinsics(
-    data_path: Path,
-    squares_x: int,
-    squares_y: int,
-    square_size: float,
-    marker_size: float,
-    aruco_dict: cv2.aruco_Dictionary,
-) -> None:
-    board = cv2.aruco.CharucoBoard(
-        (squares_x, squares_y),
-        square_size,
-        marker_size,
-        aruco_dict,
+    return ViewTransforms(
+        R_base2tcp, t_base2tcp, R_tcp2base, t_tcp2base, R_cam2target, t_cam2target
     )
-    board.setLegacyPattern(True)
 
-    cam_name = data_path.name[:-18]
-    image_paths = sorted(data_path.glob("*_image_*.png"))
-    tcp_paths = sorted(data_path.glob("*_tcp_*.yaml"))
-    intrinsics_path = data_path / f"{cam_name}_intrinsics.json"
 
-    if not image_paths:
-        print(f"No images found in {data_path}")
-        return
-    if not tcp_paths:
-        print(f"No TCP poses found in {data_path}")
-        return
-    if not intrinsics_path.is_file():
-        print(f"Intrinsics file not found in {intrinsics_path}")
-        return
-    if len(image_paths) != len(tcp_paths):
-        print(
-            f"Number of images ({len(image_paths)}) and TCP poses ({len(tcp_paths)}) do not match!"
-        )
+def load_tcp(tcp_path: Path) -> Tuple[np.ndarray, np.ndarray]:
+    with open(tcp_path, "r") as f:
+        data = yaml.safe_load(f)
+    pos = np.array(data["tcp_pose"]["position"], dtype=float)
+    ori = np.array(data["tcp_pose"]["orientation"], dtype=float)
+    return pos, ori
 
-    camera_matrix, dist_coeffs = load_intrinsics(intrinsics_path)
 
-    tcp_poses_R = []
-    tcp_poses_t = []
-    target_poses_R = []
-    target_poses_t = []
-
-    valid_views = 0
-
-    for image_path, tcp_path in zip(image_paths, tcp_paths):
-        poses = process_view(
-            image_path, tcp_path, board, aruco_dict, camera_matrix, dist_coeffs
-        )
-        if poses is None:
-            continue
-        R_robot2tcp, t_robot2tcp, R_cam2target, t_cam2target = poses
-
-        tcp_poses_R.append(R_robot2tcp)
-        tcp_poses_t.append(t_robot2tcp)
-        target_poses_R.append(R_cam2target)
-        target_poses_t.append(t_cam2target)
-
-        valid_views += 1
-
-    print(f"Processed {valid_views} valid views for extrinsic calibration")
-
-    if valid_views < 3:
-        print("Not enough valid views for calibration")
-        return
-
-    R_tcp2cam, t_tcp2cam = cv2.calibrateHandEye(
-        tcp_poses_R,
-        tcp_poses_t,
-        target_poses_R,
-        target_poses_t,
+def calibrate_eye_to_hand(
+    tcp2base_list_R: List[np.ndarray],
+    tcp2base_list_t: List[np.ndarray],
+    cam2target_list_R: List[np.ndarray],
+    cam2target_list_t: List[np.ndarray],
+) -> Dict[str, List[List[float]]]:
+    R_base2cam, t_base2cam = cv2.calibrateHandEye(
+        tcp2base_list_R,
+        tcp2base_list_t,
+        cam2target_list_R,
+        cam2target_list_t,
         method=cv2.CALIB_HAND_EYE_TSAI,
     )
 
-    T_tcp2cam = np.eye(4)
-    T_tcp2cam[:3, :3] = R_tcp2cam
-    T_tcp2cam[:3, 3] = t_tcp2cam.ravel()
+    T_base2cam = make_homogeneous(R_base2cam, t_base2cam)
+    T_cam2base = np.linalg.inv(T_base2cam)
 
-    print("Transformation matrix (TCP to camera)\n")
-    print(T_tcp2cam)
+    print("Transformation matrix (base to camera):\n", T_base2cam)
+    print("Transformation matrix (camera to base):\n", T_cam2base)
 
-    extrinsics_path = data_path / f"{data_path.name[:-18]}_extrinsics.json"
-    with open(extrinsics_path, "w") as f:
-        json.dump({"T_tcp2cam": T_tcp2cam.tolist()}, f, indent=2)
+    calib_data = {
+        "T_base2cam": T_base2cam.tolist(),
+        "T_cam2base": T_cam2base.tolist(),
+    }
 
-    print(f"Extrinsics saved to {extrinsics_path}")
+    return calib_data
 
 
-def main() -> None:
-    args = parse_args()
-
-    base_path = (
-        Path(args.path).expanduser()
-        if args.path
-        else Path("~/ceai_ws/calib_data").expanduser()
-    )
-    data_path = get_latest_folder(base_path, args.camera)
-    if not data_path:
-        print(f"No calibration data folder found in {base_path} directory")
-        return
-
-    package_share_path = Path(get_package_share_directory("aegis_utils"))
-    board_path = package_share_path / "config" / "charuco_board.yaml"
-
-    with open(board_path, "r") as f:
-        board_cfg = yaml.safe_load(f)
-
-    if args.camera.startswith("tool_front"):
-        board_params = board_cfg["big"]
-    else:
-        board_params = board_cfg["small"]
-
-    squares_x = board_params["squares_x"]
-    squares_y = board_params["squares_y"]
-    square_size = board_params["square_size"]
-    marker_size = board_params["marker_size"]
-    aruco_dict = cv2.aruco.getPredefinedDictionary(
-        getattr(cv2.aruco, board_params["aruco_dict"])
+def calibrate_eye_in_hand(
+    base2tcp_list_R: List[np.ndarray],
+    base2tcp_list_t: List[np.ndarray],
+    cam2target_list_R: List[np.ndarray],
+    cam2target_list_t: List[np.ndarray],
+) -> Dict[str, List[List[float]]]:
+    R_tcp2cam, t_tcp2cam = cv2.calibrateHandEye(
+        base2tcp_list_R,
+        base2tcp_list_t,
+        cam2target_list_R,
+        cam2target_list_t,
+        method=cv2.CALIB_HAND_EYE_TSAI,
     )
 
-    calibrate_extrinsics(
-        data_path, squares_x, squares_y, square_size, marker_size, aruco_dict
-    )
+    T_tcp2cam = make_homogeneous(R_tcp2cam, t_tcp2cam)
+    T_cam2tcp = np.linalg.inv(T_tcp2cam)
+
+    print("Transformation matrix (TCP to camera):\n", T_tcp2cam)
+    print("Transformation matrix (camera to TCP):\n", T_cam2tcp)
+
+    calib_data = {
+        "T_tcp2cam": T_tcp2cam.tolist(),
+        "T_cam2tcp": T_cam2tcp.tolist(),
+    }
+
+    return calib_data
+
+
+def make_homogeneous(R: np.ndarray, t: np.ndarray) -> np.ndarray:
+    T = np.eye(4)
+    T[:3, :3] = R
+    T[:3, 3] = t.ravel()
+    return T
 
 
 if __name__ == "__main__":

@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-60](https://github.com/AGH-CEAI/aegis_ros/pull/60) - Added maximum acceleration limits config for Moveit planning.
+
+### Changed
+
+
+* [PR-60](https://github.com/AGH-CEAI/aegis_ros/pull/60) - Disabled MoveIt's Trajectory Execution Monitoring (TEM) - it is now possible to scale down robot speeds without trajectory errors.
+
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [v202509011041]
+
+### Fixed
+
+* [PR-58](https://github.com/AGH-CEAI/aegis_ros/pull/58) - Fixed changelogs.
+
+## [v202508271325]
+
+### Added
+
 * [PR-53](https://github.com/AGH-CEAI/aegis_ros/pull/53) - Updated RViz visualization.
 * [PR-44](https://github.com/AGH-CEAI/aegis_ros/pull/21) - RViz camera visualization for the Luxonis OAK-D SR tool camera.
 * [PR-25](https://github.com/AGH-CEAI/aegis_ros/pull/25) - Integration with `robotiq_hande_driver` package.
@@ -23,12 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [PR-42](https://github.com/AGH-CEAI/aegis_ros/pull/42) - Changed default pose from "zero" to "home"; moved OMPL config from launch to yaml.
 * [PR-9](https://github.com/AGH-CEAI/aegis_ros/pull/9) - Launch and URDF files completely revamped.
 
-### Deprecated
-
-### Removed
-
 ### Fixed
 
 * [PR-8](https://github.com/AGH-CEAI/aegis_ros/pull/8) - Handling of transformations.
-
-### Security
