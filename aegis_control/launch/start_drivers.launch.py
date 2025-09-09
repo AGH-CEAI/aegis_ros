@@ -94,19 +94,6 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
         launch_arguments=launch_args.items(),
     )
     
-    moveit_servo_driver = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            PathJoinSubstitution(
-                [
-                    FindPackageShare("aegis_control"),
-                    "launch",
-                    "moveit_servo_driver.launch.py",
-                ]
-            )
-        ),
-        launch_arguments=launch_args.items(),
-    )
-
     return [
         ur_driver,
         control_node,
@@ -114,7 +101,6 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
         ft_sensor_driver,
         depthai_cameras_driver,
         pylon_cameras_driver,
-        moveit_servo_driver
     ]
 
 
