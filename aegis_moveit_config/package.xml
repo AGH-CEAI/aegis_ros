@@ -14,8 +14,24 @@
 
   <author email="macal@agh.edu.pl">Maciej Aleksandrowicz</author>
   <author email="sivral@proton.me">Jakub Plachno</author>
+  <author email="krzkli@agh.edu.pl">Krzysztof Klimek</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>control_msgs</depend>
+  <!-- <depend>control_toolbox</depend> -->
+  <!-- <depend>generate_parameter_library</depend> -->
+  <depend>geometry_msgs</depend>
+  <depend>moveit_msgs</depend>
+  <!-- <depend>moveit_core</depend> -->
+  <!-- <depend>moveit_ros_planning_interface</depend> -->
+  <!-- <depend>pluginlib</depend> -->
+  <!-- <depend>realtime_tools</depend> -->
+  <depend>sensor_msgs</depend>
+  <!-- <depend>std_msgs</depend> -->
+  <depend>std_srvs</depend>
+  <!-- <depend>tf2_eigen</depend> -->
+  <!-- <depend>trajectory_msgs</depend> -->
 
   <exec_depend>aegis_description</exec_depend>
   <exec_depend>controller_manager</exec_depend>
