@@ -50,10 +50,11 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         "ur_force_torque_sensor_broadcaster",
         "tcp_pose_broadcaster",
         "ur_configuration_controller",
+        "joint_trajectory_controller",
     ]
     controllers_inactive = [
         "scaled_joint_trajectory_controller",
-        "joint_trajectory_controller",
+        # "joint_trajectory_controller",
         "forward_velocity_controller",
         "forward_position_controller",
         "force_mode_controller",
@@ -62,13 +63,13 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         "tool_contact_controller",
     ]
 
-    init_joint_controller = (
-        cfg.fake_initial_joint_controller
-        if mock_hardware_bool
-        else cfg.real_initial_joint_controller
-    )
-    controllers_active.append(init_joint_controller)
-    controllers_inactive.remove(init_joint_controller)
+    # init_joint_controller = (
+    #     cfg.fake_initial_joint_controller
+    #     if mock_hardware_bool
+    #     else cfg.real_initial_joint_controller
+    # )
+    # controllers_active.append(init_joint_controller)
+    # controllers_inactive.remove(init_joint_controller)
 
     if mock_hardware_bool:
         controllers_active.remove("tcp_pose_broadcaster")

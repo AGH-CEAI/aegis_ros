@@ -1,36 +1,43 @@
 cmake_minimum_required(VERSION 3.22)
 project(aegis_moveit_config)
 
+find_package(ament_cmake REQUIRED)
 
-find_package(moveit_common REQUIRED)
-moveit_package()
+
+# find_package(moveit_common REQUIRED)
+# moveit_package()
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   control_msgs
-  # control_toolbox
   geometry_msgs
-  # moveit_core
   moveit_msgs
-  # moveit_ros_planning
-  # pluginlib
-  # rclcpp
-  # rclcpp_components
-  # realtime_tools
   sensor_msgs
-  # std_msgs
   std_srvs
-  # tf2_eigen
-  # trajectory_msgs
+  rclcpp
+  rclcpp_lifecycle
+  rcpputils
 )
 
-# Add executable for using a controller
-add_library(servo_controller_input SHARED src/teleop_demo/joystick_servo_example.cpp)
-ament_target_dependencies(servo_controller_input PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
-rclcpp_components_register_nodes(servo_controller_input "moveit_servo::JoyToServoPub")
+foreach(dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  find_package(${dependency} REQUIRED)
+endforeach()
 
-find_package(ament_cmake REQUIRED)
+add_executable(servo_keyboard_input src/servo_keyboard_input.cpp)
+target_include_directories(servo_keyboard_input PUBLIC include)
+ament_target_dependencies(servo_keyboard_input  ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-ament_package()
+# # Add executable for using a controller
+# add_library(servo_controller_input SHARED src/joystick_servo_example.cpp)
+# ament_target_dependencies(servo_controller_input PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
+# rclcpp_components_register_nodes(servo_controller_input "moveit_servo::JoyToServoPub")
+
+install(
+  TARGETS
+    servo_keyboard_input
+    # servo_controller_input
+  DESTINATION
+    lib/${PROJECT_NAME}
+)
 
 install(
   DIRECTORY launch
@@ -38,3 +45,5 @@ install(
   PATTERN "setup_assistant.launch" EXCLUDE)
 install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
 install(FILES .setup_assistant DESTINATION share/${PROJECT_NAME})
+
+ament_package()
