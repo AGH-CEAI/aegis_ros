@@ -12,6 +12,10 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from ur_moveit_config.launch_common import load_yaml
 
+# from launch.event_handlers import OnProcessExit
+from launch_ros.actions import ComposableNodeContainer
+from launch_ros.descriptions import ComposableNode
+
 
 def str2bool(x: str) -> bool:
     return x.lower() in ("true")
@@ -90,7 +94,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     paths = AegisPathsCfg()
 
     mock_hardware_bool = str2bool(context.perform_substitution(mock_hardware))
-    
+
     robot_description = Command(
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
@@ -193,6 +197,27 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     scene_objects_manager_node = prepare_scene_objects_manager_node(paths)
     octomap_node = prepare_octomap_node(node_cfg)
 
+    # Launch as much as possible in components
+    container = ComposableNodeContainer(
+        name="moveit_servo_demo_container",
+        namespace="/",
+        package="rclcpp_components",
+        executable="component_container_mt",
+        composable_node_descriptions=[
+            ComposableNode(
+                package="aegis_moveit_config",
+                plugin="aegis_moveit_config::JoyToServoPubAegis",
+                name="controller_to_servo_node",
+            ),
+            ComposableNode(
+                package="joy",
+                plugin="joy::Joy",
+                name="joy_node",
+            ),
+        ],
+        output="screen",
+    )
+
     return [
         move_group_node,
         rviz_node,
@@ -201,8 +226,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         octomap_node,
         # TODO(issue#5) enable real-time servo
         servo_node(node_cfg),
-        # joy_node(),
-        # joy_to_servo_node()
+        container,
     ]
 
 
@@ -315,6 +339,7 @@ def prepare_octomap_node(cfg: dict) -> Node:
 #         "warehouse_host": warehouse_sqlite_path,
 #     }
 
+
 # TODO(issue#5) Enable MoveIt servo
 def servo_node(cfg: dict) -> Node:
     print(f"Type{type(cfg['robot_description'])}")
@@ -330,28 +355,11 @@ def servo_node(cfg: dict) -> Node:
             servo_params,
             {
                 "robot_description": ParameterValue(
-                                cfg["robot_description"], value_type=str
-                            )
+                    cfg["robot_description"], value_type=str
+                )
             },
             cfg["robot_description_semantic"],
-            cfg["robot_description_kinematics_file"]
+            cfg["robot_description_kinematics_file"],
         ],
-        output="screen",
-    )
-    
-def joy_node() -> Node:
-    return Node(
-        package="joy",
-        executable="joy_node",
-        name="joy_node",
-        output="screen",
-        # parameters=[{"dev": "/dev/input/js0"}],
-    )
-
-def joy_to_servo_node() -> Node:
-    return Node(
-        package="moveit_servo",
-        executable="joy_to_servo_pub",
-        name="joy_to_servo_node",
         output="screen",
     )

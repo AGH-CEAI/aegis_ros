@@ -171,10 +171,10 @@ void updateCmdFrame(std::string& frame_name, const std::vector<int>& buttons)
 
 namespace moveit_servo
 {
-class JoyToServoPub : public rclcpp::Node
+class JoyToServoPubAegis : public rclcpp::Node
 {
 public:
-  JoyToServoPub(const rclcpp::NodeOptions& options)
+  JoyToServoPubAegis(const rclcpp::NodeOptions& options)
     : Node("joy_to_twist_publisher", options), frame_to_publish_(BASE_FRAME_ID)
   {
     // Setup pub/sub
@@ -192,9 +192,11 @@ public:
     servo_start_client_->wait_for_service(std::chrono::seconds(1));
     servo_start_client_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
 
+    RCLCPP_DEBUG(this->get_logger(), "##### Joy to servo node run successfully ######");
+
   }
 
-  ~JoyToServoPub() override
+  ~JoyToServoPubAegis() override
   {
     if (collision_pub_thread_.joinable())
       collision_pub_thread_.join();
@@ -208,6 +210,8 @@ public:
 
     // This call updates the frame for twist commands
     updateCmdFrame(frame_to_publish_, msg->buttons);
+
+    RCLCPP_DEBUG(this->get_logger(), "##### Received signal from Joy ######");
 
     // Convert the joystick message to Twist or JointJog and publish
     if (convertJoyToCmd(msg->axes, msg->buttons, twist_msg, joint_msg))
@@ -236,10 +240,10 @@ private:
   std::string frame_to_publish_;
 
   std::thread collision_pub_thread_;
-};  // class JoyToServoPub
+};  // class JoyToServoPubAegis
 
 }  // namespace moveit_servo
 
 // Register the component with class_loader
 #include <rclcpp_components/register_node_macro.hpp>
-RCLCPP_COMPONENTS_REGISTER_NODE(moveit_servo::JoyToServoPub)
+RCLCPP_COMPONENTS_REGISTER_NODE(moveit_servo::JoyToServoPubAegis)
