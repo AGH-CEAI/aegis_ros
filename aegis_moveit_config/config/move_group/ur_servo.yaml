@@ -74,7 +74,7 @@ command_out_topic: /scaled_joint_trajectory_controller/joint_trajectory # Publis
 # TODO DEBUG WHY SERVO COLLISION CHECKING ALWAYS RETURNS COLLISION
 # -------------------------------------------
 
-check_collisions: false # Check collisions?
+check_collisions: true # Check collisions?
 collision_check_rate: 5.0 # [Hz] Collision-checking can easily bog down a CPU if done too often.
 # Two collision check algorithms are available:
 # "threshold_distance" begins slowing down when nearer than a specified distance. Good if you want to tune collision thresholds manually.

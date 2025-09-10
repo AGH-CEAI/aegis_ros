@@ -63,8 +63,9 @@
 const std::string JOY_TOPIC = "/joy";
 const std::string TWIST_TOPIC = "/servo_node/delta_twist_cmds";
 const std::string JOINT_TOPIC = "/servo_node/delta_joint_cmds";
-const std::string EEF_FRAME_ID = "panda_hand";
-const std::string BASE_FRAME_ID = "panda_link0";
+// const std::string EEF_FRAME_ID = "robotiq_hande_end";
+const std::string EEF_FRAME_ID = "tool0";
+const std::string BASE_FRAME_ID = "ur_base";
 
 // Enums for button names -> axis/button array index
 // For XBOX 1 controller
@@ -116,16 +117,21 @@ bool convertJoyToCmd(const std::vector<float>& axes, const std::vector<int>& but
   if (buttons[A] || buttons[B] || buttons[X] || buttons[Y] || axes[D_PAD_X] || axes[D_PAD_Y])
   {
     // Map the D_PAD to the proximal joints
-    joint->joint_names.push_back("panda_joint1");
+    joint->joint_names.push_back("wrist_1_joint");
     joint->velocities.push_back(axes[D_PAD_X]);
-    joint->joint_names.push_back("panda_joint2");
+    joint->joint_names.push_back("wrist_2_joint");
     joint->velocities.push_back(axes[D_PAD_Y]);
 
     // Map the diamond to the distal joints
-    joint->joint_names.push_back("panda_joint7");
+    joint->joint_names.push_back("wrist_3_joint");
     joint->velocities.push_back(buttons[B] - buttons[X]);
-    joint->joint_names.push_back("panda_joint6");
+    joint->joint_names.push_back("robotiq_hande_left_finger_joint");
     joint->velocities.push_back(buttons[Y] - buttons[A]);
+
+    /* TODO: define following joints on gamepad */
+    // shoulder_pan_joint
+    // shoulder_lift_joint
+    // elbow_joint
     return false;
   }
 
@@ -186,46 +192,6 @@ public:
     servo_start_client_->wait_for_service(std::chrono::seconds(1));
     servo_start_client_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
 
-    // Load the collision scene asynchronously
-    collision_pub_thread_ = std::thread([this]() {
-      rclcpp::sleep_for(std::chrono::seconds(3));
-      // Create collision object, in the way of servoing
-      moveit_msgs::msg::CollisionObject collision_object;
-      collision_object.header.frame_id = "panda_link0";
-      collision_object.id = "box";
-
-      shape_msgs::msg::SolidPrimitive table_1;
-      table_1.type = table_1.BOX;
-      table_1.dimensions = { 0.4, 0.6, 0.03 };
-
-      geometry_msgs::msg::Pose table_1_pose;
-      table_1_pose.position.x = 0.6;
-      table_1_pose.position.y = 0.0;
-      table_1_pose.position.z = 0.4;
-
-      shape_msgs::msg::SolidPrimitive table_2;
-      table_2.type = table_2.BOX;
-      table_2.dimensions = { 0.6, 0.4, 0.03 };
-
-      geometry_msgs::msg::Pose table_2_pose;
-      table_2_pose.position.x = 0.0;
-      table_2_pose.position.y = 0.5;
-      table_2_pose.position.z = 0.25;
-
-      collision_object.primitives.push_back(table_1);
-      collision_object.primitive_poses.push_back(table_1_pose);
-      collision_object.primitives.push_back(table_2);
-      collision_object.primitive_poses.push_back(table_2_pose);
-      collision_object.operation = collision_object.ADD;
-
-      moveit_msgs::msg::PlanningSceneWorld psw;
-      psw.collision_objects.push_back(collision_object);
-
-      auto ps = std::make_unique<moveit_msgs::msg::PlanningScene>();
-      ps->world = psw;
-      ps->is_diff = true;
-      collision_pub_->publish(std::move(ps));
-    });
   }
 
   ~JoyToServoPub() override
@@ -255,7 +221,7 @@ public:
     {
       // publish the JointJog
       joint_msg->header.stamp = now();
-      joint_msg->header.frame_id = "panda_link3";
+      joint_msg->header.frame_id = BASE_FRAME_ID;
       joint_pub_->publish(std::move(joint_msg));
     }
   }
