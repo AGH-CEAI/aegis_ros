@@ -93,14 +93,14 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
         ),
         launch_arguments=launch_args.items(),
     )
-    
+
     return [
         ur_driver,
         control_node,
         gripper_driver,
         ft_sensor_driver,
-        depthai_cameras_driver,
-        pylon_cameras_driver,
+        # depthai_cameras_driver,
+        # pylon_cameras_driver,
     ]
 
 
