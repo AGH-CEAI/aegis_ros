@@ -15,9 +15,33 @@
         </geometry>
       </visual>
       <collision>
-        <origin xyz="-0.460 -0.240 0.786" rpy="0 0 0"/>
+        <origin xyz="0 0.06 0.43" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://aegis_description/meshes/cell.dae" scale="1.0 1.0 1.0"/>
+          <box size="0.84 0.56 0.86"/>
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="-0.48 0 0.96" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.12 0.68 1.92"/>
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="0.48 0 0.96" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.12 0.68 1.92"/>
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="0 -0.28 0.96" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.84 0.12 1.92"/>
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="0 0.04 1.98" rpy="0 0 0"/>
+        <geometry>
+          <box size="1.08 0.76 0.12"/>
         </geometry>
       </collision>
     </link>
