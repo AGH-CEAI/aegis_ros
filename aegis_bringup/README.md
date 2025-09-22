@@ -21,12 +21,18 @@ ros2 launch aegis_bringup bringup.launch.py
 ros2 launch aegis_bringup bringup.launch.py mock_hardware:=false launch_rviz:=true
 ```
 
+And you are ready to go!
+
 Possible launch arguments:
 * `mock_hardware:={false, true}` (default: `false`) - enables the _fake_hardware_ feature of the ros2_control (the simplest "simulation").
 * `launch_rviz:={false, true}` (default: `true`) - launches visualization in RViz.
 
-3. Start the client program on the robot via dashboard service:
+### Control the the client program on the robot via dashboard service:
+
 ```bash
+# Stop the program
+ros2 service call /dashboard_client/stop std_srvs/srv/Trigger {}
+# Run the program
 ros2 service call /dashboard_client/play std_srvs/srv/Trigger {}
 ```
 
