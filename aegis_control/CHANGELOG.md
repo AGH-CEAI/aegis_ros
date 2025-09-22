@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-63](https://github.com/AGH-CEAI/aegis_ros/pull/63) - Automatic call of the "Play" service of the `ur_dashboard` node.
 * [PR-54](https://github.com/AGH-CEAI/aegis_ros/pull/54) - Process tool cameras' images (Basler).
 * [PR-44](https://github.com/AGH-CEAI/aegis_ros/pull/44) - Integration with Luxonis tool camera.
 * [PR-43](https://github.com/AGH-CEAI/aegis_ros/pull/43) - Integration with Balser tool cameras.
