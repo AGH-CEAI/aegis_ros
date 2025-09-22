@@ -1,6 +1,5 @@
 import argparse
 import glob
-import json
 from pathlib import Path
 from typing import Optional
 
@@ -115,6 +114,7 @@ def calibrate_intrinsics(
         img = cv2.imread(str(image_path))
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         image_size = img_gray.shape[::-1]
+        image_width, image_height = image_size
 
         corners, ids, _ = cv2.aruco.detectMarkers(img_gray, aruco_dict)
         if ids is not None and len(ids) > 0:
@@ -145,18 +145,54 @@ def calibrate_intrinsics(
     print("Distortion coefficients (D):\n", dist_coeffs)
 
     calib_data = {
-        "camera_matrix": camera_matrix.tolist(),
-        "dist_coeffs": dist_coeffs.tolist(),
-        "square_size": square_size,
-        "marker_size": marker_size,
-        "squares_x": squares_x,
-        "squares_y": squares_y,
+        "image_width": image_width,
+        "image_height": image_height,
+        "camera_name": cam_name,
+        "camera_matrix": {
+            "rows": 3,
+            "cols": 3,
+            "data": camera_matrix.flatten().tolist(),
+        },
+        "distortion_model": "plumb_bob",
+        "distortion_coefficients": {
+            "rows": 1,
+            "cols": dist_coeffs.size,
+            "data": dist_coeffs.flatten().tolist(),
+        },
+        "rectification_matrix": {
+            "rows": 3,
+            "cols": 3,
+            "data": [1, 0, 0, 0, 1, 0, 0, 0, 1],
+        },
+        "projection_matrix": {
+            "rows": 3,
+            "cols": 4,
+            "data": [
+                float(camera_matrix[0, 0]),
+                0,
+                float(camera_matrix[0, 2]),
+                0,
+                0,
+                float(camera_matrix[1, 1]),
+                float(camera_matrix[1, 2]),
+                0,
+                0,
+                0,
+                1,
+                0,
+            ],
+        },
     }
 
-    intrinsics_path = data_path / f"{cam_name}_intrinsics.json"
+    intrinsics_path = data_path / f"{cam_name}_intrinsics.yaml"
     with open(intrinsics_path, "w") as f:
-        json.dump(calib_data, f, indent=2)
-        f.write("\n")
+        yaml.safe_dump(
+            calib_data,
+            f,
+            sort_keys=False,
+            default_flow_style=None,
+            width=200,
+        )
 
     print(f"Intrinsics saved to {intrinsics_path}")
 
