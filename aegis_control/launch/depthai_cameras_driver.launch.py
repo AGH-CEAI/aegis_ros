@@ -1,14 +1,17 @@
 import json
-import yaml
 import tempfile
 from pathlib import Path
-from launch import LaunchDescription, LaunchContext
+
+import numpy as np
+import yaml
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchContext, LaunchDescription
 from launch.actions import OpaqueFunction
 from launch.conditions import UnlessCondition
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, TextSubstitution
 from launch_ros.actions import ComposableNodeContainer, LoadComposableNodes, Node
 from launch_ros.descriptions import ComposableNode
-from ament_index_python.packages import get_package_share_directory
+from scipy.spatial.transform import Rotation
 
 
 class DepthAIConfig:
@@ -136,6 +139,16 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         }
     }
 
+    cam_scene_extrinsics_path = Path(
+        "~/ceai_ws/src/aegis_ros/aegis_utils/config/scene_extrinsics.yaml"
+    ).expanduser()
+    cam_tool_front_right_extrinsics_path = Path(
+        "~/ceai_ws/src/aegis_ros/aegis_utils/config/tool_front_right_extrinsics.yaml"
+    ).expanduser()
+    cam_tool_front_left_extrinsics_path = Path(
+        "~/ceai_ws/src/aegis_ros/aegis_utils/config/tool_front_left_extrinsics.yaml"
+    ).expanduser()
+
     camera_scene_node = create_camera_node(
         cfg.mock_hardware,
         cam_scene_name,
@@ -161,6 +174,19 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         cfg.mock_hardware, cam_scene_name, cfg.cam_params_path
     )
     point_cloud_node = create_point_cloud_node(cfg.mock_hardware, cam_scene_name)
+    static_tf_scene_node = create_static_tf_node(
+        cam_scene_extrinsics_path, "ur_base", "cam_scene_rgb"
+    )
+    static_tf_tool_front_right_node = create_static_tf_node(
+        cam_tool_front_right_extrinsics_path,
+        "robotiq_hande_end",
+        "cam_tool_front_right",
+    )
+    static_tf_tool_front_left_node = create_static_tf_node(
+        cam_tool_front_left_extrinsics_path,
+        "robotiq_hande_end",
+        "cam_tool_front_left",
+    )
 
     return [
         camera_scene_node,
@@ -170,6 +196,9 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         rectify_tool_left_node,
         spatial_bb_node,
         point_cloud_node,
+        static_tf_scene_node,
+        static_tf_tool_front_right_node,
+        static_tf_tool_front_left_node,
     ]
 
 
@@ -271,5 +300,38 @@ def create_point_cloud_node(
                     ("/points", name + "/pointcloud"),
                 ],
             ),
+        ],
+    )
+
+
+def create_static_tf_node(
+    extrinsics_path: Path, parent_frame: str, child_frame: str
+) -> Node:
+    file_missing = not extrinsics_path.is_file()
+    if not file_missing:
+        with open(extrinsics_path, "r") as f:
+            data = yaml.safe_load(f)
+
+        T = np.array(data["T_base2cam" if "scene" in child_frame else "T_tcp2cam"])
+        x, y, z = T[:3, 3]
+        qx, qy, qz, qw = Rotation.from_matrix(T[:3, :3]).as_quat()
+    else:
+        x, y, z, qx, qy, qz, qw = 0, 0, 0, 0, 0, 0, 1
+
+    return Node(
+        condition=UnlessCondition(TextSubstitution(text=str(file_missing).lower())),
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        name=f"static_tf_{child_frame}",
+        arguments=[
+            str(x),
+            str(y),
+            str(z),
+            str(qx),
+            str(qy),
+            str(qz),
+            str(qw),
+            parent_frame,
+            f"{child_frame}_camera_optical_frame_cal",
         ],
     )
