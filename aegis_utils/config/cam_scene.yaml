@@ -153,3 +153,227 @@ positions:
     wrist_1_joint: -2.0263
     wrist_2_joint: -1.7267
     wrist_3_joint: -0.8472
+  -
+    shoulder_pan_joint: -0.4049
+    shoulder_lift_joint: -1.9787
+    elbow_joint: 2.3965
+    wrist_1_joint: -2.2448
+    wrist_2_joint: -1.5467
+    wrist_3_joint: -0.4695
+  -
+    shoulder_pan_joint: -0.7213
+    shoulder_lift_joint: -1.9787
+    elbow_joint: 2.3967
+    wrist_1_joint: -2.2447
+    wrist_2_joint: -1.5526
+    wrist_3_joint: -0.4695
+  -
+    shoulder_pan_joint: -0.9051
+    shoulder_lift_joint: -1.9785
+    elbow_joint: 2.3965
+    wrist_1_joint: -2.2447
+    wrist_2_joint: -1.5525
+    wrist_3_joint: -0.4695
+  -
+    shoulder_pan_joint: -1.0674
+    shoulder_lift_joint: -1.8117
+    elbow_joint: 2.3969
+    wrist_1_joint: -2.5597
+    wrist_2_joint: -1.3341
+    wrist_3_joint: -0.4697
+  -
+    shoulder_pan_joint: -1.3015
+    shoulder_lift_joint: -2.3990
+    elbow_joint: 2.4855
+    wrist_1_joint: -2.0466
+    wrist_2_joint: -1.5900
+    wrist_3_joint: -0.4697
+  -
+    shoulder_pan_joint: -1.6216
+    shoulder_lift_joint: -2.3990
+    elbow_joint: 2.4838
+    wrist_1_joint: -2.0455
+    wrist_2_joint: -1.5900
+    wrist_3_joint: -0.4697
+  -
+    shoulder_pan_joint: -1.6214
+    shoulder_lift_joint: -2.4922
+    elbow_joint: 2.0865
+    wrist_1_joint: -1.5595
+    wrist_2_joint: -1.5898
+    wrist_3_joint: -0.4697
+  -
+    shoulder_pan_joint: -1.4544
+    shoulder_lift_joint: -2.4920
+    elbow_joint: 2.0865
+    wrist_1_joint: -1.5595
+    wrist_2_joint: -1.5898
+    wrist_3_joint: -0.4695
+  -
+    shoulder_pan_joint: -1.3128
+    shoulder_lift_joint: -2.4920
+    elbow_joint: 2.0865
+    wrist_1_joint: -1.5595
+    wrist_2_joint: -1.5898
+    wrist_3_joint: -0.4695
+  -
+    shoulder_pan_joint: -1.0854
+    shoulder_lift_joint: -2.4920
+    elbow_joint: 2.0865
+    wrist_1_joint: -1.5595
+    wrist_2_joint: -1.5898
+    wrist_3_joint: -0.4695
+  -
+    shoulder_pan_joint: -0.8959
+    shoulder_lift_joint: -2.4920
+    elbow_joint: 2.0865
+    wrist_1_joint: -1.5595
+    wrist_2_joint: -1.5898
+    wrist_3_joint: -0.4695
+  -
+    shoulder_pan_joint: -0.8961
+    shoulder_lift_joint: -1.9700
+    elbow_joint: 2.0836
+    wrist_1_joint: -1.6001
+    wrist_2_joint: -1.2680
+    wrist_3_joint: -1.4018
+  -
+    shoulder_pan_joint: -0.8961
+    shoulder_lift_joint: -1.5846
+    elbow_joint: 2.0940
+    wrist_1_joint: -1.9801
+    wrist_2_joint: -1.2605
+    wrist_3_joint: -1.4020
+  -
+    shoulder_pan_joint: -1.0116
+    shoulder_lift_joint: -1.5266
+    elbow_joint: 2.0940
+    wrist_1_joint: -1.9804
+    wrist_2_joint: -1.3265
+    wrist_3_joint: -1.5244
+  -
+    shoulder_pan_joint: -0.8107
+    shoulder_lift_joint: -1.5266
+    elbow_joint: 2.0940
+    wrist_1_joint: -1.9803
+    wrist_2_joint: -1.3265
+    wrist_3_joint: -1.5244
+  -
+    shoulder_pan_joint: -0.8107
+    shoulder_lift_joint: -1.6272
+    elbow_joint: 2.1527
+    wrist_1_joint: -1.9803
+    wrist_2_joint: -1.3401
+    wrist_3_joint: -1.5244
+  -
+    shoulder_pan_joint: -0.6025
+    shoulder_lift_joint: -1.6598
+    elbow_joint: 2.1527
+    wrist_1_joint: -1.9803
+    wrist_2_joint: -1.2345
+    wrist_3_joint: -1.5244
+  -
+    shoulder_pan_joint: -0.2501
+    shoulder_lift_joint: -1.7520
+    elbow_joint: 2.1527
+    wrist_1_joint: -1.9803
+    wrist_2_joint: -1.1460
+    wrist_3_joint: -1.5244
+  -
+    shoulder_pan_joint: -0.0881
+    shoulder_lift_joint: -1.8008
+    elbow_joint: 2.1527
+    wrist_1_joint: -1.9801
+    wrist_2_joint: -1.1462
+    wrist_3_joint: -1.5244
+  -
+    shoulder_pan_joint: -0.0883
+    shoulder_lift_joint: -1.8345
+    elbow_joint: 2.3677
+    wrist_1_joint: -2.2726
+    wrist_2_joint: -1.0875
+    wrist_3_joint: -0.3978
+  -
+    shoulder_pan_joint: -0.0883
+    shoulder_lift_joint: -2.0305
+    elbow_joint: 2.4689
+    wrist_1_joint: -2.3119
+    wrist_2_joint: -1.0919
+    wrist_3_joint: 0.2512
+  -
+    shoulder_pan_joint: 0.2183
+    shoulder_lift_joint: -2.1290
+    elbow_joint: 2.4674
+    wrist_1_joint: -2.4012
+    wrist_2_joint: -1.1839
+    wrist_3_joint: 0.7039
+  -
+    shoulder_pan_joint: 0.2169
+    shoulder_lift_joint: -1.6439
+    elbow_joint: 2.3539
+    wrist_1_joint: -2.6634
+    wrist_2_joint: -1.6064
+    wrist_3_joint: 0.5545
+  -
+    shoulder_pan_joint: 0.1016
+    shoulder_lift_joint: -2.2663
+    elbow_joint: 2.1370
+    wrist_1_joint: -2.2471
+    wrist_2_joint: -1.6144
+    wrist_3_joint: 0.7444
+  -
+    shoulder_pan_joint: 0.1016
+    shoulder_lift_joint: -2.1393
+    elbow_joint: 1.1324
+    wrist_1_joint: -1.1423
+    wrist_2_joint: -1.7146
+    wrist_3_joint: 0.6508
+  -
+    shoulder_pan_joint: 0.1018
+    shoulder_lift_joint: -2.1393
+    elbow_joint: 1.0866
+    wrist_1_joint: -1.0908
+    wrist_2_joint: -1.9073
+    wrist_3_joint: -0.0688
+  -
+    shoulder_pan_joint: -0.2841
+    shoulder_lift_joint: -2.1393
+    elbow_joint: 1.0868
+    wrist_1_joint: -1.0908
+    wrist_2_joint: -1.9569
+    wrist_3_joint: -0.0688
+  -
+    shoulder_pan_joint: -0.8112
+    shoulder_lift_joint: -2.1393
+    elbow_joint: 1.0868
+    wrist_1_joint: -1.0908
+    wrist_2_joint: -1.9394
+    wrist_3_joint: -0.5267
+  -
+    shoulder_pan_joint: -0.9837
+    shoulder_lift_joint: -2.1372
+    elbow_joint: 1.1025
+    wrist_1_joint: -1.2392
+    wrist_2_joint: -1.8635
+    wrist_3_joint: -0.9140
+  -
+    shoulder_pan_joint: -0.7601
+    shoulder_lift_joint: -2.1862
+    elbow_joint: 1.1025
+    wrist_1_joint: -1.2406
+    wrist_2_joint: -1.5469
+    wrist_3_joint: -1.2708
+  -
+    shoulder_pan_joint: -0.7463
+    shoulder_lift_joint: -2.2361
+    elbow_joint: 1.0737
+    wrist_1_joint: -1.2233
+    wrist_2_joint: -1.4457
+    wrist_3_joint: -0.7081
+  -
+    shoulder_pan_joint: -0.6374
+    shoulder_lift_joint: -2.3178
+    elbow_joint: 1.0737
+    wrist_1_joint: -0.8083
+    wrist_2_joint: -1.1030
+    wrist_3_joint: -0.1840
