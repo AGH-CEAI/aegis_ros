@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+* [PR-65](https://github.com/AGH-CEAI/aegis_ros/pull/65) - Added static transformation nodes for cameras from calibration.
+
 ### Changed
 ### Deprecated
 ### Removed
