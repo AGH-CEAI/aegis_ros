@@ -159,11 +159,18 @@ def calibrate_intrinsics(
             "cols": dist_coeffs.size,
             "data": dist_coeffs.flatten().tolist(),
         },
+        # Rectification is identity for monocular cameras (no stereo correction needed)
         "rectification_matrix": {
             "rows": 3,
             "cols": 3,
             "data": [1, 0, 0, 0, 1, 0, 0, 0, 1],
         },
+        # Standard pinhole projection matrix [K | 0]
+        # [
+        #   fx   0   cx   0
+        #   0   fy   cy   0
+        #   0   0   1   0
+        # ]
         "projection_matrix": {
             "rows": 3,
             "cols": 4,
