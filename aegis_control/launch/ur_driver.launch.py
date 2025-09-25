@@ -1,7 +1,7 @@
 from launch import LaunchDescription, LaunchContext
-from launch.actions import OpaqueFunction
+from launch.actions import OpaqueFunction, TimerAction, ExecuteProcess
 from launch.conditions import IfCondition, UnlessCondition
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, FindExecutable
 from launch_ros.actions import Node
 
 # Bypassing the launch system to access local import
@@ -42,13 +42,14 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     dashboard_client_node = prepare_dashboard_client_node(mock_hardware, cfg)
     urscript_interface = prepare_urscript_interface(cfg)
     controller_stopper_node = prepare_controller_stopper_node(mock_hardware)
+    service_call_play = prepare_service_call_play()
 
     controllers_active = [
         "joint_state_broadcaster",
         "io_and_status_controller",
         "speed_scaling_state_broadcaster",
         "ur_force_torque_sensor_broadcaster",
-        # "tcp_pose_broadcaster", # TODO(issue#12): debug why this doesn't work
+        "tcp_pose_broadcaster",
         "ur_configuration_controller",
     ]
     controllers_inactive = [
@@ -56,10 +57,10 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         "joint_trajectory_controller",
         "forward_velocity_controller",
         "forward_position_controller",
-        # TODO(issue#12): debug why these controllers don't work
-        # "force_mode_controller",
-        # "passthrough_trajectory_controller",
-        # "freedrive_mode_controller",
+        "force_mode_controller",
+        "passthrough_trajectory_controller",
+        "freedrive_mode_controller",
+        "tool_contact_controller",
     ]
 
     init_joint_controller = (
@@ -70,6 +71,9 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     controllers_active.append(init_joint_controller)
     controllers_inactive.remove(init_joint_controller)
 
+    if mock_hardware_bool:
+        controllers_active.remove("tcp_pose_broadcaster")
+
     return [
         tool_communication_node,
         dashboard_client_node,
@@ -77,6 +81,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         controller_stopper_node,
         controllers_spawner(controllers_active),
         controllers_spawner(controllers_inactive, active=False),
+        service_call_play,
     ]
 
 
@@ -136,6 +141,7 @@ def prepare_controller_stopper_node(mock_hardware: LaunchConfiguration) -> Node:
                     "force_torque_sensor_broadcaster",
                     "joint_state_broadcaster",
                     "speed_scaling_state_broadcaster",
+                    "tcp_pose_broadcaster",
                     "ur_configuration_controller",
                 ]
             },
@@ -144,6 +150,26 @@ def prepare_controller_stopper_node(mock_hardware: LaunchConfiguration) -> Node:
             (
                 "controller_manager/list_controllers",
                 "~/controller_manager/list_controllers",
+            )
+        ],
+    )
+
+
+def prepare_service_call_play() -> TimerAction:
+    return TimerAction(
+        period=5.0,  # s
+        actions=[
+            ExecuteProcess(
+                cmd=[
+                    [
+                        FindExecutable(name="ros2"),
+                        " service call ",
+                        "/dashboard_client/play ",
+                        "std_srvs/srv/Trigger ",
+                        "'{}'",
+                    ]
+                ],
+                shell=True,
             )
         ],
     )

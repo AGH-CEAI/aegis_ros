@@ -1,5 +1,7 @@
 import os
+import time
 from pathlib import Path
+from typing import Dict
 
 import numpy as np
 import yaml
@@ -11,6 +13,7 @@ from launch.launch_context import LaunchContext
 from launch.substitutions import LaunchConfiguration, TextSubstitution
 from launch_ros.actions import ComposableNodeContainer, LoadComposableNodes, Node
 from launch_ros.descriptions import ComposableNode
+from rclpy.logging import get_logger
 from scipy.spatial.transform import Rotation
 
 
@@ -146,12 +149,35 @@ def launch_node(context: LaunchContext):
     # see https://navigation.ros.org/tutorials/docs/get_backtrace.html
     launch_prefix = ["xterm -e gdb -ex run --args"] if debug else ""
 
-    cam_tool_right_extrinsics_path = Path(
-        "~/ceai_ws/src/aegis_ros/aegis_utils/config/tool_right_extrinsics.yaml"
-    ).expanduser()
-    cam_tool_left_extrinsics_path = Path(
-        "~/ceai_ws/src/aegis_ros/aegis_utils/config/tool_left_extrinsics.yaml"
-    ).expanduser()
+    logger = get_logger("pylon_cameras_driver")
+
+    calibration_extrinsics_paths = {
+        "cam_tool_right": Path(
+            "~/ceai_ws/src/aegis_ros/aegis_utils/config/tool_right_extrinsics.yaml"
+        ).expanduser(),
+        "cam_tool_left": Path(
+            "~/ceai_ws/src/aegis_ros/aegis_utils/config/tool_left_extrinsics.yaml"
+        ).expanduser(),
+    }
+
+    files_missing = {
+        name: not path.is_file() for name, path in calibration_extrinsics_paths.items()
+    }
+
+    if any(files_missing.values()):
+        logger.warn(
+            "Following calibration files are missing:\n"
+            + "\n".join(
+                str(calibration_extrinsics_paths[name])
+                for name, missing in files_missing.items()
+                if missing
+            )
+        )
+        logger.warn(
+            "[WARN] Static TF will not be published for cameras:\n"
+            + "\n".join(name for name, missing in files_missing.items() if missing)
+        )
+        time.sleep(6)
 
     node_camera_left = Node(
         package="pylon_ros2_camera_wrapper",
@@ -199,12 +225,14 @@ def launch_node(context: LaunchContext):
 
     rectify_tool_node = create_rectify_node()
     static_tf_tool_right_node = create_static_tf_node(
-        cam_tool_right_extrinsics_path,
+        files_missing,
+        calibration_extrinsics_paths,
         "robotiq_hande_end",
         "cam_tool_right",
     )
     static_tf_tool_left_node = create_static_tf_node(
-        cam_tool_left_extrinsics_path,
+        files_missing,
+        calibration_extrinsics_paths,
         "robotiq_hande_end",
         "cam_tool_left",
     )
@@ -245,13 +273,14 @@ def create_rectify_node() -> LoadComposableNodes:
 
 
 def create_static_tf_node(
-    extrinsics_path: Path, parent_frame: str, child_frame: str
+    files_missing: Dict[str, bool],
+    calibration_extrinsics_paths: Dict[str, Path],
+    parent_frame: str,
+    child_frame: str,
 ) -> Node:
-    file_missing = not extrinsics_path.is_file()
-    if not file_missing:
-        with open(extrinsics_path, "r") as f:
+    if not files_missing[child_frame]:
+        with open(calibration_extrinsics_paths[child_frame], "r") as f:
             data = yaml.safe_load(f)
-
         T = np.array(data["T_base2cam" if "scene" in child_frame else "T_tcp2cam"])
         x, y, z = T[:3, 3]
         qx, qy, qz, qw = Rotation.from_matrix(T[:3, :3]).as_quat()
@@ -259,7 +288,9 @@ def create_static_tf_node(
         x, y, z, qx, qy, qz, qw = 0, 0, 0, 0, 0, 0, 1
 
     return Node(
-        condition=UnlessCondition(TextSubstitution(text=str(file_missing).lower())),
+        condition=UnlessCondition(
+            TextSubstitution(text=str(files_missing[child_frame]).lower())
+        ),
         package="tf2_ros",
         executable="static_transform_publisher",
         name=f"static_tf_{child_frame}",

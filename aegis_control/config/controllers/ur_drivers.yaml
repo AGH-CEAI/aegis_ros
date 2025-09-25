@@ -9,38 +9,41 @@
       joint_state_broadcaster:
         type: joint_state_broadcaster/JointStateBroadcaster
 
-      io_and_status_controller:
-        type: ur_controllers/GPIOController
-
       speed_scaling_state_broadcaster:
         type: ur_controllers/SpeedScalingStateBroadcaster
+
+      tcp_pose_broadcaster:
+        type: pose_broadcaster/PoseBroadcaster
 
       ur_force_torque_sensor_broadcaster:
         type: force_torque_sensor_broadcaster/ForceTorqueSensorBroadcaster
 
-      joint_trajectory_controller:
-        type: joint_trajectory_controller/JointTrajectoryController
-
-      scaled_joint_trajectory_controller:
-        type: ur_controllers/ScaledJointTrajectoryController
-
-      forward_velocity_controller:
-        type: velocity_controllers/JointGroupVelocityController
+      force_mode_controller:
+        type: ur_controllers/ForceModeController
 
       forward_position_controller:
         type: position_controllers/JointGroupPositionController
 
-      force_mode_controller:
-        type: ur_controllers/ForceModeController
+      forward_velocity_controller:
+        type: velocity_controllers/JointGroupVelocityController
 
       freedrive_mode_controller:
         type: ur_controllers/FreedriveModeController
 
+      io_and_status_controller:
+        type: ur_controllers/GPIOController
+
+      joint_trajectory_controller:
+        type: joint_trajectory_controller/JointTrajectoryController
+
       passthrough_trajectory_controller:
         type: ur_controllers/PassthroughTrajectoryController
 
-      tcp_pose_broadcaster:
-        type: pose_broadcaster/PoseBroadcaster
+      scaled_joint_trajectory_controller:
+        type: ur_controllers/ScaledJointTrajectoryController
+
+      tool_contact_controller:
+        type: ur_controllers/ToolContactController
 
       ur_configuration_controller:
         type: ur_controllers/URConfigurationController
@@ -50,13 +53,12 @@
       state_publish_rate: 100.0
       tf_prefix: "$(var tf_prefix)"
 
-  io_and_status_controller:
+  tcp_pose_broadcaster:
     ros__parameters:
-      tf_prefix: "$(var tf_prefix)"
-
-  ur_configuration_controller:
-    ros__parameters:
-      tf_prefix: "$(var tf_prefix)"
+      frame_id: $(var tf_prefix)base
+      pose_name: $(var tf_prefix)tcp_pose
+      tf:
+        child_frame_id: $(var tf_prefix)tool0_controller
 
   ur_force_torque_sensor_broadcaster:
     ros__parameters:
@@ -70,6 +72,39 @@
         - torque.z
       frame_id: $(var tf_prefix)tool0
       topic_name: ft_data
+
+  force_mode_controller:
+    ros__parameters:
+      tf_prefix: "$(var tf_prefix)"
+
+  forward_position_controller:
+    ros__parameters:
+      joints:
+        - $(var tf_prefix)shoulder_pan_joint
+        - $(var tf_prefix)shoulder_lift_joint
+        - $(var tf_prefix)elbow_joint
+        - $(var tf_prefix)wrist_1_joint
+        - $(var tf_prefix)wrist_2_joint
+        - $(var tf_prefix)wrist_3_joint
+
+  forward_velocity_controller:
+    ros__parameters:
+      joints:
+        - $(var tf_prefix)shoulder_pan_joint
+        - $(var tf_prefix)shoulder_lift_joint
+        - $(var tf_prefix)elbow_joint
+        - $(var tf_prefix)wrist_1_joint
+        - $(var tf_prefix)wrist_2_joint
+        - $(var tf_prefix)wrist_3_joint
+      interface_name: velocity
+
+  freedrive_mode_controller:
+    ros__parameters:
+      tf_prefix: "$(var tf_prefix)"
+
+  io_and_status_controller:
+    ros__parameters:
+      tf_prefix: "$(var tf_prefix)"
 
   joint_trajectory_controller:
     ros__parameters:
@@ -97,6 +132,21 @@
         $(var tf_prefix)wrist_1_joint: { trajectory: 0.2, goal: 0.1 }
         $(var tf_prefix)wrist_2_joint: { trajectory: 0.2, goal: 0.1 }
         $(var tf_prefix)wrist_3_joint: { trajectory: 0.2, goal: 0.1 }
+
+  passthrough_trajectory_controller:
+    ros__parameters:
+      tf_prefix: "$(var tf_prefix)"
+      joints:
+        - $(var tf_prefix)shoulder_pan_joint
+        - $(var tf_prefix)shoulder_lift_joint
+        - $(var tf_prefix)elbow_joint
+        - $(var tf_prefix)wrist_1_joint
+        - $(var tf_prefix)wrist_2_joint
+        - $(var tf_prefix)wrist_3_joint
+      state_interfaces:
+        - position
+        - velocity
+      speed_scaling_interface_name: $(var tf_prefix)speed_scaling/speed_scaling_factor
 
   scaled_joint_trajectory_controller:
     ros__parameters:
@@ -126,53 +176,10 @@
         $(var tf_prefix)wrist_3_joint: { trajectory: 0.2, goal: 0.1 }
       speed_scaling_interface_name: $(var tf_prefix)speed_scaling/speed_scaling_factor
 
-  passthrough_trajectory_controller:
-    ros__parameters:
-      tf_prefix: "$(var tf_prefix)"
-      joints:
-        - $(var tf_prefix)shoulder_pan_joint
-        - $(var tf_prefix)shoulder_lift_joint
-        - $(var tf_prefix)elbow_joint
-        - $(var tf_prefix)wrist_1_joint
-        - $(var tf_prefix)wrist_2_joint
-        - $(var tf_prefix)wrist_3_joint
-      state_interfaces:
-        - position
-        - velocity
-      speed_scaling_interface_name: $(var tf_prefix)speed_scaling/speed_scaling_factor
-
-  forward_velocity_controller:
-    ros__parameters:
-      joints:
-        - $(var tf_prefix)shoulder_pan_joint
-        - $(var tf_prefix)shoulder_lift_joint
-        - $(var tf_prefix)elbow_joint
-        - $(var tf_prefix)wrist_1_joint
-        - $(var tf_prefix)wrist_2_joint
-        - $(var tf_prefix)wrist_3_joint
-      interface_name: velocity
-
-  forward_position_controller:
-    ros__parameters:
-      joints:
-        - $(var tf_prefix)shoulder_pan_joint
-        - $(var tf_prefix)shoulder_lift_joint
-        - $(var tf_prefix)elbow_joint
-        - $(var tf_prefix)wrist_1_joint
-        - $(var tf_prefix)wrist_2_joint
-        - $(var tf_prefix)wrist_3_joint
-
-  force_mode_controller:
+  tool_contact_controller:
     ros__parameters:
       tf_prefix: "$(var tf_prefix)"
 
-  freedrive_mode_controller:
+  ur_configuration_controller:
     ros__parameters:
       tf_prefix: "$(var tf_prefix)"
-
-  tcp_pose_broadcaster:
-    ros__parameters:
-      frame_id: $(var tf_prefix)base
-      pose_name: $(var tf_prefix)tcp_pose
-      tf:
-        child_frame_id: $(var tf_prefix)tool0_controller

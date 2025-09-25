@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 ### Changed
+
+* [PR-63](https://github.com/AGH-CEAI/aegis_ros/pull/63) - Updated readme.
+* [PR-60](https://github.com/AGH-CEAI/aegis_ros/pull/60) - Updated launch files diagram.
+
 ### Deprecated
 ### Removed
 ### Fixed
