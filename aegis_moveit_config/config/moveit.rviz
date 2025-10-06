@@ -3,8 +3,7 @@ Panels:
     Help Height: 0
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /Camera Tool Left RGB1/Topic1
+      Expanded: ~
       Splitter Ratio: 0.5
     Tree Height: 279
   - Class: rviz_common/Help
