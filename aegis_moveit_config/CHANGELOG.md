@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-
+* [PR-68](https://github.com/AGH-CEAI/aegis_ros/pull/68) - Updated RViz config for proper QoS RGB camera config.
 * [PR-60](https://github.com/AGH-CEAI/aegis_ros/pull/60) - Disabled MoveIt's Trajectory Execution Monitoring (TEM) - it is now possible to scale down robot speeds without trajectory errors.
 
 ### Deprecated
