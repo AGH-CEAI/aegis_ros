@@ -1,6 +1,5 @@
 import argparse
 import glob
-import json
 from pathlib import Path
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
@@ -114,8 +113,8 @@ def calibrate_extrinsics(
 
     image_paths = sorted(data_path.glob("*_image_*.png"))
     tcp_paths = sorted(data_path.glob("*_tcp_*.yaml"))
-    intrinsics_path = data_path / f"{cam_name}_intrinsics.json"
-    extrinsics_path = data_path / f"{cam_name}_extrinsics.json"
+    intrinsics_path = data_path / f"{cam_name}_intrinsics.yaml"
+    extrinsics_path = data_path / f"{cam_name}_extrinsics.yaml"
 
     if not image_paths:
         print(f"No images found in {data_path}")
@@ -174,17 +173,28 @@ def calibrate_extrinsics(
         )
 
     with open(extrinsics_path, "w") as f:
-        json.dump(calib_data, f, indent=2)
-        f.write("\n")
+        yaml.safe_dump(
+            calib_data,
+            f,
+            sort_keys=False,
+            default_flow_style=None,
+        )
 
     print(f"Extrinsics saved to {extrinsics_path}")
 
 
 def load_intrinsics(intrinsics_path: Path) -> Tuple[np.ndarray, np.ndarray]:
     with open(intrinsics_path, "r") as f:
-        data = json.load(f)
-    camera_matrix = np.array(data["camera_matrix"], dtype=float)
-    dist_coeffs = np.array(data["dist_coeffs"], dtype=float)
+        data = yaml.safe_load(f)
+    camera_matrix = np.array(data["camera_matrix"]["data"]).reshape(
+        (data["camera_matrix"]["rows"], data["camera_matrix"]["cols"])
+    )
+    dist_coeffs = np.array(data["distortion_coefficients"]["data"]).reshape(
+        (
+            data["distortion_coefficients"]["rows"],
+            data["distortion_coefficients"]["cols"],
+        )
+    )
     return camera_matrix, dist_coeffs
 
 
