@@ -1,56 +1,61 @@
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+-   repo: https://gitlab.com/vojko.pribudic.foss/pre-commit-update
+    rev: v0.8.0
     hooks:
-      - id: check-added-large-files
-      - id: check-ast
-      - id: check-case-conflict
-      - id: check-executables-have-shebangs
-      - id: check-json
-      - id: check-merge-conflict
-      - id: check-symlinks
-      - id: check-toml
-      - id: check-xml
-      - id: debug-statements
-      - id: destroyed-symlinks
-      - id: detect-private-key
-      - id: end-of-file-fixer
-      - id: fix-byte-order-marker
-      - id: mixed-line-ending
-      - id: trailing-whitespace
-      - id: check-yaml
+    -   id: pre-commit-update
+
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+    -   id: check-added-large-files
+    -   id: check-ast
+    -   id: check-case-conflict
+    -   id: check-executables-have-shebangs
+    -   id: check-json
+    -   id: check-merge-conflict
+    -   id: check-symlinks
+    -   id: check-toml
+    -   id: check-xml
+    -   id: debug-statements
+    -   id: destroyed-symlinks
+    -   id: detect-private-key
+    -   id: end-of-file-fixer
+    -   id: fix-byte-order-marker
+    -   id: mixed-line-ending
+    -   id: trailing-whitespace
+    -   id: check-yaml
         exclude: joint_limits.yaml # uses custom macro for deg<->rad transformation
-      - id: pretty-format-json
+    -   id: pretty-format-json
         args: ['--autofix', '--no-sort-keys', '--indent', '2']
 
-  - repo: https://github.com/codespell-project/codespell
+-   repo: https://github.com/codespell-project/codespell
     rev: v2.4.1
     hooks:
-      - id: codespell
+    -   id: codespell
         args: [-w]
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.5
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.13.3
     hooks:
-      - id: ruff
+    -   id: ruff
         args:
-          - --fix
-          - --exit-non-zero-on-fix
-      - id: ruff-format
+        -   --fix
+        -   --exit-non-zero-on-fix
+    -   id: ruff-format
 
-  - repo: https://github.com/cheshirekow/cmake-format-precommit
+-   repo: https://github.com/cheshirekow/cmake-format-precommit
     rev: v0.6.13
     hooks:
-      - id: cmake-format
-      - id: cmake-lint
+    -   id: cmake-format
+    -   id: cmake-lint
 
-  - repo: https://github.com/tier4/pre-commit-hooks-ros
+-   repo: https://github.com/tier4/pre-commit-hooks-ros
     rev: v0.10.0
     hooks:
-      - id: prettier-xacro
-      - id: prettier-package-xml
-      - id: ros-include-guard
-      - id: sort-package-xml
+    -   id: prettier-xacro
+    -   id: prettier-package-xml
+    -   id: ros-include-guard
+    -   id: sort-package-xml
 
   # TODO(issue#1) Re-enable warehouse integration
   # - repo: https://github.com/macmacal/pre-commit-sqlite-dump

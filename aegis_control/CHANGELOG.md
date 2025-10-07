@@ -8,8 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+* [PR-65](https://github.com/AGH-CEAI/aegis_ros/pull/65) - Added static transformation nodes for cameras from calibration.
+* [PR-63](https://github.com/AGH-CEAI/aegis_ros/pull/63) - Automatic call of the "Play" service of the `ur_dashboard` node.
+
 ### Changed
 
+* [PR-68](https://github.com/AGH-CEAI/aegis_ros/pull/68) - Changed gripper_action_controller's action monitor rate from `20` to `10` Hz.
 * [PR-60](https://github.com/AGH-CEAI/aegis_ros/pull/60) - Enabled all UR driver controllers.
 
 ### Deprecated

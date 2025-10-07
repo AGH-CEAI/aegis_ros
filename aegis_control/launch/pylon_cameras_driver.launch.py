@@ -1,18 +1,20 @@
-#!/usr/bin/env python3
-
 import os
+import time
+from pathlib import Path
+from typing import Dict
 
+import numpy as np
+import yaml
 from ament_index_python.packages import get_package_share_directory
-
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.actions import OpaqueFunction
-from launch.launch_context import LaunchContext
-from launch.substitutions import LaunchConfiguration
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.conditions import UnlessCondition
-from launch_ros.actions import LoadComposableNodes, Node
+from launch.launch_context import LaunchContext
+from launch.substitutions import LaunchConfiguration, TextSubstitution
+from launch_ros.actions import ComposableNodeContainer, LoadComposableNodes, Node
 from launch_ros.descriptions import ComposableNode
-from launch_ros.actions import ComposableNodeContainer
+from rclpy.logging import get_logger
+from scipy.spatial.transform import Rotation
 
 
 def generate_launch_description():
@@ -147,6 +149,36 @@ def launch_node(context: LaunchContext):
     # see https://navigation.ros.org/tutorials/docs/get_backtrace.html
     launch_prefix = ["xterm -e gdb -ex run --args"] if debug else ""
 
+    logger = get_logger("pylon_cameras_driver")
+
+    calibration_extrinsics_paths = {
+        "cam_tool_right": Path(
+            "~/ceai_ws/src/aegis_ros/aegis_utils/config/tool_right_extrinsics.yaml"
+        ).expanduser(),
+        "cam_tool_left": Path(
+            "~/ceai_ws/src/aegis_ros/aegis_utils/config/tool_left_extrinsics.yaml"
+        ).expanduser(),
+    }
+
+    files_missing = {
+        name: not path.is_file() for name, path in calibration_extrinsics_paths.items()
+    }
+
+    if any(files_missing.values()):
+        logger.warn(
+            "Following calibration files are missing:\n"
+            + "\n".join(
+                str(calibration_extrinsics_paths[name])
+                for name, missing in files_missing.items()
+                if missing
+            )
+        )
+        logger.warn(
+            "[WARN] Static TF will not be published for cameras:\n"
+            + "\n".join(name for name, missing in files_missing.items() if missing)
+        )
+        time.sleep(6)
+
     node_camera_left = Node(
         package="pylon_ros2_camera_wrapper",
         namespace="",
@@ -192,11 +224,25 @@ def launch_node(context: LaunchContext):
     )
 
     rectify_tool_node = create_rectify_node()
+    static_tf_tool_right_node = create_static_tf_node(
+        files_missing,
+        calibration_extrinsics_paths,
+        "robotiq_hande_end",
+        "cam_tool_right",
+    )
+    static_tf_tool_left_node = create_static_tf_node(
+        files_missing,
+        calibration_extrinsics_paths,
+        "robotiq_hande_end",
+        "cam_tool_left",
+    )
 
     return [
         node_camera_left,
         node_camera_right,
         rectify_tool_node,
+        static_tf_tool_right_node,
+        static_tf_tool_left_node,
     ]
 
 
@@ -223,4 +269,40 @@ def create_rectify_node() -> LoadComposableNodes:
         ],
         arguments=["--ros-args", "--log-level", "info"],
         output="both",
+    )
+
+
+def create_static_tf_node(
+    files_missing: Dict[str, bool],
+    calibration_extrinsics_paths: Dict[str, Path],
+    parent_frame: str,
+    child_frame: str,
+) -> Node:
+    if not files_missing[child_frame]:
+        with open(calibration_extrinsics_paths[child_frame], "r") as f:
+            data = yaml.safe_load(f)
+        T = np.array(data["T_base2cam" if "scene" in child_frame else "T_tcp2cam"])
+        x, y, z = T[:3, 3]
+        qx, qy, qz, qw = Rotation.from_matrix(T[:3, :3]).as_quat()
+    else:
+        x, y, z, qx, qy, qz, qw = 0, 0, 0, 0, 0, 0, 1
+
+    return Node(
+        condition=UnlessCondition(
+            TextSubstitution(text=str(files_missing[child_frame]).lower())
+        ),
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        name=f"static_tf_{child_frame}",
+        arguments=[
+            str(x),
+            str(y),
+            str(z),
+            str(qx),
+            str(qy),
+            str(qz),
+            str(qw),
+            parent_frame,
+            f"{child_frame}_camera_optical_frame_cal",
+        ],
     )
