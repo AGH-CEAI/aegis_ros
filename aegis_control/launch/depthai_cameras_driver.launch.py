@@ -1,14 +1,20 @@
 import json
-import yaml
 import tempfile
+import time
 from pathlib import Path
-from launch import LaunchDescription, LaunchContext
+from typing import Dict
+
+import numpy as np
+import yaml
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchContext, LaunchDescription
 from launch.actions import OpaqueFunction
 from launch.conditions import UnlessCondition
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, TextSubstitution
 from launch_ros.actions import ComposableNodeContainer, LoadComposableNodes, Node
 from launch_ros.descriptions import ComposableNode
-from ament_index_python.packages import get_package_share_directory
+from rclpy.logging import get_logger
+from scipy.spatial.transform import Rotation
 
 
 class DepthAIConfig:
@@ -136,6 +142,39 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         }
     }
 
+    logger = get_logger("depthai_cameras_driver")
+
+    calibration_extrinsics_paths = {
+        "cam_scene_rgb": Path(
+            "~/ceai_ws/src/aegis_ros/aegis_utils/config/scene_extrinsics.yaml"
+        ).expanduser(),
+        "cam_tool_front_right": Path(
+            "~/ceai_ws/src/aegis_ros/aegis_utils/config/tool_front_right_extrinsics.yaml"
+        ).expanduser(),
+        "cam_tool_front_left": Path(
+            "~/ceai_ws/src/aegis_ros/aegis_utils/config/tool_front_left_extrinsics.yaml"
+        ).expanduser(),
+    }
+
+    files_missing = {
+        name: not path.is_file() for name, path in calibration_extrinsics_paths.items()
+    }
+
+    if any(files_missing.values()):
+        logger.warn(
+            "Following calibration files are missing:\n"
+            + "\n".join(
+                str(calibration_extrinsics_paths[name])
+                for name, missing in files_missing.items()
+                if missing
+            )
+        )
+        logger.warn(
+            "[WARN] Static TF will not be published for cameras:\n"
+            + "\n".join(name for name, missing in files_missing.items() if missing)
+        )
+        time.sleep(6)
+
     camera_scene_node = create_camera_node(
         cfg.mock_hardware,
         cam_scene_name,
@@ -161,6 +200,24 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         cfg.mock_hardware, cam_scene_name, cfg.cam_params_path
     )
     point_cloud_node = create_point_cloud_node(cfg.mock_hardware, cam_scene_name)
+    static_tf_scene_node = create_static_tf_node(
+        files_missing,
+        calibration_extrinsics_paths,
+        "ur_base",
+        "cam_scene_rgb",
+    )
+    static_tf_tool_front_right_node = create_static_tf_node(
+        files_missing,
+        calibration_extrinsics_paths,
+        "robotiq_hande_end",
+        "cam_tool_front_right",
+    )
+    static_tf_tool_front_left_node = create_static_tf_node(
+        files_missing,
+        calibration_extrinsics_paths,
+        "robotiq_hande_end",
+        "cam_tool_front_left",
+    )
 
     return [
         camera_scene_node,
@@ -170,6 +227,9 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         rectify_tool_left_node,
         spatial_bb_node,
         point_cloud_node,
+        static_tf_scene_node,
+        static_tf_tool_front_right_node,
+        static_tf_tool_front_left_node,
     ]
 
 
@@ -271,5 +331,41 @@ def create_point_cloud_node(
                     ("/points", name + "/pointcloud"),
                 ],
             ),
+        ],
+    )
+
+
+def create_static_tf_node(
+    files_missing: Dict[str, bool],
+    calibration_extrinsics_paths: Dict[str, Path],
+    parent_frame: str,
+    child_frame: str,
+) -> Node:
+    if not files_missing[child_frame]:
+        with open(calibration_extrinsics_paths[child_frame], "r") as f:
+            data = yaml.safe_load(f)
+        T = np.array(data["T_base2cam" if "scene" in child_frame else "T_tcp2cam"])
+        x, y, z = T[:3, 3]
+        qx, qy, qz, qw = Rotation.from_matrix(T[:3, :3]).as_quat()
+    else:
+        x, y, z, qx, qy, qz, qw = 0, 0, 0, 0, 0, 0, 1
+
+    return Node(
+        condition=UnlessCondition(
+            TextSubstitution(text=str(files_missing[child_frame]).lower())
+        ),
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        name=f"static_tf_{child_frame}",
+        arguments=[
+            str(x),
+            str(y),
+            str(z),
+            str(qx),
+            str(qy),
+            str(qz),
+            str(qw),
+            parent_frame,
+            f"{child_frame}_camera_optical_frame_cal",
         ],
     )

@@ -1,7 +1,7 @@
 from launch import LaunchDescription, LaunchContext
-from launch.actions import OpaqueFunction
+from launch.actions import OpaqueFunction, TimerAction, ExecuteProcess
 from launch.conditions import IfCondition, UnlessCondition
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, FindExecutable
 from launch_ros.actions import Node
 
 # Bypassing the launch system to access local import
@@ -42,6 +42,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     dashboard_client_node = prepare_dashboard_client_node(mock_hardware, cfg)
     urscript_interface = prepare_urscript_interface(cfg)
     controller_stopper_node = prepare_controller_stopper_node(mock_hardware)
+    service_call_play = prepare_service_call_play()
 
     controllers_active = [
         "joint_state_broadcaster",
@@ -83,6 +84,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         controller_stopper_node,
         controllers_spawner(controllers_active),
         controllers_spawner(controllers_inactive, active=False),
+        service_call_play,
     ]
 
 
@@ -151,6 +153,26 @@ def prepare_controller_stopper_node(mock_hardware: LaunchConfiguration) -> Node:
             (
                 "controller_manager/list_controllers",
                 "~/controller_manager/list_controllers",
+            )
+        ],
+    )
+
+
+def prepare_service_call_play() -> TimerAction:
+    return TimerAction(
+        period=5.0,  # s
+        actions=[
+            ExecuteProcess(
+                cmd=[
+                    [
+                        FindExecutable(name="ros2"),
+                        " service call ",
+                        "/dashboard_client/play ",
+                        "std_srvs/srv/Trigger ",
+                        "'{}'",
+                    ]
+                ],
+                shell=True,
             )
         ],
     )
