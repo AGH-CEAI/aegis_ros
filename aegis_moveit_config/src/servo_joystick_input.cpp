@@ -64,8 +64,8 @@ const std::string JOY_TOPIC = "/joy";
 const std::string TWIST_TOPIC = "/servo_node/delta_twist_cmds";
 const std::string JOINT_TOPIC = "/servo_node/delta_joint_cmds";
 // const std::string EEF_FRAME_ID = "robotiq_hande_end";
-const std::string EEF_FRAME_ID = "tool0";
-const std::string BASE_FRAME_ID = "ur_base";
+const std::string EEF_FRAME_ID = "robotiq_hande_end";
+const std::string BASE_FRAME_ID = "base_link";
 
 // Enums for button names -> axis/button array index
 // For XBOX 1 controller
