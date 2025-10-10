@@ -15,10 +15,10 @@ positions:
     wrist_3_joint: 0.5313
   -
     shoulder_pan_joint: 0.4006
-    shoulder_lift_joint: -1.4642
+    shoulder_lift_joint: -1.5304
     elbow_joint: 1.5825
     wrist_1_joint: -1.4043
-    wrist_2_joint: -2.0506
+    wrist_2_joint: -1.9186
     wrist_3_joint: 0.7487
   -
     shoulder_pan_joint: 0.2969
