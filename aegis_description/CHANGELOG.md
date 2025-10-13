@@ -36,6 +36,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-72](https://github.com/AGH-CEAI/aegis_ros/pull/72) - Simplified Basler ace tool collision — replaced individual camera and lens collisions with a single mount collision. Renamed several links and joints, removed unnecessary ones.
+* [PR-69](https://github.com/AGH-CEAI/aegis_ros/pull/69) - Changed cell collision.
+* [PR-62](https://github.com/AGH-CEAI/aegis_ros/pull/62) - Changed cell collision.
 * [PR-53](https://github.com/AGH-CEAI/aegis_ros/pull/53) - Renamed `cam_tool` to `cam_tool_front`.
 * [PR-52](https://github.com/AGH-CEAI/aegis_ros/pull/52) - Renamed `ip_adress` to `socat_ip_address` and `port` to `socat_port`.
 * [PR-49](https://github.com/AGH-CEAI/aegis_ros/pull/49) - Updated Hand-E gripper parameters.

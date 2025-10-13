@@ -20,14 +20,14 @@
     <xacro:ft_sensor_schunk_axia80 parent="adapter_to_sensor_end" prefix="${prefix}" mock_hardware="${mock_hardware}"/>
     <xacro:adapter_from_sensor parent="tool_mount_link" prefix="${prefix}"/>
     <xacro:hande_gripper parent="adapter_from_sensor_end" prefix="${prefix}" mock_hardware="${mock_hardware}"/>
-    <xacro:mount_camera_tool_luxonis parent="mount" prefix="${prefix}"/>
-    <xacro:mount_camera_tool_balser parent="adapter_to_mount_camera_tool_right" prefix="${prefix}" side="right"/>
-    <xacro:mount_camera_tool_balser parent="adapter_to_mount_camera_tool_left" prefix="${prefix}" side="left"/>
+    <xacro:mount_camera_tool_luxonis parent="adapter_mount_front" prefix="${prefix}"/>
+    <xacro:mount_camera_tool_basler parent="adapter_mount_right" prefix="${prefix}" side="right"/>
+    <xacro:mount_camera_tool_basler parent="adapter_mount_left" prefix="${prefix}" side="left"/>
     <xacro:camera_scene_luxonis parent="cell"/>
-    <xacro:camera_tool_luxonis parent="camera_tool" prefix="${prefix}"/>
-    <xacro:camera_tool_basler parent="mount_to_camera_right" prefix="${prefix}" side="right"/>
-    <xacro:camera_tool_basler parent="mount_to_camera_left" prefix="${prefix}" side="left"/>
-    <xacro:lens_computar parent="camera_to_lens_right" prefix="${prefix}" side="right"/>
-    <xacro:lens_computar parent="camera_to_lens_left" prefix="${prefix}" side="left"/>
+    <xacro:camera_tool_luxonis parent="mount_front_end" prefix="${prefix}"/>
+    <xacro:camera_tool_basler parent="mount_right_end" prefix="${prefix}" side="right"/>
+    <xacro:camera_tool_basler parent="mount_left_end" prefix="${prefix}" side="left"/>
+    <xacro:lens_computar parent="cam_tool_right" prefix="${prefix}" side="right"/>
+    <xacro:lens_computar parent="cam_tool_left" prefix="${prefix}" side="left"/>
   </xacro:macro>
 </robot>

@@ -2,16 +2,14 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="mount_camera_tool_luxonis" params="prefix parent">
     <xacro:property name="mass" value="0.4"/>
-    <xacro:property name="mounting_dist_x" value="0.091"/>
-    <xacro:property name="mounting_dist_z" value="-0.014"/>
 
-    <joint name="${prefix}mount_camera_joint" type="fixed">
+    <joint name="${prefix}mount_front_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <parent link="${parent}"/>
-      <child link="${prefix}mount_camera"/>
+      <child link="${prefix}mount_front"/>
     </joint>
 
-    <link name="${prefix}mount_camera">
+    <link name="${prefix}mount_front">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
@@ -24,19 +22,19 @@
         <inertia ixx="27.3e-6" ixy="0" ixz="4.19e-6" iyy="19.7e-6" iyz="0" izz="43.38e-6"/>
       </inertial>
       <collision>
-        <origin xyz="0.084 0 -0.01" rpy="0 0 0"/>
+        <origin xyz="0.084 0 0" rpy="0 0 0"/>
         <geometry>
-          <box size="0.076 0.1 0.12"/>
+          <box size="0.08 0.1 0.142"/>
         </geometry>
       </collision>
     </link>
 
-    <joint name="${prefix}mount_to_camera_joint" type="fixed">
+    <joint name="${prefix}mount_front_end_joint" type="fixed">
       <origin xyz="0.091 0 -0.012" rpy="0 0 ${-pi}"/>
-      <parent link="${prefix}mount_camera"/>
-      <child link="${prefix}camera_tool"/>
+      <parent link="${prefix}mount_front"/>
+      <child link="${prefix}mount_front_end"/>
     </joint>
 
-    <link name="${prefix}camera_tool"/>
+    <link name="${prefix}mount_front_end"/>
   </xacro:macro>
 </robot>

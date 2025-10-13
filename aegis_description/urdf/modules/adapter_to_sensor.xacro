@@ -48,28 +48,28 @@
 
     <link name="${prefix}adapter_to_sensor_end"/>
 
-    <joint name="${prefix}adapter_to_mount_camera_tool_right_joint" type="fixed">
+    <joint name="${prefix}adapter_to_mount_right_joint" type="fixed">
       <origin xyz="0 0 ${height_to_adapter}" rpy="0 ${pi} 0"/>
       <parent link="${prefix}adapter_to_sensor"/>
-      <child link="${prefix}adapter_to_mount_camera_tool_right"/>
+      <child link="${prefix}adapter_mount_right"/>
     </joint>
 
-    <link name="${prefix}adapter_to_mount_camera_tool_right"/>
+    <link name="${prefix}adapter_mount_right"/>
 
-    <joint name="${prefix}adapter_to_mount_camera_tool_left_joint" type="fixed">
+    <joint name="${prefix}adapter_to_mount_left_joint" type="fixed">
       <origin xyz="0 0 ${height_to_adapter}" rpy="0 ${pi} ${pi}"/>
       <parent link="${prefix}adapter_to_sensor"/>
-      <child link="${prefix}adapter_to_mount_camera_tool_left"/>
+      <child link="${prefix}adapter_mount_left"/>
     </joint>
 
-    <link name="${prefix}adapter_to_mount_camera_tool_left"/>
+    <link name="${prefix}adapter_mount_left"/>
 
-    <joint name="adapter_to_mount_joint" type="fixed">
+    <joint name="${prefix}adapter_to_mount_front_joint" type="fixed">
       <origin xyz="0 0 ${height_to_adapter}" rpy="0 ${pi} ${pi / 2}"/>
       <parent link="${prefix}adapter_to_sensor"/>
-      <child link="${prefix}mount"/>
+      <child link="${prefix}adapter_mount_front"/>
     </joint>
 
-    <link name="${prefix}mount"/>
+    <link name="${prefix}adapter_mount_front"/>
   </xacro:macro>
 </robot>

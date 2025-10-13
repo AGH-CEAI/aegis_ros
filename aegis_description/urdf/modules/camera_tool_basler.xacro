@@ -7,13 +7,13 @@
     <xacro:property name="camera_length" value="0.0603"/>
     <xacro:property name="lens_offset" value="-0.0145"/>
 
-    <joint name="basler_camera_joint_${side}" type="fixed">
+    <joint name="${prefix}camera_${side}_joint" type="fixed">
       <origin xyz="0 ${0.5 * camera_height} ${camera_mounting_offset}" rpy="0 0 0"/>
       <parent link="${parent}"/>
-      <child link="${prefix}basler_camera_${side}"/>
+      <child link="${prefix}cam_tool_${side}"/>
     </joint>
 
-    <link name="${prefix}basler_camera_${side}">
+    <link name="${prefix}cam_tool_${side}">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
@@ -25,20 +25,6 @@
         <mass value="${camera_mass}"/>
         <inertia ixx="0.3403" ixy="0.0" ixz="0.0" iyy="0.3403" iyz="0.0" izz="0.039606138"/>
       </inertial>
-      <collision>
-        <origin xyz="0 0 ${0.5 * camera_length}" rpy="0 0 0"/>
-        <geometry>
-          <box size="${camera_height} ${camera_height} ${camera_length}"/>
-        </geometry>
-      </collision>
     </link>
-
-    <joint name="${prefix}camera_to_lens_${side}_joint" type="fixed">
-      <origin xyz="0 0 ${lens_offset}" rpy="0 0 0"/>
-      <parent link="${prefix}basler_camera_${side}"/>
-      <child link="${prefix}camera_to_lens_${side}"/>
-    </joint>
-
-    <link name="${prefix}camera_to_lens_${side}"/>
   </xacro:macro>
 </robot>

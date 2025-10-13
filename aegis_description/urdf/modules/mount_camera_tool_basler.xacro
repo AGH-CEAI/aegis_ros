@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="mount_camera_tool_balser" params="prefix parent side">
+  <xacro:macro name="mount_camera_tool_basler" params="prefix parent side">
     <xacro:property name="mass" value="0.217"/>
     <xacro:property name="mounting_width" value="0.07000"/>
     <xacro:property name="mounting_height" value="0.01360"/>
@@ -10,13 +10,13 @@
     <xacro:property name="mounting_dist_z" value="-0.06607"/>
     <xacro:property name="mounting_dist_x" value="0.119084"/>
 
-    <joint name="mount_camera_tool_balser_joint_${side}" type="fixed">
+    <joint name="${prefix}mount_${side}_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <parent link="${parent}"/>
-      <child link="${prefix}mount_camera_tool_balser_${side}"/>
+      <child link="${prefix}mount_${side}"/>
     </joint>
 
-    <link name="${prefix}mount_camera_tool_balser_${side}">
+    <link name="${prefix}mount_${side}">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
@@ -29,19 +29,43 @@
         <inertia ixx="116e-6" ixy="0" ixz="37.5e-6" iyy="196e-6" iyz="0" izz="106e-6"/>
       </inertial>
       <collision>
-        <origin xyz="${1.0 * mounting_size_x} 0 ${-1.0 * mounting_height}" rpy="0 0 0"/>
+        <origin xyz="0.048 0 0" rpy="0 0 0"/>
         <geometry>
-          <box size="${mounting_size_x} ${mounting_width} ${3.0 * mounting_height}"/>
+          <box size="0.01 0.086 0.06"/>
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="0.11 0 -0.026" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.114 0.04 0.088"/>
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="0.105 0 -0.08" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.104 0.04 0.02"/>
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="0.096 0 -0.1" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.086 0.04 0.02"/>
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="0.091 0 -0.125" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.076 0.04 0.03"/>
         </geometry>
       </collision>
     </link>
 
-    <joint name="${prefix}mount_camera_tool_balser_${side}_joint" type="fixed">
+    <joint name="${prefix}mount_${side}_end_joint" type="fixed">
       <origin xyz="${mounting_dist_x} 0 ${mounting_dist_z}" rpy="${mounting_yaw} 0 ${-0.5 * pi}"/>
-      <parent link="${prefix}mount_camera_tool_balser_${side}"/>
-      <child link="${prefix}mount_to_camera_${side}"/>
+      <parent link="${prefix}mount_${side}"/>
+      <child link="${prefix}mount_${side}_end"/>
     </joint>
 
-    <link name="${prefix}mount_to_camera_${side}"/>
+    <link name="${prefix}mount_${side}_end"/>
   </xacro:macro>
 </robot>
