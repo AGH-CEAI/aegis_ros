@@ -9,10 +9,10 @@
     <joint name="lens_${side}_joint" type="fixed">
       <origin xyz="0 0 ${lens_offset}" rpy="0 0 0"/>
       <parent link="${parent}"/>
-      <child link="${prefix}lens_${side}_computar"/>
+      <child link="${prefix}lens_${side}"/>
     </joint>
 
-    <link name="${prefix}lens_${side}_computar">
+    <link name="${prefix}lens_${side}">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
         <geometry>
