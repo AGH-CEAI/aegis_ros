@@ -8,7 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 ### Changed
+
+* [PR-68](https://github.com/AGH-CEAI/aegis_ros/pull/68) - Updated repos for new robotiq_hande_driver fix.
+
 ### Deprecated
 ### Removed
 ### Fixed

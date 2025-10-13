@@ -10,10 +10,10 @@
     <joint name="${prefix}camera_${side}_joint" type="fixed">
       <origin xyz="0 ${0.5 * camera_height} ${camera_mounting_offset}" rpy="0 0 0"/>
       <parent link="${parent}"/>
-      <child link="${prefix}cam_tool_${side}_basler"/>
+      <child link="${prefix}cam_tool_${side}"/>
     </joint>
 
-    <link name="${prefix}cam_tool_${side}_basler">
+    <link name="${prefix}cam_tool_${side}">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
