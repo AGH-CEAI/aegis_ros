@@ -120,9 +120,9 @@
     <disable_collisions link1="adapter_from_sensor" link2="robotiq_hande_link" reason="Never"/>
     <disable_collisions link1="adapter_from_sensor" link2="robotiq_hande_right_finger" reason="Never"/>
     <disable_collisions link1="adapter_from_sensor" link2="robotiq_hande_left_finger" reason="Never"/>
-    <disable_collisions link1="robotiq_hande_coupler" link2="mount_front" reason="Never"/>
-    <disable_collisions link1="robotiq_hande_coupler" link2="mount_right" reason="Never"/>
-    <disable_collisions link1="robotiq_hande_coupler" link2="mount_left" reason="Never"/>
+    <disable_collisions link1="adapter_from_sensor" link2="mount_front" reason="Never"/>
+    <disable_collisions link1="adapter_from_sensor" link2="mount_right" reason="Never"/>
+    <disable_collisions link1="adapter_from_sensor" link2="mount_left" reason="Never"/>
     <disable_collisions link1="robotiq_hande_coupler" link2="robotiq_hande_link" reason="Adjacent"/>
     <disable_collisions link1="robotiq_hande_coupler" link2="robotiq_hande_right_finger" reason="Never"/>
     <disable_collisions link1="robotiq_hande_coupler" link2="robotiq_hande_left_finger" reason="Never"/>
