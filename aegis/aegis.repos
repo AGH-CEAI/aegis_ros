@@ -10,7 +10,7 @@ repositories:
   robotiq_hande_driver:
     type: git
     url: https://github.com/AGH-CEAI/robotiq_hande_driver
-    version: v0.2.0-humble
+    version: 90f0de68cf42b5bc97f913490674a6431413f45d
   scene_objects_manager:
     type: git
     url: https://github.com/AGH-CEAI/scene_objects_manager
