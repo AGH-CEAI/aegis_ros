@@ -4,14 +4,15 @@
     <xacro:property name="lens_mass" value="0.063"/>
     <xacro:property name="lens_radius" value="0.01660"/>
     <xacro:property name="lens_height" value="0.02890"/>
+    <xacro:property name="lens_offset" value="-0.0145"/>
 
-    <joint name="lens_computar_joint_${side}" type="fixed">
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+    <joint name="lens_${side}_joint" type="fixed">
+      <origin xyz="0 0 ${lens_offset}" rpy="0 0 0"/>
       <parent link="${parent}"/>
-      <child link="${prefix}lens_computar_${side}"/>
+      <child link="${prefix}lens_${side}"/>
     </joint>
 
-    <link name="${prefix}lens_computar_${side}">
+    <link name="${prefix}lens_${side}">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
         <geometry>
@@ -33,12 +34,6 @@
           izz="${(lens_mass/12.0) * (3*lens_radius*lens_radius + lens_height*lens_height)}"
         />
       </inertial>
-      <collision>
-        <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
-        <geometry>
-          <cylinder radius="${lens_radius}" length="${lens_height}"/>
-        </geometry>
-      </collision>
     </link>
   </xacro:macro>
 </robot>
