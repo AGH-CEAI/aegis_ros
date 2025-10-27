@@ -14,6 +14,13 @@
 
   <author email="macal@agh.edu.pl">Maciej Aleksandrowicz</author>
   <author email="sivral@proton.me">Jakub Plachno</author>
+  <author email="krzkli@agh.edu.pl">Krzysztof Klimek</author>
+
+  <depend>control_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>moveit_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_srvs</depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

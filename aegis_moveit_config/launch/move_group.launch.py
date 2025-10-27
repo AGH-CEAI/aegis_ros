@@ -84,8 +84,6 @@ def generate_launch_description() -> LaunchDescription:
 def launch_setup(context: LaunchContext) -> list[Node]:
     mock_hardware = LaunchConfiguration("mock_hardware")
     launch_rviz = LaunchConfiguration("launch_rviz")
-    # TODO(issue#5) enable real-time servo
-    # launch_servo = LaunchConfiguration("launch_servo")
 
     paths = AegisPathsCfg()
 
@@ -151,6 +149,27 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     # }
     warehouse_ros_config = None
 
+    # TODO mitigate 2nd URDF parsing for the servo_node
+    robot_description = Command(
+        [
+            PathJoinSubstitution([FindExecutable(name="xacro")]),
+            " ",
+            PathJoinSubstitution(
+                [
+                    FindPackageShare("aegis_description"),
+                    "urdf",
+                    "aegis.urdf.xacro",
+                ]
+            ),
+            " ",
+            "tf_prefix:=",
+            " ",
+            " ",
+            "mock_hardware:=",
+            mock_hardware,
+        ]
+    )
+
     node_cfg = {
         "launch_rviz": launch_rviz,
         "moveit_controllers": moveit_controllers,
@@ -164,6 +183,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         "octomap_updater_parameters": octomap_updater_parameters,
         "mock_hardware": mock_hardware,
         "warehouse_ros_config": warehouse_ros_config,
+        "robot_description": robot_description,
     }
 
     move_group_node = prepare_move_group_node(node_cfg)
@@ -178,8 +198,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         tf_odom_node,
         scene_objects_manager_node,
         octomap_node,
-        # TODO(issue#5) enable real-time servo
-        # servo_node(),
+        servo_node(node_cfg),
     ]
 
 
@@ -292,19 +311,25 @@ def prepare_octomap_node(cfg: dict) -> Node:
 #         "warehouse_host": warehouse_sqlite_path,
 #     }
 
-# TODO(issue#5) Enable MoveIt servo
-# def servo_node() -> Node:
-#     # Servo node for realtime control
-#     servo_yaml = load_yaml("aegis_moveit_config", "config/ur_servo.yaml")
-#     servo_params = {"moveit_servo": servo_yaml}
-#     return Node(
-#         package="moveit_servo",
-#         condition=IfCondition(launch_servo),
-#         executable="servo_node_main",
-#         parameters=[
-#             servo_params,
-#             robot_description,
-#             robot_description_semantic,
-#         ],
-#         output="screen",
-#     )
+
+def servo_node(cfg: dict) -> Node:
+    print(f"Type{type(cfg['robot_description'])}")
+    # Servo node for realtime control
+    servo_yaml = load_yaml("aegis_moveit_config", "config/move_group/ur_servo.yaml")
+    print(f"Servo: {servo_yaml}")
+    servo_params = {"moveit_servo": servo_yaml}
+    return Node(
+        package="moveit_servo",
+        executable="servo_node_main",
+        parameters=[
+            servo_params,
+            {
+                "robot_description": ParameterValue(
+                    cfg["robot_description"], value_type=str
+                )
+            },
+            cfg["robot_description_semantic"],
+            cfg["robot_description_kinematics_file"],
+        ],
+        output="screen",
+    )
