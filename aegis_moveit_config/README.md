@@ -6,6 +6,19 @@ This package has been auto-generated with Setup Assistant tool. Here is the [tut
 > [!WARNING]
 > Remember to setup `LC_NUMERIC=en_US.UTF-8` locale before running anything!
 
+## Enable Servo
+To enable servo you need to switch controllers and send a proper trigger:
+```bash
+# Enable
+ros2 control switch_controllers --deactivate scaled_joint_trajectory_controller --activate forward_position_controller
+ros2 service call /servo_node/start_servo std_srvs/srv/Trigger {}
+# Disable
+ros2 service call /servo_node/stop_servo std_srvs/srv/Trigger {}
+ros2 control switch_controllers --activate scaled_joint_trajectory_controller --deactivate forward_position_controller
+
+```
+
+
 ## Running with the real hardawre
 1. Ensure that the `ur_robot_driver` is running:
 ```bash
