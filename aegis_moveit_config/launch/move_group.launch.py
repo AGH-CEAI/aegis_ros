@@ -327,11 +327,7 @@ def servo_node(cfg: dict) -> Node:
     servo_params = {"moveit_servo": servo_yaml}
     return Node(
         package="moveit_servo",
-        # condition=IfCondition(launch_servo),
         executable="servo_node_main",
-        parameters=[
-            servo_params,
-            cfg["robot_description_kinematics_file"],
-        ],
+        parameters=[servo_params],
         output="screen",
     )
