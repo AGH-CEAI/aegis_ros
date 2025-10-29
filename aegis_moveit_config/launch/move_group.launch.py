@@ -233,7 +233,6 @@ def prepare_move_group_node(cfg: dict) -> Node:
             cfg["octomap_parameters"],
             cfg["octomap_updater_parameters"],
             {"use_sim_time": cfg["mock_hardware"]},
-            {"publish_robot_description": True},
             {"publish_robot_description_semantic": True},
             # TODO(issue#1) Re-enable warehouse integration
             # cfg["warehouse_ros_config"],
