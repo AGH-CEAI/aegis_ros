@@ -152,27 +152,6 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     # }
     warehouse_ros_config = None
 
-    # TODO mitigate 2nd URDF parsing for the servo_node
-    robot_description = Command(
-        [
-            PathJoinSubstitution([FindExecutable(name="xacro")]),
-            " ",
-            PathJoinSubstitution(
-                [
-                    FindPackageShare("aegis_description"),
-                    "urdf",
-                    "aegis.urdf.xacro",
-                ]
-            ),
-            " ",
-            "tf_prefix:=",
-            " ",
-            " ",
-            "mock_hardware:=",
-            mock_hardware,
-        ]
-    )
-
     node_cfg = {
         "launch_rviz": launch_rviz,
         "moveit_controllers": moveit_controllers,
@@ -186,7 +165,6 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         "octomap_updater_parameters": octomap_updater_parameters,
         "mock_hardware": mock_hardware,
         "warehouse_ros_config": warehouse_ros_config,
-        "robot_description": robot_description,
     }
 
     move_group_node = prepare_move_group_node(node_cfg)
