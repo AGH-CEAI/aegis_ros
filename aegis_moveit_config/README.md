@@ -15,7 +15,32 @@ ros2 service call /servo_node/start_servo std_srvs/srv/Trigger {}
 # Disable
 ros2 service call /servo_node/stop_servo std_srvs/srv/Trigger {}
 ros2 control switch_controllers --activate scaled_joint_trajectory_controller --deactivate forward_position_controller
+```
 
+## Send Servo commands from CLI
+```bash
+ros2 topic pub /servo_node/delta_twist_cmds geometry_msgs/msg/TwistStamped "{header: {stamp: now, frame_id: 'ur_base'}, twist: {linear: {x: 1.0, y: 1.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}}"
+# or
+ros2 topic pub /servo_node/delta_joint_cmds control_msgs/msg/JointJog "header:
+  stamp: now
+  frame_id: ''
+joint_names:
+- shoulder_pan_joint
+- shoulder_lift_joint
+- elbow_joint
+- wrist_1_joint
+- wrist_2_joint
+- wrist_3_joint
+displacements: []
+velocities:
+- 1.0
+- 0.0
+- 0.0
+- 0.0
+- 0.0
+- 0.0
+duration: 0.0
+"
 ```
 
 
