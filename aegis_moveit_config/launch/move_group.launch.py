@@ -76,6 +76,9 @@ class AegisPathsCfg:
     def load_octomap_updater_cfg(self) -> dict:
         return load_yaml(self.moveit_cfg_pkg_name, "config/octomap_updater.yaml")
 
+    def load_servo_cfg(self) -> dict:
+        return load_yaml(self.moveit_cfg_pkg_name, "config/move_group/ur_servo.yaml")
+
 
 def generate_launch_description() -> LaunchDescription:
     return LaunchDescription([OpaqueFunction(function=launch_setup)])
@@ -191,7 +194,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     tf_odom_node = prepare_static_tf_node("world", "odom")
     scene_objects_manager_node = prepare_scene_objects_manager_node(paths)
     octomap_node = prepare_octomap_node(node_cfg)
-    servo_node = prepare_servo_node(node_cfg)
+    servo_node = prepare_servo_node(paths)
 
     return [
         move_group_node,
@@ -313,24 +316,12 @@ def prepare_octomap_node(cfg: dict) -> Node:
 #     }
 
 
-def prepare_servo_node(cfg: dict) -> Node:
-    print(f"Type{type(cfg['robot_description'])}")
-    # Servo node for realtime control
-    servo_yaml = load_yaml("aegis_moveit_config", "config/move_group/ur_servo.yaml")
-    print(f"Servo: {servo_yaml}")
-    servo_params = {"moveit_servo": servo_yaml}
+# TODO(issue#74) Use ComposableNodeContainer to speed inter-process communication between servo and ros2_control.
+# Servo node for realtime control
+def prepare_servo_node(paths: AegisPathsCfg) -> Node:
     return Node(
         package="moveit_servo",
         executable="servo_node_main",
-        parameters=[
-            servo_params,
-            {
-                "robot_description": ParameterValue(
-                    cfg["robot_description"], value_type=str
-                )
-            },
-            cfg["robot_description_semantic"],
-            cfg["robot_description_kinematics_file"],
-        ],
+        parameters=[{"moveit_servo": paths.load_servo_cfg()}],
         output="screen",
     )
