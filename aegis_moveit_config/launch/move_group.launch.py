@@ -30,6 +30,8 @@ def deep_dict_update(d_target: dict, d_update: dict) -> dict:
     return d_target
 
 
+# TODO(issue#75): Use MoveItConfigsBuilder to simplify loading of these params
+# https://github.com/moveit/moveit2/blob/humble/moveit_configs_utils/moveit_configs_utils/moveit_configs_builder.py
 class AegisPathsCfg:
     """Contains paths to the configuration files."""
 
@@ -88,32 +90,10 @@ def generate_launch_description() -> LaunchDescription:
 def launch_setup(context: LaunchContext) -> list[Node]:
     mock_hardware = LaunchConfiguration("mock_hardware")
     launch_rviz = LaunchConfiguration("launch_rviz")
-    # TODO(issue#5) enable real-time servo
-    launch_servo = LaunchConfiguration("launch_servo")
 
     paths = AegisPathsCfg()
 
     mock_hardware_bool = str2bool(context.perform_substitution(mock_hardware))
-
-    robot_description = Command(
-        [
-            PathJoinSubstitution([FindExecutable(name="xacro")]),
-            " ",
-            PathJoinSubstitution(
-                [
-                    FindPackageShare("aegis_description"),
-                    "urdf",
-                    "aegis.urdf.xacro",
-                ]
-            ),
-            " ",
-            "tf_prefix:=",
-            " ",
-            " ",
-            "mock_hardware:=",
-            mock_hardware,
-        ]
-    )
 
     # Planning joints limits
     robot_description_planning = {
@@ -180,7 +160,6 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         "moveit_controllers": moveit_controllers,
         "ompl_planning_pipeline_config": ompl_planning_pipeline_cfg,
         "planning_scene_monitor_parameters": planning_scene_monitor_parameters,
-        "robot_description": robot_description,
         "robot_description_kinematics_file": paths.kinematics_cfg,
         "robot_description_planning": robot_description_planning,
         "robot_description_semantic": get_robot_description_semantic(paths),
@@ -257,7 +236,7 @@ def prepare_move_group_node(cfg: dict) -> Node:
             cfg["octomap_parameters"],
             cfg["octomap_updater_parameters"],
             {"use_sim_time": cfg["mock_hardware"]},
-            {"publish_robot_description": True},
+            # {"publish_robot_description": True},
             {"publish_robot_description_semantic": True},
             # TODO(issue#1) Re-enable warehouse integration
             # cfg["warehouse_ros_config"],
@@ -342,7 +321,6 @@ def prepare_octomap_node(cfg: dict) -> Node:
 
 # TODO(issue#5) Enable MoveIt servo
 def servo_node(cfg: dict) -> Node:
-    print(f"Type{type(cfg['robot_description'])}")
     # Servo node for realtime control
     servo_yaml = load_yaml("aegis_moveit_config", "config/move_group/ur_servo.yaml")
     print(f"Servo: {servo_yaml}")
@@ -353,12 +331,6 @@ def servo_node(cfg: dict) -> Node:
         executable="servo_node_main",
         parameters=[
             servo_params,
-            {
-                "robot_description": ParameterValue(
-                    cfg["robot_description"], value_type=str
-                )
-            },
-            cfg["robot_description_semantic"],
             cfg["robot_description_kinematics_file"],
         ],
         output="screen",
