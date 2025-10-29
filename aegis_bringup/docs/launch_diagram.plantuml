@@ -102,6 +102,7 @@ package aegis_moveit_config {
         Node tf_robot_base_node()
         Node tf_odom_node()
         Node scene_objects_manager_node()
+        Node servo_node()
     }
     package config {
         class aegis << (S,#c298e9) SRDF >> {}
@@ -109,6 +110,7 @@ package aegis_moveit_config {
             class kinematics << (Y,#ffffc9) YAML >> {}
             class ompl_planning << (Y,#ffffc9) YAML >> {}
             class planning_joint_limits << (Y,#ffffc9) YAML >> {}
+            class ur_servo << (Y,#ffffc9) YAML >> {}
         }
         class moveit << (R,#ffffff) rviz >> {}
         class controlers_description << (Y,#ffffc9) YAML >> {}
