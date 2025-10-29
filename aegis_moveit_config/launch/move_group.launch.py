@@ -191,6 +191,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     tf_odom_node = prepare_static_tf_node("world", "odom")
     scene_objects_manager_node = prepare_scene_objects_manager_node(paths)
     octomap_node = prepare_octomap_node(node_cfg)
+    servo_node = prepare_servo_node(node_cfg)
 
     return [
         move_group_node,
@@ -198,7 +199,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         tf_odom_node,
         scene_objects_manager_node,
         octomap_node,
-        servo_node(node_cfg),
+        servo_node,
     ]
 
 
@@ -312,7 +313,7 @@ def prepare_octomap_node(cfg: dict) -> Node:
 #     }
 
 
-def servo_node(cfg: dict) -> Node:
+def prepare_servo_node(cfg: dict) -> Node:
     print(f"Type{type(cfg['robot_description'])}")
     # Servo node for realtime control
     servo_yaml = load_yaml("aegis_moveit_config", "config/move_group/ur_servo.yaml")
