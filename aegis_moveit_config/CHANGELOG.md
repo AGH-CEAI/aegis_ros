@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-73](https://github.com/AGH-CEAI/aegis_ros/pull/73) - Enabled MoveIt2 servo.
 * [PR-60](https://github.com/AGH-CEAI/aegis_ros/pull/60) - Added maximum acceleration limits config for Moveit planning.
 
 ### Changed

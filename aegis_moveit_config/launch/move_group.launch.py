@@ -76,6 +76,9 @@ class AegisPathsCfg:
     def load_octomap_updater_cfg(self) -> dict:
         return load_yaml(self.moveit_cfg_pkg_name, "config/octomap_updater.yaml")
 
+    def load_servo_cfg(self) -> dict:
+        return load_yaml(self.moveit_cfg_pkg_name, "config/move_group/ur_servo.yaml")
+
 
 def generate_launch_description() -> LaunchDescription:
     return LaunchDescription([OpaqueFunction(function=launch_setup)])
@@ -84,8 +87,6 @@ def generate_launch_description() -> LaunchDescription:
 def launch_setup(context: LaunchContext) -> list[Node]:
     mock_hardware = LaunchConfiguration("mock_hardware")
     launch_rviz = LaunchConfiguration("launch_rviz")
-    # TODO(issue#5) enable real-time servo
-    # launch_servo = LaunchConfiguration("launch_servo")
 
     paths = AegisPathsCfg()
 
@@ -171,6 +172,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     tf_odom_node = prepare_static_tf_node("world", "odom")
     scene_objects_manager_node = prepare_scene_objects_manager_node(paths)
     octomap_node = prepare_octomap_node(node_cfg)
+    servo_node = prepare_servo_node(paths)
 
     return [
         move_group_node,
@@ -178,8 +180,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         tf_odom_node,
         scene_objects_manager_node,
         octomap_node,
-        # TODO(issue#5) enable real-time servo
-        # servo_node(),
+        servo_node,
     ]
 
 
@@ -210,7 +211,6 @@ def prepare_move_group_node(cfg: dict) -> Node:
             cfg["octomap_parameters"],
             cfg["octomap_updater_parameters"],
             {"use_sim_time": cfg["mock_hardware"]},
-            {"publish_robot_description": True},
             {"publish_robot_description_semantic": True},
             # TODO(issue#1) Re-enable warehouse integration
             # cfg["warehouse_ros_config"],
@@ -292,19 +292,13 @@ def prepare_octomap_node(cfg: dict) -> Node:
 #         "warehouse_host": warehouse_sqlite_path,
 #     }
 
-# TODO(issue#5) Enable MoveIt servo
-# def servo_node() -> Node:
-#     # Servo node for realtime control
-#     servo_yaml = load_yaml("aegis_moveit_config", "config/ur_servo.yaml")
-#     servo_params = {"moveit_servo": servo_yaml}
-#     return Node(
-#         package="moveit_servo",
-#         condition=IfCondition(launch_servo),
-#         executable="servo_node_main",
-#         parameters=[
-#             servo_params,
-#             robot_description,
-#             robot_description_semantic,
-#         ],
-#         output="screen",
-#     )
+
+# TODO(issue#74) Use ComposableNodeContainer to speed inter-process communication between servo and ros2_control.
+# Servo node for realtime control
+def prepare_servo_node(paths: AegisPathsCfg) -> Node:
+    return Node(
+        package="moveit_servo",
+        executable="servo_node_main",
+        parameters=[{"moveit_servo": paths.load_servo_cfg()}],
+        output="screen",
+    )
