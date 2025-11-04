@@ -56,6 +56,11 @@ class RobotDirector:
             self.node.get_logger().warn(
                 f"Service {self.switch_controllers.srv_name} not available"
             )
+        self._servo_enabled = False
+
+    @property
+    def servo_enabled(self) -> bool:
+        return self._servo_enabled
 
     def _preapre_gripper_interface(self) -> None:
         self.gripper_interface = GripperInterface(
@@ -119,22 +124,24 @@ class RobotDirector:
         return retval.pose
 
     def servo_enable(self) -> None:
-        if self.servo.is_enabled:
+        if self.servo_enabled:
             return
         assert self._switch_controllers(
             activate=["scaled_joint_trajectory_controller"],
             deactivate=["scaled_joint_trajectory_controller"],
         ), "Failed to switch controllers during enabling the servo."
         self.servo.enable(sync=True)
+        self._servo_enabled = True
 
     def servo_disable(self) -> None:
-        if not self.servo.is_enabled:
+        if not self.servo_enabled:
             return
         assert self._switch_controllers(
             activate=["scaled_joint_trajectory_controller"],
             deactivate=["forward_position_controller"],
         ), "Failed to switch controllers during disabling the servo."
         self.servo.disable(sync=True)
+        self._servo_enabled = False
 
     def _switch_controllers(
         self, activate: Iterable[str], deactivate: Iterable[str], strict=True
@@ -244,10 +251,10 @@ class RobotDirector:
         linear: tuple[float, float, float] = (0.0, 0.0, 0.0),
         angular: tuple[float, float, float] = (0.0, 0.0, 0.0),
     ) -> None:
-        if not self.servo.is_enabled:
+        if not self.servo_enabled:
             self.node.get_logger().warn("Enable servo before moving. Ignoring.")
             return
-        self.servo(linear=linear, angular=angular, enable_if_disabled=False)
+        self.servo.servo(linear=linear, angular=angular, enable_if_disabled=False)
 
     def _wait_for_move_execution(self, cancel_after_secs: float = 0.0) -> None:
         if self.synchronous:
