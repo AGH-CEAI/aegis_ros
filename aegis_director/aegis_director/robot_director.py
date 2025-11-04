@@ -1,15 +1,16 @@
 import time
 from threading import Thread
-from typing import Optional, Union
+from typing import Iterable, Optional, Union
 
 import numpy as np
 import rclpy
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.node import Node
+from controller_manager_msgs.srv import SwitchController
 from geometry_msgs.msg import Point, Pose, PoseStamped, Quaternion
 from sensor_msgs.msg import JointState
 
-from pymoveit2 import MoveIt2, MoveIt2State, GripperInterface
+from pymoveit2 import MoveIt2, MoveIt2State, GripperInterface, MoveIt2Servo
 import aegis_director.aegis_robot as robot
 
 
@@ -19,6 +20,18 @@ class RobotDirector:
         self.node = Node("director")
         self.cb_group = ReentrantCallbackGroup()
 
+        self._prepare_moveit2()
+        self._preapre_servo()
+        self._preapre_gripper_interface()
+
+        self.executor = rclpy.executors.MultiThreadedExecutor()
+        self.executor.add_node(self.node)
+        self.executor_thread = Thread(target=self.executor.spin, daemon=True, args=())
+        self.executor_thread.start()
+        # Sleep a while in order to get the first joint state
+        self.node.create_rate(10.0).sleep()
+
+    def _prepare_moveit2(self) -> None:
         self.moveit2 = MoveIt2(
             node=self.node,
             joint_names=robot.joint_names(),
@@ -29,6 +42,22 @@ class RobotDirector:
         )
         self.moveit2.planner_id = "RRTConnectkConfigDefault"
 
+    def _preapre_servo(self) -> None:
+        self.servo = MoveIt2Servo(
+            node=self.node,
+            frame_id=robot.base_link_name(),
+            callback_group=self.cb_group,
+            enable_at_init=False,
+        )
+        self.switch_controllers = self.node.create_client(
+            SwitchController, "/controller_manager/switch_controller"
+        )
+        if not self.switch_controllers.wait_for_service(timeout_sec=5.0):
+            self.node.get_logger().warn(
+                f"Service {self.switch_controllers.srv_name} not available"
+            )
+
+    def _preapre_gripper_interface(self) -> None:
         self.gripper_interface = GripperInterface(
             node=self.node,
             gripper_joint_names=robot.gripper_joint_names(),
@@ -38,13 +67,6 @@ class RobotDirector:
             callback_group=self.cb_group,
             gripper_command_action_name="gripper_action_controller/gripper_cmd",
         )
-
-        self.executor = rclpy.executors.MultiThreadedExecutor()
-        self.executor.add_node(self.node)
-        self.executor_thread = Thread(target=self.executor.spin, daemon=True, args=())
-        self.executor_thread.start()
-        # Sleep a while in order to get the first joint state
-        self.node.create_rate(10.0).sleep()
 
     def __del__(self):
         if self.executor_thread.is_alive():
@@ -95,6 +117,37 @@ class RobotDirector:
         if retval is None:
             raise ValueError("Failed to obtain TCP pose (i.e. calculate FK).")
         return retval.pose
+
+    def servo_enable(self) -> None:
+        if self.servo.is_enabled:
+            return
+        assert self._switch_controllers(
+            activate=["scaled_joint_trajectory_controller"],
+            deactivate=["scaled_joint_trajectory_controller"],
+        ), "Failed to switch controllers during enabling the servo."
+        self.servo.enable(sync=True)
+
+    def servo_disable(self) -> None:
+        if not self.servo.is_enabled:
+            return
+        assert self._switch_controllers(
+            activate=["scaled_joint_trajectory_controller"],
+            deactivate=["forward_position_controller"],
+        ), "Failed to switch controllers during disabling the servo."
+        self.servo.disable(sync=True)
+
+    def _switch_controllers(
+        self, activate: Iterable[str], deactivate: Iterable[str], strict=True
+    ) -> bool:
+        req = SwitchController.Request()
+        req.activate_controllers = activate
+        req.deactivate_controllers = deactivate
+        req.strictness = (
+            SwitchController.Request.STRICT
+            if strict
+            else SwitchController.Request.BEST_EFFORT
+        )
+        return self.switch_controllers.call(req).ok
 
     def joint_move(
         self,
@@ -186,10 +239,15 @@ class RobotDirector:
         self.gripper_interface.move_to_position(width)
         self._wait_for_gripper_execution()
 
-    def servo_move(self) -> None:
-        # Placeholder for future implementation
-        # from pymoveit2 import MoveIt2Servo
-        self.node.get_logger().warn("Servo movement is not implemented yet. Ignoring.")
+    def servo_move(
+        self,
+        linear: tuple[float, float, float] = (0.0, 0.0, 0.0),
+        angular: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    ) -> None:
+        if not self.servo.is_enabled:
+            self.node.get_logger().warn("Enable servo before moving. Ignoring.")
+            return
+        self.servo(linear=linear, angular=angular, enable_if_disabled=False)
 
     def _wait_for_move_execution(self, cancel_after_secs: float = 0.0) -> None:
         if self.synchronous:
