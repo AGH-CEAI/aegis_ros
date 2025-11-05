@@ -266,6 +266,18 @@ class RobotDirector:
             return
         self.servo.servo(linear=linear, angular=angular, enable_if_disabled=False)
 
+    def servo_jog(
+        self,
+        joint_names: tuple[str, ...],
+        velocities: tuple[float, ...] = tuple(),
+    ) -> None:
+        if not self.servo_enabled:
+            self.node.get_logger().warn("Enable servo before moving. Ignoring.")
+            return
+        self.servo.servo_jog(
+            joint_names=joint_names, velocities=velocities, enable_if_disabled=False
+        )
+
     def _wait_for_move_execution(self, cancel_after_secs: float = 0.0) -> None:
         if self.synchronous:
             self.moveit2.wait_until_executed()
