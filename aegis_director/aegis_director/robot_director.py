@@ -31,6 +31,14 @@ class RobotDirector:
         # Sleep a while in order to get the first joint state
         self.node.create_rate(10.0).sleep()
 
+        # Ensure that the servo is disabled
+        self.servo.disable(sync=True)
+        self._switch_controllers(
+            activate=["scaled_joint_trajectory_controller"],
+            deactivate=["forward_position_controller"],
+        )
+        self._servo_enabled = False
+
     def _prepare_moveit2(self) -> None:
         self.moveit2 = MoveIt2(
             node=self.node,
@@ -56,7 +64,6 @@ class RobotDirector:
             self.node.get_logger().warn(
                 f"Service {self.switch_controllers.srv_name} not available"
             )
-        self._servo_enabled = False
 
     @property
     def servo_enabled(self) -> bool:
@@ -126,26 +133,28 @@ class RobotDirector:
     def servo_enable(self) -> None:
         if self.servo_enabled:
             return
-        assert self._switch_controllers(
-            activate=["scaled_joint_trajectory_controller"],
+        self._switch_controllers(
+            activate=["forward_position_controller"],
             deactivate=["scaled_joint_trajectory_controller"],
-        ), "Failed to switch controllers during enabling the servo."
-        self.servo.enable(sync=True)
+        )
+        self.servo.enable(sync=False)
+        time.sleep(3.0)  # HACK workaround for sync wait deadlock
         self._servo_enabled = True
 
     def servo_disable(self) -> None:
         if not self.servo_enabled:
             return
-        assert self._switch_controllers(
+        self.servo.disable(sync=False)
+        time.sleep(3.0)  # HACK workaround for sync wait deadlock
+        self._switch_controllers(
             activate=["scaled_joint_trajectory_controller"],
             deactivate=["forward_position_controller"],
-        ), "Failed to switch controllers during disabling the servo."
-        self.servo.disable(sync=True)
+        )
         self._servo_enabled = False
 
     def _switch_controllers(
         self, activate: Iterable[str], deactivate: Iterable[str], strict=True
-    ) -> bool:
+    ) -> None:
         req = SwitchController.Request()
         req.activate_controllers = activate
         req.deactivate_controllers = deactivate
@@ -154,7 +163,8 @@ class RobotDirector:
             if strict
             else SwitchController.Request.BEST_EFFORT
         )
-        return self.switch_controllers.call(req).ok
+        self.switch_controllers.call_async(req)
+        time.sleep(1.0)  # HACK workaround for sync wait deadlock
 
     def joint_move(
         self,
@@ -248,7 +258,7 @@ class RobotDirector:
 
     def servo_move(
         self,
-        linear: tuple[float, float, float] = (0.0, 0.0, 0.0),
+        linear: tuple[float, float, float],
         angular: tuple[float, float, float] = (0.0, 0.0, 0.0),
     ) -> None:
         if not self.servo_enabled:
