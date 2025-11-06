@@ -31,12 +31,8 @@ class RobotDirector:
         self.executor_thread.start()
 
         # Ensure that the servo is disabled
-        self.servo.disable(sync=True)
-        self._switch_controllers(
-            activate=["scaled_joint_trajectory_controller"],
-            deactivate=["forward_position_controller"],
-        )
-        self._servo_enabled = False
+        self._servo_enabled = True
+        self.servo_disable()
 
     def _prepare_moveit2(self) -> None:
         self.moveit2 = MoveIt2(
