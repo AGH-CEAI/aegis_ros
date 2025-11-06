@@ -82,9 +82,9 @@ class RobotDirector:
         )
 
     def __del__(self):
+        self.executor.shutdown()
         if self.executor_thread.is_alive():
             self.executor_thread.join()
-        self.executor.shutdown()
         self.node.destroy_node()
 
     def get_joint_positions(self) -> dict[str, float]:
