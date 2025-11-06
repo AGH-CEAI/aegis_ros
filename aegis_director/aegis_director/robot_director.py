@@ -4,7 +4,7 @@ from typing import Iterable, Optional, Union
 
 import numpy as np
 import rclpy
-from rclpy.callback_groups import ReentrantCallbackGroup
+from rclpy.callback_groups import ReentrantCallbackGroup, MutuallyExclusiveCallbackGroup
 from rclpy.node import Node
 from controller_manager_msgs.srv import SwitchController
 from geometry_msgs.msg import Point, Pose, PoseStamped, Quaternion
@@ -19,6 +19,7 @@ class RobotDirector:
         self.synchronous = synchronous
         self.node = Node("director")
         self.cb_group = ReentrantCallbackGroup()
+        self.cb_exclusive_group = MutuallyExclusiveCallbackGroup()
 
         self._prepare_moveit2()
         self._preapre_servo()
@@ -28,8 +29,6 @@ class RobotDirector:
         self.executor.add_node(self.node)
         self.executor_thread = Thread(target=self.executor.spin, daemon=True, args=())
         self.executor_thread.start()
-        # Sleep a while in order to get the first joint state
-        self.node.create_rate(10.0).sleep()
 
         # Ensure that the servo is disabled
         self.servo.disable(sync=True)
@@ -58,7 +57,9 @@ class RobotDirector:
             enable_at_init=False,
         )
         self.switch_controllers = self.node.create_client(
-            SwitchController, "/controller_manager/switch_controller"
+            SwitchController,
+            "/controller_manager/switch_controller",
+            callback_group=self.cb_exclusive_group,
         )
         if not self.switch_controllers.wait_for_service(timeout_sec=5.0):
             self.node.get_logger().warn(
@@ -133,23 +134,33 @@ class RobotDirector:
     def servo_enable(self) -> None:
         if self.servo_enabled:
             return
+        self.servo.enable(sync=False)
         self._switch_controllers(
             activate=["forward_position_controller"],
             deactivate=["scaled_joint_trajectory_controller"],
         )
-        self.servo.enable(sync=False)
-        time.sleep(3.0)  # HACK workaround for sync wait deadlock
+
+        # TODO(issue#X) ROS spin deadlockswith synchronous calls
+        # HACK workaround for sync wait deadlock
+        time.sleep(1.0)
+        self.servo.__is_enabled = True
+
         self._servo_enabled = True
 
     def servo_disable(self) -> None:
         if not self.servo_enabled:
             return
         self.servo.disable(sync=False)
-        time.sleep(3.0)  # HACK workaround for sync wait deadlock
         self._switch_controllers(
             activate=["scaled_joint_trajectory_controller"],
             deactivate=["forward_position_controller"],
         )
+
+        # TODO(issue#X) ROS spin deadlockswith synchronous calls
+        # HACK workaround for sync wait deadlock
+        time.sleep(1.0)
+        self.servo.__is_enabled = False
+
         self._servo_enabled = False
 
     def _switch_controllers(
@@ -164,7 +175,6 @@ class RobotDirector:
             else SwitchController.Request.BEST_EFFORT
         )
         self.switch_controllers.call_async(req)
-        time.sleep(1.0)  # HACK workaround for sync wait deadlock
 
     def joint_move(
         self,
