@@ -136,7 +136,7 @@ class RobotDirector:
             deactivate=["scaled_joint_trajectory_controller"],
         )
 
-        # TODO(issue#X) ROS spin deadlockswith synchronous calls
+        # TODO(issue#76) ROS spin deadlockswith synchronous calls
         # HACK workaround for sync wait deadlock
         time.sleep(1.0)
         self.servo.__is_enabled = True
@@ -152,7 +152,7 @@ class RobotDirector:
             deactivate=["forward_position_controller"],
         )
 
-        # TODO(issue#X) ROS spin deadlockswith synchronous calls
+        # TODO(issue#76) ROS spin deadlockswith synchronous calls
         # HACK workaround for sync wait deadlock
         time.sleep(1.0)
         self.servo.__is_enabled = False
