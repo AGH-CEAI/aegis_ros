@@ -41,7 +41,6 @@ CAMERA_CONFIG = {
 class CalibCollectNode(Node):
     def __init__(self, robot: RobotDirector, image_topic: str, data_path: Path) -> None:
         super().__init__("calib_collect_node")
-        self.robot = robot
         self.bridge = CvBridge()
         self.image = None
         self.timestamp = None
