@@ -144,19 +144,18 @@ class MeasureCameraErrorNode(Node):
             # TODO: measure TCP pos from image
             tcp_pose_camera = None 
 
-            # TODO: save TCP pose from robot and camera
-            tcp_path = self.data_path / f"{self.camera_name}_tcp_{self.i:02}.yaml"
-            self.save_tcp(tcp_pose_robot, tcp_path)
 
             # TODO: calculate error
 
-            # TODO: save and print results
+
+            # TODO: save TCP pos data and error data
+            tcp_path = self.data_path / f"{self.camera_name}_tcp_{self.i:02}.yaml"
+            self.save_tcp(tcp_pose_robot, tcp_path)
 
             next_measure = self.ask_for_next_measure()
 
         self.analyze_results()
         self.log("\033[92mFinished measuring camera error.\033[92m")
-
         
 
     def save_tcp(self, 
