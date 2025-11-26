@@ -1,15 +1,16 @@
 import time
 from threading import Thread
-from typing import Optional, Union
+from typing import Iterable, Optional, Union
 
 import numpy as np
 import rclpy
-from rclpy.callback_groups import ReentrantCallbackGroup
+from rclpy.callback_groups import ReentrantCallbackGroup, MutuallyExclusiveCallbackGroup
 from rclpy.node import Node
+from controller_manager_msgs.srv import SwitchController
 from geometry_msgs.msg import Point, Pose, PoseStamped, Quaternion
 from sensor_msgs.msg import JointState
 
-from pymoveit2 import MoveIt2, MoveIt2State, GripperInterface
+from pymoveit2 import MoveIt2, MoveIt2State, GripperInterface, MoveIt2Servo
 import aegis_director.aegis_robot as robot
 
 
@@ -18,7 +19,22 @@ class RobotDirector:
         self.synchronous = synchronous
         self.node = Node("director")
         self.cb_group = ReentrantCallbackGroup()
+        self.cb_exclusive_group = MutuallyExclusiveCallbackGroup()
 
+        self._prepare_moveit2()
+        self._preapre_servo()
+        self._preapre_gripper_interface()
+
+        self.executor = rclpy.executors.MultiThreadedExecutor()
+        self.executor.add_node(self.node)
+        self.executor_thread = Thread(target=self.executor.spin, daemon=True, args=())
+        self.executor_thread.start()
+
+        # Ensure that the servo is disabled
+        self._servo_enabled = True
+        self.servo_disable()
+
+    def _prepare_moveit2(self) -> None:
         self.moveit2 = MoveIt2(
             node=self.node,
             joint_names=robot.joint_names(),
@@ -29,6 +45,28 @@ class RobotDirector:
         )
         self.moveit2.planner_id = "RRTConnectkConfigDefault"
 
+    def _preapre_servo(self) -> None:
+        self.servo = MoveIt2Servo(
+            node=self.node,
+            frame_id=robot.base_link_name(),
+            callback_group=self.cb_group,
+            enable_at_init=False,
+        )
+        self.switch_controllers = self.node.create_client(
+            SwitchController,
+            "/controller_manager/switch_controller",
+            callback_group=self.cb_exclusive_group,
+        )
+        if not self.switch_controllers.wait_for_service(timeout_sec=5.0):
+            self.node.get_logger().warn(
+                f"Service {self.switch_controllers.srv_name} not available"
+            )
+
+    @property
+    def servo_enabled(self) -> bool:
+        return self._servo_enabled
+
+    def _preapre_gripper_interface(self) -> None:
         self.gripper_interface = GripperInterface(
             node=self.node,
             gripper_joint_names=robot.gripper_joint_names(),
@@ -39,17 +77,10 @@ class RobotDirector:
             gripper_command_action_name="gripper_action_controller/gripper_cmd",
         )
 
-        self.executor = rclpy.executors.MultiThreadedExecutor()
-        self.executor.add_node(self.node)
-        self.executor_thread = Thread(target=self.executor.spin, daemon=True, args=())
-        self.executor_thread.start()
-        # Sleep a while in order to get the first joint state
-        self.node.create_rate(10.0).sleep()
-
     def __del__(self):
+        self.executor.shutdown()
         if self.executor_thread.is_alive():
             self.executor_thread.join()
-        self.executor.shutdown()
         self.node.destroy_node()
 
     def get_joint_positions(self) -> dict[str, float]:
@@ -95,6 +126,51 @@ class RobotDirector:
         if retval is None:
             raise ValueError("Failed to obtain TCP pose (i.e. calculate FK).")
         return retval.pose
+
+    def servo_enable(self) -> None:
+        if self.servo_enabled:
+            return
+        self.servo.enable(sync=False)
+        self._switch_controllers(
+            activate=["forward_position_controller"],
+            deactivate=["scaled_joint_trajectory_controller"],
+        )
+
+        # TODO(issue#76) ROS spin deadlockswith synchronous calls
+        # HACK workaround for sync wait deadlock
+        time.sleep(1.0)
+        self.servo.__is_enabled = True
+
+        self._servo_enabled = True
+
+    def servo_disable(self) -> None:
+        if not self.servo_enabled:
+            return
+        self.servo.disable(sync=False)
+        self._switch_controllers(
+            activate=["scaled_joint_trajectory_controller"],
+            deactivate=["forward_position_controller"],
+        )
+
+        # TODO(issue#76) ROS spin deadlockswith synchronous calls
+        # HACK workaround for sync wait deadlock
+        time.sleep(1.0)
+        self.servo.__is_enabled = False
+
+        self._servo_enabled = False
+
+    def _switch_controllers(
+        self, activate: Iterable[str], deactivate: Iterable[str], strict=True
+    ) -> None:
+        req = SwitchController.Request()
+        req.activate_controllers = activate
+        req.deactivate_controllers = deactivate
+        req.strictness = (
+            SwitchController.Request.STRICT
+            if strict
+            else SwitchController.Request.BEST_EFFORT
+        )
+        self.switch_controllers.call_async(req)
 
     def joint_move(
         self,
@@ -186,10 +262,27 @@ class RobotDirector:
         self.gripper_interface.move_to_position(width)
         self._wait_for_gripper_execution()
 
-    def servo_move(self) -> None:
-        # Placeholder for future implementation
-        # from pymoveit2 import MoveIt2Servo
-        self.node.get_logger().warn("Servo movement is not implemented yet. Ignoring.")
+    def servo_move(
+        self,
+        linear: tuple[float, float, float],
+        angular: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    ) -> None:
+        if not self.servo_enabled:
+            self.node.get_logger().warn("Enable servo before moving. Ignoring.")
+            return
+        self.servo.servo(linear=linear, angular=angular, enable_if_disabled=False)
+
+    def servo_jog(
+        self,
+        joint_names: tuple[str, ...],
+        velocities: tuple[float, ...] = tuple(),
+    ) -> None:
+        if not self.servo_enabled:
+            self.node.get_logger().warn("Enable servo before moving. Ignoring.")
+            return
+        self.servo.servo_jog(
+            joint_names=joint_names, velocities=velocities, enable_if_disabled=False
+        )
 
     def _wait_for_move_execution(self, cancel_after_secs: float = 0.0) -> None:
         if self.synchronous:
