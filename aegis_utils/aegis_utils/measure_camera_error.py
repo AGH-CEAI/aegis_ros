@@ -52,7 +52,6 @@ class CollectImageNode(Node):
         self.mutex = threading.Lock()
         self.sub = self.create_subscription(Image, image_topic, self.image_callback, 10)
         self.get_logger().info(f"Subscribed to image topic: {image_topic}")
-        print("I am here, before moving to home")
 
     def image_callback(self, msg: Image) -> None:
         try:
@@ -95,6 +94,15 @@ class MeasureCameraErrorNode(Node):
         self.data_path = data_path
         self.robot = robot
         self.image_node = image_node
+        self.T_cam2base = np.array([
+            [0.019393463529861016, 0.9990240674437583, -0.039683828449952906, 0.047714301707007856],
+            [0.9996413820847948,  -0.0186417902732842, 0.019224746526503706, -0.34666811181735363],
+            [0.018466206863277983, -0.04004243153875939, -0.9990273283952479, 1.1668662643689283],
+            [0.0, 0.0, 0.0, 1.0]
+        ])
+        self.camera_matrix = np.array([1045.253469873161, 0.0, 616.7886604727472, 0.0, 1043.2430632943033, 386.8198966768913, 0.0, 0.0, 1.0], dtype=np.float32).reshape((3, 3))
+        self.dist_coeffs = np.array([0.08083301537530861, -0.04332893272558069, 0.003319516691409084, -0.0016267198557977577, -0.2800871865529448], dtype=np.float32).reshape((5, 1))
+
 
     def move_to_home(self) -> None:
         self.robot.joint_move(
@@ -114,53 +122,110 @@ class MeasureCameraErrorNode(Node):
     def working_loop(self) -> None:
         next_measure = True
         while next_measure:
-            # TODO: change the way to control the robot. Make it possible to move the robot manually
+            # TODO: check; change the way to control the robot. Make it possible to move the robot manually
             self.robot._switch_controllers(
                 activate=["freedrive_mode_controller"],
                 deactivate=["scaled_joint_trajectory_controller"],
             )
+            time.sleep(1.0)
 
             self.log("\033[93mSet the end effector at the corner of the calibration board.\033[93m")
             self.log("\033[93mWhen robot is in position, press ENTER to start measuring camera error...\033[93m ")
-            input()
+            input()            
+            
+            # TODO: check; change the way to control the robot. Control from remote
+            self.robot._switch_controllers(
+                activate=["scaled_joint_trajectory_controller"],
+                deactivate=["freedrive_mode_controller"],
+            )
+            time.sleep(1.0)
 
-            # TODO: change the way to control the robot. Control from remote
-
-            # get TCP pose of specific pointer
-            tcp_pose_robot = self.robot.get_tcp_pose() 
+            # TODO: get TCP pose of specific pointer
+            tcp_pose_robot = self.robot.get_tcp_pose()["position"]
+            print(f"TCP pose from robot: {tcp_pose_robot}")
             
             # move robot to home position
             self.move_to_home()
             time.sleep(1.0)  # Wait for robot to stabilize
 
             # get image from camera
-            time_start = self.get_clock().now().nanoseconds / 1e9
-            self.log("Waiting for image...")
-            image = self.image_node.get_image(time_start)
-            if image is not None:
-                image_path = self.data_path / f"{self.camera_name}_image_{self.i:02}.png"
-                self.image_node.save_image(image, image_path)
-            else: 
-                self.image_node.log("\033[91mFailed to get image from camera.\033[91m")
+            # time_start = self.get_clock().now().nanoseconds / 1e9
+            # self.log("Waiting for image...")
+            # image = self.image_node.get_image(time_start)
+            # if image is not None:
+            #     image_path = self.data_path / f"{self.camera_name}_image_{self.i:02}.png"
+            #     self.image_node.save_image(image, image_path)
+            # else: 
+            #     self.image_node.log("\033[91mFailed to get image from camera.\033[91m")
+            #     next_measure = self.ask_for_next_measure()
+            #     continue
+            image  = cv2.imread("error_data/test_image.png")  # For testing purpose only
+            if image is None:
                 next_measure = self.ask_for_next_measure()
                 continue
 
-            # TODO: measure TCP pos from image
-            tcp_pose_camera = None 
 
+            # TODO: measure TCP pos from image                
+            tcp_pose_camera_frame = self.measure_position_from_marker(image)
+            tcp_pose_camera_frame = np.vstack((tcp_pose_camera_frame, [1]))  # Convert to homogeneous coordinates
+
+            tcp_pose_camera = self.T_cam2base @ tcp_pose_camera_frame
+            print(f"TCP pose from camera: {tcp_pose_camera[:3].flatten().tolist()}")
+
+            print(f"TCP pose robot: {tcp_pose_robot}")
 
             # TODO: calculate error
-
+            error = np.array(tcp_pose_robot) - tcp_pose_camera[:3].flatten()
+            print(f"Position error (m): {error.tolist()}")
 
             # TODO: save TCP pos data and error data
-            tcp_path = self.data_path / f"{self.camera_name}_tcp_{self.i:02}.yaml"
-            self.save_tcp(tcp_pose_robot, tcp_path)
 
             next_measure = self.ask_for_next_measure()
 
         self.analyze_results()
         self.log("\033[92mFinished measuring camera error.\033[92m")
         
+
+    def measure_position_from_marker(
+        self, image: np.ndarray
+    ) -> np.ndarray:
+        aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
+        parameters = cv2.aruco.DetectorParameters_create()
+        marker_size = 0.1415  # Marker size in meters
+
+        corners, ids, _ = cv2.aruco.detectMarkers(image, aruco_dict, parameters=parameters)
+
+        marker_corners = corners[0]
+        image_points = marker_corners.reshape(-1, 2).astype(np.float32)
+
+        obj_points = np.array([
+            [0.0,           0.0,            0.0],           # corner 0 (top-left)
+            [marker_size, 0.0,            0.0],           # corner 1 (top-right)
+            [marker_size, marker_size,  0.0],           # corner 2 (bottom-right)
+            [0.0,           marker_size,  0.0],           # corner 3 (bottom-left)
+        ], dtype=np.float32)
+
+        retval, rvec, tvec = cv2.solvePnP(
+            obj_points,
+            image_points,
+            self.camera_matrix,
+            self.dist_coeffs
+        )
+
+        cv2.drawFrameAxes(
+            image,
+            self.camera_matrix,
+            self.dist_coeffs,
+            rvec,
+            tvec,
+            marker_size * 0.5  # visual axis length
+        )
+
+        cv2.imshow("Test Image", image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+        return tvec
 
 
     def save_tcp(self, 
@@ -169,21 +234,6 @@ class MeasureCameraErrorNode(Node):
         path: Path
     ) -> None:
         pass
-        # with open(path, "w") as f:
-        #     yaml.dump(
-        #         {
-        #             "tcp_pose_robot": {
-        #                 "position": tcp_pose_robot["position"].tolist(),
-        #                 "orientation": tcp_pose_robot["orientation"].tolist(),
-        #             }
-        #             "tcp_pose_camera": {
-        #                 "position": tcp_pose_camera["position"].tolist(),
-        #                 "orientation": tcp_pose_camera["orientation"].tolist(),
-        #             }
-        #         },
-        #         f,
-        #     )
-        # self.get_logger().info(f"Saved TCP pose to: {path}")
 
 
     def ask_for_next_measure(self) -> bool:
