@@ -115,6 +115,10 @@ class MeasureCameraErrorNode(Node):
         next_measure = True
         while next_measure:
             # TODO: change the way to control the robot. Make it possible to move the robot manually
+            self.robot._switch_controllers(
+                activate=["freedrive_mode_controller"],
+                deactivate=["scaled_joint_trajectory_controller"],
+            )
 
             self.log("\033[93mSet the end effector at the corner of the calibration board.\033[93m")
             self.log("\033[93mWhen robot is in position, press ENTER to start measuring camera error...\033[93m ")
@@ -158,26 +162,28 @@ class MeasureCameraErrorNode(Node):
         self.log("\033[92mFinished measuring camera error.\033[92m")
         
 
+
     def save_tcp(self, 
         tcp_pose_robot: Dict[str, List[float]], 
         tcp_pose_camera: Dict[str, List[float]], 
         path: Path
     ) -> None:
-        with open(path, "w") as f:
-            yaml.dump(
-                {
-                    "tcp_pose_robot": {
-                        "position": tcp_pose_robot["position"].tolist(),
-                        "orientation": tcp_pose_robot["orientation"].tolist(),
-                    }
-                    "tcp_pose_camera": {
-                        "position": tcp_pose_camera["position"].tolist(),
-                        "orientation": tcp_pose_camera["orientation"].tolist(),
-                    }
-                },
-                f,
-            )
-        self.get_logger().info(f"Saved TCP pose to: {path}")
+        pass
+        # with open(path, "w") as f:
+        #     yaml.dump(
+        #         {
+        #             "tcp_pose_robot": {
+        #                 "position": tcp_pose_robot["position"].tolist(),
+        #                 "orientation": tcp_pose_robot["orientation"].tolist(),
+        #             }
+        #             "tcp_pose_camera": {
+        #                 "position": tcp_pose_camera["position"].tolist(),
+        #                 "orientation": tcp_pose_camera["orientation"].tolist(),
+        #             }
+        #         },
+        #         f,
+        #     )
+        # self.get_logger().info(f"Saved TCP pose to: {path}")
 
 
     def ask_for_next_measure(self) -> bool:
