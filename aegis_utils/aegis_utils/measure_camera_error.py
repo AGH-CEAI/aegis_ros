@@ -54,6 +54,7 @@ class CollectImageNode(Node):
         self.get_logger().info(f"Subscribed to image topic: {image_topic}")
 
     def image_callback(self, msg: Image) -> None:
+        print("Received image")
         try:
             with self.mutex:
                 self.image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
@@ -87,13 +88,13 @@ class CollectImageNode(Node):
 
 
 
-class MeasureCameraErrorNode(Node):
+class MeasureCameraError():
     def __init__(self,  robot: RobotDirector, image_node: CollectImageNode, camera_name: str, data_path: Path) -> None:
-        super().__init__('measure_camera_error_node')
-        self.camera_name = camera_name
-        self.data_path = data_path
         self.robot = robot
         self.image_node = image_node
+        self.camera_name = camera_name
+        self.data_path = data_path
+
         self.T_cam2base = np.array([
             [0.019393463529861016, 0.9990240674437583, -0.039683828449952906, 0.047714301707007856],
             [0.9996413820847948,  -0.0186417902732842, 0.019224746526503706, -0.34666811181735363],
@@ -140,10 +141,10 @@ class MeasureCameraErrorNode(Node):
             )
             time.sleep(1.0)
 
-            # TODO: get TCP pose of specific pointer
+            # # TODO: get TCP pose of specific pointer
             tcp_pose_robot = self.robot.get_tcp_pose()["position"]
             print(f"TCP pose from robot: {tcp_pose_robot}")
-            
+
             # move robot to home position
             self.move_to_home()
             time.sleep(1.0)  # Wait for robot to stabilize
@@ -175,8 +176,8 @@ class MeasureCameraErrorNode(Node):
             print(f"TCP pose robot: {tcp_pose_robot}")
 
             # TODO: calculate error
-            error = np.array(tcp_pose_robot) - tcp_pose_camera[:3].flatten()
-            print(f"Position error (m): {error.tolist()}")
+            # error = np.array(tcp_pose_robot) - tcp_pose_camera[:3].flatten()
+            # print(f"Position error (m): {error.tolist()}")
 
             # TODO: save TCP pos data and error data
 
@@ -251,7 +252,7 @@ class MeasureCameraErrorNode(Node):
         pass
 
     def log(self, msg: str) -> None:
-        self.get_logger().info(msg)
+        self.image_node.log(msg)
 
 
 
@@ -269,7 +270,7 @@ def main() -> None:
             Path("~/ceai_ws/error_data").expanduser() / f"{cam_name}_{timestamp}"
         )
     
-    data_path.mkdir(parents=True, exist_ok=True)
+    # data_path.mkdir(parents=True, exist_ok=True)
 
     package_share_path = Path(get_package_share_directory("aegis_utils"))
     camera_info = CAMERA_CONFIG[cam_name]
@@ -279,19 +280,18 @@ def main() -> None:
     rclpy.init()
     robot = RobotDirector(synchronous=True)
     image_node = CollectImageNode(robot, image_topic, data_path)
-    measure_node = MeasureCameraErrorNode(robot, image_node, cam_name, data_path)
-    executor = SingleThreadedExecutor()
-    executor.add_node(image_node)
-    spin_thread = threading.Thread(target=executor.spin, daemon=True)
-    spin_thread.start()
+    measure = MeasureCameraError(robot, image_node, cam_name, data_path)
+    robot.executor.add_node(image_node)
 
     try:
-        measure_node.working_loop()
+        measure.working_loop()
     finally:
-        measure_node.destroy_node()
+        # robot.executor.shutdown()
+        # robot.executor_thread.join()
+        robot.executor.remove_node(image_node)
+        image_node.destroy_node()
         rclpy.shutdown()
-        executor.shutdown()
-        spin_thread.join()
+
 
 
 
