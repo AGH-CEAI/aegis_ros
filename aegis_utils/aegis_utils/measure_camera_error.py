@@ -54,7 +54,6 @@ class CollectImageNode(Node):
         self.get_logger().info(f"Subscribed to image topic: {image_topic}")
 
     def image_callback(self, msg: Image) -> None:
-        print("Received image")
         try:
             with self.mutex:
                 self.image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
@@ -114,7 +113,7 @@ class MeasureCameraError():
                 "wrist_1_joint": -1.57,
                 "wrist_2_joint": -1.57,
                 "wrist_3_joint": 0.0,
-                "robotiq_hande_left_finger_joint": 0.025,
+                # "robotiq_hande_left_finger_joint": 0.005,
             },
             max_vel=0.5,
             max_accel=0.5,
@@ -141,9 +140,12 @@ class MeasureCameraError():
             )
             time.sleep(1.0)
 
-            # # TODO: get TCP pose of specific pointer
-            tcp_pose_robot = self.robot.get_tcp_pose()["position"]
-            print(f"TCP pose from robot: {tcp_pose_robot}")
+            joint_pos = self.robot.get_joint_positions()
+            print(f"JOINT POSS:: {joint_pos}")
+
+            # # # TODO: get TCP pose of specific pointer
+            # tcp_pose_robot = self.robot.get_tcp_pose()["position"]
+            # print(f"TCP pose from robot: {tcp_pose_robot}")
 
             # move robot to home position
             self.move_to_home()
