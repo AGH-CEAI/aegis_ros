@@ -11,39 +11,22 @@ import tty
 import cv2
 import numpy as np
 import rclpy
-import yaml
-from aegis_director.robot_director import RobotDirector
-from ament_index_python.packages import get_package_share_directory
+from aegis_director import RobotDirector
 from builtin_interfaces.msg import Time
 from cv_bridge import CvBridge
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
 from sensor_msgs.msg import Image
 
+
 CAMERA_CONFIG = {
     "scene": {"pos_config": "cam_scene.yaml", "topic": "/cam_scene/rgb/image_raw"},
-    "tool_front_right": {
-        "pos_config": "cam_tool_front.yaml",
-        "topic": "/cam_tool_front/right/image_raw",
-    },
-    "tool_front_left": {
-        "pos_config": "cam_tool_front.yaml",
-        "topic": "/cam_tool_front/left/image_raw",
-    },
-    "tool_right": {
-        "pos_config": "cam_tool_right.yaml",
-        "topic": "/cam_tool_right/image_color",
-    },
-    "tool_left": {
-        "pos_config": "cam_tool_left.yaml",
-        "topic": "/cam_tool_left/image_color",
-    },
 }
 
 
 class CollectImageNode(Node):
     def __init__(self, robot: RobotDirector, image_topic: str, data_path: Path) -> None:
-        super().__init__('collect_image_node')
+        super().__init__("collect_image_node")
         self.robot = robot
         self.image = None
         self.timestamp = None
@@ -86,23 +69,67 @@ class CollectImageNode(Node):
         self.get_logger().info(msg)
 
 
-
-class MeasureCameraError():
-    def __init__(self,  robot: RobotDirector, image_node: CollectImageNode, camera_name: str, data_path: Path) -> None:
+class MeasureCameraError:
+    def __init__(
+        self,
+        robot: RobotDirector,
+        image_node: CollectImageNode,
+        camera_name: str,
+        data_path: Path,
+    ) -> None:
         self.robot = robot
         self.image_node = image_node
         self.camera_name = camera_name
         self.data_path = data_path
 
-        self.T_cam2base = np.array([
-            [0.019393463529861016, 0.9990240674437583, -0.039683828449952906, 0.047714301707007856],
-            [0.9996413820847948,  -0.0186417902732842, 0.019224746526503706, -0.34666811181735363],
-            [0.018466206863277983, -0.04004243153875939, -0.9990273283952479, 1.1668662643689283],
-            [0.0, 0.0, 0.0, 1.0]
-        ])
-        self.camera_matrix = np.array([1045.253469873161, 0.0, 616.7886604727472, 0.0, 1043.2430632943033, 386.8198966768913, 0.0, 0.0, 1.0], dtype=np.float32).reshape((3, 3))
-        self.dist_coeffs = np.array([0.08083301537530861, -0.04332893272558069, 0.003319516691409084, -0.0016267198557977577, -0.2800871865529448], dtype=np.float32).reshape((5, 1))
-
+        # TODO: load from calibration file
+        self.T_cam2base = np.array(
+            [
+                [
+                    0.019393463529861016,
+                    0.9990240674437583,
+                    -0.039683828449952906,
+                    0.047714301707007856,
+                ],
+                [
+                    0.9996413820847948,
+                    -0.0186417902732842,
+                    0.019224746526503706,
+                    -0.34666811181735363,
+                ],
+                [
+                    0.018466206863277983,
+                    -0.04004243153875939,
+                    -0.9990273283952479,
+                    1.1668662643689283,
+                ],
+                [0.0, 0.0, 0.0, 1.0],
+            ]
+        )
+        self.camera_matrix = np.array(
+            [
+                1045.253469873161,
+                0.0,
+                616.7886604727472,
+                0.0,
+                1043.2430632943033,
+                386.8198966768913,
+                0.0,
+                0.0,
+                1.0,
+            ],
+            dtype=np.float32,
+        ).reshape((3, 3))
+        self.dist_coeffs = np.array(
+            [
+                0.08083301537530861,
+                -0.04332893272558069,
+                0.003319516691409084,
+                -0.0016267198557977577,
+                -0.2800871865529448,
+            ],
+            dtype=np.float32,
+        ).reshape((5, 1))
 
     def move_to_home(self) -> None:
         self.robot.joint_move(
@@ -113,69 +140,64 @@ class MeasureCameraError():
                 "wrist_1_joint": -1.57,
                 "wrist_2_joint": -1.57,
                 "wrist_3_joint": 0.0,
-                # "robotiq_hande_left_finger_joint": 0.005,
+                # "robotiq_hande_left_finger_joint": 0.005, # not working with that
             },
             max_vel=0.5,
             max_accel=0.5,
         )
-    
+
     def working_loop(self) -> None:
         next_measure = True
         while next_measure:
-            # TODO: check; change the way to control the robot. Make it possible to move the robot manually
+            # Set robot to freedrive mode and wait for user to position the robot. Then switch back to normal mode.
             self.robot._switch_controllers(
                 activate=["freedrive_mode_controller"],
                 deactivate=["scaled_joint_trajectory_controller"],
             )
             time.sleep(1.0)
-
-            self.log("\033[93mSet the end effector at the corner of the calibration board.\033[93m")
-            self.log("\033[93mWhen robot is in position, press ENTER to start measuring camera error...\033[93m ")
-            input()            
-            
-            # TODO: check; change the way to control the robot. Control from remote
+            self.log("""\033[93mINSTRUCTIONS::
+                                (With teachpendant)
+                                1) change REMOTE to LOCAL (top right corner of screen),
+                                2) PAUSE the program (pause button)
+                                3) With deadmen button pressed, set the end effector at the corner of the calibration board.
+                                4) PLAY the program (play button)
+                                5) change back to REMOTE
+                                6) press ENTER at kayboard to start measuring camera error\033[93m""")
+            input()
             self.robot._switch_controllers(
                 activate=["scaled_joint_trajectory_controller"],
                 deactivate=["freedrive_mode_controller"],
             )
             time.sleep(1.0)
 
-            joint_pos = self.robot.get_joint_positions()
-            print(f"JOINT POSS:: {joint_pos}")
+            # testing: print joint pos
+            # joint_pos = self.robot.get_joint_positions()
+            # print(f"JOINT POSS:: {joint_pos}")
 
             # # # TODO: get TCP pose of specific pointer
-            # tcp_pose_robot = self.robot.get_tcp_pose()["position"]
-            # print(f"TCP pose from robot: {tcp_pose_robot}")
+            tcp_pose_robot = self.robot.get_tcp_pose()["position"]
+            print(f"TCP pose from robot: {tcp_pose_robot}")
 
             # move robot to home position
             self.move_to_home()
             time.sleep(1.0)  # Wait for robot to stabilize
 
-            # get image from camera
-            # time_start = self.get_clock().now().nanoseconds / 1e9
-            # self.log("Waiting for image...")
-            # image = self.image_node.get_image(time_start)
-            # if image is not None:
-            #     image_path = self.data_path / f"{self.camera_name}_image_{self.i:02}.png"
-            #     self.image_node.save_image(image, image_path)
-            # else: 
-            #     self.image_node.log("\033[91mFailed to get image from camera.\033[91m")
-            #     next_measure = self.ask_for_next_measure()
-            #     continue
-            image  = cv2.imread("error_data/test_image.png")  # For testing purpose only
+            # image = self.get_image_from_camera()
+            image = cv2.imread("error_data/test_image.png")  # For testing purpose only
             if image is None:
                 next_measure = self.ask_for_next_measure()
                 continue
 
-
-            # TODO: measure TCP pos from image                
+            # measure TCP pos from image
             tcp_pose_camera_frame = self.measure_position_from_marker(image)
-            tcp_pose_camera_frame = np.vstack((tcp_pose_camera_frame, [1]))  # Convert to homogeneous coordinates
+            tcp_pose_camera_frame = np.vstack(
+                (tcp_pose_camera_frame, [1])
+            )  # Convert to homogeneous coordinates
 
             tcp_pose_camera = self.T_cam2base @ tcp_pose_camera_frame
             print(f"TCP pose from camera: {tcp_pose_camera[:3].flatten().tolist()}")
 
-            print(f"TCP pose robot: {tcp_pose_robot}")
+            # print(f"TCP pose robot: {tcp_pose_robot}")
 
             # TODO: calculate error
             # error = np.array(tcp_pose_robot) - tcp_pose_camera[:3].flatten()
@@ -187,32 +209,42 @@ class MeasureCameraError():
 
         self.analyze_results()
         self.log("\033[92mFinished measuring camera error.\033[92m")
-        
 
-    def measure_position_from_marker(
-        self, image: np.ndarray
-    ) -> np.ndarray:
+    def get_image_from_camera(self) -> Optional[np.ndarray]:
+        time_start = self.get_clock().now().nanoseconds / 1e9
+        self.log("Waiting for image...")
+        image = self.image_node.get_image(time_start)
+        if image is not None:
+            image_path = self.data_path / f"{self.camera_name}_image_{self.i:02}.png"
+            self.image_node.save_image(image, image_path)
+        else:
+            self.image_node.log("\033[91mFailed to get image from camera.\033[91m")
+        return image
+
+    def measure_position_from_marker(self, image: np.ndarray) -> np.ndarray:
         aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
         parameters = cv2.aruco.DetectorParameters_create()
         marker_size = 0.1415  # Marker size in meters
 
-        corners, ids, _ = cv2.aruco.detectMarkers(image, aruco_dict, parameters=parameters)
+        corners, ids, _ = cv2.aruco.detectMarkers(
+            image, aruco_dict, parameters=parameters
+        )
 
         marker_corners = corners[0]
         image_points = marker_corners.reshape(-1, 2).astype(np.float32)
 
-        obj_points = np.array([
-            [0.0,           0.0,            0.0],           # corner 0 (top-left)
-            [marker_size, 0.0,            0.0],           # corner 1 (top-right)
-            [marker_size, marker_size,  0.0],           # corner 2 (bottom-right)
-            [0.0,           marker_size,  0.0],           # corner 3 (bottom-left)
-        ], dtype=np.float32)
+        obj_points = np.array(
+            [
+                [0.0, 0.0, 0.0],  # corner 0 (top-left)
+                [marker_size, 0.0, 0.0],  # corner 1 (top-right)
+                [marker_size, marker_size, 0.0],  # corner 2 (bottom-right)
+                [0.0, marker_size, 0.0],  # corner 3 (bottom-left)
+            ],
+            dtype=np.float32,
+        )
 
         retval, rvec, tvec = cv2.solvePnP(
-            obj_points,
-            image_points,
-            self.camera_matrix,
-            self.dist_coeffs
+            obj_points, image_points, self.camera_matrix, self.dist_coeffs
         )
 
         cv2.drawFrameAxes(
@@ -221,7 +253,7 @@ class MeasureCameraError():
             self.dist_coeffs,
             rvec,
             tvec,
-            marker_size * 0.5  # visual axis length
+            marker_size * 0.5,  # visual axis length
         )
 
         cv2.imshow("Test Image", image)
@@ -230,25 +262,24 @@ class MeasureCameraError():
 
         return tvec
 
-
-    def save_tcp(self, 
-        tcp_pose_robot: Dict[str, List[float]], 
-        tcp_pose_camera: Dict[str, List[float]], 
-        path: Path
+    def save_tcp(
+        self,
+        tcp_pose_robot: Dict[str, List[float]],
+        tcp_pose_camera: Dict[str, List[float]],
+        path: Path,
     ) -> None:
         pass
 
-
     def ask_for_next_measure(self) -> bool:
-            while True:
-                self.log("\033[93mDo you want to measure again? (Y/n)\033[93m")
-                answer = getch()
-                if answer == 'Y':
-                    return True
-                elif answer == 'n':
-                    return False
-                else:
-                    self.log("Invalid input. Please press 'Y' or 'n'.")
+        while True:
+            self.log("\033[93mDo you want to measure again? (Y/n)\033[93m")
+            answer = getch()
+            if answer == "Y":
+                return True
+            elif answer == "n":
+                return False
+            else:
+                self.log("Invalid input. Please press 'Y' or 'n'.")
 
     def analyze_results(self) -> None:
         pass
@@ -257,10 +288,9 @@ class MeasureCameraError():
         self.image_node.log(msg)
 
 
-
 def main() -> None:
     args = parse_args()
-    cam_name = args.camera  
+    cam_name = args.camera
     path_name = args.path
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -271,30 +301,30 @@ def main() -> None:
         data_path = (
             Path("~/ceai_ws/error_data").expanduser() / f"{cam_name}_{timestamp}"
         )
-    
+
     # data_path.mkdir(parents=True, exist_ok=True)
 
-    package_share_path = Path(get_package_share_directory("aegis_utils"))
+    # package_share_path = Path(get_package_share_directory("aegis_utils"))
     camera_info = CAMERA_CONFIG[cam_name]
-    pos_config_path = package_share_path / "config" / camera_info["pos_config"]
+    # pos_config_path = package_share_path / "config" / camera_info["pos_config"]
     image_topic = camera_info["topic"]
 
     rclpy.init()
     robot = RobotDirector(synchronous=True)
     image_node = CollectImageNode(robot, image_topic, data_path)
     measure = MeasureCameraError(robot, image_node, cam_name, data_path)
-    robot.executor.add_node(image_node)
+
+    executor = SingleThreadedExecutor()
+    executor.add_node(image_node)
+    spin_thread = threading.Thread(target=executor.spin, daemon=True)
+    spin_thread.start()
 
     try:
         measure.working_loop()
     finally:
-        # robot.executor.shutdown()
-        # robot.executor_thread.join()
-        robot.executor.remove_node(image_node)
+        executor.shutdown()
         image_node.destroy_node()
         rclpy.shutdown()
-
-
 
 
 def parse_args() -> argparse.Namespace:
@@ -326,6 +356,7 @@ def getch():
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
     return ch
+
 
 if __name__ == "__main__":
     main()

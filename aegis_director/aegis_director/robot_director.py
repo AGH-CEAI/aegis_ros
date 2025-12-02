@@ -112,7 +112,8 @@ class RobotDirector:
         }
 
     def _get_tcp_pose(self) -> Pose:
-        js = self._get_joint_states() # TODO: my edit
+        # js = self._get_joint_states() # TODO: my edit
+        js = self.moveit2.joint_state
         retval = None
         if self.synchronous:
             retval = self.moveit2.compute_fk(js)
