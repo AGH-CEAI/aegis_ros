@@ -3,10 +3,11 @@ import threading
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 import sys
 import termios
 import tty
+import math
 
 import cv2
 import numpy as np
@@ -17,11 +18,43 @@ from cv_bridge import CvBridge
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
 from sensor_msgs.msg import Image
+from geometry_msgs.msg import TransformStamped
+from tf2_ros.static_transform_broadcaster import StaticTransformBroadcaster
+from tf2_ros import Buffer, TransformListener
 
 
 CAMERA_CONFIG = {
     "scene": {"pos_config": "cam_scene.yaml", "topic": "/cam_scene/rgb/image_raw"},
 }
+
+
+class CalibrationTool(Node):
+    def __init__(self, tool_offset: List[float]) -> None:
+        super().__init__("static_tf_broadcaster")
+
+        # broadcaster object
+        self.broadcaster = StaticTransformBroadcaster(self)
+
+        # create TransformStamped
+        t = TransformStamped()
+        t.header.stamp = self.get_clock().now().to_msg()
+        t.header.frame_id = "tool0"  # parent frame
+        t.child_frame_id = "calibration_tool"  # child frame
+
+        # translation (meters)
+        t.transform.translation.x = tool_offset[0]
+        t.transform.translation.y = tool_offset[1]
+        t.transform.translation.z = tool_offset[2]
+
+        # orientation as quaternion (x,y,z,w) # no rotation
+        t.transform.rotation.x = 0.0
+        t.transform.rotation.y = 0.0
+        t.transform.rotation.z = 0.0
+        t.transform.rotation.w = 1.0
+
+        # send it once
+        self.broadcaster.sendTransform(t)
+        self.get_logger().info("Static transform tool0 -> calibration_tool published")
 
 
 class CollectImageNode(Node):
@@ -35,6 +68,10 @@ class CollectImageNode(Node):
         self.mutex = threading.Lock()
         self.sub = self.create_subscription(Image, image_topic, self.image_callback, 10)
         self.get_logger().info(f"Subscribed to image topic: {image_topic}")
+
+        # tf2 setup and calibration tool
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
 
     def image_callback(self, msg: Image) -> None:
         try:
@@ -65,6 +102,46 @@ class CollectImageNode(Node):
         cv2.imwrite(str(path), image)
         self.get_logger().info(f"Saved image to: {path}")
 
+    def get_calibration_tool_pose_in_base(self) -> Dict[str, np.ndarray]:
+        """
+        Returns (position, orientation) of calibration_tool in base frame.
+
+        position: np.array([x, y, z])
+        orientation: np.array([qx, qy, qz, qw])
+        """
+        try:
+            t = self.tf_buffer.lookup_transform(
+                "base",  # target frame
+                "calibration_tool",  # source frame
+                Time(),  # latest available
+            )
+        except Exception as e:
+            self.get_logger().error(
+                f"Failed to lookup transform base->calibration_tool: {e}"
+            )
+            return None, None
+
+        pos = np.array(
+            [
+                t.transform.translation.x,
+                t.transform.translation.y,
+                t.transform.translation.z,
+            ],
+            dtype=float,
+        )
+
+        ori = np.array(
+            [
+                t.transform.rotation.x,
+                t.transform.rotation.y,
+                t.transform.rotation.z,
+                t.transform.rotation.w,
+            ],
+            dtype=float,
+        )
+
+        return {"position": pos, "orientation": ori}
+
     def log(self, msg: str) -> None:
         self.get_logger().info(msg)
 
@@ -81,8 +158,10 @@ class MeasureCameraError:
         self.image_node = image_node
         self.camera_name = camera_name
         self.data_path = data_path
+        self.errors = []
 
         # TODO: load from calibration file
+        # self.T_cam2base, self.camera_matrix, self.dist_coeffs = self.self.load_data()
         self.T_cam2base = np.array(
             [
                 [
@@ -140,11 +219,13 @@ class MeasureCameraError:
                 "wrist_1_joint": -1.57,
                 "wrist_2_joint": -1.57,
                 "wrist_3_joint": 0.0,
-                # "robotiq_hande_left_finger_joint": 0.005, # not working with that
             },
             max_vel=0.5,
             max_accel=0.5,
         )
+
+    def load_data(self) -> None:
+        pass
 
     def working_loop(self) -> None:
         next_measure = True
@@ -170,15 +251,14 @@ class MeasureCameraError:
             )
             time.sleep(1.0)
 
-            # testing: print joint pos
+            # TESTING: print joint pos
             # joint_pos = self.robot.get_joint_positions()
             # print(f"JOINT POSS:: {joint_pos}")
 
-            # # # TODO: get TCP pose of specific pointer
-            tcp_pose_robot = self.robot.get_tcp_pose()["position"]
+            tcp_pose_robot = self.image_node.get_calibration_tool_pose_in_base()
+            tcp_pose_robot = tcp_pose_robot["position"].flatten().tolist()
             print(f"TCP pose from robot: {tcp_pose_robot}")
 
-            # move robot to home position
             self.move_to_home()
             time.sleep(1.0)  # Wait for robot to stabilize
 
@@ -188,22 +268,16 @@ class MeasureCameraError:
                 next_measure = self.ask_for_next_measure()
                 continue
 
-            # measure TCP pos from image
             tcp_pose_camera_frame = self.measure_position_from_marker(image)
-            tcp_pose_camera_frame = np.vstack(
-                (tcp_pose_camera_frame, [1])
-            )  # Convert to homogeneous coordinates
+            tcp_pose_camera_frame = np.vstack((tcp_pose_camera_frame, [1]))
 
             tcp_pose_camera = self.T_cam2base @ tcp_pose_camera_frame
-            print(f"TCP pose from camera: {tcp_pose_camera[:3].flatten().tolist()}")
+            tcp_pose_camera = tcp_pose_camera[:3].flatten().tolist()
+            print(f"TCP pose from camera: {tcp_pose_camera}")
 
-            # print(f"TCP pose robot: {tcp_pose_robot}")
-
-            # TODO: calculate error
-            # error = np.array(tcp_pose_robot) - tcp_pose_camera[:3].flatten()
-            # print(f"Position error (m): {error.tolist()}")
-
-            # TODO: save TCP pos data and error data
+            TCP_error = self.calculate_TCP_error(tcp_pose_camera, tcp_pose_robot)
+            self.errors.append(TCP_error)
+            print(f"Error of the position:: {TCP_error[3]}")
 
             next_measure = self.ask_for_next_measure()
 
@@ -262,19 +336,11 @@ class MeasureCameraError:
 
         return tvec
 
-    def save_tcp(
-        self,
-        tcp_pose_robot: Dict[str, List[float]],
-        tcp_pose_camera: Dict[str, List[float]],
-        path: Path,
-    ) -> None:
-        pass
-
     def ask_for_next_measure(self) -> bool:
         while True:
             self.log("\033[93mDo you want to measure again? (Y/n)\033[93m")
             answer = getch()
-            if answer == "Y":
+            if answer in ("Y", "\r", "\n"):
                 return True
             elif answer == "n":
                 return False
@@ -282,7 +348,14 @@ class MeasureCameraError:
                 self.log("Invalid input. Please press 'Y' or 'n'.")
 
     def analyze_results(self) -> None:
-        pass
+        mean_errors = np.mean([row[3] for row in self.errors])
+        self.log(f"Mean error: {mean_errors}")
+
+    def calculate_TCP_error(self, c, r) -> Tuple[float, float, float, float]:
+        dx = c[0] - r[0]
+        dy = c[1] - r[1]
+        dz = c[2] - r[2]
+        return (abs(dx), abs(dy), abs(dz), math.sqrt(dx * dx + dy * dy + dz * dz))
 
     def log(self, msg: str) -> None:
         self.image_node.log(msg)
@@ -292,6 +365,7 @@ def main() -> None:
     args = parse_args()
     cam_name = args.camera
     path_name = args.path
+    tool_offset = args.tool_offset
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
@@ -312,10 +386,12 @@ def main() -> None:
     rclpy.init()
     robot = RobotDirector(synchronous=True)
     image_node = CollectImageNode(robot, image_topic, data_path)
+    tool_tf_node = CalibrationTool(tool_offset)
     measure = MeasureCameraError(robot, image_node, cam_name, data_path)
 
     executor = SingleThreadedExecutor()
     executor.add_node(image_node)
+    executor.add_node(tool_tf_node)
     spin_thread = threading.Thread(target=executor.spin, daemon=True)
     spin_thread.start()
 
@@ -324,16 +400,26 @@ def main() -> None:
     finally:
         executor.shutdown()
         image_node.destroy_node()
+        tool_tf_node.destroy_node()
+        spin_thread.join()
         rclpy.shutdown()
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "-t",
+        "--tool_offset",
+        type=float,
+        nargs=3,
+        default=[0.0, 0.0, 0.25],
+        help="Offset of the calibration tool from tool0 frame in meters (x y z)",
+    )
+    parser.add_argument(
         "-c",
         "--camera",
         type=str,
-        required=True,
+        default="scene",
         choices=CAMERA_CONFIG.keys(),
         help="Which camera: scene, tool_front_right, tool_front_left, tool_right, tool_left",
     )
