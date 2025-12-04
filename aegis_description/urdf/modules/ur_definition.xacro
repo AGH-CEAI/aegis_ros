@@ -2,17 +2,17 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find ur_description)/urdf/ur_macro.xacro"/>
 
-  <!-- For simulation, the global parent must be the same as ur_base -->
-  <joint name="world_to_ur_base" type="fixed">
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-    <parent link="${parent}"/>
-    <child link="ur_base"/>
-  </joint>
-
   <!-- The list of all available options can be found in the <ur_description>/urdf/ur_macro.xacro file -->
   <!-- Descriptions of the arguments can be found in the <ur_robot_driver>/src/hardware_interface.cpp file -->
 
   <xacro:macro name="ur_definition" params="name parent tf_prefix mock_hardware">
+    <!-- For simulation, the global parent must be the same as ur_base -->
+    <joint name="world_to_ur_base" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <parent link="${parent}"/>
+      <child link="ur_base"/>
+    </joint>
+
     <!-- parameters -->
     <xacro:arg name="tf_prefix" default="${tf_prefix}"/>
     <xacro:arg name="joint_limit_params" default="$(find aegis_description)/config/ur5e/joint_limits.yaml"/>

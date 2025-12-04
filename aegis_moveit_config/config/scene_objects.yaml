@@ -1,7 +1,7 @@
 UniqueSceneObjectExample:
   pretty_name: "table"
   type: box
-  frame_id: world
+  frame_id: cell
   size:
     x: 0.84
     y: 0.55
