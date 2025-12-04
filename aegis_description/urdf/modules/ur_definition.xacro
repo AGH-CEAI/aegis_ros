@@ -2,6 +2,13 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find ur_description)/urdf/ur_macro.xacro"/>
 
+  <!-- For simulation, the global parent must be the same as ur_base -->
+  <joint name="world_to_ur_base" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="${parent}"/>
+    <child link="ur_base"/>
+  </joint>
+
   <!-- The list of all available options can be found in the <ur_description>/urdf/ur_macro.xacro file -->
   <!-- Descriptions of the arguments can be found in the <ur_robot_driver>/src/hardware_interface.cpp file -->
 
@@ -48,7 +55,7 @@
     <xacro:ur_robot
       name="${name}"
       tf_prefix="$(arg tf_prefix)"
-      parent="${parent}"
+      parent="ur_base"
       joint_limits_parameters_file="$(arg joint_limit_params)"
       kinematics_parameters_file="$(arg kinematics_calibration)"
       physical_parameters_file="$(arg physical_params)"
@@ -77,7 +84,7 @@
 
     <xacro:if value="$(arg sim_gazebo)">
       <!-- Gazebo plugins -->
-      <gazebo reference="${parent}"/>
+      <gazebo reference="ur_base"/>
       <gazebo>
         <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
           <parameters>$(arg simulation_controllers${port})</parameters>
@@ -87,7 +94,7 @@
 
     <xacro:if value="$(arg sim_ignition)">
       <!-- Gazebo plugins -->
-      <gazebo reference="${parent}"/>
+      <gazebo reference="ur_base"/>
       <gazebo>
         <plugin filename="libign_ros2_control-system.so" name="ign_ros2_control::IgnitionROS2ControlPlugin">
           <parameters>$(arg simulation_controllers)</parameters>
