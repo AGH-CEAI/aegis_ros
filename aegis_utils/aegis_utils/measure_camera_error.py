@@ -257,7 +257,7 @@ class MeasureCameraError:
 
             tcp_pose_robot = self.image_node.get_calibration_tool_pose_in_base()
             tcp_pose_robot = tcp_pose_robot["position"].flatten().tolist()
-            print(f"TCP pose from robot: {tcp_pose_robot}")
+            self.log(f"TCP pose from robot: {tcp_pose_robot}")
 
             self.move_to_home()
             time.sleep(1.0)  # Wait for robot to stabilize
@@ -273,11 +273,11 @@ class MeasureCameraError:
 
             tcp_pose_camera = self.T_cam2base @ tcp_pose_camera_frame
             tcp_pose_camera = tcp_pose_camera[:3].flatten().tolist()
-            print(f"TCP pose from camera: {tcp_pose_camera}")
+            self.log(f"TCP pose from camera: {tcp_pose_camera}")
 
             TCP_error = self.calculate_TCP_error(tcp_pose_camera, tcp_pose_robot)
             self.errors.append(TCP_error)
-            print(f"Error of the position:: {TCP_error[3]}")
+            self.log(f"Error of the position:: {TCP_error[3]}")
 
             next_measure = self.ask_for_next_measure()
 
