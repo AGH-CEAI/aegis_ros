@@ -135,7 +135,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     }
 
     octomap_parameters = {
-        "frame_id": "world",
+        "frame_id": "ur_base",
         "resolution": 0.01,
         "max_range": 2.0,
     }
@@ -169,7 +169,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
 
     move_group_node = prepare_move_group_node(node_cfg)
     rviz_node = prepare_rviz_node(node_cfg, paths)
-    tf_odom_node = prepare_static_tf_node("world", "odom")
+    tf_odom_node = prepare_static_tf_node("ur_base", "odom")
     scene_objects_manager_node = prepare_scene_objects_manager_node(paths)
     octomap_node = prepare_octomap_node(node_cfg)
     servo_node = prepare_servo_node(paths)

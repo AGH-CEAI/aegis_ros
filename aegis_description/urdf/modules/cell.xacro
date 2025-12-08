@@ -3,7 +3,7 @@
   <xacro:macro name="cell" params="parent">
     <joint name="ur_base_to_cell" type="fixed">
       <origin xyz="0 0 -0.806" rpy="0 0 -${0.5 * pi}"/>
-      <parent link="ur_base"/>
+      <parent link="${parent}"/>
       <child link="cell"/>
     </joint>
 
@@ -63,7 +63,5 @@
         </geometry>
       </collision>
     </link>
-
-    <link name="ur_base"/>
   </xacro:macro>
 </robot>
