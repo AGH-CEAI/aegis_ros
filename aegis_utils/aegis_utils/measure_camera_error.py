@@ -8,6 +8,7 @@ import sys
 import termios
 import tty
 import math
+import yaml
 
 import cv2
 import numpy as np
@@ -159,6 +160,7 @@ class MeasureCameraError:
         self.camera_name = camera_name
         self.data_path = data_path
         self.errors = []
+        self.iteration = 0
 
         # TODO: load from calibration file
         # self.T_cam2base, self.camera_matrix, self.dist_coeffs = self.self.load_data()
@@ -262,28 +264,26 @@ class MeasureCameraError:
             self.move_to_home()
             time.sleep(1.0)  # Wait for robot to stabilize
 
-            # image = self.get_image_from_camera()
-            image = cv2.imread(
-                "error_data/scene_image_02.png"
-            )  # For testing purpose only
+            image = self.get_image_from_camera()
+            # image = cv2.imread(
+            #     "error_data/scene_image_02.png"
+            # )  # For testing purpose only
             if image is None:
                 next_measure = self.ask_for_next_measure()
                 continue
 
             tcp_pose_camera_frame_tvec = self.measure_position_from_marker(image)
-            tcp_pose_camera_frame_tvec = np.vstack((tcp_pose_camera_frame_tvec, [1]))
-            print(
-                f"TCP pose from camera frame (tvec): {tcp_pose_camera_frame_tvec.flatten().tolist()}"
-            )
-            print(tcp_pose_camera_frame_tvec.shape)
 
-            tcp_pose_camera = self.T_base2cam @ tcp_pose_camera_frame_tvec
-            tcp_pose_camera = tcp_pose_camera[:3].flatten().tolist()
-            self.log(f"TCP pose from camera: {tcp_pose_camera}")
+            if tcp_pose_camera_frame_tvec.all() != None:
+                tcp_pose_camera_frame_tvec = np.vstack((tcp_pose_camera_frame_tvec, [1]))
 
-            TCP_error = self.calculate_TCP_error(tcp_pose_camera, tcp_pose_robot)
-            self.errors.append(TCP_error)
-            self.log(f"Error of the position:: {TCP_error[3]}")
+                tcp_pose_camera = self.T_base2cam @ tcp_pose_camera_frame_tvec
+                tcp_pose_camera = tcp_pose_camera[:3].flatten().tolist()
+                self.log(f"TCP pose from camera: {tcp_pose_camera}")
+
+                TCP_error = self.calculate_TCP_error(tcp_pose_camera, tcp_pose_robot)
+                self.errors.append(TCP_error)
+                self.log(f"Error of the position:: {TCP_error[3]}")
 
             next_measure = self.ask_for_next_measure()
 
@@ -291,12 +291,13 @@ class MeasureCameraError:
         self.log("\033[92mFinished measuring camera error.\033[92m")
 
     def get_image_from_camera(self) -> Optional[np.ndarray]:
-        time_start = self.get_clock().now().nanoseconds / 1e9
+        time_start = self.image_node.get_clock().now().nanoseconds / 1e9
         self.log("Waiting for image...")
         image = self.image_node.get_image(time_start)
         if image is not None:
-            image_path = self.data_path / f"{self.camera_name}_image_{self.i:02}.png"
+            image_path = self.data_path / f"{self.camera_name}_image_{self.iteration:02}.png"
             self.image_node.save_image(image, image_path)
+            self.iteration += 1
         else:
             self.image_node.log("\033[91mFailed to get image from camera.\033[91m")
         return image
@@ -309,6 +310,10 @@ class MeasureCameraError:
         corners, ids, _ = cv2.aruco.detectMarkers(
             image, aruco_dict, parameters=parameters
         )
+
+        if len(corners) == 0:
+            self.log("No detected marker at image")
+            return None
 
         marker_corners = corners[0]
         image_points = marker_corners.reshape(-1, 2).astype(np.float32)
@@ -339,6 +344,7 @@ class MeasureCameraError:
         cv2.imshow("Test Image", image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+        print(f"tvec: {tvec}")
 
         return tvec
 
@@ -354,8 +360,43 @@ class MeasureCameraError:
                 self.log("Invalid input. Please press 'Y' or 'n'.")
 
     def analyze_results(self) -> None:
-        mean_errors = np.mean([row[3] for row in self.errors])
+        errors_x = [row[0] for row in self.errors]
+        errors_y = [row[1] for row in self.errors]
+        errors_z = [row[2] for row in self.errors]
+        errors_all = [row[3] for row in self.errors]
+        mean_errors = {
+            "x": float(np.mean(errors_x)),
+            "y": float(np.mean(errors_y)),
+            "z": float(np.mean(errors_z)),
+            "total": float(np.mean(errors_all)),
+        }        # Prepare YAML structure
+
+        std_errors = {
+            "x": float(np.std(errors_x)),
+            "y": float(np.std(errors_y)),
+            "z": float(np.std(errors_z)),
+            "total": float(np.std(errors_all)),
+        }
+        data_to_save = {
+            "errors": {
+                "x": errors_x,
+                "y": errors_y,
+                "z": errors_z,
+                "total": errors_all,
+            },
+            "statistics": {
+                "mean": mean_errors,
+                "std_dev": std_errors,
+            }
+        }
+
+        yaml_file = self.data_path / "results.yaml"
+        with open(yaml_file, "w") as f:
+            yaml.dump(data_to_save, f, default_flow_style=False)
+
         self.log(f"Mean error: {mean_errors}")
+        self.log(f"STD: {std_errors}")
+        self.log(f"Saved YAML to: {yaml_file}")
 
     def calculate_TCP_error(self, c, r) -> Tuple[float, float, float, float]:
         dx = c[0] - r[0]
@@ -382,7 +423,7 @@ def main() -> None:
             Path("~/ceai_ws/error_data").expanduser() / f"{cam_name}_{timestamp}"
         )
 
-    # data_path.mkdir(parents=True, exist_ok=True)
+    data_path.mkdir(parents=True, exist_ok=True)
 
     # package_share_path = Path(get_package_share_directory("aegis_utils"))
     camera_info = CAMERA_CONFIG[cam_name]
