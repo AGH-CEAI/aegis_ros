@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="cell" params="parent">
-    <joint name="ur_base_to_cell" type="fixed">
+    <joint name="parent_to_cell" type="fixed">
       <origin xyz="0 0 -0.806" rpy="0 0 -${0.5 * pi}"/>
       <parent link="${parent}"/>
       <child link="cell"/>

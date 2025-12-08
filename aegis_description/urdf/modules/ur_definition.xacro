@@ -77,7 +77,7 @@
 
     <xacro:if value="$(arg sim_gazebo)">
       <!-- Gazebo plugins -->
-      <gazebo reference="ur_base"/>
+      <gazebo reference="${parent}"/>
       <gazebo>
         <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
           <parameters>$(arg simulation_controllers${port})</parameters>
@@ -87,7 +87,7 @@
 
     <xacro:if value="$(arg sim_ignition)">
       <!-- Gazebo plugins -->
-      <gazebo reference="ur_base"/>
+      <gazebo reference="${parent}"/>
       <gazebo>
         <plugin filename="libign_ros2_control-system.so" name="ign_ros2_control::IgnitionROS2ControlPlugin">
           <parameters>$(arg simulation_controllers)</parameters>
