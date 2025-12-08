@@ -111,7 +111,7 @@ class CollectImageNode(Node):
         """
         try:
             t = self.tf_buffer.lookup_transform(
-                "base",  # target frame
+                "ur_base",  # target frame
                 "calibration_tool",  # source frame
                 Time(),  # latest available
             )
@@ -162,29 +162,29 @@ class MeasureCameraError:
 
         # TODO: load from calibration file
         # self.T_cam2base, self.camera_matrix, self.dist_coeffs = self.self.load_data()
-        self.T_cam2base = np.array(
+        self.T_base2cam = np.array(
             [
                 [
-                    0.019393463529861016,
-                    0.9990240674437583,
-                    -0.039683828449952906,
-                    0.047714301707007856,
-                ],
-                [
-                    0.9996413820847948,
-                    -0.0186417902732842,
-                    0.019224746526503706,
-                    -0.34666811181735363,
-                ],
-                [
+                    0.019393463529861155,
+                    0.9996413820847947,
                     0.018466206863277983,
+                    0.3240708510322008,
+                ],
+                [
+                    0.999024067443758,
+                    -0.018641790273284053,
                     -0.04004243153875939,
-                    -0.9990273283952479,
-                    1.1668662643689283,
+                    -0.007406087495627406,
+                ],
+                [
+                    -0.0396838284499529,
+                    0.0192247465265037,
+                    -0.9990273283952478,
+                    1.1742893794290938,
                 ],
                 [0.0, 0.0, 0.0, 1.0],
             ]
-        )
+        ).reshape((4, 4))
         self.camera_matrix = np.array(
             [
                 1045.253469873161,
@@ -270,10 +270,14 @@ class MeasureCameraError:
                 next_measure = self.ask_for_next_measure()
                 continue
 
-            tcp_pose_camera_frame = self.measure_position_from_marker(image)
-            tcp_pose_camera_frame = np.vstack((tcp_pose_camera_frame, [1]))
+            tcp_pose_camera_frame_tvec = self.measure_position_from_marker(image)
+            tcp_pose_camera_frame_tvec = np.vstack((tcp_pose_camera_frame_tvec, [1]))
+            print(
+                f"TCP pose from camera frame (tvec): {tcp_pose_camera_frame_tvec.flatten().tolist()}"
+            )
+            print(tcp_pose_camera_frame_tvec.shape)
 
-            tcp_pose_camera = self.T_cam2base @ tcp_pose_camera_frame
+            tcp_pose_camera = self.T_base2cam @ tcp_pose_camera_frame_tvec
             tcp_pose_camera = tcp_pose_camera[:3].flatten().tolist()
             self.log(f"TCP pose from camera: {tcp_pose_camera}")
 
