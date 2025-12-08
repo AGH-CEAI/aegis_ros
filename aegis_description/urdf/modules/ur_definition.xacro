@@ -71,7 +71,7 @@
       input_recipe_filename="$(arg input_recipe_filename)"
       reverse_ip="$(arg reverse_ip)"
     >
-      <!-- position robot in the world -->
+      <!-- robot relative pose -->
       <origin xyz="0 0 0" rpy="0 0 0"/>
     </xacro:ur_robot>
 
