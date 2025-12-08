@@ -19,7 +19,7 @@ ros2 control switch_controllers --activate scaled_joint_trajectory_controller --
 
 ## Send Servo commands from CLI
 ```bash
-ros2 topic pub /servo_node/delta_twist_cmds geometry_msgs/msg/TwistStamped "{header: {stamp: now, frame_id: 'ur_base'}, twist: {linear: {x: 1.0, y: 1.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}}"
+ros2 topic pub /servo_node/delta_twist_cmds geometry_msgs/msg/TwistStamped "{header: {stamp: now, frame_id: 'world'}, twist: {linear: {x: 1.0, y: 1.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}}"
 # or
 ros2 topic pub /servo_node/delta_joint_cmds control_msgs/msg/JointJog "header:
   stamp: now

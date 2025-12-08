@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* [PR-77](https://github.com/AGH-CEAI/aegis_ros/pull/77) - Changed `world` frame to the `ur_base` frame (simulation simplification).
+* [PR-77](https://github.com/AGH-CEAI/aegis_ros/pull/77) - Changed `ur_base` frame to the `world` frame (simulation simplification).
 * [PR-75](https://github.com/AGH-CEAI/aegis_ros/pull/75) - Updated servo max linear, angular and joints velocities.
 * [PR-71](https://github.com/AGH-CEAI/aegis_ros/pull/71) - Updated collision checking.
 * [PR-68](https://github.com/AGH-CEAI/aegis_ros/pull/68) - Updated RViz config for proper QoS RGB camera config.

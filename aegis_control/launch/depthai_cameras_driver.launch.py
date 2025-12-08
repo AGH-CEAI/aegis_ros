@@ -203,7 +203,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     static_tf_scene_node = create_static_tf_node(
         files_missing,
         calibration_extrinsics_paths,
-        "ur_base",
+        "world",
         "cam_scene_rgb",
     )
     static_tf_tool_front_right_node = create_static_tf_node(

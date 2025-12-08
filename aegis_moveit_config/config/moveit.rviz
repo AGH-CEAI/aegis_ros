@@ -32,7 +32,7 @@ Visualization Manager:
         Z: 0
       Plane: XY
       Plane Cell Count: 10
-      Reference Frame: ur_base
+      Reference Frame: world
       Value: true
     - Alpha: 1
       Class: rviz_default_plugins/RobotModel
@@ -320,11 +320,11 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          ur_base:
+          world:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          ur_base:
+          world:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -618,11 +618,11 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          ur_base:
+          world:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          ur_base:
+          world:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -903,7 +903,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: ur_base
+    Fixed Frame: world
     Frame Rate: 30
   Name: root
   Tools:
@@ -934,7 +934,7 @@ Visualization Manager:
       Name: Current View
       Near Clip Distance: 0.009999999776482582
       Pitch: 0.44499996304512024
-      Target Frame: ur_base
+      Target Frame: world
       Value: Orbit (rviz_default_plugins)
       Yaw: 0.8100001811981201
     Saved: ~

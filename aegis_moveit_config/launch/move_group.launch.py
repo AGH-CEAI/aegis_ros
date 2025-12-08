@@ -135,7 +135,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     }
 
     octomap_parameters = {
-        "frame_id": "ur_base",
+        "frame_id": "world",
         "resolution": 0.01,
         "max_range": 2.0,
     }
@@ -169,7 +169,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
 
     move_group_node = prepare_move_group_node(node_cfg)
     rviz_node = prepare_rviz_node(node_cfg, paths)
-    tf_odom_node = prepare_static_tf_node("ur_base", "odom")
+    tf_odom_node = prepare_static_tf_node("world", "odom")
     scene_objects_manager_node = prepare_scene_objects_manager_node(paths)
     octomap_node = prepare_octomap_node(node_cfg)
     servo_node = prepare_servo_node(paths)
@@ -270,7 +270,7 @@ def prepare_scene_objects_manager_node(paths: AegisPathsCfg) -> Node:
         executable="scene_objects_manager",
         name="scene_objects_manager",
         output="screen",
-        arguments=["--cfg", paths.scene_objects_cfg, "--frame", "ur_base"],
+        arguments=["--cfg", paths.scene_objects_cfg, "--frame", "world"],
     )
 
 
