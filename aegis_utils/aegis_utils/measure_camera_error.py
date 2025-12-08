@@ -263,7 +263,9 @@ class MeasureCameraError:
             time.sleep(1.0)  # Wait for robot to stabilize
 
             # image = self.get_image_from_camera()
-            image = cv2.imread("error_data/test_image.png")  # For testing purpose only
+            image = cv2.imread(
+                "error_data/scene_image_02.png"
+            )  # For testing purpose only
             if image is None:
                 next_measure = self.ask_for_next_measure()
                 continue
