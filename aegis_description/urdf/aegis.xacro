@@ -25,7 +25,7 @@
     <xacro:mount_camera_tool_luxonis parent="adapter_mount_front" prefix="${prefix}"/>
     <xacro:mount_camera_tool_basler parent="adapter_mount_right" prefix="${prefix}" side="right"/>
     <xacro:mount_camera_tool_basler parent="adapter_mount_left" prefix="${prefix}" side="left"/>
-    <xacro:camera_scene_luxonis parent="cell"/>
+    <xacro:camera_scene_luxonis parent="base_link"/>
     <xacro:camera_tool_luxonis parent="mount_front_end" prefix="${prefix}"/>
     <xacro:camera_tool_basler parent="mount_right_end" prefix="${prefix}" side="right"/>
     <xacro:camera_tool_basler parent="mount_left_end" prefix="${prefix}" side="left"/>
