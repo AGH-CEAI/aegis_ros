@@ -122,6 +122,14 @@ def generate_launch_description() -> LaunchDescription:
 
     declared_arguments.append(
         DeclareLaunchArgument(
+            "disable_cell",
+            default_value=EnvironmentVariable("DISABLE_CELL", default_value="false"),
+            description="Exclude the cell from description.",
+        )
+    )
+
+    declared_arguments.append(
+        DeclareLaunchArgument(
             "launch_rviz",
             default_value=EnvironmentVariable("LAUNCH_RVIZ", default_value="true"),
             description="Launch RViz for robot state visualization & MoveIt2 manual control.",

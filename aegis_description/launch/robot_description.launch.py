@@ -14,6 +14,7 @@ from launch_ros.descriptions import ParameterValue
 def generate_launch_description():
     tf_prefix = LaunchConfiguration("tf_prefix", default="")
     mock_hardware = LaunchConfiguration("mock_hardware", default="false")
+    disable_cell = LaunchConfiguration("disable_cell", default="false")
 
     robot_description_str = Command(
         [
@@ -32,6 +33,9 @@ def generate_launch_description():
             " ",
             "mock_hardware:=",
             mock_hardware,
+            " ",
+            "disable_cell:=",
+            disable_cell,
         ]
     )
 
