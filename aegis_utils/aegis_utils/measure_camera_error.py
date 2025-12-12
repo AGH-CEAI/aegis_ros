@@ -47,7 +47,7 @@ class CalibrationTool(Node):
         t.transform.translation.y = tool_offset[1]
         t.transform.translation.z = tool_offset[2]
 
-        # orientation as quaternion (x,y,z,w) # no rotation
+        # orientation as quaternion (x,y,z,w)
         t.transform.rotation.x = 0.0
         t.transform.rotation.y = 0.0
         t.transform.rotation.z = 0.0
@@ -59,13 +59,13 @@ class CalibrationTool(Node):
 
 
 class CollectImageNode(Node):
-    def __init__(self, robot: RobotDirector, image_topic: str, data_path: Path) -> None:
+    def __init__(self, robot: RobotDirector, image_topic: str, res_path: Path) -> None:
         super().__init__("collect_image_node")
         self.robot = robot
         self.image = None
         self.timestamp = None
         self.bridge = CvBridge()
-        self.data_path = data_path
+        self.res_path = res_path
         self.mutex = threading.Lock()
         self.sub = self.create_subscription(Image, image_topic, self.image_callback, 10)
         self.get_logger().info(f"Subscribed to image topic: {image_topic}")
@@ -153,64 +153,66 @@ class MeasureCameraError:
         robot: RobotDirector,
         image_node: CollectImageNode,
         camera_name: str,
+        res_path: Path,
         data_path: Path,
     ) -> None:
         self.robot = robot
         self.image_node = image_node
         self.camera_name = camera_name
+        self.res_path = res_path
         self.data_path = data_path
         self.errors = []
         self.iteration = 0
 
         # TODO: load from calibration file
-        # self.T_cam2base, self.camera_matrix, self.dist_coeffs = self.self.load_data()
-        self.T_base2cam = np.array(
-            [
-                [
-                    0.019393463529861155,
-                    0.9996413820847947,
-                    0.018466206863277983,
-                    0.3240708510322008,
-                ],
-                [
-                    0.999024067443758,
-                    -0.018641790273284053,
-                    -0.04004243153875939,
-                    -0.007406087495627406,
-                ],
-                [
-                    -0.0396838284499529,
-                    0.0192247465265037,
-                    -0.9990273283952478,
-                    1.1742893794290938,
-                ],
-                [0.0, 0.0, 0.0, 1.0],
-            ]
-        ).reshape((4, 4))
-        self.camera_matrix = np.array(
-            [
-                1045.253469873161,
-                0.0,
-                616.7886604727472,
-                0.0,
-                1043.2430632943033,
-                386.8198966768913,
-                0.0,
-                0.0,
-                1.0,
-            ],
-            dtype=np.float32,
-        ).reshape((3, 3))
-        self.dist_coeffs = np.array(
-            [
-                0.08083301537530861,
-                -0.04332893272558069,
-                0.003319516691409084,
-                -0.0016267198557977577,
-                -0.2800871865529448,
-            ],
-            dtype=np.float32,
-        ).reshape((5, 1))
+        self.T_cam2base, self.camera_matrix, self.dist_coeffs = self.load_data()
+        # self.T_base2cam = np.array(
+        #     [
+        #         [
+        #             0.019393463529861155,
+        #             0.9996413820847947,
+        #             0.018466206863277983,
+        #             0.3240708510322008,
+        #         ],
+        #         [
+        #             0.999024067443758,
+        #             -0.018641790273284053,
+        #             -0.04004243153875939,
+        #             -0.007406087495627406,
+        #         ],
+        #         [
+        #             -0.0396838284499529,
+        #             0.0192247465265037,
+        #             -0.9990273283952478,
+        #             1.1742893794290938,
+        #         ],
+        #         [0.0, 0.0, 0.0, 1.0],
+        #     ]
+        # ).reshape((4, 4))
+        # self.camera_matrix = np.array(
+        #     [
+        #         1045.253469873161,
+        #         0.0,
+        #         616.7886604727472,
+        #         0.0,
+        #         1043.2430632943033,
+        #         386.8198966768913,
+        #         0.0,
+        #         0.0,
+        #         1.0,
+        #     ],
+        #     dtype=np.float32,
+        # ).reshape((3, 3))
+        # self.dist_coeffs = np.array(
+        #     [
+        #         0.08083301537530861,
+        #         -0.04332893272558069,
+        #         0.003319516691409084,
+        #         -0.0016267198557977577,
+        #         -0.2800871865529448,
+        #     ],
+        #     dtype=np.float32,
+        # ).reshape((5, 1))
 
     def move_to_home(self) -> None:
         self.robot.joint_move(
@@ -227,7 +229,27 @@ class MeasureCameraError:
         )
 
     def load_data(self) -> None:
-        pass
+        intrinsics_path = self.data_path / f"{self.camera_name}_intrinsics.yaml"
+        extrinsics_path = self.data_path / f"{self.camera_name}_extrinsics.yaml"
+        with intrinsics_path.open("r") as f:
+            intrinsics = yaml.safe_load(f)
+        with extrinsics_path.open("r") as f:
+            extrinsics = yaml.safe_load(f)
+        camera_matrix = np.array(
+            intrinsics["camera_matrix"]["data"], dtype=np.float32
+        ).reshape((3, 3))
+        dist_coeffs = np.array(
+            intrinsics["distortion_coefficients"]["data"], dtype=np.float32
+        ).reshape(
+            (
+                intrinsics["distortion_coefficients"]["cols"],
+                intrinsics["distortion_coefficients"]["rows"],
+            )
+        )
+        T_base2cam = np.array(extrinsics["T_base2cam"], dtype=np.float32).reshape(
+            (4, 4)
+        )
+        return T_base2cam, camera_matrix, dist_coeffs
 
     def working_loop(self) -> None:
         next_measure = True
@@ -253,33 +275,29 @@ class MeasureCameraError:
             )
             time.sleep(1.0)
 
-            # TESTING: print joint pos
-            # joint_pos = self.robot.get_joint_positions()
-            # print(f"JOINT POSS:: {joint_pos}")
-
             tcp_pose_robot = self.image_node.get_calibration_tool_pose_in_base()
             tcp_pose_robot = tcp_pose_robot["position"].flatten().tolist()
-            self.log(f"TCP pose from robot: {tcp_pose_robot}")
 
             self.move_to_home()
-            time.sleep(1.0)  # Wait for robot to stabilize
+            time.sleep(1.0)
 
             image = self.get_image_from_camera()
-            # image = cv2.imread(
-            #     "error_data/scene_image_02.png"
-            # )  # For testing purpose only
             if image is None:
                 next_measure = self.ask_for_next_measure()
                 continue
 
             tcp_pose_camera_frame_tvec = self.measure_position_from_marker(image)
 
-            if tcp_pose_camera_frame_tvec.all() != None:
-                tcp_pose_camera_frame_tvec = np.vstack((tcp_pose_camera_frame_tvec, [1]))
+            if tcp_pose_camera_frame_tvec.all() is not None:
+                tcp_pose_camera_frame_tvec = np.vstack(
+                    (tcp_pose_camera_frame_tvec, [1])
+                )
 
                 tcp_pose_camera = self.T_base2cam @ tcp_pose_camera_frame_tvec
                 tcp_pose_camera = tcp_pose_camera[:3].flatten().tolist()
+
                 self.log(f"TCP pose from camera: {tcp_pose_camera}")
+                self.log(f"TCP pose from robot: {tcp_pose_robot}")
 
                 TCP_error = self.calculate_TCP_error(tcp_pose_camera, tcp_pose_robot)
                 self.errors.append(TCP_error)
@@ -295,7 +313,9 @@ class MeasureCameraError:
         self.log("Waiting for image...")
         image = self.image_node.get_image(time_start)
         if image is not None:
-            image_path = self.data_path / f"{self.camera_name}_image_{self.iteration:02}.png"
+            image_path = (
+                self.res_path / f"{self.camera_name}_image_{self.iteration:02}.png"
+            )
             self.image_node.save_image(image, image_path)
             self.iteration += 1
         else:
@@ -341,23 +361,18 @@ class MeasureCameraError:
             marker_size * 0.5,  # visual axis length
         )
 
-        cv2.imshow("Test Image", image)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-        print(f"tvec: {tvec}")
+        # cv2.imshow("Test Image", image)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+        # print(f"tvec: {tvec}")
 
         return tvec
 
-    def ask_for_next_measure(self) -> bool:
-        while True:
-            self.log("\033[93mDo you want to measure again? (Y/n)\033[93m")
-            answer = getch()
-            if answer in ("Y", "\r", "\n"):
-                return True
-            elif answer == "n":
-                return False
-            else:
-                self.log("Invalid input. Please press 'Y' or 'n'.")
+    def calculate_TCP_error(self, c, r) -> Tuple[float, float, float, float]:
+        dx = c[0] - r[0]
+        dy = c[1] - r[1]
+        dz = c[2] - r[2]
+        return (abs(dx), abs(dy), abs(dz), math.sqrt(dx * dx + dy * dy + dz * dz))
 
     def analyze_results(self) -> None:
         errors_x = [row[0] for row in self.errors]
@@ -369,7 +384,7 @@ class MeasureCameraError:
             "y": float(np.mean(errors_y)),
             "z": float(np.mean(errors_z)),
             "total": float(np.mean(errors_all)),
-        }        # Prepare YAML structure
+        }  # Prepare YAML structure
 
         std_errors = {
             "x": float(np.std(errors_x)),
@@ -387,10 +402,10 @@ class MeasureCameraError:
             "statistics": {
                 "mean": mean_errors,
                 "std_dev": std_errors,
-            }
+            },
         }
 
-        yaml_file = self.data_path / "results.yaml"
+        yaml_file = self.res_path / "results.yaml"
         with open(yaml_file, "w") as f:
             yaml.dump(data_to_save, f, default_flow_style=False)
 
@@ -398,11 +413,16 @@ class MeasureCameraError:
         self.log(f"STD: {std_errors}")
         self.log(f"Saved YAML to: {yaml_file}")
 
-    def calculate_TCP_error(self, c, r) -> Tuple[float, float, float, float]:
-        dx = c[0] - r[0]
-        dy = c[1] - r[1]
-        dz = c[2] - r[2]
-        return (abs(dx), abs(dy), abs(dz), math.sqrt(dx * dx + dy * dy + dz * dz))
+    def ask_for_next_measure(self) -> bool:
+        while True:
+            self.log("\033[93mDo you want to measure again? (Y/n)\033[93m")
+            answer = getch()
+            if answer in ("Y", "\r", "\n"):
+                return True
+            elif answer == "n":
+                return False
+            else:
+                self.log("Invalid input. Please press 'Y' or 'n'.")
 
     def log(self, msg: str) -> None:
         self.image_node.log(msg)
@@ -411,30 +431,31 @@ class MeasureCameraError:
 def main() -> None:
     args = parse_args()
     cam_name = args.camera
-    path_name = args.path
+    result_path = args.results_path
+    data_path = args.data_path
     tool_offset = args.tool_offset
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    if path_name:
-        data_path = Path(path_name).expanduser() / f"{cam_name}_{timestamp}"
+    if result_path:
+        res_path = Path(result_path).expanduser() / f"{cam_name}_{timestamp}"
     else:
-        data_path = (
-            Path("~/ceai_ws/error_data").expanduser() / f"{cam_name}_{timestamp}"
-        )
+        res_path = Path("~/ceai_ws/error_data").expanduser() / f"{cam_name}_{timestamp}"
 
-    data_path.mkdir(parents=True, exist_ok=True)
+    if data_path:
+        data_path = Path(data_path).expanduser()
+    else:
+        data_path = Path("~/ceai_ws/src/aegis_utils/config").expanduser()
 
-    # package_share_path = Path(get_package_share_directory("aegis_utils"))
+    res_path.mkdir(parents=True, exist_ok=True)
     camera_info = CAMERA_CONFIG[cam_name]
-    # pos_config_path = package_share_path / "config" / camera_info["pos_config"]
     image_topic = camera_info["topic"]
 
     rclpy.init()
     robot = RobotDirector(synchronous=True)
-    image_node = CollectImageNode(robot, image_topic, data_path)
+    image_node = CollectImageNode(robot, image_topic, res_path)
     tool_tf_node = CalibrationTool(tool_offset)
-    measure = MeasureCameraError(robot, image_node, cam_name, data_path)
+    measure = MeasureCameraError(robot, image_node, cam_name, res_path, data_path)
 
     executor = SingleThreadedExecutor()
     executor.add_node(image_node)
@@ -471,11 +492,18 @@ def parse_args() -> argparse.Namespace:
         help="Which camera: scene, tool_front_right, tool_front_left, tool_right, tool_left",
     )
     parser.add_argument(
-        "-p",
-        "--path",
+        "-r",
+        "--results-path",
         type=str,
         default=None,
-        help="Optional path to results data folder",
+        help="Optional path to results data directory",
+    )
+    parser.add_argument(
+        "-d",
+        "--data-path",
+        type=str,
+        default=None,
+        help="Optional path to input data directory",
     )
     return parser.parse_args()
 
