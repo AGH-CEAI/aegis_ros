@@ -163,7 +163,6 @@ class MeasureCameraError:
         self.data_path = data_path
         self.errors = []
         self.iteration = 0
-
         self.T_base2cam, self.camera_matrix, self.dist_coeffs = self.load_data()
 
     def move_to_home(self) -> None:
