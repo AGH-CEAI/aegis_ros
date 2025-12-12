@@ -15,7 +15,9 @@ def generate_launch_description():
     tf_prefix = LaunchConfiguration("tf_prefix", default="")
     mock_hardware = LaunchConfiguration("mock_hardware", default="false")
     disable_cell = LaunchConfiguration("disable_cell", default="false")
-    disable_cell_collision = LaunchConfiguration("disable_cell_collision", default="false")
+    disable_cell_collision = LaunchConfiguration(
+        "disable_cell_collision", default="false"
+    )
 
     robot_description_str = Command(
         [
