@@ -1,69 +1,71 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="cell" params="parent disable_cell_collision">
-    <joint name="world_to_cell" type="fixed">
-      <origin xyz="0 0 -0.806" rpy="0 0 -${0.5 * pi}"/>
-      <parent link="${parent}"/>
-      <child link="cell"/>
-    </joint>
+  <xacro:macro name="cell" params="parent disable_cell disable_cell_collision">
+    <xacro:unless value="${disable_cell}">
+      <joint name="world_to_cell" type="fixed">
+        <origin xyz="0 0 -0.806" rpy="0 0 -${0.5 * pi}"/>
+        <parent link="${parent}"/>
+        <child link="cell"/>
+      </joint>
 
-    <link name="cell">
-      <visual>
-        <origin xyz="-0.460 -0.240 0.786" rpy="0 0 0"/>
-        <geometry>
-          <mesh filename="package://aegis_description/meshes/cell.dae" scale="1.0 1.0 1.0"/>
-        </geometry>
-      </visual>
-      <xacro:unless value="${disable_cell_collision}">
-        <collision>
-          <origin xyz="0 -0.162 0.435" rpy="0 0 0"/>
+      <link name="cell">
+        <visual>
+          <origin xyz="-0.460 -0.240 0.786" rpy="0 0 0"/>
           <geometry>
-            <box size="0.72 0.324 0.87"/>
+            <mesh filename="package://aegis_description/meshes/cell.dae" scale="1.0 1.0 1.0"/>
           </geometry>
-        </collision>
-        <collision>
-          <origin xyz="0 0.162 0.41" rpy="0 0 0"/>
-          <geometry>
-            <box size="0.72 0.324 0.82"/>
-          </geometry>
-        </collision>
-        <collision>
-          <origin xyz="0.48 0 0.97" rpy="0 0 0"/>
-          <geometry>
-            <box size="0.08 0.648 1.94"/>
-          </geometry>
-        </collision>
-        <collision>
-          <origin xyz="0.4 0 0.435" rpy="0 0 0"/>
-          <geometry>
-            <box size="0.08 0.648 0.87"/>
-          </geometry>
-        </collision>
-        <collision>
-          <origin xyz="-0.48 0 0.97" rpy="0 0 0"/>
-          <geometry>
-            <box size="0.08 0.648 1.94"/>
-          </geometry>
-        </collision>
-        <collision>
-          <origin xyz="-0.4 0 0.435" rpy="0 0 0"/>
-          <geometry>
-            <box size="0.08 0.648 0.87"/>
-          </geometry>
-        </collision>
-        <collision>
-          <origin xyz="0 0.04 1.98" rpy="0 0 0"/>
-          <geometry>
-            <box size="1.04 0.728 0.08"/>
-          </geometry>
-        </collision>
-        <collision>
-          <origin xyz="0 -0.62 1.2" rpy="0 0 0"/>
-          <geometry>
-            <box size="2.4 0.02 2.4"/>
-          </geometry>
-        </collision>
-      </xacro:unless>
-    </link>
+        </visual>
+        <xacro:unless value="${disable_cell_collision}">
+          <collision>
+            <origin xyz="0 -0.162 0.435" rpy="0 0 0"/>
+            <geometry>
+              <box size="0.72 0.324 0.87"/>
+            </geometry>
+          </collision>
+          <collision>
+            <origin xyz="0 0.162 0.41" rpy="0 0 0"/>
+            <geometry>
+              <box size="0.72 0.324 0.82"/>
+            </geometry>
+          </collision>
+          <collision>
+            <origin xyz="0.48 0 0.97" rpy="0 0 0"/>
+            <geometry>
+              <box size="0.08 0.648 1.94"/>
+            </geometry>
+          </collision>
+          <collision>
+            <origin xyz="0.4 0 0.435" rpy="0 0 0"/>
+            <geometry>
+              <box size="0.08 0.648 0.87"/>
+            </geometry>
+          </collision>
+          <collision>
+            <origin xyz="-0.48 0 0.97" rpy="0 0 0"/>
+            <geometry>
+              <box size="0.08 0.648 1.94"/>
+            </geometry>
+          </collision>
+          <collision>
+            <origin xyz="-0.4 0 0.435" rpy="0 0 0"/>
+            <geometry>
+              <box size="0.08 0.648 0.87"/>
+            </geometry>
+          </collision>
+          <collision>
+            <origin xyz="0 0.04 1.98" rpy="0 0 0"/>
+            <geometry>
+              <box size="1.04 0.728 0.08"/>
+            </geometry>
+          </collision>
+          <collision>
+            <origin xyz="0 -0.62 1.2" rpy="0 0 0"/>
+            <geometry>
+              <box size="2.4 0.02 2.4"/>
+            </geometry>
+          </collision>
+        </xacro:unless>
+      </link>
+    </xacro:unless>
   </xacro:macro>
 </robot>
