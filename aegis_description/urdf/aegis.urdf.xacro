@@ -2,6 +2,7 @@
 <robot xmlns:xacro="http://wiki.ros.org/xacro" name="aegis">
   <xacro:arg name="mock_hardware" default="false"/>
   <xacro:arg name="disable_cell" default="false"/>
+  <xacro:arg name="disable_cell_collision" default="false"/>
 
   <xacro:arg name="base_link" default="world"/>
   <xacro:arg name="prefix" default=""/>
@@ -10,5 +11,12 @@
   <xacro:include filename="$(find aegis_description)/urdf/aegis.xacro"/>
 
   <link name="$(arg base_link)"/>
-  <xacro:aegis_robot parent="$(arg base_link)" tf_prefix="$(arg tf_prefix)" prefix="$(arg prefix)" mock_hardware="$(arg mock_hardware)" disable_cell="$(arg disable_cell)"/>
+  <xacro:aegis_robot
+    parent="$(arg base_link)"
+    tf_prefix="$(arg tf_prefix)"
+    prefix="$(arg prefix)"
+    mock_hardware="$(arg mock_hardware)"
+    disable_cell="$(arg disable_cell)"
+    disable_cell_collision="$(arg disable_cell_collision)"
+  />
 </robot>
