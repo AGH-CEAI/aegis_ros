@@ -164,55 +164,7 @@ class MeasureCameraError:
         self.errors = []
         self.iteration = 0
 
-        # TODO: load from calibration file
-        self.T_cam2base, self.camera_matrix, self.dist_coeffs = self.load_data()
-        # self.T_base2cam = np.array(
-        #     [
-        #         [
-        #             0.019393463529861155,
-        #             0.9996413820847947,
-        #             0.018466206863277983,
-        #             0.3240708510322008,
-        #         ],
-        #         [
-        #             0.999024067443758,
-        #             -0.018641790273284053,
-        #             -0.04004243153875939,
-        #             -0.007406087495627406,
-        #         ],
-        #         [
-        #             -0.0396838284499529,
-        #             0.0192247465265037,
-        #             -0.9990273283952478,
-        #             1.1742893794290938,
-        #         ],
-        #         [0.0, 0.0, 0.0, 1.0],
-        #     ]
-        # ).reshape((4, 4))
-        # self.camera_matrix = np.array(
-        #     [
-        #         1045.253469873161,
-        #         0.0,
-        #         616.7886604727472,
-        #         0.0,
-        #         1043.2430632943033,
-        #         386.8198966768913,
-        #         0.0,
-        #         0.0,
-        #         1.0,
-        #     ],
-        #     dtype=np.float32,
-        # ).reshape((3, 3))
-        # self.dist_coeffs = np.array(
-        #     [
-        #         0.08083301537530861,
-        #         -0.04332893272558069,
-        #         0.003319516691409084,
-        #         -0.0016267198557977577,
-        #         -0.2800871865529448,
-        #     ],
-        #     dtype=np.float32,
-        # ).reshape((5, 1))
+        self.T_base2cam, self.camera_matrix, self.dist_coeffs = self.load_data()
 
     def move_to_home(self) -> None:
         self.robot.joint_move(
@@ -228,7 +180,7 @@ class MeasureCameraError:
             max_accel=0.5,
         )
 
-    def load_data(self) -> None:
+    def load_data(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         intrinsics_path = self.data_path / f"{self.camera_name}_intrinsics.yaml"
         extrinsics_path = self.data_path / f"{self.camera_name}_extrinsics.yaml"
         with intrinsics_path.open("r") as f:
@@ -249,6 +201,7 @@ class MeasureCameraError:
         T_base2cam = np.array(extrinsics["T_base2cam"], dtype=np.float32).reshape(
             (4, 4)
         )
+
         return T_base2cam, camera_matrix, dist_coeffs
 
     def working_loop(self) -> None:
@@ -288,7 +241,7 @@ class MeasureCameraError:
 
             tcp_pose_camera_frame_tvec = self.measure_position_from_marker(image)
 
-            if tcp_pose_camera_frame_tvec.all() is not None:
+            if tcp_pose_camera_frame_tvec is not None:
                 tcp_pose_camera_frame_tvec = np.vstack(
                     (tcp_pose_camera_frame_tvec, [1])
                 )
@@ -445,7 +398,7 @@ def main() -> None:
     if data_path:
         data_path = Path(data_path).expanduser()
     else:
-        data_path = Path("~/ceai_ws/src/aegis_utils/config").expanduser()
+        data_path = Path("~/ceai_ws/src/aegis_ros/aegis_utils/config").expanduser()
 
     res_path.mkdir(parents=True, exist_ok=True)
     camera_info = CAMERA_CONFIG[cam_name]
