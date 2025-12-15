@@ -9,7 +9,7 @@ This package provides the configuration and launch files required to enable all 
 ## Run the project
 
 > [!CAUTION]
-> Never startup the project on the real hardware unattended!
+> Never start the project on real hardware unattended!
 
 1. Ensure that the `ros2_driver` program on the robot is loaded, and the robot is set to the `Remote` mode (the top-right corner on the teach pendant).
 
@@ -21,13 +21,15 @@ ros2 launch aegis_bringup bringup.launch.py
 ros2 launch aegis_bringup bringup.launch.py mock_hardware:=false launch_rviz:=true
 ```
 
-And you are ready to go!
+The system should now be up and running!
 
 Possible launch arguments:
-* `mock_hardware:={false, true}` (default: `false`) - enables the _fake_hardware_ feature of the ros2_control (the simplest "simulation").
-* `launch_rviz:={false, true}` (default: `true`) - launches visualization in RViz.
+* `mock_hardware:={false, true}` (default: `false`) – enables the _fake_hardware_ feature of the `ros2_control` (the simplest "simulation")
+* `launch_rviz:={false, true}` (default: `true`) – launches visualization in RViz
+* `disable_cell:={false, true}` (default: `false`) – completely removes the cell from the robot description
+* `disable_cell_collision:={false, true}` (default: `false`) – keeps the cell visual geometry but removes its collision geometry
 
-### Control the the client program on the robot via dashboard service:
+### Control the client program on the robot via dashboard service:
 
 ```bash
 # Stop the program
