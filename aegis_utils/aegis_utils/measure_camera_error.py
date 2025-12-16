@@ -1,27 +1,29 @@
 import argparse
+import math
+import sys
+import termios
+import textwrap
 import threading
 import time
+import tty
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-import sys
-import termios
-import tty
-import math
-import yaml
 
 import cv2
 import numpy as np
 import rclpy
-from aegis_director import RobotDirector
-from builtin_interfaces.msg import Time
+import yaml
 from cv_bridge import CvBridge
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
-from sensor_msgs.msg import Image
-from geometry_msgs.msg import TransformStamped
 from tf2_ros.static_transform_broadcaster import StaticTransformBroadcaster
 from tf2_ros import Buffer, TransformListener
+
+from aegis_director import RobotDirector
+from builtin_interfaces.msg import Time
+from geometry_msgs.msg import TransformStamped
+from sensor_msgs.msg import Image
 
 
 CAMERA_CONFIG = {
@@ -32,28 +34,20 @@ CAMERA_CONFIG = {
 class CalibrationTool(Node):
     def __init__(self, tool_offset: List[float]) -> None:
         super().__init__("static_tf_broadcaster")
-
-        # broadcaster object
         self.broadcaster = StaticTransformBroadcaster(self)
-
-        # create TransformStamped
         t = TransformStamped()
         t.header.stamp = self.get_clock().now().to_msg()
-        t.header.frame_id = "tool0"  # parent frame
-        t.child_frame_id = "calibration_tool"  # child frame
+        t.header.frame_id = "tool0"
+        t.child_frame_id = "calibration_tool"
 
-        # translation (meters)
         t.transform.translation.x = tool_offset[0]
         t.transform.translation.y = tool_offset[1]
         t.transform.translation.z = tool_offset[2]
-
-        # orientation as quaternion (x,y,z,w)
         t.transform.rotation.x = 0.0
         t.transform.rotation.y = 0.0
         t.transform.rotation.z = 0.0
         t.transform.rotation.w = 1.0
 
-        # send it once
         self.broadcaster.sendTransform(t)
         self.get_logger().info("Static transform tool0 -> calibration_tool published")
 
@@ -70,7 +64,6 @@ class CollectImageNode(Node):
         self.sub = self.create_subscription(Image, image_topic, self.image_callback, 10)
         self.get_logger().info(f"Subscribed to image topic: {image_topic}")
 
-        # tf2 setup and calibration tool
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
@@ -85,14 +78,21 @@ class CollectImageNode(Node):
     def get_timestamp(self, time_msg: Time) -> float:
         return time_msg.sec + time_msg.nanosec * 1e-9
 
+    def _get_time_elapsed(self, start_time: float) -> float:
+        return self.get_clock().now().nanoseconds / 1e9 - start_time
+
+    def _should_return_image(self, time_start: float) -> bool:
+        has_valid_data = self.image is not None and self.timestamp is not None
+        is_fresh_data = self.timestamp > time_start
+        return has_valid_data and is_fresh_data
+
     def get_image(
         self, time_start: float, timeout: float = 3.0
     ) -> Optional[np.ndarray]:
-        while self.get_clock().now().nanoseconds / 1e9 - time_start < timeout:
+        while self._get_time_elapsed(time_start) < timeout:
             with self.mutex:
-                if self.image is not None and self.timestamp is not None:
-                    if self.timestamp > time_start:
-                        return self.image.copy()
+                if self._should_return_image(time_start):
+                    return self.image.copy()
             time.sleep(1)
         return None
 
@@ -120,7 +120,7 @@ class CollectImageNode(Node):
             self.get_logger().error(
                 f"Failed to lookup transform base->calibration_tool: {e}"
             )
-            return None, None
+            return None
 
         pos = np.array(
             [
@@ -155,6 +155,8 @@ class MeasureCameraError:
         camera_name: str,
         res_path: Path,
         data_path: Path,
+        aruco_dict: cv2.aruco_Dictionary,
+        marker_size: float,
     ) -> None:
         self.robot = robot
         self.image_node = image_node
@@ -163,6 +165,8 @@ class MeasureCameraError:
         self.data_path = data_path
         self.errors = []
         self.iteration = 0
+        self.aruco_dict = aruco_dict
+        self.marker_size = marker_size
         self.T_base2cam, self.camera_matrix, self.dist_coeffs = self.load_data()
 
     def move_to_home(self) -> None:
@@ -206,20 +210,23 @@ class MeasureCameraError:
     def working_loop(self) -> None:
         next_measure = True
         while next_measure:
-            # Set robot to freedrive mode and wait for user to position the robot. Then switch back to normal mode.
             self.robot._switch_controllers(
                 activate=["freedrive_mode_controller"],
                 deactivate=["scaled_joint_trajectory_controller"],
             )
             time.sleep(1.0)
-            self.log("""\033[93mINSTRUCTIONS::
-                                (With teachpendant)
-                                1) change REMOTE to LOCAL (top right corner of screen),
-                                2) PAUSE the program (pause button)
-                                3) With deadmen button pressed, set the end effector at the corner of the calibration board.
-                                4) PLAY the program (play button)
-                                5) change back to REMOTE
-                                6) press ENTER at kayboard to start measuring camera error\033[93m""")
+            self.log(
+                textwrap.dedent("""\
+                    \033[93mINSTRUCTIONS::
+                        (With teach pendant)
+                        1) Change REMOTE to LOCAL (top-right corner of screen)
+                        2) PAUSE the program (pause button)
+                        3) With deadman button pressed, set the end effector at the corner of the calibration board
+                        4) PLAY the program (play button)
+                        5) Change back to REMOTE
+                        6) Press ENTER on the keyboard to start measuring camera error\033[93m
+            """)
+            )
             input()
             self.robot._switch_controllers(
                 activate=["scaled_joint_trajectory_controller"],
@@ -275,12 +282,10 @@ class MeasureCameraError:
         return image
 
     def measure_position_from_marker(self, image: np.ndarray) -> np.ndarray:
-        aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
         parameters = cv2.aruco.DetectorParameters_create()
-        marker_size = 0.1415  # Marker size in meters
 
         corners, ids, _ = cv2.aruco.detectMarkers(
-            image, aruco_dict, parameters=parameters
+            image, self.aruco_dict, parameters=parameters
         )
 
         if len(corners) == 0:
@@ -292,10 +297,10 @@ class MeasureCameraError:
 
         obj_points = np.array(
             [
-                [0.0, 0.0, 0.0],  # corner 0 (top-left)
-                [marker_size, 0.0, 0.0],  # corner 1 (top-right)
-                [marker_size, marker_size, 0.0],  # corner 2 (bottom-right)
-                [0.0, marker_size, 0.0],  # corner 3 (bottom-left)
+                [0.0, 0.0, 0.0],
+                [self.marker_size, 0.0, 0.0],
+                [self.marker_size, self.marker_size, 0.0],
+                [0.0, self.marker_size, 0.0],
             ],
             dtype=np.float32,
         )
@@ -304,23 +309,11 @@ class MeasureCameraError:
             obj_points, image_points, self.camera_matrix, self.dist_coeffs
         )
 
-        cv2.drawFrameAxes(
-            image,
-            self.camera_matrix,
-            self.dist_coeffs,
-            rvec,
-            tvec,
-            marker_size * 0.5,  # visual axis length
-        )
-
-        # cv2.imshow("Test Image", image)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-        # print(f"tvec: {tvec}")
-
         return tvec
 
-    def calculate_TCP_error(self, c, r) -> Tuple[float, float, float, float]:
+    def calculate_TCP_error(
+        self, c: np.ndarray, r: np.ndarray
+    ) -> Tuple[float, float, float, float]:
         dx = c[0] - r[0]
         dy = c[1] - r[1]
         dz = c[2] - r[2]
@@ -368,7 +361,7 @@ class MeasureCameraError:
     def ask_for_next_measure(self) -> bool:
         while True:
             self.log("\033[93mDo you want to measure again? (Y/n)\033[93m")
-            answer = getch()
+            answer = get_character()
             if answer in ("Y", "\r", "\n"):
                 return True
             elif answer == "n":
@@ -402,12 +395,25 @@ def main() -> None:
     res_path.mkdir(parents=True, exist_ok=True)
     camera_info = CAMERA_CONFIG[cam_name]
     image_topic = camera_info["topic"]
+    board_path = Path(
+        "~/ceai_ws/src/aegis_ros/aegis_utils/config/charuco_board.yaml"
+    ).expanduser()
+
+    with open(board_path, "r") as f:
+        board_cfg = yaml.safe_load(f)
+    board_params = board_cfg["calib"]
+    marker_size = board_params["marker_size"]
+    aruco_dict = cv2.aruco.getPredefinedDictionary(
+        getattr(cv2.aruco, board_params["aruco_dict"])
+    )
 
     rclpy.init()
     robot = RobotDirector(synchronous=True)
     image_node = CollectImageNode(robot, image_topic, res_path)
     tool_tf_node = CalibrationTool(tool_offset)
-    measure = MeasureCameraError(robot, image_node, cam_name, res_path, data_path)
+    measure = MeasureCameraError(
+        robot, image_node, cam_name, res_path, data_path, aruco_dict, marker_size
+    )
 
     executor = SingleThreadedExecutor()
     executor.add_node(image_node)
@@ -460,9 +466,13 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def getch():
+def get_character():
+    """
+    Read a single character from standard input without waiting for Enter key.
+    """
     fd = sys.stdin.fileno()
     old = termios.tcgetattr(fd)
+    ch = None
     try:
         tty.setraw(fd)
         ch = sys.stdin.read(1)
