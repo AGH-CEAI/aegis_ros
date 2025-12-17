@@ -66,7 +66,34 @@ ros2 run aegis_utils calib_extrinsics -c tool_front_right
 ```
 
 ## Measure scene camera transformation error
-<!-- TODO -->
+This tool verifies the calibration of the camera-to-scene transformation.
+It compares the position of a marker, computed from the camera image and transformed into the robot’s base frame, with the position obtained from the robot’s TCP
+
+The tool outputs the **mean error** and **standard deviation** for each measurement.
+
+### Example usage
+To run the program use:
+```bash
+ros2 run aegis_utils measure_camera_error
+```
+
+By default, the collected images and errors are saved to:
+
+`~/ceai_ws/error_data/`
+
+The camera setup data are located by default in:
+
+`~/ceai_ws/src/aegis_ros/aegis_utils/config/`
+
+You can optionally specify:
+- A custom path and folder name for collecting the results using `-r`
+- A path and folder for getting the camera data (camera_matrix and camera destortion) with the `-d`argument.
+- A tool offset from the robot flange using the `-t` argument.
+
+For example:
+```bash
+ros2 run aegis_utils calib_data_collect -r ~/Documents/error_data -d ~/Documents/camera_data -t 0.00077 0.00053 0.26455
+```
 
 ## Calibration results
 For now, the JSON files containing intrinsic and extrinsic calibration results for each of the cameras are located in:

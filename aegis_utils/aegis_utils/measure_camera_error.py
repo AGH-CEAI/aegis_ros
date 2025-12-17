@@ -8,7 +8,6 @@ import time
 import tty
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -32,7 +31,7 @@ CAMERA_CONFIG = {
 
 
 class CalibrationTool(Node):
-    def __init__(self, tool_offset: List[float]) -> None:
+    def __init__(self, tool_offset: list[float]) -> None:
         super().__init__("static_tf_broadcaster")
         self.broadcaster = StaticTransformBroadcaster(self)
         t = TransformStamped()
@@ -86,9 +85,7 @@ class CollectImageNode(Node):
         is_fresh_data = self.timestamp > time_start
         return has_valid_data and is_fresh_data
 
-    def get_image(
-        self, time_start: float, timeout: float = 3.0
-    ) -> Optional[np.ndarray]:
+    def get_image(self, time_start: float, timeout: float = 3.0) -> np.ndarray | None:
         while self._get_time_elapsed(time_start) < timeout:
             with self.mutex:
                 if self._should_return_image(time_start):
@@ -96,14 +93,14 @@ class CollectImageNode(Node):
             time.sleep(1)
         return None
 
-    def save_image(self, image: Optional[np.ndarray], path: Path) -> None:
+    def save_image(self, image: np.ndarray | None, path: Path) -> None:
         if image is None:
             self.get_logger().warn("No image to save")
             return
         cv2.imwrite(str(path), image)
         self.get_logger().info(f"Saved image to: {path}")
 
-    def get_calibration_tool_pose_in_base(self) -> Dict[str, np.ndarray]:
+    def get_calibration_tool_pose_in_base(self) -> dict[str, np.ndarray]:
         """
         Returns (position, orientation) of calibration_tool in base frame.
 
@@ -267,7 +264,7 @@ class MeasureCameraError:
         self.analyze_results()
         self.log("\033[92mFinished measuring camera error.\033[92m")
 
-    def get_image_from_camera(self) -> Optional[np.ndarray]:
+    def get_image_from_camera(self) -> np.ndarray | None:
         time_start = self.image_node.get_clock().now().nanoseconds / 1e9
         self.log("Waiting for image...")
         image = self.image_node.get_image(time_start)
@@ -313,7 +310,7 @@ class MeasureCameraError:
 
     def calculate_TCP_error(
         self, c: np.ndarray, r: np.ndarray
-    ) -> Tuple[float, float, float, float]:
+    ) -> tuple[float, float, float, float]:
         dx = c[0] - r[0]
         dy = c[1] - r[1]
         dz = c[2] - r[2]
