@@ -14,4 +14,4 @@ small:
 
 calib:
   aruco_dict: DICT_4X4_50
-  marker_size: 01415
+  marker_size: 0.1415
