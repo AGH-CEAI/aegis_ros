@@ -83,7 +83,7 @@ class CollectImageNode(Node):
 
     def _should_return_image(self, time_start: float) -> bool:
         has_valid_data = self.image is not None and self.timestamp is not None
-        is_fresh_data = self.timestamp > time_start
+        is_fresh_data = (self.timestamp > time_start) if has_valid_data else False
         return has_valid_data and is_fresh_data
 
     def get_image(self, time_start: float, timeout: float = 3.0) -> np.ndarray | None:
@@ -158,7 +158,8 @@ class RemoteControlChecker(Node):
     def send_request(self) -> bool:
         future = self.cli.call_async(self.req)
         rclpy.spin_until_future_complete(self, future)
-        if future.result() is not None:
+        print(f"FUTURE RES:: {future.result()}")
+        if future.result().success:
             return future.result().remote_control
         else:
             self.get_logger().error("Service call failed %r" % (future.exception(),))
@@ -251,6 +252,14 @@ class MeasureCameraError:
             """)
             )
             input()
+            remote_control = self.remote_control_checker.send_request()
+            self.log(f"The robot in Remote control mode: {remote_control}")
+            # while not remote_control:
+            #     self.log(f"wait for remote control {remote_control}")
+            #     time.sleep(0.5)
+            #     remote_control = self.remote_control_checker.send_request()
+            continue
+
             self.robot._switch_controllers(
                 activate=["scaled_joint_trajectory_controller"],
                 deactivate=["freedrive_mode_controller"],
@@ -305,7 +314,7 @@ class MeasureCameraError:
         return image
 
     def measure_position_from_marker(self, image: np.ndarray) -> np.ndarray:
-        parameters = cv2.aruco.DetectorParameters_create()
+        parameters = cv2.aruco.DetectorParameters()
 
         corners, ids, _ = cv2.aruco.detectMarkers(
             image, self.aruco_dict, parameters=parameters
