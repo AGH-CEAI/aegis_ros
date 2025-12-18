@@ -72,6 +72,11 @@ It compares the position of a marker, computed from the camera image and transfo
 The tool outputs the **mean error** and **standard deviation** for each measurement.
 
 ### Example usage
+To start and keep freedrive active, you’ll have to frequently publish a `True` msg on the indicated topic. Before starting the program in a new terminal, run the following command to enable the freedrive controller:
+```bash
+ros2 topic pub --rate 2 /freedrive_mode_controller/enable_freedrive_mode std_msgs/msg/Bool "{data: true}"
+```
+
 To run the program use:
 ```bash
 ros2 run aegis_utils measure_camera_error
