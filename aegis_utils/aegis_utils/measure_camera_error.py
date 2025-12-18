@@ -16,10 +16,9 @@ import yaml
 from rclpy.executors import SingleThreadedExecutor
 
 from aegis_director import RobotDirector
-from ros_nodes import (
+from aegis_utils.measure_camera_error_ros_nodes import (
     CalibrationTool,
     CollectImageNode,
-    RemoteControlChecker,
     SafeProgramControl,
 )
 
@@ -50,8 +49,13 @@ class MeasureCameraError:
         self.aruco_dict = aruco_dict
         self.marker_size = marker_size
         self.T_base2cam, self.camera_matrix, self.dist_coeffs = self.load_data()
-        self.remote_control_checker = RemoteControlChecker()
+        # self.remote_control_checker = RemoteControlChecker()
         self.safe_program_control = SafeProgramControl()
+
+    def destroy(self):
+        if self.safe_program_control is not None:
+            self.safe_program_control.destroy_node()
+            self.safe_program_control = None
 
     # TODO(issue#80) Get the home position from the SRDF file
     def move_to_home(self) -> None:
@@ -100,8 +104,9 @@ class MeasureCameraError:
                 deactivate=["scaled_joint_trajectory_controller"],
             )
             time.sleep(1.0)
-            remote = self.safe_program_control.is_remote()
-            self.log(f"Remote control status: {remote}")
+            while not self.safe_program_control.is_remote():
+                self.log("")
+            self.safe_program_control.stop_if_remote()
             self.log(
                 textwrap.dedent("""\
                     \033[93mINSTRUCTIONS::
@@ -128,6 +133,8 @@ class MeasureCameraError:
 
             remote = self.safe_program_control.is_remote()
             self.log(f"Remote control status: {remote}")
+            self.safe_program_control.play_if_remote()
+            input()
             continue
 
             self.robot._switch_controllers(
@@ -326,6 +333,7 @@ def main() -> None:
     try:
         measure.working_loop()
     finally:
+        measure.destroy()
         executor.shutdown()
         image_node.destroy_node()
         tool_tf_node.destroy_node()

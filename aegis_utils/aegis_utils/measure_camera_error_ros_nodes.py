@@ -205,7 +205,7 @@ class RemoteControlChecker_2(Node):
         return False
 
 
-class SefeProgramControl(Node):
+class SafeProgramControl(Node):
     def __init__(self):
         super().__init__("safe_program_control")
         self.is_remote_cli = self.create_client(
@@ -236,7 +236,7 @@ class SefeProgramControl(Node):
 
     def _is_remote(self) -> tuple[bool, bool]:
         req = IsInRemoteControl.Request()
-        future = self.cli_is_remote.call_async(req)
+        future = self.is_remote_cli.call_async(req)
         rclpy.spin_until_future_complete(self, future)
         resp = future.result()
         if resp is not None and resp.success:
@@ -265,17 +265,20 @@ class SefeProgramControl(Node):
             self.get_logger().warn("Robot not in REMOTE, not starting program")
             return
         req = Trigger.Request()
+        self.reconnect_dashboard()
         future = self.play_cli.call_async(req)
         rclpy.spin_until_future_complete(self, future)
+        # TODO: Play
         self.get_logger().info(
             f"Play: {future.result().success}, {future.result().message}"
         )
 
-    def stop_if_remote(self):
+    def stop_if_remote(self) -> bool:
         if not self.is_remote():
             self.get_logger().warn("Robot not in REMOTE, not stopping program")
-            return
+            return False
         req = Trigger.Request()
+        self.reconnect_dashboard()
         future = self.stop_cli.call_async(req)
         rclpy.spin_until_future_complete(self, future)
         self.get_logger().info(
