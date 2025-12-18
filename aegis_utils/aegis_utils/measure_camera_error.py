@@ -13,157 +13,20 @@ import cv2
 import numpy as np
 import rclpy
 import yaml
-from cv_bridge import CvBridge
 from rclpy.executors import SingleThreadedExecutor
-from rclpy.node import Node
-from tf2_ros.static_transform_broadcaster import StaticTransformBroadcaster
-from tf2_ros import Buffer, TransformListener
 
 from aegis_director import RobotDirector
-from builtin_interfaces.msg import Time
-from geometry_msgs.msg import TransformStamped
-from ur_dashboard_msgs.srv import IsInRemoteControl
-from sensor_msgs.msg import Image
+from ros_nodes import (
+    CalibrationTool,
+    CollectImageNode,
+    RemoteControlChecker,
+    SafeProgramControl,
+)
 
 
 CAMERA_CONFIG = {
     "scene": {"pos_config": "cam_scene.yaml", "topic": "/cam_scene/rgb/image_raw"},
 }
-
-
-class CalibrationTool(Node):
-    def __init__(self, tool_offset: list[float]) -> None:
-        super().__init__("static_tf_broadcaster")
-        self.broadcaster = StaticTransformBroadcaster(self)
-        t = TransformStamped()
-        t.header.stamp = self.get_clock().now().to_msg()
-        t.header.frame_id = "tool0"
-        t.child_frame_id = "calibration_tool"
-
-        t.transform.translation.x = tool_offset[0]
-        t.transform.translation.y = tool_offset[1]
-        t.transform.translation.z = tool_offset[2]
-        t.transform.rotation.x = 0.0
-        t.transform.rotation.y = 0.0
-        t.transform.rotation.z = 0.0
-        t.transform.rotation.w = 1.0
-
-        self.broadcaster.sendTransform(t)
-        self.get_logger().info("Static transform tool0 -> calibration_tool published")
-
-
-class CollectImageNode(Node):
-    def __init__(self, robot: RobotDirector, image_topic: str, res_path: Path) -> None:
-        super().__init__("collect_image_node")
-        self.robot = robot
-        self.image = None
-        self.timestamp = None
-        self.bridge = CvBridge()
-        self.res_path = res_path
-        self.mutex = threading.Lock()
-        self.sub = self.create_subscription(Image, image_topic, self.image_callback, 10)
-        self.get_logger().info(f"Subscribed to image topic: {image_topic}")
-
-        self.tf_buffer = Buffer()
-        self.tf_listener = TransformListener(self.tf_buffer, self)
-
-    def image_callback(self, msg: Image) -> None:
-        try:
-            with self.mutex:
-                self.image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
-                self.timestamp = self.get_timestamp(msg.header.stamp)
-        except Exception as e:
-            self.get_logger().error(f"Failed to convert image: {e}")
-
-    def get_timestamp(self, time_msg: Time) -> float:
-        return time_msg.sec + time_msg.nanosec * 1e-9
-
-    def _get_time_elapsed(self, start_time: float) -> float:
-        return self.get_clock().now().nanoseconds / 1e9 - start_time
-
-    def _should_return_image(self, time_start: float) -> bool:
-        has_valid_data = self.image is not None and self.timestamp is not None
-        is_fresh_data = (self.timestamp > time_start) if has_valid_data else False
-        return has_valid_data and is_fresh_data
-
-    def get_image(self, time_start: float, timeout: float = 3.0) -> np.ndarray | None:
-        while self._get_time_elapsed(time_start) < timeout:
-            with self.mutex:
-                if self._should_return_image(time_start):
-                    return self.image.copy()
-            time.sleep(1)
-        return None
-
-    def save_image(self, image: np.ndarray | None, path: Path) -> None:
-        if image is None:
-            self.get_logger().warn("No image to save")
-            return
-        cv2.imwrite(str(path), image)
-        self.get_logger().info(f"Saved image to: {path}")
-
-    def get_calibration_tool_pose_in_base(self) -> dict[str, np.ndarray]:
-        """
-        Returns (position, orientation) of calibration_tool in base frame.
-
-        position: np.array([x, y, z])
-        orientation: np.array([qx, qy, qz, qw])
-        """
-        try:
-            t = self.tf_buffer.lookup_transform(
-                "ur_base",  # target frame
-                "calibration_tool",  # source frame
-                Time(),  # latest available
-            )
-        except Exception as e:
-            self.get_logger().error(
-                f"Failed to lookup transform base->calibration_tool: {e}"
-            )
-            return None
-
-        pos = np.array(
-            [
-                t.transform.translation.x,
-                t.transform.translation.y,
-                t.transform.translation.z,
-            ],
-            dtype=float,
-        )
-
-        ori = np.array(
-            [
-                t.transform.rotation.x,
-                t.transform.rotation.y,
-                t.transform.rotation.z,
-                t.transform.rotation.w,
-            ],
-            dtype=float,
-        )
-
-        return {"position": pos, "orientation": ori}
-
-    def log(self, msg: str) -> None:
-        self.get_logger().info(msg)
-
-
-class RemoteControlChecker(Node):
-    def __init__(self):
-        super().__init__("remote_control_checker")
-        self.cli = self.create_client(
-            IsInRemoteControl, "dashboard_client/is_in_remote_control"
-        )
-        while not self.cli.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info("service not available, waiting again...")
-        self.req = IsInRemoteControl.Request()
-
-    def send_request(self) -> bool:
-        future = self.cli.call_async(self.req)
-        rclpy.spin_until_future_complete(self, future)
-        print(f"FUTURE RES:: {future.result()}")
-        if future.result().success:
-            return future.result().remote_control
-        else:
-            self.get_logger().error("Service call failed %r" % (future.exception(),))
-            return False
 
 
 class MeasureCameraError:
@@ -188,6 +51,7 @@ class MeasureCameraError:
         self.marker_size = marker_size
         self.T_base2cam, self.camera_matrix, self.dist_coeffs = self.load_data()
         self.remote_control_checker = RemoteControlChecker()
+        self.safe_program_control = SafeProgramControl()
 
     # TODO(issue#80) Get the home position from the SRDF file
     def move_to_home(self) -> None:
@@ -235,29 +99,35 @@ class MeasureCameraError:
                 activate=["freedrive_mode_controller"],
                 deactivate=["scaled_joint_trajectory_controller"],
             )
-            self.log(
-                f"The robot in Remote control mode: {self.remote_control_checker.send_request()}"
-            )
             time.sleep(1.0)
+            remote = self.safe_program_control.is_remote()
+            self.log(f"Remote control status: {remote}")
             self.log(
                 textwrap.dedent("""\
                     \033[93mINSTRUCTIONS::
                         (With teach pendant)
                         1) Change REMOTE to LOCAL (top-right corner of screen)
-                        2) PAUSE the program (pause button)
-                        3) With deadman button pressed, set the end effector at the corner of the calibration board
-                        4) PLAY the program (play button)
-                        5) Change back to REMOTE
-                        6) Press ENTER on the keyboard to start measuring camera error\033[93m
+                        2) With deadman button pressed, set the end effector at the corner of the calibration board
+                        3) Change back to REMOTE
+                        4) Press ENTER on the keyboard to start measuring camera error\033[93m
             """)
             )
+            # self.log(
+            #     textwrap.dedent("""\
+            #         \033[93mINSTRUCTIONS::
+            #             (With teach pendant)
+            #             1) Change REMOTE to LOCAL (top-right corner of screen)
+            #             2) PAUSE the program (pause button)
+            #             3) With deadman button pressed, set the end effector at the corner of the calibration board
+            #             4) PLAY the program (play button)
+            #             5) Change back to REMOTE
+            #             6) Press ENTER on the keyboard to start measuring camera error\033[93m
+            # """)
+            # )
             input()
-            remote_control = self.remote_control_checker.send_request()
-            self.log(f"The robot in Remote control mode: {remote_control}")
-            # while not remote_control:
-            #     self.log(f"wait for remote control {remote_control}")
-            #     time.sleep(0.5)
-            #     remote_control = self.remote_control_checker.send_request()
+
+            remote = self.safe_program_control.is_remote()
+            self.log(f"Remote control status: {remote}")
             continue
 
             self.robot._switch_controllers(
