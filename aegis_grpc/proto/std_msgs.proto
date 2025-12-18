@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package robot_service;
+
+// ========== Message Definitions ==========
+message Float32 {
+  float data = 1;
+}

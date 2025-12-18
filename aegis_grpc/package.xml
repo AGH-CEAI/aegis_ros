@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>aegis_grpc</name>
+  <version>0.0.0</version>
+  <description>gRPC server to interact with ROS 2 services within the Aegis project.</description>
+  <maintainer email="ceai@agh.edu.pl">AGH Center of Excellence in Artificial Intelligence</maintainer>
+  <license>Apache-2.0</license>
+
+  <url type="website">http://cdsi.agh.edu.pl</url>
+  <url type="repository">https://github.com/AGH-CEAI/aegis_ros</url>
+  <url type="bugtracker">https://github.com/AGH-CEAI/aegis_ros/issues</url>
+
+  <author email="macal@agh.edu.pl">Maciej Aleksandrowicz</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>libgrpc</depend>
+  <depend>protobuf-compiler-grpc</depend>
+  <depend>protobuf-dev</depend>
+
+  <exec_depend>python3-grpc-tools</exec_depend>
+  <exec_depend>python3-grpcio</exec_depend>
+  <exec_depend>python3-protobuf</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
