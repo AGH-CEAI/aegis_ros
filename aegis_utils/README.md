@@ -57,7 +57,9 @@ ros2 run aegis_utils calib_intrinsics -c tool_front_right
 ## Calibration of camera extrinsics
 This tool computes the extrinsic parameters of a camera using previously collected calibration images, TCP poses and the computed camera intrinsics.
 
-It outputs the resulting transformation matrix form the robot TCP to the camera frame and saves it to the calibration data folder.
+For tool-mounted cameras, it outputs the resulting transformation matrix from the robot TCP frame to the camera frame.
+In the case of a scene camera, it outputs the transformation matrix from the robot base frame to the camera frame.
+The resulting transformation matrix is saved to the calibration data folder.
 
 ### Example usage
 It accepts the same arguments and uses the same default data path as the data collection tool described above. For example:
@@ -66,13 +68,14 @@ ros2 run aegis_utils calib_extrinsics -c tool_front_right
 ```
 
 ## Measure scene camera transformation error
-This tool verifies the calibration of the camera-to-scene transformation.
-It compares the position of a marker, computed from the camera image and transformed into the robot’s base frame, with the position obtained from the robot’s TCP
+This tool verifies the calibration of the robot base to camera transformation.
+It compares the position of a marker, computed from the camera image and transformed into the robot’s base frame, with the position obtained from the robot’s TCP.
 
 The tool outputs the **mean error** and **standard deviation** for each measurement.
 
 ### Example usage
-To start and keep freedrive active, you’ll have to frequently publish a `True` msg on the indicated topic. Before starting the program in a new terminal, run the following command to enable the freedrive controller:
+To start and keep freedrive active, you’ll have to frequently publish a `True` msg on the indicated topic.
+Before starting the program in a new terminal, run the following command to enable the freedrive controller:
 ```bash
 ros2 topic pub --rate 2 /freedrive_mode_controller/enable_freedrive_mode std_msgs/msg/Bool "{data: true}"
 ```
@@ -91,9 +94,9 @@ The camera setup data are located by default in:
 `~/ceai_ws/src/aegis_ros/aegis_utils/config/`
 
 You can optionally specify:
-- A custom path and folder name for collecting the results using `-r`
-- A path and folder for getting the camera data (camera_matrix and camera destortion) with the `-d`argument.
-- A tool offset from the robot flange using the `-t` argument.
+- a custom path and folder name for collecting the results using `-r`
+- a path and folder for getting the camera data (camera_matrix and camera distortion) using the `-d`argument
+- a tool offset from the robot flange (`tool0` frame) using the `-t` argument
 
 For example:
 ```bash
