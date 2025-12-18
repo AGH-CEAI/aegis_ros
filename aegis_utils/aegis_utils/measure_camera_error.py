@@ -22,6 +22,7 @@ from tf2_ros import Buffer, TransformListener
 from aegis_director import RobotDirector
 from builtin_interfaces.msg import Time
 from geometry_msgs.msg import TransformStamped
+from ur_dashboard_msgs.srv import IsInRemoteControl
 from sensor_msgs.msg import Image
 
 
@@ -144,6 +145,26 @@ class CollectImageNode(Node):
         self.get_logger().info(msg)
 
 
+class RemoteControlChecker(Node):
+    def __init__(self):
+        super().__init__("remote_control_checker")
+        self.cli = self.create_client(
+            IsInRemoteControl, "dashboard_client/is_in_remote_control"
+        )
+        while not self.cli.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info("service not available, waiting again...")
+        self.req = IsInRemoteControl.Request()
+
+    def send_request(self) -> bool:
+        future = self.cli.call_async(self.req)
+        rclpy.spin_until_future_complete(self, future)
+        if future.result() is not None:
+            return future.result().remote_control
+        else:
+            self.get_logger().error("Service call failed %r" % (future.exception(),))
+            return False
+
+
 class MeasureCameraError:
     def __init__(
         self,
@@ -165,6 +186,7 @@ class MeasureCameraError:
         self.aruco_dict = aruco_dict
         self.marker_size = marker_size
         self.T_base2cam, self.camera_matrix, self.dist_coeffs = self.load_data()
+        self.remote_control_checker = RemoteControlChecker()
 
     # TODO(issue#80) Get the home position from the SRDF file
     def move_to_home(self) -> None:
@@ -211,6 +233,9 @@ class MeasureCameraError:
             self.robot._switch_controllers(
                 activate=["freedrive_mode_controller"],
                 deactivate=["scaled_joint_trajectory_controller"],
+            )
+            self.log(
+                f"The robot in Remote control mode: {self.remote_control_checker.send_request()}"
             )
             time.sleep(1.0)
             self.log(
