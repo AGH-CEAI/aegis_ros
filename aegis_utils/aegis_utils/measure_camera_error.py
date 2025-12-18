@@ -166,6 +166,7 @@ class MeasureCameraError:
         self.marker_size = marker_size
         self.T_base2cam, self.camera_matrix, self.dist_coeffs = self.load_data()
 
+    # TODO(issue#80) Get the home position from the SRDF file
     def move_to_home(self) -> None:
         self.robot.joint_move(
             joint_positions={
