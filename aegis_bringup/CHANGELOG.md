@@ -8,10 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+* [PR-78](https://github.com/AGH-CEAI/aegis_ros/pull/78) - Introduced `disable_cell` and `disable_cell_collision` launch arguments.
+
 ### Changed
 
+* [PR-78](https://github.com/AGH-CEAI/aegis_ros/pull/78) - Updated README.
 * [PR-73](https://github.com/AGH-CEAI/aegis_ros/pull/73) - Updated PlantUML launch files diagram.
-* [PR-63](https://github.com/AGH-CEAI/aegis_ros/pull/63) - Updated readme.
+* [PR-63](https://github.com/AGH-CEAI/aegis_ros/pull/63) - Updated README.
 * [PR-60](https://github.com/AGH-CEAI/aegis_ros/pull/60) - Updated launch files diagram.
 
 ### Deprecated
@@ -29,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* [PR-9](https://github.com/AGH-CEAI/aegis_ros/pull/9) - Introduced `mock_hardware` and `launch_rviz` launch args.
+* [PR-9](https://github.com/AGH-CEAI/aegis_ros/pull/9) - Introduced `mock_hardware` and `launch_rviz` launch arguments.
 * [PR-7](https://github.com/AGH-CEAI/aegis_ros/pull/7) - Initial version of the Aegis ROS 2 packages.
 
 ### Changed

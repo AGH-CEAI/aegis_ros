@@ -8,8 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+* [PR-78](https://github.com/AGH-CEAI/aegis_ros/pull/78) - Added logic to allow selective inclusion of cell visual and collision geometry.
+
 ### Changed
 
+* [PR-77](https://github.com/AGH-CEAI/aegis_ros/pull/77) - Changed `ur_base` frame to the `world` frame (simulation simplification).
 * [PR-62](https://github.com/AGH-CEAI/aegis_ros/pull/62) - Replaced cell collision mesh with primitive shapes.
 * [PR-60](https://github.com/AGH-CEAI/aegis_ros/pull/60) - Decreased the default velocity and acceleration scaling factor to 5%.
 * [PR-57](https://github.com/AGH-CEAI/aegis_ros/pull/57) - Increased the position limit of the wrist 1 joint.

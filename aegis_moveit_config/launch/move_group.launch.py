@@ -270,7 +270,7 @@ def prepare_scene_objects_manager_node(paths: AegisPathsCfg) -> Node:
         executable="scene_objects_manager",
         name="scene_objects_manager",
         output="screen",
-        arguments=["--cfg", paths.scene_objects_cfg, "--frame", "ur_base"],
+        arguments=["--cfg", paths.scene_objects_cfg, "--frame", "world"],
     )
 
 
