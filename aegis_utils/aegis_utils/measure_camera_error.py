@@ -131,12 +131,6 @@ class MeasureCameraError:
             while not self.safe_program_control.play_if_remote():
                 self.log("Program has not started, trying one more time...")
 
-            # # testing purpose only
-            # self.log("Press ENTER to capture image for measuring camera error...")
-            # input()
-            # continue
-            # # ----
-
             self.robot._switch_controllers(
                 activate=["scaled_joint_trajectory_controller"],
                 deactivate=["freedrive_mode_controller"],

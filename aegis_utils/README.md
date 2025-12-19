@@ -100,10 +100,10 @@ You can optionally specify:
 
 For example:
 ```bash
-ros2 run aegis_utils calib_data_collect -r ~/Documents/error_data -d ~/Documents/camera_data -t 0.00077 0.00053 0.26455
+ros2 run aegis_utils measure_camera_error -r ~/Documents/error_data -d ~/Documents/camera_data -t 0.00077 0.00053 0.26455
 ```
 
 ## Calibration results
-For now, the JSON files containing intrinsic and extrinsic calibration results for each of the cameras are located in:
+For now, the YAML files containing intrinsic and extrinsic calibration results for each of the cameras are located in:
 
 `aegis_utils/aegis_utils/config/`
