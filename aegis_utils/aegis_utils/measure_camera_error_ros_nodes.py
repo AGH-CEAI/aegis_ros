@@ -13,7 +13,7 @@ from tf2_ros import Buffer, TransformListener
 from aegis_director import RobotDirector
 from builtin_interfaces.msg import Time
 from geometry_msgs.msg import TransformStamped
-from ur_dashboard_msgs.srv import IsInRemoteControl
+from ur_dashboard_msgs.srv import IsInRemoteControl, RawRequest, ProgramState
 from sensor_msgs.msg import Image
 from std_srvs.srv import Trigger
 
@@ -236,7 +236,7 @@ class SafeProgramControl(Node):
 
     def _is_remote(self) -> tuple[bool, bool]:
         req = IsInRemoteControl.Request()
-        future = self.is_remote_cli.call_async(req)
+        future = self.cli_is_remote.call_async(req)
         rclpy.spin_until_future_complete(self, future)
         resp = future.result()
         if resp is not None and resp.success:
@@ -265,22 +265,42 @@ class SafeProgramControl(Node):
             self.get_logger().warn("Robot not in REMOTE, not starting program")
             return
         req = Trigger.Request()
-        self.reconnect_dashboard()
         future = self.play_cli.call_async(req)
         rclpy.spin_until_future_complete(self, future)
-        # TODO: Play
+        # TODO: Robot is stopping the program but the response says success=False
         self.get_logger().info(
             f"Play: {future.result().success}, {future.result().message}"
         )
 
-    def stop_if_remote(self) -> bool:
+    def stop_if_remote(self):
         if not self.is_remote():
             self.get_logger().warn("Robot not in REMOTE, not stopping program")
-            return False
+            return
         req = Trigger.Request()
-        self.reconnect_dashboard()
         future = self.stop_cli.call_async(req)
         rclpy.spin_until_future_complete(self, future)
+        # TODO: Robot is stopping the program but the response says success=False
         self.get_logger().info(
             f"Stop: {future.result().success}, {future.result().message}"
         )
+
+        prog_cli = self.create_client(ProgramState, "dashboard_client/program_state")
+        while not prog_cli.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info("program_state not available, waiting...")
+        req_prog = ProgramState.Request()
+        future_prog = prog_cli.call_async(req_prog)
+        rclpy.spin_until_future_complete(self, future_prog)
+        state = future_prog.result().state
+        self.get_logger().info(f"Program state after stop: '{state}'")
+
+    def debug_raw_stop(self):
+        raw_cli = self.create_client(RawRequest, "dashboard_client/raw_request")
+        while not raw_cli.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info("raw_request not available, waiting...")
+
+        req = RawRequest.Request()
+        req.query = "stop"
+        future = raw_cli.call_async(req)
+        rclpy.spin_until_future_complete(self, future)
+        answer = future.result().answer
+        self.get_logger().info(f"Raw stop answer: '{answer}'")

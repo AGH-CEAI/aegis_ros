@@ -105,7 +105,7 @@ class MeasureCameraError:
             )
             time.sleep(1.0)
             while not self.safe_program_control.is_remote():
-                self.log("")
+                self.log("Waiting for REMOTE control...")
             self.safe_program_control.stop_if_remote()
             self.log(
                 textwrap.dedent("""\
@@ -117,25 +117,18 @@ class MeasureCameraError:
                         4) Press ENTER on the keyboard to start measuring camera error\033[93m
             """)
             )
-            # self.log(
-            #     textwrap.dedent("""\
-            #         \033[93mINSTRUCTIONS::
-            #             (With teach pendant)
-            #             1) Change REMOTE to LOCAL (top-right corner of screen)
-            #             2) PAUSE the program (pause button)
-            #             3) With deadman button pressed, set the end effector at the corner of the calibration board
-            #             4) PLAY the program (play button)
-            #             5) Change back to REMOTE
-            #             6) Press ENTER on the keyboard to start measuring camera error\033[93m
-            # """)
-            # )
             input()
 
-            remote = self.safe_program_control.is_remote()
-            self.log(f"Remote control status: {remote}")
+            while not self.safe_program_control.is_remote():
+                self.log("Waiting for REMOTE control...")
+
             self.safe_program_control.play_if_remote()
+
+            # testing purpose only
+            self.log("Press ENTER to capture image for measuring camera error...")
             input()
             continue
+            # ----
 
             self.robot._switch_controllers(
                 activate=["scaled_joint_trajectory_controller"],
