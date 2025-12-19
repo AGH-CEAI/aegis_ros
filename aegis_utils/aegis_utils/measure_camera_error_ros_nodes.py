@@ -13,7 +13,7 @@ from tf2_ros import Buffer, TransformListener
 from aegis_director import RobotDirector
 from builtin_interfaces.msg import Time
 from geometry_msgs.msg import TransformStamped
-from ur_dashboard_msgs.srv import IsInRemoteControl, RawRequest, ProgramState
+from ur_dashboard_msgs.srv import IsInRemoteControl, GetProgramState
 from sensor_msgs.msg import Image
 from std_srvs.srv import Trigger
 
@@ -132,85 +132,13 @@ class CollectImageNode(Node):
         self.get_logger().info(msg)
 
 
-class RemoteControlChecker(Node):
-    def __init__(self):
-        super().__init__("remote_control_checker")
-        self.cli = self.create_client(
-            IsInRemoteControl, "dashboard_client/is_in_remote_control"
-        )
-        while not self.cli.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info("service not available, waiting again...")
-        self.req = IsInRemoteControl.Request()
-
-    def send_request(self) -> bool:
-        future = self.cli.call_async(self.req)
-        rclpy.spin_until_future_complete(self, future)
-        print(f"FUTURE RES:: {future.result()}")
-        if future.result().success:
-            return future.result().remote_control
-        else:
-            self.get_logger().error("Service call failed %r" % (future.exception(),))
-            return False
-
-
-class RemoteControlChecker_2(Node):
-    def __init__(self):
-        super().__init__("remote_control_checker")
-
-        self.cli_is_remote = self.create_client(
-            IsInRemoteControl, "dashboard_client/is_in_remote_control"
-        )
-        while not self.cli_is_remote.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info("is_in_remote_control not available, waiting...")
-
-        self.cli_connect = self.create_client(Trigger, "dashboard_client/connect")
-        while not self.cli_connect.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info("connect not available, waiting...")
-
-        self.req_is_remote = IsInRemoteControl.Request()
-        self.req_connect = Trigger.Request()
-
-    def reconnect_dashboard(self) -> bool:
-        future = self.cli_connect.call_async(self.req_connect)
-        rclpy.spin_until_future_complete(self, future)
-        resp = future.result()
-        self.get_logger().info(
-            f"Reconnect: success={resp.success}, msg='{resp.message}'"
-        )
-        return resp.success
-
-    def _send_request(self) -> tuple[bool, bool]:
-        future = self.cli_is_remote.call_async(self.req_is_remote)
-        rclpy.spin_until_future_complete(self, future)
-        resp = future.result()
-        if resp is not None and resp.success:
-            return True, resp.remote_control
-        return False, False
-
-    def send_request(self) -> bool:
-        call_ok, remote = self._send_request()
-        if call_ok:
-            return remote
-
-        self.get_logger().warn("is_in_remote_control failed, trying reconnect...")
-        if not self.reconnect_dashboard():
-            self.get_logger().error("Reconnect failed")
-            return False
-
-        call_ok, remote = self._send_request()
-        if call_ok:
-            return remote
-
-        self.get_logger().error("Service call failed after reconnect")
-        return False
-
-
 class SafeProgramControl(Node):
     def __init__(self):
         super().__init__("safe_program_control")
         self.is_remote_cli = self.create_client(
             IsInRemoteControl, "dashboard_client/is_in_remote_control"
         )
+        self.cli_quit = self.create_client(Trigger, "dashboard_client/quit")
         self.cli_connect = self.create_client(Trigger, "dashboard_client/connect")
         self.play_cli = self.create_client(Trigger, "dashboard_client/play")
         self.stop_cli = self.create_client(Trigger, "dashboard_client/stop")
@@ -225,18 +153,20 @@ class SafeProgramControl(Node):
                 self.get_logger().info(f"{name} not available, waiting...")
 
     def reconnect_dashboard(self) -> bool:
+        quit_req = Trigger.Request()
+        future_quit = self.cli_quit.call_async(quit_req)
+        rclpy.spin_until_future_complete(self, future_quit)
+
         req = Trigger.Request()
         future = self.cli_connect.call_async(req)
         rclpy.spin_until_future_complete(self, future)
         resp = future.result()
-        self.get_logger().info(
-            f"Reconnect: success={resp.success}, msg='{resp.message}'"
-        )
+        self.get_logger().info(f"Reconnect: success={resp.success}'")
         return resp.success
 
     def _is_remote(self) -> tuple[bool, bool]:
         req = IsInRemoteControl.Request()
-        future = self.cli_is_remote.call_async(req)
+        future = self.is_remote_cli.call_async(req)
         rclpy.spin_until_future_complete(self, future)
         resp = future.result()
         if resp is not None and resp.success:
@@ -251,7 +181,7 @@ class SafeProgramControl(Node):
         self.get_logger().warn("is_in_remote_control failed, trying reconnect...")
         if not self.reconnect_dashboard():
             self.get_logger().error("Reconnect failed")
-            return False
+            return
 
         call_ok, remote = self._is_remote()
         if call_ok:
@@ -260,7 +190,7 @@ class SafeProgramControl(Node):
         self.get_logger().error("Service call failed after reconnect")
         return False
 
-    def play_if_remote(self):
+    def play_if_remote(self) -> bool:
         if not self.is_remote():
             self.get_logger().warn("Robot not in REMOTE, not starting program")
             return
@@ -268,11 +198,17 @@ class SafeProgramControl(Node):
         future = self.play_cli.call_async(req)
         rclpy.spin_until_future_complete(self, future)
         # TODO: Robot is stopping the program but the response says success=False
-        self.get_logger().info(
-            f"Play: {future.result().success}, {future.result().message}"
-        )
+        # self.get_logger().info(
+        #     f"Play: {future.result().success}, {future.result().message}"
+        # )
 
-    def stop_if_remote(self):
+        state = self.get_program_state()
+        if state == "PLAYING":
+            return True
+        else:
+            return False
+
+    def stop_if_remote(self) -> bool:
         if not self.is_remote():
             self.get_logger().warn("Robot not in REMOTE, not stopping program")
             return
@@ -280,27 +216,25 @@ class SafeProgramControl(Node):
         future = self.stop_cli.call_async(req)
         rclpy.spin_until_future_complete(self, future)
         # TODO: Robot is stopping the program but the response says success=False
-        self.get_logger().info(
-            f"Stop: {future.result().success}, {future.result().message}"
-        )
+        # self.get_logger().info(
+        #     f"Stop: {future.result().success}, {future.result().message}"
+        # )
 
-        prog_cli = self.create_client(ProgramState, "dashboard_client/program_state")
+        state = self.get_program_state()
+        if state == "STOPPED":
+            return True
+        else:
+            return False
+
+    def get_program_state(self) -> str:
+        time.sleep(1)
+        prog_cli = self.create_client(GetProgramState, "dashboard_client/program_state")
         while not prog_cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info("program_state not available, waiting...")
-        req_prog = ProgramState.Request()
+        req_prog = GetProgramState.Request()
         future_prog = prog_cli.call_async(req_prog)
         rclpy.spin_until_future_complete(self, future_prog)
-        state = future_prog.result().state
-        self.get_logger().info(f"Program state after stop: '{state}'")
+        state = future_prog.result().state.state
+        self.get_logger().info(f"Program state:: '{state}'")
 
-    def debug_raw_stop(self):
-        raw_cli = self.create_client(RawRequest, "dashboard_client/raw_request")
-        while not raw_cli.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info("raw_request not available, waiting...")
-
-        req = RawRequest.Request()
-        req.query = "stop"
-        future = raw_cli.call_async(req)
-        rclpy.spin_until_future_complete(self, future)
-        answer = future.result().answer
-        self.get_logger().info(f"Raw stop answer: '{answer}'")
+        return state

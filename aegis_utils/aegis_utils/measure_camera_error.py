@@ -103,10 +103,14 @@ class MeasureCameraError:
                 activate=["freedrive_mode_controller"],
                 deactivate=["scaled_joint_trajectory_controller"],
             )
-            time.sleep(1.0)
+            time.sleep(0.5)
             while not self.safe_program_control.is_remote():
                 self.log("Waiting for REMOTE control...")
-            self.safe_program_control.stop_if_remote()
+                time.sleep(1)
+
+            while not self.safe_program_control.stop_if_remote():
+                self.log("Program has not stopped, trying one more time...")
+
             self.log(
                 textwrap.dedent("""\
                     \033[93mINSTRUCTIONS::
@@ -121,14 +125,17 @@ class MeasureCameraError:
 
             while not self.safe_program_control.is_remote():
                 self.log("Waiting for REMOTE control...")
+                time.sleep(1)
 
-            self.safe_program_control.play_if_remote()
+            self.safe_program_control.reconnect_dashboard()
+            while not self.safe_program_control.play_if_remote():
+                self.log("Program has not started, trying one more time...")
 
-            # testing purpose only
-            self.log("Press ENTER to capture image for measuring camera error...")
-            input()
-            continue
-            # ----
+            # # testing purpose only
+            # self.log("Press ENTER to capture image for measuring camera error...")
+            # input()
+            # continue
+            # # ----
 
             self.robot._switch_controllers(
                 activate=["scaled_joint_trajectory_controller"],
@@ -297,9 +304,7 @@ def main() -> None:
     res_path.mkdir(parents=True, exist_ok=True)
     camera_info = CAMERA_CONFIG[cam_name]
     image_topic = camera_info["topic"]
-    board_path = Path(
-        "~/ceai_ws/src/aegis_ros/aegis_utils/config/charuco_board.yaml"
-    ).expanduser()
+    board_path = data_path / "charuco_board.yaml"
 
     with open(board_path, "r") as f:
         board_cfg = yaml.safe_load(f)
