@@ -49,7 +49,6 @@ class MeasureCameraError:
         self.aruco_dict = aruco_dict
         self.marker_size = marker_size
         self.T_base2cam, self.camera_matrix, self.dist_coeffs = self.load_data()
-        # self.remote_control_checker = RemoteControlChecker()
         self.safe_program_control = SafeProgramControl()
 
     def destroy(self):

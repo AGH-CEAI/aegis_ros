@@ -197,7 +197,7 @@ class SafeProgramControl(Node):
         req = Trigger.Request()
         future = self.play_cli.call_async(req)
         rclpy.spin_until_future_complete(self, future)
-        # TODO: Robot is stopping the program but the response says success=False
+        # TODO(issue#81): Robot is playing the program but the response says success=False
         # self.get_logger().info(
         #     f"Play: {future.result().success}, {future.result().message}"
         # )
@@ -215,7 +215,7 @@ class SafeProgramControl(Node):
         req = Trigger.Request()
         future = self.stop_cli.call_async(req)
         rclpy.spin_until_future_complete(self, future)
-        # TODO: Robot is stopping the program but the response says success=False
+        # TODO(issue#81): Robot is stopping the program but the response says success=False
         # self.get_logger().info(
         #     f"Stop: {future.result().success}, {future.result().message}"
         # )
