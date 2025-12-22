@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Fixed
 
-*[PR-79](https://github.com/AGH-CEAI/aegis_ros/pull/79) - Fixed the _get_tcp_pose()
+* [PR-79](https://github.com/AGH-CEAI/aegis_ros/pull/79) - Fixed the _get_tcp_pose()
 
 ### Security
 
