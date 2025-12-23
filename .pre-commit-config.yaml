@@ -35,7 +35,7 @@ repos:
         args: [-w]
 
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.9
+    rev: v0.14.10
     hooks:
     -   id: ruff
         args:
@@ -56,6 +56,12 @@ repos:
     -   id: prettier-package-xml
     -   id: ros-include-guard
     -   id: sort-package-xml
+
+-   repo: https://github.com/bufbuild/buf
+    rev: v1.61.0
+    hooks:
+    -   id: buf-lint
+    -   id: buf-format
 
   # TODO(issue#1) Re-enable warehouse integration
   # - repo: https://github.com/macmacal/pre-commit-sqlite-dump

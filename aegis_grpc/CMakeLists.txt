@@ -1,3 +1,4 @@
+# cmake-lint: disable=C0307
 cmake_minimum_required(VERSION 3.8)
 project(aegis_grpc)
 
@@ -45,15 +46,12 @@ find_package(Protobuf REQUIRED)
 # Protbuf & gRPC generation
 
 # Set the directory where .proto files are located
-set(PROTO_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/proto")
+set(PROTO_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/proto/v1")
 file(GLOB PROTO_SRC "${PROTO_SRC_DIR}/*.proto")
 
 # Specify output directory for header, source, and script files
-set(GENERATED_PROTO_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/msgs")
-set(GENERATED_PROTO_PY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/script/msgs")
-
-# Make folders if they dont exist
-file(MAKE_DIRECTORY ${GENERATED_PROTO_CPP_DIR} ${GENERATED_PROTO_PY_DIR})
+set(GENERATED_PROTO_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/proto")
+file(MAKE_DIRECTORY ${GENERATED_PROTO_CPP_DIR})
 
 # Generate header and source files directory
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_SRC})
@@ -70,25 +68,28 @@ foreach(proto_file ${PROTO_SRC})
   message(STATUS "Processing Proto definition: ${proto_name}")
 
   # Add custom command to generate C++ code for each .proto file
-  set(pb_cc ${GENERATED_PROTO_CPP_DIR}/${proto_name}.pb.cc)
-  set(pb_h ${GENERATED_PROTO_CPP_DIR}/${proto_name}.pb.h)
-  set(grpc_cc ${GENERATED_PROTO_CPP_DIR}/${proto_name}.grpc.pb.cc)
-  set(grpc_h ${GENERATED_PROTO_CPP_DIR}/${proto_name}.grpc.pb.h)
+  set(PB_CC ${GENERATED_PROTO_CPP_DIR}/${proto_name}.pb.cc)
+  set(PB_H ${GENERATED_PROTO_CPP_DIR}/${proto_name}.pb.h)
+  set(GRPC_CC ${GENERATED_PROTO_CPP_DIR}/${proto_name}.grpc.pb.cc)
+  set(GRPC_H ${GENERATED_PROTO_CPP_DIR}/${proto_name}.grpc.pb.h)
 
   add_custom_command(
-    OUTPUT ${pb_cc} ${pb_h} ${grpc_cc} ${grpc_h}
+    OUTPUT ${PB_CC} ${PB_H} ${GRPC_CC} ${GRPC_H}
     COMMAND
       ${Protobuf_PROTOC_EXECUTABLE} ARGS --proto_path=${PROTO_SRC_DIR}
       --grpc_out=${GENERATED_PROTO_CPP_DIR} --cpp_out=${GENERATED_PROTO_CPP_DIR}
       --plugin=protoc-gen-grpc=${GRPC_CPP_PLUGIN_EXECUTABLE} ${proto_file}
     DEPENDS ${proto_file} ${GRPC_CPP_PLUGIN_EXECUTABLE}
     COMMENT "Compiling ${proto_file} to C++ header & source")
-  list(APPEND GRPC_SRCS ${grpc_cc})
-  list(APPEND GRPC_HDRS ${grpc_h})
+  list(APPEND GRPC_SRCS ${GRPC_CC})
+  list(APPEND GRPC_HDRS ${GRPC_H})
 endforeach()
 
 # Create a custom target to trigger code generation for all proto files
-add_custom_target(generate_protos ALL DEPENDS ${GRPC_SRCS} ${GRPC_HDRS})
+add_custom_target(
+  generate_protos ALL
+  DEPENDS ${GRPC_SRCS} ${GRPC_HDRS}
+  COMMENT "Generating gRPC and Protobuf headers")
 
 # ------------------------------
 # Executable targets

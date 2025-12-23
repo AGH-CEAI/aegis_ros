@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package robot_service;
+package aegis_grpc.proto.v1;
 
 // ========== Message Definitions ==========
 message Float32 {
