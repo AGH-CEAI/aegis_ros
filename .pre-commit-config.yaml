@@ -59,7 +59,7 @@ repos:
 
 # Protobuf & gRPC
 -   repo: https://github.com/bufbuild/buf
-    rev: v1.61.0
+    rev: v1.62.1
     hooks:
     -   id: buf-lint
     -   id: buf-format
