@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package aegis_grpc.proto.v1;
+
+// import "geometry_msgs.proto";
+// import "sensor_msgs.proto";
+
+import "aegis_grpc/proto/v1/geometry_msgs.proto";
+import "aegis_grpc/proto/v1/sensor_msgs.proto";
+
+service MoveitService {
+  rpc GotoPose(GotoPoseRequest) returns (GotoPoseResponse);
+  rpc GotoJoints(GotoJointsRequest) returns (GotoJointsResponse);
+}
+
+message GotoPoseRequest {
+  Pose goal = 1;
+}
+
+message GotoPoseResponse {
+  bool success = 1;
+}
+
+message GotoJointsRequest {
+  JointState goal = 1;
+}
+
+message GotoJointsResponse {
+  bool success = 1;
+}

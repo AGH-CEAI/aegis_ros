@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package aegis_grpc.proto.v1;
+
+message Vector3 {
+  // This represents a vector in free space.
+  // It is only meant to represent a direction.
+  // If you want your data to be translatable too, use the
+  // geometry_msgs/Point message instead.
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+message Point {
+  // This contains the position of a point in free space.
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+message Quaternion {
+  // This represents an orientation in free space in quaternion form.
+  double x = 1;
+  double y = 2;
+  double z = 3;
+  double w = 4;
+}
+
+message Pose {
+  // A representation of pose in free space, composed of position and orientation.
+  Point position = 1;
+  Quaternion orientation = 2;
+}
+
+message Wrench {
+  // Force in free space.
+  Vector3 force = 1;
+  Vector3 torque = 2;
+}
+
+message Twist {
+  // Velocity in free space.
+  Vector3 linear = 1;
+  Vector3 angular = 2;
+}

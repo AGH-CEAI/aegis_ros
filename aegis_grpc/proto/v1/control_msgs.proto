@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package aegis_grpc.proto.v1;
+
+service GripperService {
+  rpc SetWidth(SetWidthRequest) returns (SetWidthResponse);
+}
+
+message SetWidthRequest {
+  double position = 1; // The goal gripper gap size (in meters)
+  double effort = 2; // The goal effort exerted (in Newtons)
+}
+
+message SetWidthResponse {
+  double position = 1; // The current gripper gap size (in meters)
+  double effort = 2; // The current effort exerted (in Newtons)
+  bool stalled = 3; // True iff the gripper is exerting max effort and not moving
+  bool reached_goal = 4; // True iff the gripper position has reached the commanded setpoint
+}
+
+message JointJog {
+  // Name list of the joints to jog (case-sensitive).
+  repeated string name = 1;
+
+  // Position command to the joints. Units are meters or radians.
+  repeated double displacements = 2;
+
+  // Velocit command to the joints. Units are m/s or rad/s.
+  repeated double velocities = 3;
+
+  double duration = 4;
+}

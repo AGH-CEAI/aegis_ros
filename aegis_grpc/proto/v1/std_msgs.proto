@@ -1,8 +1,0 @@
-syntax = "proto3";
-
-package aegis_grpc.proto.v1;
-
-// ========== Message Definitions ==========
-message Float32 {
-  float data = 1;
-}
