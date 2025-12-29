@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package aegis_grpc.proto.v1;
+package proto_grpc_aegis.v1;
 
 message JointState {
   // This is a message that holds data to describe the state of a set of torque controlled joints.

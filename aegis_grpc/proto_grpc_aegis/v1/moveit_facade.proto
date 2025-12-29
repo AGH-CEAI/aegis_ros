@@ -1,12 +1,9 @@
 syntax = "proto3";
 
-package aegis_grpc.proto.v1;
+package proto_grpc_aegis.v1;
 
-// import "geometry_msgs.proto";
-// import "sensor_msgs.proto";
-
-import "aegis_grpc/proto/v1/geometry_msgs.proto";
-import "aegis_grpc/proto/v1/sensor_msgs.proto";
+import "proto_grpc_aegis/v1/geometry_msgs.proto";
+import "proto_grpc_aegis/v1/sensor_msgs.proto";
 
 service MoveitService {
   rpc GotoPose(GotoPoseRequest) returns (GotoPoseResponse);

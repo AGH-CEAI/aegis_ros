@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package aegis_grpc.proto.v1;
+package proto_grpc_aegis.v1;
 
 service GripperService {
   rpc SetWidth(SetWidthRequest) returns (SetWidthResponse);

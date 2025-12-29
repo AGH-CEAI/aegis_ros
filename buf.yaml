@@ -1,16 +1,16 @@
 version: v2
 
 modules:
-  - path: .
+  - path: aegis_grpc
 
 lint:
   use:
     - STANDARD
   ignore_only:
     PACKAGE_DIRECTORY_MATCH:
-      - aegis_grpc/proto/v1/control_msgs.proto
-      - aegis_grpc/proto/v1/moveit_facade.proto
-      - aegis_grpc/proto/v1/geometry_msgs.proto
+      - aegis_grpc/proto_grpc_aegis/v1/control_msgs.proto
+      - aegis_grpc/proto_grpc_aegis/v1/moveit_facade.proto
+      - aegis_grpc/proto_grpc_aegis/v1/geometry_msgs.proto
 
 breaking:
   use:

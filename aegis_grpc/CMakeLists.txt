@@ -46,15 +46,15 @@ find_package(Protobuf REQUIRED)
 # Protbuf & gRPC generation
 
 # Set the directory where .proto files are located
-set(PROTO_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/proto/v1")
+set(PROTO_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/proto_grpc_aegis/v1")
 file(GLOB PROTO_SRC "${PROTO_SRC_DIR}/*.proto")
+message(STATUS "Proto files path: ${PROTO_SRC_DIR}")
+message(STATUS "Found PROTO_SRC files: ${PROTO_SRC}")
 
 # Specify output directory for header, source, and script files
-set(GENERATED_PROTO_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/proto")
+set(GENERATED_PROTO_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 file(MAKE_DIRECTORY ${GENERATED_PROTO_CPP_DIR})
 
-# Generate header and source files directory
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_SRC})
 # These will be in CMAKE_CURRENT_BINARY_DIR by default
 include_directories(${GENERATED_PROTO_CPP_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -76,7 +76,7 @@ foreach(proto_file ${PROTO_SRC})
   add_custom_command(
     OUTPUT ${PB_CC} ${PB_H} ${GRPC_CC} ${GRPC_H}
     COMMAND
-      ${Protobuf_PROTOC_EXECUTABLE} ARGS --proto_path=${PROTO_SRC_DIR}
+      ${Protobuf_PROTOC_EXECUTABLE} --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
       --grpc_out=${GENERATED_PROTO_CPP_DIR} --cpp_out=${GENERATED_PROTO_CPP_DIR}
       --plugin=protoc-gen-grpc=${GRPC_CPP_PLUGIN_EXECUTABLE} ${proto_file}
     DEPENDS ${proto_file} ${GRPC_CPP_PLUGIN_EXECUTABLE}

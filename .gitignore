@@ -9,4 +9,4 @@ log/
 *.log
 COLCON_IGNORE
 
-*/include/proto
+*/include/proto_*
