@@ -1,6 +1,6 @@
 # aegis_grpc
 
-This packages provides a bridge between ROS 2 and [gRPC](https://grpc.io) protocols, with custom [Protobuf](https://protobuf.dev) messages based on selected ones from `control_msgs`, `geometry_msgs` and `sensors_mgs` packages.
+This packages provides a bridge between ROS 2 and [gRPC](https://grpc.io) protocols, with custom [Protobuf](https://protobuf.dev) messages based on selected ones from [`control_msgs`](https://github.com/ros-controls/control_msgs/tree/humble), [`geometry_msgs`](https://github.com/ros2/common_interfaces/tree/humble/geometry_msgs) and [`sensors_mgs`](https://github.com/ros2/common_interfaces/tree/rolling/sensor_msgs) packages.
 
 It aims to provide a form of "frequency clutch" between real-time domain and low-frequnecy decision making (e.g. an ANN inference in Python).
 
