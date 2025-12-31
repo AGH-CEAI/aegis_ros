@@ -15,6 +15,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 find_program(GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin REQUIRED)
 
@@ -94,10 +96,15 @@ add_custom_target(
 # ------------------------------
 # Executable targets
 
-add_executable(grpc_server src/grpc_server.cpp)
+add_executable(grpc_server src/grpc_server_node.cpp)
+add_dependencies(grpc_server generate_protos)
 target_include_directories(grpc_server PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                                               $<INSTALL_INTERFACE:include>)
 target_compile_features(grpc_server PUBLIC c_std_99 cxx_std_17) # Require C99 and C++17
+
+target_link_libraries(grpc_server gRPC::grpc++ protobuf::libprotobuf)
+
+ament_target_dependencies(grpc_server rclcpp geometry_msgs sensor_msgs)
 
 install(TARGETS grpc_server DESTINATION lib/${PROJECT_NAME})
 
