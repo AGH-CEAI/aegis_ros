@@ -63,7 +63,8 @@ message(STATUS "Proto files path: ${PROTO_SRC_DIR}")
 message(STATUS "Found PROTO_SRC files: ${PROTO_SRC}")
 
 # Specify output directory for header, source, and script files
-set(GENERATED_PROTO_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/proto_grpc_aegis/v1")
+set(GENERATED_PROTO_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(GENERATED_PROTO_CPP_DIR "${GENERATED_PROTO_ROOT_DIR}/proto_grpc_aegis/v1")
 file(MAKE_DIRECTORY ${GENERATED_PROTO_CPP_DIR})
 
 # gRPC C++/Python stubs
@@ -86,8 +87,9 @@ foreach(proto_file ${PROTO_SRC})
   add_custom_command(
     OUTPUT ${PB_CC} ${PB_H} ${GRPC_CC} ${GRPC_H}
     COMMAND
+      # ${Protobuf_PROTOC_EXECUTABLE} --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
       ${Protobuf_PROTOC_EXECUTABLE} --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
-      --grpc_out=${GENERATED_PROTO_CPP_DIR} --cpp_out=${GENERATED_PROTO_CPP_DIR}
+      --grpc_out=${GENERATED_PROTO_ROOT_DIR} --cpp_out=${GENERATED_PROTO_ROOT_DIR}
       --plugin=protoc-gen-grpc=${GRPC_CPP_PLUGIN_EXECUTABLE} ${proto_file}
     DEPENDS ${proto_file} ${GRPC_CPP_PLUGIN_EXECUTABLE}
     COMMENT "Compiling ${proto_file} to C++ header & source")
@@ -103,7 +105,6 @@ add_custom_target(
   generate_protos ALL
   DEPENDS ${PROTO_SRCS} ${PROTO_HDRS} ${GRPC_SRCS} ${GRPC_HDRS}
   COMMENT "Generating gRPC and Protobuf headers")
-message(STATUS "Prepared GRPC_CC files: ${GRPC_CC}")
 
 # ------------------------------
 # Static library with all CPP files
