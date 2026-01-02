@@ -4,6 +4,14 @@ This packages provides a bridge between ROS 2 and [gRPC](https://grpc.io) protoc
 
 It aims to provide a form of "frequency clutch" between real-time domain and low-frequnecy decision making (e.g. an ANN inference in Python).
 
+## Launch
+
+``` bash
+ros2 launch aegis_grpc start_server.launch.py
+# or
+ros2 run aegis_grpc grpc_server
+```
+
 ## Messages architecture
 
 Since this project aims to bridge communication between ROS and gRPC, the protobuf definitions tries to mimic default messages, services and actions from ROS.

@@ -137,4 +137,6 @@ install(TARGETS grpc_server ${PROJECT_NAME}_lib DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY include/ DESTINATION include)
 
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
+
 ament_package()
