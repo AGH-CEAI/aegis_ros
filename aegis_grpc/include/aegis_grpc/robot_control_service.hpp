@@ -75,8 +75,8 @@ class RobotControlServiceImpl final
     control_msgs::msg::JointJog servo_joint_msg_;
     geometry_msgs::msg::Twist servo_tcp_msg_;
 
-    bool gripper_cmd_success_{false};
-    std::string gripper_cmd_msg_{};
+    bool gripper_cmd_success_;
+    std::string gripper_cmd_msg_;
 };
 
 } // namespace aegis_grpc
