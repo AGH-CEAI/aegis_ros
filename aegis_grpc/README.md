@@ -46,12 +46,12 @@ The server is split into 2 services defined in [`proto_aegis_grpc.v1.robot_srvs`
 
 The "ROS-getters" are implemented in the [`RobotReadServiceImpl`](./include/aegis_grpc/robot_read_service.hpp) class as the following services:
 
-| Name                                                 | Desc.                      | Impl. | gRPC Request            | gRPC Response                                                                           |
-| ---------------------------------------------------- | -------------------------- | ----- | ----------------------- | --------------------------------------------------------------------------------------- |
+| Method name                                          | Desc.                       | Impl. | gRPC Request            | gRPC Response                                                                           |
+| ---------------------------------------------------- | --------------------------- | ----- | ----------------------- | --------------------------------------------------------------------------------------- |
 | `proto_aegis_grpc.v1.RobotReadService.GetAll`        | Get the all available data. | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.robot_srvs.RobotState`](./proto_aegis_grpc/v1/robot_srvs.proto)   |
-| `proto_aegis_grpc.v1.RobotReadService.GetJointState` | Get the joints' states.    | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.sensor_msgs.JointState`](./proto_aegis_grpc/v1/sensor_msgs.proto) |
-| `proto_aegis_grpc.v1.RobotReadService.GetTCPPose`    | Get the TCP pose.          | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)   |
-| `proto_aegis_grpc.v1.RobotReadService.GetWrench`     | Read force/torque sensor.  | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.geometry_msgs.Wrench`](./proto_aegis_grpc/v1/geometry_msgs.proto) |
+| `proto_aegis_grpc.v1.RobotReadService.GetJointState` | Get the joints' states.     | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.sensor_msgs.JointState`](./proto_aegis_grpc/v1/sensor_msgs.proto) |
+| `proto_aegis_grpc.v1.RobotReadService.GetTCPPose`    | Get the TCP pose.           | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)   |
+| `proto_aegis_grpc.v1.RobotReadService.GetWrench`     | Read force/torque sensor.   | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.geometry_msgs.Wrench`](./proto_aegis_grpc/v1/geometry_msgs.proto) |
 
 You can always list the above services them with the `grpcurl`:
 ```bash
@@ -62,7 +62,7 @@ grpcurl -plaintext 127.0.0.1:50051 list proto_aegis_grpc.v1.RobotReadService
 
 The control bridge for MoveIt2 servo and planners are implemented in the [`RobotControlServiceImpl`](./include/aegis_grpc/robot_control_service.hpp) class as the following services:
 
-| Name                                                     | Desc.                                                           | Impl. | gRPC Request                                                                                      | gRPC Response                                                                              |
+| Method name                                              | Desc.                                                           | Impl. | gRPC Request                                                                                      | gRPC Response                                                                              |
 | -------------------------------------------------------- | --------------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | `proto_aegis_grpc.v1.RobotControlService.GotoJoints`     | Plan & execute the MoveIt2 trajectory to a given joints target. | ❌     | [`proto_aegis_grpc.v1.sensor_msgs.JointState`](./proto_aegis_grpc/v1/sensor_msgs.proto)           | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
 | `proto_aegis_grpc.v1.RobotControlService.GotoPose`       | Plan & execute the MoveIt2 trajectory to a given pose target.   | ❌     | [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)             | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
