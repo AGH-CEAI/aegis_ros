@@ -1,11 +1,11 @@
 syntax = "proto3";
 
-package proto_grpc_aegis.v1;
+package proto_aegis_grpc.v1;
 
 import "google/protobuf/empty.proto";
-import "proto_grpc_aegis/v1/control_msgs.proto";
-import "proto_grpc_aegis/v1/geometry_msgs.proto";
-import "proto_grpc_aegis/v1/sensor_msgs.proto";
+import "proto_aegis_grpc/v1/control_msgs.proto";
+import "proto_aegis_grpc/v1/geometry_msgs.proto";
+import "proto_aegis_grpc/v1/sensor_msgs.proto";
 
 service RobotReadService {
   rpc GetTCPPose(google.protobuf.Empty) returns (Pose);

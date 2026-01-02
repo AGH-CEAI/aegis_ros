@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package proto_grpc_aegis.v1;
+package proto_aegis_grpc.v1;
 
 message JointJog {
   // Name list of the joints to jog (case-sensitive).

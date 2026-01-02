@@ -57,14 +57,14 @@ find_package(Protobuf REQUIRED)
 # Protbuf & gRPC generation
 
 # Set the directory where .proto files are located
-set(PROTO_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/proto_grpc_aegis/v1")
+set(PROTO_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/proto_aegis_grpc/v1")
 file(GLOB PROTO_SRC "${PROTO_SRC_DIR}/*.proto")
 message(STATUS "Proto files path: ${PROTO_SRC_DIR}")
 message(STATUS "Found PROTO_SRC files: ${PROTO_SRC}")
 
 # Specify output directory for header, source, and script files
 set(GENERATED_PROTO_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
-set(GENERATED_PROTO_CPP_DIR "${GENERATED_PROTO_ROOT_DIR}/proto_grpc_aegis/v1")
+set(GENERATED_PROTO_CPP_DIR "${GENERATED_PROTO_ROOT_DIR}/proto_aegis_grpc/v1")
 file(MAKE_DIRECTORY ${GENERATED_PROTO_CPP_DIR})
 
 # gRPC C++/Python stubs

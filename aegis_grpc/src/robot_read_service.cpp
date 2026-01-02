@@ -37,7 +37,7 @@ void RobotReadServiceImpl::JointStateSubCb(
 grpc::Status
 RobotReadServiceImpl::GetTCPPose(grpc::ServerContext *context,
                                  const google::protobuf::Empty *request,
-                                 proto_grpc_aegis::v1::Pose *response) {
+                                 proto_aegis_grpc::v1::Pose *response) {
     (void) context;
     (void) request;
 
@@ -48,7 +48,7 @@ RobotReadServiceImpl::GetTCPPose(grpc::ServerContext *context,
 grpc::Status
 RobotReadServiceImpl::GetWrench(grpc::ServerContext *context,
                                 const google::protobuf::Empty *request,
-                                proto_grpc_aegis::v1::Wrench *response) {
+                                proto_aegis_grpc::v1::Wrench *response) {
   (void) context;
   (void) request;
   FillProtoWrench(wrench_data_, response);
@@ -57,7 +57,7 @@ RobotReadServiceImpl::GetWrench(grpc::ServerContext *context,
 
 grpc::Status RobotReadServiceImpl::GetJointState(
     grpc::ServerContext *context, const google::protobuf::Empty *request,
-    proto_grpc_aegis::v1::JointState *response) {
+    proto_aegis_grpc::v1::JointState *response) {
   (void) context;
   (void) request;
   FillProtoJointState(joint_state_data_, response);
@@ -67,7 +67,7 @@ grpc::Status RobotReadServiceImpl::GetJointState(
 grpc::Status
 RobotReadServiceImpl::GetAll(grpc::ServerContext *context,
                              const google::protobuf::Empty *request,
-                             proto_grpc_aegis::v1::RobotState *response) {
+                             proto_aegis_grpc::v1::RobotState *response) {
   (void) context;
   (void) request;
   FillProtoPose(pose_data_, response->mutable_pose());
@@ -78,7 +78,7 @@ RobotReadServiceImpl::GetAll(grpc::ServerContext *context,
 
 void RobotReadServiceImpl::FillProtoPose(
     const geometry_msgs::msg::Pose& ros,
-    proto_grpc_aegis::v1::Pose* out) {
+    proto_aegis_grpc::v1::Pose* out) {
   auto* pos = out->mutable_position();
   pos->set_x(ros.position.x);
   pos->set_y(ros.position.y);
@@ -93,7 +93,7 @@ void RobotReadServiceImpl::FillProtoPose(
 
 void RobotReadServiceImpl::FillProtoWrench(
     const geometry_msgs::msg::Wrench& ros,
-    proto_grpc_aegis::v1::Wrench* out) {
+    proto_aegis_grpc::v1::Wrench* out) {
   auto* f = out->mutable_force();
   f->set_x(ros.force.x);
   f->set_y(ros.force.y);
@@ -107,7 +107,7 @@ void RobotReadServiceImpl::FillProtoWrench(
 
 void RobotReadServiceImpl::FillProtoJointState(
     const sensor_msgs::msg::JointState& ros,
-    proto_grpc_aegis::v1::JointState* out) {
+    proto_aegis_grpc::v1::JointState* out) {
   out->clear_name();
   out->clear_position();
   out->clear_velocity();

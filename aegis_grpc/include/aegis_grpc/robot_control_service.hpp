@@ -2,7 +2,7 @@
 #define AEGIS_GRPC__ROBOT_CONTROL_SERVICE_HPP_
 #include <grpcpp/grpcpp.h>
 #include <google/protobuf/empty.pb.h>
-#include "proto_grpc_aegis/v1/robot_srvs.grpc.pb.h"
+#include "proto_aegis_grpc/v1/robot_srvs.grpc.pb.h"
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
@@ -15,7 +15,7 @@
 namespace aegis_grpc {
 
 class RobotControlServiceImpl final
-    : public proto_grpc_aegis::v1::RobotControlService::Service {
+    : public proto_aegis_grpc::v1::RobotControlService::Service {
   public:
     using GripperCommand = control_msgs::action::GripperCommand;
     using GoalHandleGripper = rclcpp_action::ClientGoalHandle<GripperCommand>;
@@ -24,40 +24,40 @@ class RobotControlServiceImpl final
 
     grpc::Status ServoJoint(
         grpc::ServerContext* context,
-        const proto_grpc_aegis::v1::JointJog *request,
+        const proto_aegis_grpc::v1::JointJog *request,
         google::protobuf::Empty *response) override;
 
     grpc::Status ServoTCP(
         grpc::ServerContext* context,
-        const proto_grpc_aegis::v1::Twist *request,
+        const proto_aegis_grpc::v1::Twist *request,
         google::protobuf::Empty *response) override;
 
     //TODO add MoveIt2 actions to plan&execute trajectories to targets in Joints and Poses.
     // grpc::Status GotoPose(
     //     grpc::ServerContext* context,
-    //     const proto_grpc_aegis::v1::Pose *request,
-    //     proto_grpc_aegis::v1::TriggerResponse *response) override;
+    //     const proto_aegis_grpc::v1::Pose *request,
+    //     proto_aegis_grpc::v1::TriggerResponse *response) override;
 
     // grpc::Status GotoJoints(
     //     grpc::ServerContext* context,
-    //     const proto_grpc_aegis::v1::JointState *request,
-    //     proto_grpc_aegis::v1::TriggerResponse *response) override;
+    //     const proto_aegis_grpc::v1::JointState *request,
+    //     proto_aegis_grpc::v1::TriggerResponse *response) override;
 
     //TODO change name to GripperSetPosition
     grpc::Status GriperSetWidth(
       grpc::ServerContext* context,
-      const proto_grpc_aegis::v1::GripperSetWidthRequest *request,
-      proto_grpc_aegis::v1::TriggerResponse *response) override;
+      const proto_aegis_grpc::v1::GripperSetWidthRequest *request,
+      proto_aegis_grpc::v1::TriggerResponse *response) override;
 
     grpc::Status GriperClose(
         grpc::ServerContext* context,
         const google::protobuf::Empty *request,
-        proto_grpc_aegis::v1::TriggerResponse *response) override;
+        proto_aegis_grpc::v1::TriggerResponse *response) override;
 
     grpc::Status GriperOpen(
         grpc::ServerContext* context,
         const google::protobuf::Empty *request,
-        proto_grpc_aegis::v1::TriggerResponse *response) override;
+        proto_aegis_grpc::v1::TriggerResponse *response) override;
 
   private:
 

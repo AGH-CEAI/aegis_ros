@@ -2,7 +2,7 @@
 #define AEGIS_GRPC__ROBOT_READ_SERVICE_HPP_
 #include <grpcpp/grpcpp.h>
 #include <google/protobuf/empty.pb.h>
-#include "proto_grpc_aegis/v1/robot_srvs.grpc.pb.h"
+#include "proto_aegis_grpc/v1/robot_srvs.grpc.pb.h"
 
 #include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/pose.hpp>
@@ -12,26 +12,26 @@
 namespace aegis_grpc {
 
 class RobotReadServiceImpl final
-    : public proto_grpc_aegis::v1::RobotReadService::Service {
+    : public proto_aegis_grpc::v1::RobotReadService::Service {
   public:
     explicit RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node);
 
     grpc::Status GetTCPPose(grpc::ServerContext *context,
                             const google::protobuf::Empty *request,
-                            proto_grpc_aegis::v1::Pose *response) override;
+                            proto_aegis_grpc::v1::Pose *response) override;
 
     grpc::Status GetWrench(grpc::ServerContext *context,
                           const google::protobuf::Empty *request,
-                          proto_grpc_aegis::v1::Wrench *response) override;
+                          proto_aegis_grpc::v1::Wrench *response) override;
 
     grpc::Status
     GetJointState(grpc::ServerContext *context,
                   const google::protobuf::Empty *request,
-                  proto_grpc_aegis::v1::JointState *response) override;
+                  proto_aegis_grpc::v1::JointState *response) override;
 
     grpc::Status GetAll(grpc::ServerContext *context,
                         const google::protobuf::Empty *request,
-                        proto_grpc_aegis::v1::RobotState *response) override;
+                        proto_aegis_grpc::v1::RobotState *response) override;
 
   private:
     void PoseSubCb(const geometry_msgs::msg::Pose::SharedPtr msg);
@@ -40,15 +40,15 @@ class RobotReadServiceImpl final
 
   static void FillProtoPose(
       const geometry_msgs::msg::Pose& ros,
-      proto_grpc_aegis::v1::Pose* out);
+      proto_aegis_grpc::v1::Pose* out);
 
   static void FillProtoWrench(
       const geometry_msgs::msg::Wrench& ros,
-      proto_grpc_aegis::v1::Wrench* out);
+      proto_aegis_grpc::v1::Wrench* out);
 
   static void FillProtoJointState(
       const sensor_msgs::msg::JointState& ros,
-      proto_grpc_aegis::v1::JointState* out);
+      proto_aegis_grpc::v1::JointState* out);
 
     std::shared_ptr<rclcpp::Node> node_;
     rclcpp::Subscription<geometry_msgs::msg::Pose>::SharedPtr pose_sub_;

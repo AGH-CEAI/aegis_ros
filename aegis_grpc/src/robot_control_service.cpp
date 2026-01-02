@@ -37,7 +37,7 @@ void RobotControlServiceImpl::PublishLoop() {
 }
 
 grpc::Status RobotControlServiceImpl::ServoJoint(
-    grpc::ServerContext *context, const proto_grpc_aegis::v1::JointJog *request,
+    grpc::ServerContext *context, const proto_aegis_grpc::v1::JointJog *request,
     google::protobuf::Empty *response) {
 
   (void)context;
@@ -68,7 +68,7 @@ grpc::Status RobotControlServiceImpl::ServoJoint(
 
 grpc::Status
 RobotControlServiceImpl::ServoTCP(grpc::ServerContext *context,
-                                  const proto_grpc_aegis::v1::Twist *request,
+                                  const proto_aegis_grpc::v1::Twist *request,
                                   google::protobuf::Empty *response) {
 
   (void)context;
@@ -91,8 +91,8 @@ RobotControlServiceImpl::ServoTCP(grpc::ServerContext *context,
 
 grpc::Status RobotControlServiceImpl::GriperSetWidth(
     grpc::ServerContext *context,
-    const proto_grpc_aegis::v1::GripperSetWidthRequest *request,
-    proto_grpc_aegis::v1::TriggerResponse *response) {
+    const proto_aegis_grpc::v1::GripperSetWidthRequest *request,
+    proto_aegis_grpc::v1::TriggerResponse *response) {
 
   (void)context;
 
@@ -108,7 +108,7 @@ grpc::Status RobotControlServiceImpl::GriperSetWidth(
 
 grpc::Status RobotControlServiceImpl::GriperClose(
     grpc::ServerContext *context, const google::protobuf::Empty *request,
-    proto_grpc_aegis::v1::TriggerResponse *response) {
+    proto_aegis_grpc::v1::TriggerResponse *response) {
   (void)context;
   (void)request;
   GripperSendGoal(0.0, 0.0);
@@ -119,7 +119,7 @@ grpc::Status RobotControlServiceImpl::GriperClose(
 
 grpc::Status RobotControlServiceImpl::GriperOpen(
     grpc::ServerContext *context, const google::protobuf::Empty *request,
-    proto_grpc_aegis::v1::TriggerResponse *response) {
+    proto_aegis_grpc::v1::TriggerResponse *response) {
 
   (void)context;
   (void)request;
