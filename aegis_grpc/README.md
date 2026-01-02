@@ -38,28 +38,44 @@ grpcurl -plaintext 127.0.0.1:50051 \
 ## Messages architecture
 
 Since this project aims to bridge communication between ROS and gRPC, the protobuf definitions tries to mimic default messages, services and actions from ROS.
-The main difference is the lack of the header with timestamps - the data synchronization responsibility should not be forwarded.
+The main difference is the lack of the header with timestamps - the data synchronization responsibility should not be forwarded outside the ROS ecosystem.
 
+The server is split into 2 services defined in [`proto_aegis_grpc.v1.robot_srvs`](./proto_aegis_grpc/v1/robot_srvs.proto): `RobotReadService` and `RobotControlService`.
 
-### Read data
+### Reading data with `RobotReadService`
 
-| Name       | Desc                      | Impl. | Type  | gRPC Def                                                                          | ROS Def                                                                                                              |
-| ---------- | ------------------------- | ----- | ----- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Wrench     | Read force/torque sensor. | ❌     | `msg` | [`proto_aegis_grpc.v1.geometry_msgs.Wrench`](./proto/v1/geometry_msgs.proto)      | [`geometry_msgs/msg/Wrench`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Wrench.msg)     |
-| Pose       | Get the TCP pose.         | ❌     | `msg` | [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto/v1/geometry_msgs.proto)        | [`geometry_msgs/msg/Pose`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Pose.msg)         |
-| JointState | Get the joints' states.   | ❌     | `msg` | [`proto_aegis_grpc.v1.sensor_msgs_msgs.JointState`](./proto/v1/sensor_msgs.proto) | [`sensor_msgs/msg/JointState`](https://github.com/ros2/common_interfaces/blob/humble/sensor_msgs/msg/JointState.msg) |
+The "ROS-getters" are implemented in the [`RobotReadServiceImpl`](./include/aegis_grpc/robot_read_service.hpp) class as the following services:
 
+| Name                                                 | Desc.                      | Impl. | gRPC Request            | gRPC Response                                                                           |
+| ---------------------------------------------------- | -------------------------- | ----- | ----------------------- | --------------------------------------------------------------------------------------- |
+| `proto_aegis_grpc.v1.RobotReadService.GetAll`        | Get the all available data. | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.robot_srvs.RobotState`](./proto_aegis_grpc/v1/robot_srvs.proto)   |
+| `proto_aegis_grpc.v1.RobotReadService.GetJointState` | Get the joints' states.    | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.sensor_msgs.JointState`](./proto_aegis_grpc/v1/sensor_msgs.proto) |
+| `proto_aegis_grpc.v1.RobotReadService.GetTCPPose`    | Get the TCP pose.          | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)   |
+| `proto_aegis_grpc.v1.RobotReadService.GetWrench`     | Read force/torque sensor.  | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.geometry_msgs.Wrench`](./proto_aegis_grpc/v1/geometry_msgs.proto) |
 
-### Send data
+You can always list the above services them with the `grpcurl`:
+```bash
+grpcurl -plaintext 127.0.0.1:50051 list proto_aegis_grpc.v1.RobotReadService
+```
 
-| Name                     | Desc                                                            | Impl. | Type  | gRPC Def                                                                               | ROS Def                                                                                                                                    |
-| ------------------------ | --------------------------------------------------------------- | ----- | ----- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| GripperService/SetWidth  | Set the gripper width.                                          | ❌     | `rpc` | [`proto_aegis_grpc.v1.control_msgs.GripperCommand`](./proto/v1/control_msgs.proto)     | [`control_msgs/action/GripperCommand`](https://github.com/ros-controls/control_msgs/blob/humble/control_msgs/action/GripperCommand.action) |
-| Twist                    | Servoing (w.r.t. TCP).                                          | ❌     | `msg` | [`proto_aegis_grpc.v1.geometry_msgs.Twist`](./proto/v1/geometry_msgs.proto)            | [`geometry_msgs/msg/TwistPose`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Twist.msg)                         |
-| JointJog                 | Servoing (w.r.t. joints).                                       | ❌     | `msg` | [`proto_aegis_grpc.v1.control_msgs.JointJog`](./proto/v1/control_msgs.proto)           | [`control_msgs/msg/JointJog`](https://github.com/ros-controls/control_msgs/blob/humble/control_msgs/msg/JointJog.msg)                      |
-| MoveitService/GotoPose   | Plan & execute the MoveIt2 trajectory to a given pose target.   | ❌     | `rpc` | [`proto_aegis_grpc.v1.moveit_facade.MoveToPoseTarget`](./proto/v1/control_msgs.proto)  | -                                                                                                                                          |
-| MoveitService/GotoJoints | Plan & execute the MoveIt2 trajectory to a given joints target. | ❌     | `rpc` | [`proto_aegis_grpc.v1.moveit_facade.MoveToJointTarget`](./proto/v1/control_msgs.proto) | -                                                                                                                                          |
+### Controlling the robot with `RobotControlService`
 
+The control bridge for MoveIt2 servo and planners are implemented in the [`RobotControlServiceImpl`](./include/aegis_grpc/robot_control_service.hpp) class as the following services:
+
+| Name                                                     | Desc.                                                           | Impl. | gRPC Request                                                                                      | gRPC Response                                                                              |
+| -------------------------------------------------------- | --------------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `proto_aegis_grpc.v1.RobotControlService.GotoJoints`     | Plan & execute the MoveIt2 trajectory to a given joints target. | ❌     | [`proto_aegis_grpc.v1.sensor_msgs.JointState`](./proto_aegis_grpc/v1/sensor_msgs.proto)           | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
+| `proto_aegis_grpc.v1.RobotControlService.GotoPose`       | Plan & execute the MoveIt2 trajectory to a given pose target.   | ❌     | [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)             | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
+| `proto_aegis_grpc.v1.RobotControlService.GriperClose`    | Closes the gripper.                                             | ✅     | `google.protobuf.Empty`                                                                           | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
+| `proto_aegis_grpc.v1.RobotControlService.GriperOpen`     | Opens the gripper.                                              | ✅     | `google.protobuf.Empty`                                                                           | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
+| `proto_aegis_grpc.v1.RobotControlService.GriperSetWidth` | Set the gripper width.                                          | ✅     | [`proto_aegis_grpc.v1.robot_srvs.GripperSetWidthRequest`](./proto_aegis_grpc/v1/robot_srvs.proto) | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
+| `proto_aegis_grpc.v1.RobotControlService.ServoJoint`     | Servoing (w.r.t. joints).                                       | ✅     | [`proto_aegis_grpc.v1.control_msgs.JointJog`](./proto_aegis_grpc/v1/control_msgs.proto)           | `google.protobuf.Empty`                                                                    |
+| `proto_aegis_grpc.v1.RobotControlService.ServoTCP`       | Servoing (w.r.t. TCP).                                          | ✅     | [`proto_aegis_grpc.v1.geometry_msgs.Twist`](./proto_aegis_grpc/v1/geometry_msgs.proto)            | `google.protobuf.Empty`                                                                    |
+
+You can always list the above services them with the `grpcurl`:
+```bash
+grpcurl -plaintext 127.0.0.1:50051 list proto_aegis_grpc.v1.RobotControlService
+```
 
 ### All messages
 
