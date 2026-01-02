@@ -5,11 +5,11 @@ namespace aegis_grpc {
 RobotReadServiceImpl::RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node)
     : node_(node), pose_data_(), wrench_data_(), joint_state_data_() {
       //TODO parametrize topic names from ros arguments
-  pose_sub_ = node_->create_subscription<geometry_msgs::msg::Pose>(
+  pose_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
       "/tcp_pose", 10,
       std::bind(&RobotReadServiceImpl::PoseSubCb, this,
                 std::placeholders::_1));
-  wrench_sub_ = node_->create_subscription<geometry_msgs::msg::Wrench>(
+  wrench_sub_ = node_->create_subscription<geometry_msgs::msg::WrenchStamped>(
       "/wrench", 10,
       std::bind(&RobotReadServiceImpl::WrenchSubCb, this,
                 std::placeholders::_1));
@@ -20,13 +20,13 @@ RobotReadServiceImpl::RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node)
 }
 
 void RobotReadServiceImpl::PoseSubCb(
-    const geometry_msgs::msg::Pose::SharedPtr msg) {
-  pose_data_ = *msg;
+    const geometry_msgs::msg::PoseStamped::SharedPtr msg) {
+  pose_data_ = msg->pose;
 }
 
 void RobotReadServiceImpl::WrenchSubCb(
-    const geometry_msgs::msg::Wrench::SharedPtr msg) {
-  wrench_data_ = *msg;
+    const geometry_msgs::msg::WrenchStamped::SharedPtr msg) {
+  wrench_data_ = msg->wrench;
 }
 
 void RobotReadServiceImpl::JointStateSubCb(
@@ -55,7 +55,7 @@ RobotReadServiceImpl::GetWrench(grpc::ServerContext *context,
   return grpc::Status::OK;
 }
 
-grpc::Status RobotReadServiceImpl::GetJointState(
+grpc::Status RobotReadServiceImpl::GetJointStates(
     grpc::ServerContext *context, const google::protobuf::Empty *request,
     proto_aegis_grpc::v1::JointState *response) {
   (void) context;

@@ -10,7 +10,7 @@ import "proto_aegis_grpc/v1/sensor_msgs.proto";
 service RobotReadService {
   rpc GetTCPPose(google.protobuf.Empty) returns (Pose);
   rpc GetWrench(google.protobuf.Empty) returns (Wrench);
-  rpc GetJointState(google.protobuf.Empty) returns (JointState);
+  rpc GetJointStates(google.protobuf.Empty) returns (JointState);
   rpc GetAll(google.protobuf.Empty) returns (RobotState);
 }
 

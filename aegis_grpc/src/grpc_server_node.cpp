@@ -5,6 +5,7 @@
 
 #include <grpcpp/grpcpp.h>
 #include <rclcpp/rclcpp.hpp>
+#include <grpcpp/ext/proto_server_reflection_plugin.h>
 
 #include "aegis_grpc/robot_control_service.hpp"
 #include "aegis_grpc/robot_read_service.hpp"
@@ -12,7 +13,10 @@
 std::unique_ptr<grpc::Server>
 build_server(const std::string &address,
              std::vector<grpc::Service *> &services) {
+
   grpc::ServerBuilder builder;
+  grpc::reflection::InitProtoReflectionServerBuilderPlugin();
+  grpc::EnableDefaultHealthCheckService(true);
   builder.AddListeningPort(address, grpc::InsecureServerCredentials());
 
   for (auto *srv : services)

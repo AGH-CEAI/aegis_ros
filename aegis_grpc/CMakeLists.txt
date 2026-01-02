@@ -129,7 +129,12 @@ add_executable(grpc_server src/grpc_server_node.cpp)
 add_dependencies(grpc_server ${PROJECT_NAME}_lib generate_protos)
 target_compile_features(grpc_server PUBLIC c_std_99 cxx_std_17) # Require C99 and C++17
 
-target_link_libraries(grpc_server gRPC::grpc++ protobuf::libprotobuf ${PROJECT_NAME}_lib)
+target_link_libraries(
+  grpc_server
+  gRPC::grpc++
+  grpc++_reflection
+  protobuf::libprotobuf
+  ${PROJECT_NAME}_lib)
 
 ament_target_dependencies(grpc_server ${ROS_DEPENDS})
 

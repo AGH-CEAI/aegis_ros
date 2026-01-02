@@ -4,12 +4,35 @@ This packages provides a bridge between ROS 2 and [gRPC](https://grpc.io) protoc
 
 It aims to provide a form of "frequency clutch" between real-time domain and low-frequnecy decision making (e.g. an ANN inference in Python).
 
-## Launch
+## Usage
+
+### Launch
 
 ``` bash
 ros2 launch aegis_grpc start_server.launch.py
 # or
 ros2 run aegis_grpc grpc_server
+```
+
+### Interaction
+The server have enabled a "reflection" plugin, which allows to explore all services with external tool like [`grpcurl`](https://github.com/fullstorydev/grpcurl).
+
+```bash
+grpcurl -plaintext 127.0.0.1:50051 list
+grpcurl -plaintext 127.0.0.1:50051 list proto_aegis_grpc.v1.RobotControlService
+grpcurl -plaintext 127.0.0.1:50051 list proto_aegis_grpc.v1.RobotReadService
+grpcurl -plaintext 127.0.0.1:50051 describe proto_aegis_grpc.v1.RobotReadService.GetAll
+# or with tool from container
+podman run --network=host docker.io/fullstorydev/grpcurl -plaintext 127.0.0.1:50051 list
+```
+
+Example call to `GetAll` result as a plain json:
+
+```bash
+grpcurl -plaintext 127.0.0.1:50051 \
+  -d '{}' \
+  127.0.0.1:50051 \
+  proto_aegis_grpc.v1.RobotReadService.GetAll
 ```
 
 ## Messages architecture
@@ -40,24 +63,29 @@ The main difference is the lack of the header with timestamps - the data synchro
 
 ### All messages
 
-| gRPC Def                                                                                | Type      | Name               | ROS Def                                                                                                                                    |
-| --------------------------------------------------------------------------------------- | --------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| [`proto_aegis_grpc.v1.control_msgs.GripperService`](./proto/v1/control_msgs.proto)      | `service` | GripperService     | [`control_msgs/action/GripperCommand`](https://github.com/ros-controls/control_msgs/blob/humble/control_msgs/action/GripperCommand.action) |
-| [`proto_aegis_grpc.v1.control_msgs.SetWidthRequest`](./proto/v1/control_msgs.proto)     | `msg`     | GripperStatus      | -                                                                                                                                          |
-| [`proto_aegis_grpc.v1.control_msgs.SetWidthResponse`](./proto/v1/control_msgs.proto)    | `msg`     | SetWidthResponse   | -                                                                                                                                          |
-| [`proto_aegis_grpc.v1.control_msgs.JointJog`](./proto/v1/control_msgs.proto)            | `msg`     | JointJog           | [`control_msgs/msg/JointJog`](https://github.com/ros-controls/control_msgs/blob/humble/control_msgs/msg/JointJog.msg)                      |
-| [`proto_aegis_grpc.v1.geometry_msgs.Point`](./proto/v1/geometry_msgs.proto)             | `msg`     | Point              | [`geometry_msgs/msg/Point`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Point.msg)                             |
-| [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto/v1/geometry_msgs.proto)              | `msg`     | Pose               | [`geometry_msgs/msg/Pose`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Pose.msg)                               |
-| [`proto_aegis_grpc.v1.geometry_msgs.Quaternion`](./proto/v1/geometry_msgs.proto)        | `msg`     | Quaternion         | [`geometry_msgs/msg/Pose`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Quaternion.msg)                         |
-| [`proto_aegis_grpc.v1.geometry_msgs.Twist`](./proto/v1/geometry_msgs.proto)             | `msg`     | Twist              | [`geometry_msgs/msg/TwistPose`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Twist.msg)                         |
-| [`proto_aegis_grpc.v1.geometry_msgs.Vector3`](./proto/v1/geometry_msgs.proto)           | `msg`     | Vector3            | [`geometry_msgs/msg/Vector3`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Vector3.msg)                         |
-| [`proto_aegis_grpc.v1.geometry_msgs.Wrench`](./proto/v1/geometry_msgs.proto)            | `msg`     | Wrench             | [`geometry_msgs/msg/Wrench`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Wrench.msg)                           |
-| [`proto_aegis_grpc.v1.sensor_msgs_msgs.JointState`](./proto/v1/sensor_msgs.proto)       | `msg`     | JointState         | [`sensor_msgs/msg/JointState`](https://github.com/ros2/common_interfaces/blob/humble/sensor_msgs/msg/JointState.msg)                       |
-| [`proto_aegis_grpc.v1.moveit_facade.GotoJointsRequest`](./proto/v1/control_msgs.proto)  | `msg`     | GotoJointsRequest  | -                                                                                                                                          |
-| [`proto_aegis_grpc.v1.moveit_facade.GotoJointsResponse`](./proto/v1/control_msgs.proto) | `msg`     | GotoJointsResponse | -                                                                                                                                          |
-| [`proto_aegis_grpc.v1.moveit_facade.GotoPoseRequest`](./proto/v1/control_msgs.proto)    | `msg`     | GotoPoseRequest    | -                                                                                                                                          |
-| [`proto_aegis_grpc.v1.moveit_facade.GotoPoseResponse`](./proto/v1/control_msgs.proto)   | `msg`     | GotoPoseResponse   | -                                                                                                                                          |
-| [`proto_aegis_grpc.v1.moveit_facade.MoveitService`](./proto/v1/control_msgs.proto)      | `service` | MoveitService      | -                                                                                                                                          |
+| gRPC message                                                                                      | ROS 2 interface                                                                                                                            |
+| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`proto_aegis_grpc.v1.control_msgs.JointJog`](./proto_aegis_grpc/v1/control_msgs.proto)           | [`control_msgs/msg/JointJog`](https://github.com/ros-controls/control_msgs/blob/humble/control_msgs/msg/JointJog.msg)                      |
+| [`proto_aegis_grpc.v1.geometry_msgs.Vector3`](./proto_aegis_grpc/v1/geometry_msgs.proto)          | [`geometry_msgs/msg/Vector3`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Vector3.msg)                         |
+| [`proto_aegis_grpc.v1.geometry_msgs.Point`](./proto_aegis_grpc/v1/geometry_msgs.proto)            | [`geometry_msgs/msg/Point`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Point.msg)                             |
+| [`proto_aegis_grpc.v1.geometry_msgs.Quaternion`](./proto_aegis_grpc/v1/geometry_msgs.proto)       | [`geometry_msgs/msg/Quaternion`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Quaternion.msg)                   |
+| [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)             | [`geometry_msgs/msg/Pose`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Pose.msg)                               |
+| [`proto_aegis_grpc.v1.geometry_msgs.Wrench`](./proto_aegis_grpc/v1/geometry_msgs.proto)           | [`geometry_msgs/msg/Wrench`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Wrench.msg)                           |
+| [`proto_aegis_grpc.v1.geometry_msgs.Twist`](./proto_aegis_grpc/v1/geometry_msgs.proto)            | [`geometry_msgs/msg/Twist`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Twist.msg)                             |
+| [`proto_aegis_grpc.v1.robot_srvs.RobotState`](./proto_aegis_grpc/v1/robot_srvs.proto)             | -                                                                                                                                          |
+| [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto)        | [`std_srvs/srv/Trigger`](https://github.com/ros2/common_interfaces/blob/humble/std_srvs/srv/Trigger.srv)                                   |
+| [`proto_aegis_grpc.v1.robot_srvs.GripperSetWidthRequest`](./proto_aegis_grpc/v1/robot_srvs.proto) | [`control_msgs/action/GripperCommand`](https://github.com/ros-controls/control_msgs/blob/humble/control_msgs/action/GripperCommand.action) |
+
+---
+
+## Development notes
+
+You can simulate data on ROS topics with these commands:
+```bash
+ros2 topic pub /tcp_pose geometry_msgs/msg/PoseStamped "{header: auto, pose: {position: {x: 1.0, y: 2.0, z: 3.0}, orientation: {x: 4.0, y: 5.0, z: 6.0, w: 7.0}}}" --once
+ros2 topic pub /joint_states sensor_msgs/msg/JointState "{header: auto, name: ['joint1','joint2'], position: [0.0, 1.0], velocity: [2.0, 3.0], effort: [4.0, 5.0]}" --once
+ros2 topic pub /wrench geometry_msgs/msg/WrenchStamped "{header: auto, wrench: {force: {x: 1.0, y: 2.0, z: 3.0}, torque: {x: 4.0, y: 5.0, z: 6.0}}}" --once
+```
 
 ---
 

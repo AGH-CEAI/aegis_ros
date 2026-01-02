@@ -6,7 +6,9 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/pose.hpp>
+#include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/wrench.hpp>
+#include <geometry_msgs/msg/wrench_stamped.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 
 namespace aegis_grpc {
@@ -25,7 +27,7 @@ class RobotReadServiceImpl final
                           proto_aegis_grpc::v1::Wrench *response) override;
 
     grpc::Status
-    GetJointState(grpc::ServerContext *context,
+    GetJointStates(grpc::ServerContext *context,
                   const google::protobuf::Empty *request,
                   proto_aegis_grpc::v1::JointState *response) override;
 
@@ -37,8 +39,8 @@ class RobotReadServiceImpl final
     //TODO develop synchronization guard for the freshness of the data
 
   private:
-    void PoseSubCb(const geometry_msgs::msg::Pose::SharedPtr msg);
-    void WrenchSubCb(const geometry_msgs::msg::Wrench::SharedPtr msg);
+    void PoseSubCb(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
+    void WrenchSubCb(const geometry_msgs::msg::WrenchStamped::SharedPtr msg);
     void JointStateSubCb(const sensor_msgs::msg::JointState::SharedPtr msg);
 
   static void FillProtoPose(
@@ -54,8 +56,8 @@ class RobotReadServiceImpl final
       proto_aegis_grpc::v1::JointState* out);
 
     std::shared_ptr<rclcpp::Node> node_;
-    rclcpp::Subscription<geometry_msgs::msg::Pose>::SharedPtr pose_sub_;
-    rclcpp::Subscription<geometry_msgs::msg::Wrench>::SharedPtr wrench_sub_;
+    rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr pose_sub_;
+    rclcpp::Subscription<geometry_msgs::msg::WrenchStamped>::SharedPtr wrench_sub_;
     rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr
         joint_state_sub_;
 
