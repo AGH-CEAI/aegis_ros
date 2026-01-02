@@ -61,7 +61,6 @@ repos:
 -   repo: https://github.com/bufbuild/buf
     rev: v1.62.1
     hooks:
-    # -   id: buf-lint
     -   id: buf-format
 
   # TODO(issue#1) Re-enable warehouse integration
