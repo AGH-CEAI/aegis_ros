@@ -4,7 +4,7 @@ package proto_grpc_aegis.v1;
 
 message JointJog {
   // Name list of the joints to jog (case-sensitive).
-  repeated string name = 1;
+  repeated string joint_names = 1;
 
   // Position command to the joints. Units are meters or radians.
   repeated double displacements = 2;

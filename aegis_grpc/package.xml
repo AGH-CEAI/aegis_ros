@@ -15,10 +15,13 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <depend>control_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>libgrpc</depend>
   <depend>protobuf-compiler-grpc</depend>
   <depend>protobuf-dev</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_action</depend>
   <depend>sensor_msgs</depend>
 
   <exec_depend>python3-grpc-tools</exec_depend>

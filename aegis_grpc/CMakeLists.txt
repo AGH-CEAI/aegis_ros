@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.8)
 project(aegis_grpc)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
+  add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 endif()
 
 # C++17 is required by gRPC
@@ -15,8 +15,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
+find_package(control_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+
+set(ROS_DEPENDS
+    rclcpp
+    rclcpp_action
+    control_msgs
+    geometry_msgs
+    sensor_msgs)
 
 find_program(GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin REQUIRED)
 
@@ -54,13 +63,12 @@ message(STATUS "Proto files path: ${PROTO_SRC_DIR}")
 message(STATUS "Found PROTO_SRC files: ${PROTO_SRC}")
 
 # Specify output directory for header, source, and script files
-set(GENERATED_PROTO_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(GENERATED_PROTO_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/proto_grpc_aegis/v1")
 file(MAKE_DIRECTORY ${GENERATED_PROTO_CPP_DIR})
 
-# These will be in CMAKE_CURRENT_BINARY_DIR by default
-include_directories(${GENERATED_PROTO_CPP_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-
 # gRPC C++/Python stubs
+set(PROTO_SRCS)
+set(PROTO_HDRS)
 set(GRPC_SRCS)
 set(GRPC_HDRS)
 
@@ -83,6 +91,9 @@ foreach(proto_file ${PROTO_SRC})
       --plugin=protoc-gen-grpc=${GRPC_CPP_PLUGIN_EXECUTABLE} ${proto_file}
     DEPENDS ${proto_file} ${GRPC_CPP_PLUGIN_EXECUTABLE}
     COMMENT "Compiling ${proto_file} to C++ header & source")
+
+  list(APPEND PROTO_SRCS ${PB_CC})
+  list(APPEND PROTO_HDRS ${PB_H})
   list(APPEND GRPC_SRCS ${GRPC_CC})
   list(APPEND GRPC_HDRS ${GRPC_H})
 endforeach()
@@ -90,22 +101,39 @@ endforeach()
 # Create a custom target to trigger code generation for all proto files
 add_custom_target(
   generate_protos ALL
-  DEPENDS ${GRPC_SRCS} ${GRPC_HDRS}
+  DEPENDS ${PROTO_SRCS} ${PROTO_HDRS} ${GRPC_SRCS} ${GRPC_HDRS}
   COMMENT "Generating gRPC and Protobuf headers")
+message(STATUS "Prepared GRPC_CC files: ${GRPC_CC}")
 
 # ------------------------------
-# Executable targets
+# Static library with all CPP files
+
+add_library(${PROJECT_NAME}_lib STATIC src/robot_read_service.cpp src/robot_control_service.cpp)
+
+target_include_directories(
+  ${PROJECT_NAME}_lib PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                             $<INSTALL_INTERFACE:include> ${GENERATED_PROTO_CPP_DIR})
+
+ament_target_dependencies(${PROJECT_NAME}_lib ${ROS_DEPENDS})
+
+target_link_libraries(${PROJECT_NAME}_lib gRPC::grpc++ protobuf::libprotobuf)
+
+add_dependencies(${PROJECT_NAME}_lib generate_protos)
+target_sources(${PROJECT_NAME}_lib PRIVATE ${PROTO_SRCS} ${GRPC_SRCS})
+
+# ------------------------------
+# Executable target
 
 add_executable(grpc_server src/grpc_server_node.cpp)
-add_dependencies(grpc_server generate_protos)
-target_include_directories(grpc_server PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                                              $<INSTALL_INTERFACE:include>)
+add_dependencies(grpc_server ${PROJECT_NAME}_lib generate_protos)
 target_compile_features(grpc_server PUBLIC c_std_99 cxx_std_17) # Require C99 and C++17
 
-target_link_libraries(grpc_server gRPC::grpc++ protobuf::libprotobuf)
+target_link_libraries(grpc_server gRPC::grpc++ protobuf::libprotobuf ${PROJECT_NAME}_lib)
 
-ament_target_dependencies(grpc_server rclcpp geometry_msgs sensor_msgs)
+ament_target_dependencies(grpc_server ${ROS_DEPENDS})
 
-install(TARGETS grpc_server DESTINATION lib/${PROJECT_NAME})
+install(TARGETS grpc_server ${PROJECT_NAME}_lib DESTINATION lib/${PROJECT_NAME})
+
+install(DIRECTORY include/ DESTINATION include)
 
 ament_package()

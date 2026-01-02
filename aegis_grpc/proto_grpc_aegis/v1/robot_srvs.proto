@@ -11,6 +11,13 @@ service RobotReadService {
   rpc GetTCPPose(google.protobuf.Empty) returns (Pose);
   rpc GetWrench(google.protobuf.Empty) returns (Wrench);
   rpc GetJointState(google.protobuf.Empty) returns (JointState);
+  rpc GetAll(google.protobuf.Empty) returns (RobotState);
+}
+
+message RobotState {
+  Pose pose = 1;
+  Wrench wrench = 2;
+  JointState joint_state = 3;
 }
 
 service RobotControlService {
@@ -18,12 +25,9 @@ service RobotControlService {
   rpc ServoTCP(Twist) returns (google.protobuf.Empty);
   rpc GotoPose(Pose) returns (TriggerResponse);
   rpc GotoJoints(JointState) returns (TriggerResponse);
-}
-
-service GripperService {
-  rpc SetWidth(GripperSetWidthRequest) returns (GripperSetWidthResponse);
-  rpc Close(google.protobuf.Empty) returns (TriggerResponse);
-  rpc Open(google.protobuf.Empty) returns (TriggerResponse);
+  rpc GriperSetWidth(GripperSetWidthRequest) returns (TriggerResponse);
+  rpc GriperClose(google.protobuf.Empty) returns (TriggerResponse);
+  rpc GriperOpen(google.protobuf.Empty) returns (TriggerResponse);
 }
 
 message TriggerResponse {
@@ -34,11 +38,4 @@ message TriggerResponse {
 message GripperSetWidthRequest {
   double position = 1; // The goal gripper gap size (in meters)
   double effort = 2; // The goal effort exerted (in Newtons)
-}
-
-message GripperSetWidthResponse {
-  double position = 1; // The current gripper gap size (in meters)
-  double effort = 2; // The current effort exerted (in Newtons)
-  bool stalled = 3; // True iff the gripper is exerting max effort and not moving
-  bool reached_goal = 4; // True iff the gripper position has reached the commanded setpoint
 }
