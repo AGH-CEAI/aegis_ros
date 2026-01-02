@@ -33,6 +33,9 @@ class RobotReadServiceImpl final
                         const google::protobuf::Empty *request,
                         proto_aegis_grpc::v1::RobotState *response) override;
 
+    //TODO implement getters for images from cameras (RGB & RGBD)
+    //TODO develop synchronization guard for the freshness of the data
+
   private:
     void PoseSubCb(const geometry_msgs::msg::Pose::SharedPtr msg);
     void WrenchSubCb(const geometry_msgs::msg::Wrench::SharedPtr msg);

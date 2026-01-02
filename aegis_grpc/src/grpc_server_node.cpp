@@ -15,8 +15,8 @@ build_server(const std::string &address,
   grpc::ServerBuilder builder;
   builder.AddListeningPort(address, grpc::InsecureServerCredentials());
 
-  for (auto *svc : services)
-    builder.RegisterService(svc);
+  for (auto *srv : services)
+    builder.RegisterService(srv);
 
   return builder.BuildAndStart();
 }
@@ -25,15 +25,16 @@ int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
   auto node = rclcpp::Node::make_shared("grpc_server");
 
+  //TODO parametrize port
   const std::string address = "0.0.0.0:50051";
   aegis_grpc::RobotReadServiceImpl read_service(node);
   aegis_grpc::RobotControlServiceImpl control_service(node);
   std::vector<grpc::Service *> services = {&read_service, &control_service};
 
   auto server = build_server(address, services);
+  std::thread grpc_thread([&server]() { server->Wait(); });
   std::cout << "gRPC server listening on " << address << std::endl;
 
-  std::thread grpc_thread([&server]() { server->Wait(); });
   rclcpp::spin(node);
 
   server->Shutdown();

@@ -72,6 +72,8 @@ class RobotControlServiceImpl final
     rclcpp::TimerBase::SharedPtr pub_timer_;
 
     // TODO add mutexes/atomic access to these variables
+    // TODO implement messages repeater for given servo frequency
+    // TODO allow only one method of control at the same time
     control_msgs::msg::JointJog servo_joint_msg_;
     geometry_msgs::msg::Twist servo_tcp_msg_;
 
