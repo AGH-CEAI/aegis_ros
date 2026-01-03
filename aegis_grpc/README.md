@@ -15,7 +15,7 @@ ros2 run aegis_grpc grpc_server
 ```
 
 ### Interaction
-The server have enabled a "reflection" plugin, which allows to explore all services with external tool like [`grpcurl`](https://github.com/fullstorydev/grpcurl).
+The server has enabled a "reflection" plugin, which allows you to explore all services with external tools like [`grpcurl`](https://github.com/fullstorydev/grpcurl).
 
 ```bash
 grpcurl -plaintext 127.0.0.1:50051 list
@@ -26,7 +26,7 @@ grpcurl -plaintext 127.0.0.1:50051 describe proto_aegis_grpc.v1.RobotReadService
 podman run --network=host docker.io/fullstorydev/grpcurl -plaintext 127.0.0.1:50051 list
 ```
 
-Example call to `GetAll` result as a plain json:
+Example call to the `GetAll` method with result as a plain json:
 
 ```bash
 grpcurl -plaintext 127.0.0.1:50051 \
@@ -44,7 +44,7 @@ The server is split into 2 services defined in [`proto_aegis_grpc.v1.robot_srvs`
 
 ### Reading data with `RobotReadService`
 
-The "ROS-getters" are implemented in the [`RobotReadServiceImpl`](./include/aegis_grpc/robot_read_service.hpp) class as the following services:
+The "ROS-getters" are implemented in the [`RobotReadServiceImpl`](./include/aegis_grpc/robot_read_service.hpp) class as the following methods:
 
 | Method name                                          | Desc.                       | Impl. | gRPC Request            | gRPC Response                                                                           |
 | ---------------------------------------------------- | --------------------------- | ----- | ----------------------- | --------------------------------------------------------------------------------------- |
@@ -53,14 +53,14 @@ The "ROS-getters" are implemented in the [`RobotReadServiceImpl`](./include/aegi
 | `proto_aegis_grpc.v1.RobotReadService.GetTCPPose`    | Get the TCP pose.           | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)   |
 | `proto_aegis_grpc.v1.RobotReadService.GetWrench`     | Read force/torque sensor.   | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.geometry_msgs.Wrench`](./proto_aegis_grpc/v1/geometry_msgs.proto) |
 
-You can always list the above services them with the `grpcurl`:
+You can always list the methods with the `grpcurl` command:
 ```bash
 grpcurl -plaintext 127.0.0.1:50051 list proto_aegis_grpc.v1.RobotReadService
 ```
 
 ### Controlling the robot with `RobotControlService`
 
-The control bridge for MoveIt2 servo and planners are implemented in the [`RobotControlServiceImpl`](./include/aegis_grpc/robot_control_service.hpp) class as the following services:
+The control bridge for MoveIt2 servo and planners are implemented in the [`RobotControlServiceImpl`](./include/aegis_grpc/robot_control_service.hpp) class as the following methods:
 
 | Method name                                              | Desc.                                                           | Impl. | gRPC Request                                                                                      | gRPC Response                                                                              |
 | -------------------------------------------------------- | --------------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
@@ -72,7 +72,7 @@ The control bridge for MoveIt2 servo and planners are implemented in the [`Robot
 | `proto_aegis_grpc.v1.RobotControlService.ServoJoint`     | Servoing (w.r.t. joints).                                       | ✅     | [`proto_aegis_grpc.v1.control_msgs.JointJog`](./proto_aegis_grpc/v1/control_msgs.proto)           | `google.protobuf.Empty`                                                                    |
 | `proto_aegis_grpc.v1.RobotControlService.ServoTCP`       | Servoing (w.r.t. TCP).                                          | ✅     | [`proto_aegis_grpc.v1.geometry_msgs.Twist`](./proto_aegis_grpc/v1/geometry_msgs.proto)            | `google.protobuf.Empty`                                                                    |
 
-You can always list the above services them with the `grpcurl`:
+You can always list the methods with the `grpcurl` command:
 ```bash
 grpcurl -plaintext 127.0.0.1:50051 list proto_aegis_grpc.v1.RobotControlService
 ```

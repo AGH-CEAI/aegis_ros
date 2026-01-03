@@ -29,6 +29,8 @@ set(ROS_DEPENDS
 
 find_program(GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin REQUIRED)
 
+# gRPC package for Ubuntu 22.04 (ROS Humble) can't be find by CMake's find_package()
+# https://bugs.launchpad.net/ubuntu/+source/grpc/+bug/1935709
 find_package(gRPC CONFIG QUIET)
 if(NOT gRPC_FOUND)
   message(STATUS "gRPC CONFIG not found, using manual library detection")
