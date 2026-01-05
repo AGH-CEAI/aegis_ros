@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package proto_aegis_grpc.v1;
 
+// https://github.com/ros-controls/control_msgs/blob/humble/control_msgs/msg/JointJog.msg
 message JointJog {
   // Name list of the joints to jog (case-sensitive).
   repeated string joint_names = 1;

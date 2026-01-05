@@ -30,11 +30,13 @@ service RobotControlService {
   rpc GriperOpen(google.protobuf.Empty) returns (TriggerResponse);
 }
 
+// https://github.com/ros2/common_interfaces/blob/humble/std_srvs/srv/Trigger.srv
 message TriggerResponse {
   bool success = 1;
   string msg = 2;
 }
 
+// https://github.com/ros-controls/control_msgs/blob/humble/control_msgs/action/GripperCommand.action
 message GripperSetWidthRequest {
   double position = 1; // The goal gripper gap size (in meters)
   double effort = 2; // The goal effort exerted (in Newtons)
