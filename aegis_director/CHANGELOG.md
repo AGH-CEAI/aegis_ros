@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [PR-75](https://github.com/AGH-CEAI/aegis_ros/pull/75) - Added methods for controlling MoveIt2 Servo (Twist & Jog).
 
 ### Changed
+
+* [PR-82](https://github.com/AGH-CEAI/aegis_ros/pull/82) - Set initial package version to `0.1.0`.
+
 ### Deprecated
 ### Removed
 ### Fixed

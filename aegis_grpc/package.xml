@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>aegis_grpc</name>
-  <version>0.0.0</version>
+  <version>0.1.0</version>
   <description>gRPC server to interact with ROS 2 services within the Aegis project.</description>
   <maintainer email="ceai@agh.edu.pl">AGH Center of Excellence in Artificial Intelligence</maintainer>
   <license>Apache-2.0</license>
