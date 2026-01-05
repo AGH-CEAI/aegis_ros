@@ -43,20 +43,30 @@ grpc::Status RobotControlServiceImpl::ServoJoint(
   (void)context;
   (void)response;
 
+  auto N = request->joint_names_size();
+  if (N != request->displacements_size()) {
+    std::string err = "The number of joints mismatches the number of displacmenets values!";
+    RCLCPP_WARN(
+        node_->get_logger(),
+        "[RobotControlService][ServoJoint] %s", err.c_str());
+    return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
+  }
+  if (N != request->velocities_size()) {
+    std::string err = "The number of joints mismatches the number of velocities values!";
+    RCLCPP_WARN(
+        node_->get_logger(),
+        "[RobotControlService][ServoJoint] %s", err.c_str());
+    return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
+  }
+
   auto ros_msg = control_msgs::msg::JointJog();
 
   ros_msg.joint_names.reserve(request->joint_names_size());
-  for (int i = 0; i < request->joint_names_size(); ++i) {
-    ros_msg.joint_names.push_back(request->joint_names(i));
-  }
-
   ros_msg.displacements.reserve(request->displacements_size());
-  for (int i = 0; i < request->displacements_size(); ++i) {
-    ros_msg.displacements.push_back(request->displacements(i));
-  }
-
   ros_msg.velocities.reserve(request->velocities_size());
-  for (int i = 0; i < request->velocities_size(); ++i) {
+  for (int i = 0; i < N; ++i) {
+    ros_msg.joint_names.push_back(request->joint_names(i));
+    ros_msg.displacements.push_back(request->displacements(i));
     ros_msg.velocities.push_back(request->velocities(i));
   }
 
