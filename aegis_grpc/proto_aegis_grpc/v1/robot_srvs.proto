@@ -25,7 +25,7 @@ service RobotControlService {
   rpc ServoTCP(Twist) returns (google.protobuf.Empty);
   rpc GotoPose(Pose) returns (TriggerResponse);
   rpc GotoJoints(JointState) returns (TriggerResponse);
-  rpc GriperSetWidth(GripperSetWidthRequest) returns (TriggerResponse);
+  rpc GripperSetPosition(GripperSetPositionRequest) returns (TriggerResponse);
   rpc GriperClose(google.protobuf.Empty) returns (TriggerResponse);
   rpc GriperOpen(google.protobuf.Empty) returns (TriggerResponse);
 }
@@ -37,7 +37,7 @@ message TriggerResponse {
 }
 
 // https://github.com/ros-controls/control_msgs/blob/humble/control_msgs/action/GripperCommand.action
-message GripperSetWidthRequest {
+message GripperSetPositionRequest {
   double position = 1; // The goal gripper gap size (in meters)
   double effort = 2; // The goal effort exerted (in Newtons)
 }

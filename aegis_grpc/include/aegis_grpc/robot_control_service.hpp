@@ -44,9 +44,9 @@ class RobotControlServiceImpl final
     //     proto_aegis_grpc::v1::TriggerResponse *response) override;
 
     //TODO change name to GripperSetPosition
-    grpc::Status GriperSetWidth(
+    grpc::Status GripperSetPosition(
       grpc::ServerContext* context,
-      const proto_aegis_grpc::v1::GripperSetWidthRequest *request,
+      const proto_aegis_grpc::v1::GripperSetPositionRequest *request,
       proto_aegis_grpc::v1::TriggerResponse *response) override;
 
     grpc::Status GriperClose(

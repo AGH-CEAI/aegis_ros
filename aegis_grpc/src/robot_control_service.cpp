@@ -89,9 +89,9 @@ RobotControlServiceImpl::ServoTCP(grpc::ServerContext *context,
   return grpc::Status::OK;
 }
 
-grpc::Status RobotControlServiceImpl::GriperSetWidth(
+grpc::Status RobotControlServiceImpl::GripperSetPosition(
     grpc::ServerContext *context,
-    const proto_aegis_grpc::v1::GripperSetWidthRequest *request,
+    const proto_aegis_grpc::v1::GripperSetPositionRequest *request,
     proto_aegis_grpc::v1::TriggerResponse *response) {
 
   (void)context;
