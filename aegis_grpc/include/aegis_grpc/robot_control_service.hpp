@@ -43,7 +43,6 @@ class RobotControlServiceImpl final
     //     const proto_aegis_grpc::v1::JointState *request,
     //     proto_aegis_grpc::v1::TriggerResponse *response) override;
 
-    //TODO change name to GripperSetPosition
     grpc::Status GripperSetPosition(
       grpc::ServerContext* context,
       const proto_aegis_grpc::v1::GripperSetPositionRequest *request,

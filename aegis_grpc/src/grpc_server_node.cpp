@@ -37,24 +37,25 @@ std::string GetServerAdress(std::shared_ptr<rclcpp::Node> node) {
 int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
   auto node = rclcpp::Node::make_shared("grpc_server");
+  auto logger = node->get_logger();
 
   const std::string address = GetServerAdress(node);
 
-  std::cout << "Creating RobotReadService" << std::endl;
+  RCLCPP_INFO(logger, "Creating RobotReadService");
   aegis_grpc::RobotReadServiceImpl read_service(node);
 
-  std::cout << "Creating RobotControlService" << std::endl;
+  RCLCPP_INFO(logger, "Creating RobotControlService");
   aegis_grpc::RobotControlServiceImpl control_service(node);
 
-  std::cout << "Setuping gRPC server with services" << std::endl;
+  RCLCPP_INFO(logger, "Setuping gRPC server with services");
   std::vector<grpc::Service *> services = {&read_service, &control_service};
   auto server = BuildServer(address, services);
   std::thread grpc_thread([&server]() { server->Wait(); });
-  std::cout << "gRPC server listening on " << address << std::endl;
+  RCLCPP_INFO(logger, "gRPC server listening on %s", address.c_str());
 
   rclcpp::spin(node);
 
-  std::cout << "Shutting down the gRPC server" << std::endl;
+  RCLCPP_INFO(logger, "Shutting down the gRPC server");
   server->Shutdown();
   grpc_thread.join();
   rclcpp::shutdown();
