@@ -1,5 +1,8 @@
 #ifndef AEGIS_GRPC__ROBOT_CONTROL_SERVICE_HPP_
 #define AEGIS_GRPC__ROBOT_CONTROL_SERVICE_HPP_
+#include <atomic>
+#include <chrono>
+
 #include <grpcpp/grpcpp.h>
 #include <google/protobuf/empty.pb.h>
 #include "proto_aegis_grpc/v1/robot_srvs.grpc.pb.h"
@@ -81,6 +84,7 @@ class RobotControlServiceImpl final
     bool gripper_cmd_success_;
     std::string gripper_cmd_msg_;
     std::chrono::duration<double> action_timeout_;
+    std::atomic<bool> gripper_cmd_done_;
 };
 
 } // namespace aegis_grpc

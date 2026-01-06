@@ -8,7 +8,7 @@ namespace aegis_grpc {
 RobotControlServiceImpl::RobotControlServiceImpl(
     std::shared_ptr<rclcpp::Node> node)
     : node_(node), servo_joint_msg_(), servo_tcp_msg_(),
-      gripper_cmd_success_(false), gripper_cmd_msg_(""), action_timeout_(0.0) {
+      gripper_cmd_success_(false), gripper_cmd_msg_(""), action_timeout_(0.0), gripper_cmd_done_(false) {
 
   DeclareROSParameter("topic_servo_joint", std::string("/servo_node/delta_joint_cmds"),
                       "[str] Pub: output topic for joints servo commands.");
@@ -193,6 +193,7 @@ void RobotControlServiceImpl::GripperSendGoal(double position,
         case rclcpp_action::ResultCode::SUCCEEDED:
           gripper_cmd_success_ = true;
           gripper_cmd_msg_ = "";
+          gripper_cmd_done_.store(true, std::memory_order_relaxed);
           return;
         case rclcpp_action::ResultCode::ABORTED:
           gripper_cmd_msg_ = "ABORTED";
@@ -205,11 +206,17 @@ void RobotControlServiceImpl::GripperSendGoal(double position,
           break;
         }
         gripper_cmd_success_ = false;
+        gripper_cmd_done_.store(true, std::memory_order_relaxed);
         RCLCPP_ERROR(this->node_->get_logger(), "Gripper goal result: %s",
                      gripper_cmd_msg_.c_str());
       };
 
+  gripper_cmd_done_.store(false, std::memory_order_relaxed);
   gripper_client_->async_send_goal(goal, options);
+
+  while(!gripper_cmd_done_.load(std::memory_order_relaxed)){
+    std::this_thread::sleep_for(1ms);
+  }
 }
 
 } // namespace aegis_grpc
