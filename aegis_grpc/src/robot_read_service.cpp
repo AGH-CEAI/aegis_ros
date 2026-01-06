@@ -5,9 +5,10 @@ namespace aegis_grpc {
 RobotReadServiceImpl::RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node)
     : node_(node), pose_data_(), wrench_data_(), joint_state_data_() {
 
-  DeclareROSParameter("topic_pose", "/tcp_pose", "[str] Sub: topic with the tcp pose data.");
-  DeclareROSParameter("topic_wrench", "/wrench", "[str] Sub: topic with the F/T data.");
-  DeclareROSParameter("topic_joints", "/joint_states", "[str] Sub: topic with the joint states.");
+  // Initialization parameters
+  DeclareROSParameter("topic_pose", "/tcp_pose", "[str] Init; Sub: topic with the tcp pose data.");
+  DeclareROSParameter("topic_wrench", "/wrench", "[str] Init; Sub: topic with the F/T data.");
+  DeclareROSParameter("topic_joints", "/joint_states", "[str] Init; Sub: topic with the joint states.");
 
   pose_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
       node_->get_parameter("topic_pose").as_string(), 10,

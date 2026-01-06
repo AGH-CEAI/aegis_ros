@@ -1,4 +1,4 @@
-#include <chrono>
+#include <thread>
 #include "aegis_grpc/robot_control_service.hpp"
 
 using namespace std::chrono_literals;
@@ -10,14 +10,19 @@ RobotControlServiceImpl::RobotControlServiceImpl(
     : node_(node), servo_joint_msg_(), servo_tcp_msg_(),
       gripper_cmd_success_(false), gripper_cmd_msg_(""), action_timeout_(0.0), gripper_cmd_done_(false) {
 
+  // Initialization parameters
   DeclareROSParameter("topic_servo_joint", std::string("/servo_node/delta_joint_cmds"),
-                      "[str] Pub: output topic for joints servo commands.");
+                      "[str] Init; Pub: output topic for joints servo commands.");
   DeclareROSParameter("topic_servo_tcp", std::string("/servo_node/delta_twist_cmds"),
-                      "[str] Pub: output topic for TCP servo commands.");
+                      "[str] Init; Pub: output topic for TCP servo commands.");
   DeclareROSParameter("action_gripper", std::string("/gripper_controller/gripper_cmd"),
-                      "[str] Action: GripperCommand action.");
-  DeclareROSParameter("action_timeout_s", 3.0, "[double] Waiting timeout for action in seconds.");
-  DeclareROSParameter("publish_rate_hz", 2.0, "[double] Publish loop frequency in Hz.");
+                      "[str] Init; Action: GripperCommand action.");
+  DeclareROSParameter("action_timeout_s", 3.0, "[double] Init; Waiting timeout for action in seconds.");
+  DeclareROSParameter("publish_rate_hz", 2.0, "[double] Init; Publish loop frequency in Hz.");
+
+  // Runtime parameters
+  DeclareROSParameter("r_gripper_close_m", 0.0, "[double] Runtime; Gripper close position in meters. ");
+  DeclareROSParameter("r_gripper_open_m", 0.025, "[double] Runtime; Gripper open position in meters.");
 
   servo_joint_pub_ = node_->create_publisher<control_msgs::msg::JointJog>(
       node_->get_parameter("topic_servo_joint").as_string(), 10);
@@ -152,7 +157,10 @@ grpc::Status RobotControlServiceImpl::GriperClose(
     proto_aegis_grpc::v1::TriggerResponse *response) {
   (void)context;
   (void)request;
-  GripperSendGoal(0.0, 0.0);
+
+  double pos = node_->get_parameter("r_gripper_close_m").as_double();
+  GripperSendGoal(pos, 0.0);
+
   response->set_success(gripper_cmd_success_);
   response->set_msg(gripper_cmd_msg_);
   return grpc::Status::OK;
@@ -165,8 +173,9 @@ grpc::Status RobotControlServiceImpl::GriperOpen(
   (void)context;
   (void)request;
 
-  // TODO define OPEN and CLOSE values as config parameters
-  GripperSendGoal(0.05, 0.0);
+  double pos = node_->get_parameter("r_gripper_open_m").as_double();
+  GripperSendGoal(pos, 0.0);
+
   response->set_success(gripper_cmd_success_);
   response->set_msg(gripper_cmd_msg_);
   return grpc::Status::OK;
