@@ -37,16 +37,19 @@ void RobotReadServiceImpl::DeclareROSParameter(const std::string& name, const st
 
 void RobotReadServiceImpl::PoseSubCb(
     const geometry_msgs::msg::PoseStamped::SharedPtr msg) {
+  std::lock_guard<std::mutex> lock(pose_mutex_);
   pose_data_ = msg->pose;
 }
 
 void RobotReadServiceImpl::WrenchSubCb(
     const geometry_msgs::msg::WrenchStamped::SharedPtr msg) {
+  std::lock_guard<std::mutex> lock(wrench_mutex_);
   wrench_data_ = msg->wrench;
 }
 
 void RobotReadServiceImpl::JointStateSubCb(
     const sensor_msgs::msg::JointState::SharedPtr msg) {
+  std::lock_guard<std::mutex> lock(joint_state_mutex_);
   joint_state_data_ = *msg;
 }
 
@@ -56,8 +59,10 @@ RobotReadServiceImpl::GetTCPPose(grpc::ServerContext *context,
                                  proto_aegis_grpc::v1::Pose *response) {
     (void) context;
     (void) request;
-
-    FillProtoPose(pose_data_, response);
+    {
+      std::lock_guard<std::mutex> lock(pose_mutex_);
+      FillProtoPose(pose_data_, response);
+    }
     return grpc::Status::OK;
 }
 
@@ -67,7 +72,10 @@ RobotReadServiceImpl::GetWrench(grpc::ServerContext *context,
                                 proto_aegis_grpc::v1::Wrench *response) {
   (void) context;
   (void) request;
-  FillProtoWrench(wrench_data_, response);
+  {
+    std::lock_guard<std::mutex> lock(wrench_mutex_);
+    FillProtoWrench(wrench_data_, response);
+  }
   return grpc::Status::OK;
 }
 
@@ -76,7 +84,10 @@ grpc::Status RobotReadServiceImpl::GetJointStates(
     proto_aegis_grpc::v1::JointState *response) {
   (void) context;
   (void) request;
-  FillProtoJointState(joint_state_data_, response);
+  {
+    std::lock_guard<std::mutex> lock(joint_state_mutex_);
+    FillProtoJointState(joint_state_data_, response);
+  }
   return grpc::Status::OK;
 }
 
@@ -86,9 +97,18 @@ RobotReadServiceImpl::GetAll(grpc::ServerContext *context,
                              proto_aegis_grpc::v1::RobotState *response) {
   (void) context;
   (void) request;
-  FillProtoPose(pose_data_, response->mutable_pose());
-  FillProtoWrench(wrench_data_, response->mutable_wrench());
-  FillProtoJointState(joint_state_data_, response->mutable_joint_state());
+  {
+    std::lock_guard<std::mutex> lock(pose_mutex_);
+    FillProtoPose(pose_data_, response->mutable_pose());
+  }
+  {
+    std::lock_guard<std::mutex> lock(wrench_mutex_);
+    FillProtoWrench(wrench_data_, response->mutable_wrench());
+  }
+  {
+    std::lock_guard<std::mutex> lock(joint_state_mutex_);
+    FillProtoJointState(joint_state_data_, response->mutable_joint_state());
+  }
   return grpc::Status::OK;
 }
 

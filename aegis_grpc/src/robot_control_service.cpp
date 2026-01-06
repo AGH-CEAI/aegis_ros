@@ -7,10 +7,12 @@ namespace aegis_grpc {
 
 RobotControlServiceImpl::RobotControlServiceImpl(
     std::shared_ptr<rclcpp::Node> node)
-    : node_(node), servo_joint_msg_(), servo_tcp_msg_(),
+    : node_(node), servo_mode_(ServoMode::None), servo_tcp_link_(""), servo_joint_msg_(), servo_tcp_msg_(),
       gripper_cmd_success_(false), gripper_cmd_msg_(""), action_timeout_(0.0), gripper_cmd_done_(false) {
 
   // Initialization parameters
+  DeclareROSParameter("servo_link", std::string("base_link"),
+                      "[str] Init; Name of the base link for the TCP servoing.");
   DeclareROSParameter("topic_servo_joint", std::string("/servo_node/delta_joint_cmds"),
                       "[str] Init; Pub: output topic for joints servo commands.");
   DeclareROSParameter("topic_servo_tcp", std::string("/servo_node/delta_twist_cmds"),
@@ -23,6 +25,8 @@ RobotControlServiceImpl::RobotControlServiceImpl(
   // Runtime parameters
   DeclareROSParameter("r_gripper_close_m", 0.0, "[double] Runtime; Gripper close position in meters. ");
   DeclareROSParameter("r_gripper_open_m", 0.025, "[double] Runtime; Gripper open position in meters.");
+
+  servo_tcp_link_ = node_->get_parameter("servo_link").as_string();
 
   servo_joint_pub_ = node_->create_publisher<control_msgs::msg::JointJog>(
       node_->get_parameter("topic_servo_joint").as_string(), 10);
@@ -59,17 +63,42 @@ void RobotControlServiceImpl::DeclareROSParameter(
 }
 
 void RobotControlServiceImpl::PublishLoop() {
-  // TODO add mutexes
   // TODO add mechanism for "frequency ratio"
-  geometry_msgs::msg::TwistStamped twist_msg;
-  twist_msg.header.stamp = node_->now();
-  twist_msg.header.frame_id = "base_link";
-  twist_msg.twist = servo_tcp_msg_;
-  servo_tcp_pub_->publish(twist_msg);
 
-  control_msgs::msg::JointJog jog_msg = servo_joint_msg_;
-  jog_msg.header.stamp = node_->now();
-  servo_joint_pub_->publish(jog_msg);
+  ServoMode mode;
+  control_msgs::msg::JointJog jog_msg;
+  geometry_msgs::msg::TwistStamped twist_msg;
+
+  {
+    std::lock_guard<std::mutex> lock(servo_mutex_);
+    mode = servo_mode_;
+    switch(mode) {
+      case ServoMode::JointJog:
+        jog_msg = servo_joint_msg_;
+        break;
+      case ServoMode::TCPTwist:
+        twist_msg.twist = servo_tcp_msg_;
+        break;
+      default:
+        break;
+    }
+  }
+
+  switch(mode) {
+    case ServoMode::JointJog:
+      jog_msg.header.stamp = node_->now();
+      servo_joint_pub_->publish(jog_msg);
+      return;
+
+    case ServoMode::TCPTwist:
+      twist_msg.header.stamp = node_->now();
+      twist_msg.header.frame_id = servo_tcp_link_;
+      servo_tcp_pub_->publish(twist_msg);
+      return;
+
+    default:
+      return;
+  }
 }
 
 grpc::Status RobotControlServiceImpl::ServoJoint(
@@ -108,7 +137,11 @@ grpc::Status RobotControlServiceImpl::ServoJoint(
 
   ros_msg.duration = request->duration();
 
-  servo_joint_msg_ = ros_msg;
+  {
+    std::lock_guard<std::mutex> lock(servo_mutex_);
+    servo_mode_ = ServoMode::JointJog;
+    servo_joint_msg_ = ros_msg;
+  }
   return grpc::Status::OK;
 }
 
@@ -131,7 +164,11 @@ RobotControlServiceImpl::ServoTCP(grpc::ServerContext *context,
   ros_msg.angular.y = ang.y();
   ros_msg.angular.z = ang.z();
 
-  servo_tcp_msg_ = ros_msg;
+  {
+    std::lock_guard<std::mutex> lock(servo_mutex_);
+    servo_mode_ = ServoMode::TCPTwist;
+    servo_tcp_msg_ = ros_msg;
+  }
   return grpc::Status::OK;
 }
 

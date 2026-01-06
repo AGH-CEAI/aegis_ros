@@ -23,6 +23,12 @@ class RobotControlServiceImpl final
     using GripperCommand = control_msgs::action::GripperCommand;
     using GoalHandleGripper = rclcpp_action::ClientGoalHandle<GripperCommand>;
 
+    enum class ServoMode {
+      None,
+      JointJog,
+      TCPTwist
+    };
+
     explicit RobotControlServiceImpl(std::shared_ptr<rclcpp::Node> node);
 
     grpc::Status ServoJoint(
@@ -35,7 +41,7 @@ class RobotControlServiceImpl final
         const proto_aegis_grpc::v1::Twist *request,
         google::protobuf::Empty *response) override;
 
-    //TODO add MoveIt2 actions to plan&execute trajectories to targets in Joints and Poses.
+    // TODO add MoveIt2 actions to plan&execute trajectories to targets in Joints and Poses.
     // grpc::Status GotoPose(
     //     grpc::ServerContext* context,
     //     const proto_aegis_grpc::v1::Pose *request,
@@ -71,13 +77,13 @@ class RobotControlServiceImpl final
     std::shared_ptr<rclcpp::Node> node_;
     rclcpp::Publisher<control_msgs::msg::JointJog>::SharedPtr servo_joint_pub_;
     rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr servo_tcp_pub_;
-    //TODO add MoveIt2 actions to plan&execute trajectories to targets in Joints and Poses.
     rclcpp_action::Client<GripperCommand>::SharedPtr gripper_client_;
     rclcpp::TimerBase::SharedPtr pub_timer_;
 
-    // TODO add mutexes/atomic access to these variables
     // TODO implement messages repeater for given servo frequency
-    // TODO allow only one method of control at the same time
+    std::mutex servo_mutex_;
+    ServoMode servo_mode_;
+    std::string servo_tcp_link_;
     control_msgs::msg::JointJog servo_joint_msg_;
     geometry_msgs::msg::Twist servo_tcp_msg_;
 

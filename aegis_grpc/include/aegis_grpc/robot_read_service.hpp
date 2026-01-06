@@ -1,5 +1,7 @@
 #ifndef AEGIS_GRPC__ROBOT_READ_SERVICE_HPP_
 #define AEGIS_GRPC__ROBOT_READ_SERVICE_HPP_
+#include <mutex>
+
 #include <grpcpp/grpcpp.h>
 #include <google/protobuf/empty.pb.h>
 #include "proto_aegis_grpc/v1/robot_srvs.grpc.pb.h"
@@ -67,6 +69,10 @@ class RobotReadServiceImpl final
     geometry_msgs::msg::Pose pose_data_;
     geometry_msgs::msg::Wrench wrench_data_;
     sensor_msgs::msg::JointState joint_state_data_;
+
+    std::mutex pose_mutex_;
+    std::mutex wrench_mutex_;
+    std::mutex joint_state_mutex_;
 };
 
 } // namespace aegis_grpc
