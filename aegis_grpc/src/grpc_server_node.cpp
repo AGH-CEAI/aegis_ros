@@ -12,7 +12,7 @@
 #include "aegis_grpc/robot_read_service.hpp"
 
 std::unique_ptr<grpc::Server>
-build_server(const std::string &address,
+BuildServer(const std::string &address,
              std::vector<grpc::Service *> &services) {
 
   grpc::ServerBuilder builder;
@@ -26,12 +26,19 @@ build_server(const std::string &address,
   return builder.BuildAndStart();
 }
 
+std::string GetServerAdress(std::shared_ptr<rclcpp::Node> node) {
+  auto param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+  param_desc.description = "[int] The port on which the server will listen.";
+  node->declare_parameter("port", /*default:*/ "50051", param_desc);
+  const std::string port = node->get_parameter("port").as_string();
+  return "0.0.0.0:" + port;
+}
+
 int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
   auto node = rclcpp::Node::make_shared("grpc_server");
 
-  //TODO parametrize port
-  const std::string address = "0.0.0.0:50051";
+  const std::string address = GetServerAdress(node);
 
   std::cout << "Creating RobotReadService" << std::endl;
   aegis_grpc::RobotReadServiceImpl read_service(node);
@@ -41,7 +48,7 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Setuping gRPC server with services" << std::endl;
   std::vector<grpc::Service *> services = {&read_service, &control_service};
-  auto server = build_server(address, services);
+  auto server = BuildServer(address, services);
   std::thread grpc_thread([&server]() { server->Wait(); });
   std::cout << "gRPC server listening on " << address << std::endl;
 
