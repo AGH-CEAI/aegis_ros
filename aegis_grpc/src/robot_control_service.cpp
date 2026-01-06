@@ -7,8 +7,8 @@ namespace aegis_grpc {
 
 RobotControlServiceImpl::RobotControlServiceImpl(
     std::shared_ptr<rclcpp::Node> node)
-    : node_(node), servo_mode_(ServoMode::None), servo_tcp_link_(""), servo_joint_msg_(), servo_tcp_msg_(),
-      gripper_cmd_success_(false), gripper_cmd_msg_(""), action_timeout_(0.0), gripper_cmd_done_(false) {
+    : node_(node), servo_mode_(ServoMode::None), servo_frequency_ratio_(0), servo_msgs_left_(0),
+      gripper_cmd_success_(false), action_timeout_(0.0), gripper_cmd_done_(false) {
 
   // Initialization parameters
   DeclareROSParameter("servo_link", std::string("base_link"),
@@ -20,13 +20,19 @@ RobotControlServiceImpl::RobotControlServiceImpl(
   DeclareROSParameter("action_gripper", std::string("/gripper_controller/gripper_cmd"),
                       "[str] Init; Action: GripperCommand action.");
   DeclareROSParameter("action_timeout_s", 3.0, "[double] Init; Waiting timeout for action in seconds.");
-  DeclareROSParameter("publish_rate_hz", 2.0, "[double] Init; Publish loop frequency in Hz.");
+  DeclareROSParameter("servo_in_rate_hz", 10.0, "[double] Init; Servo commands frequency in Hz.");
+  DeclareROSParameter("servo_out_rate_hz", 250.0, "[double] Init; Servo publish loop frequency in Hz.");
 
   // Runtime parameters
   DeclareROSParameter("r_gripper_close_m", 0.0, "[double] Runtime; Gripper close position in meters. ");
   DeclareROSParameter("r_gripper_open_m", 0.025, "[double] Runtime; Gripper open position in meters.");
 
   servo_tcp_link_ = node_->get_parameter("servo_link").as_string();
+
+  auto servo_in_hz = node_->get_parameter("servo_in_rate_hz").as_double();
+  auto servo_out_hz = node_->get_parameter("servo_out_rate_hz").as_double();
+  servo_frequency_ratio_ = std::round(servo_out_hz / servo_in_hz);
+  RCLCPP_INFO(get_logger(), "> Frequency ratio for servo re-publishig is %i", servo_frequency_ratio_);
 
   servo_joint_pub_ = node_->create_publisher<control_msgs::msg::JointJog>(
       node_->get_parameter("topic_servo_joint").as_string(), 10);
@@ -36,14 +42,18 @@ RobotControlServiceImpl::RobotControlServiceImpl(
       node_, node_->get_parameter("action_gripper").as_string());
 
 
-  double hz = node_->get_parameter("publish_rate_hz").as_double();
-  auto pub_period = std::chrono::duration<double>(1.0 / hz);
+  double hz = node_->get_parameter("servo_out_rate_hz").as_double();
+  auto servo_pub_period = std::chrono::duration<double>(1.0 / hz);
 
-  pub_timer_ = node_->create_wall_timer(
-      pub_period, std::bind(&RobotControlServiceImpl::PublishLoop, this));
+  servo_pub_timer_ = node_->create_wall_timer(
+      servo_pub_period, std::bind(&RobotControlServiceImpl::ServoPublishLoop, this));
 
   auto action_timeout = node_->get_parameter("action_timeout_s").as_double();
   action_timeout_ = std::chrono::duration<double>(action_timeout);
+}
+
+rclcpp::Logger RobotControlServiceImpl::get_logger() const {
+  return node_->get_logger();
 }
 
 template <class T>
@@ -57,20 +67,23 @@ void RobotControlServiceImpl::DeclareROSParameter(
   node_->declare_parameter<T>(name, default_val, param_desc);
 
   const auto p = node_->get_parameter(name);
-  RCLCPP_INFO(node_->get_logger(), "> %s := %s",
+  RCLCPP_INFO(get_logger(), "> %s := %s",
               name.c_str(),
               p.value_to_string().c_str());
 }
 
-void RobotControlServiceImpl::PublishLoop() {
-  // TODO(issue#86) add mechanism for "frequency clutch"
-
-  ServoMode mode;
-  control_msgs::msg::JointJog jog_msg;
-  geometry_msgs::msg::TwistStamped twist_msg;
+void RobotControlServiceImpl::ServoPublishLoop() {
+  static ServoMode mode;
+  static control_msgs::msg::JointJog jog_msg;
+  static geometry_msgs::msg::TwistStamped twist_msg;
 
   {
     std::lock_guard<std::mutex> lock(servo_mutex_);
+    if(servo_msgs_left_ == 0) {
+      servo_mode_ = ServoMode::None;
+      return;
+    }
+
     mode = servo_mode_;
     switch(mode) {
       case ServoMode::JointJog:
@@ -82,6 +95,8 @@ void RobotControlServiceImpl::PublishLoop() {
       default:
         break;
     }
+
+    servo_msgs_left_--;
   }
 
   switch(mode) {
@@ -112,14 +127,14 @@ grpc::Status RobotControlServiceImpl::ServoJoint(
   if (N != request->displacements_size()) {
     std::string err =
         "The number of joints mismatches the number of displacmenets values!";
-    RCLCPP_WARN(node_->get_logger(), "[RobotControlService][ServoJoint] %s",
+    RCLCPP_WARN(get_logger(), "[RobotControlService][ServoJoint] %s",
                 err.c_str());
     return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
   }
   if (N != request->velocities_size()) {
     std::string err =
         "The number of joints mismatches the number of velocities values!";
-    RCLCPP_WARN(node_->get_logger(), "[RobotControlService][ServoJoint] %s",
+    RCLCPP_WARN(get_logger(), "[RobotControlService][ServoJoint] %s",
                 err.c_str());
     return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
   }
@@ -129,7 +144,7 @@ grpc::Status RobotControlServiceImpl::ServoJoint(
   ros_msg.joint_names.reserve(request->joint_names_size());
   ros_msg.displacements.reserve(request->displacements_size());
   ros_msg.velocities.reserve(request->velocities_size());
-  for (int i = 0; i < N; ++i) {
+  for (int i = 0; i < N; i++) {
     ros_msg.joint_names.push_back(request->joint_names(i));
     ros_msg.displacements.push_back(request->displacements(i));
     ros_msg.velocities.push_back(request->velocities(i));
@@ -141,6 +156,7 @@ grpc::Status RobotControlServiceImpl::ServoJoint(
     std::lock_guard<std::mutex> lock(servo_mutex_);
     servo_mode_ = ServoMode::JointJog;
     servo_joint_msg_ = ros_msg;
+    servo_msgs_left_ = servo_frequency_ratio_;
   }
   return grpc::Status::OK;
 }
@@ -168,6 +184,7 @@ RobotControlServiceImpl::ServoTCP(grpc::ServerContext *context,
     std::lock_guard<std::mutex> lock(servo_mutex_);
     servo_mode_ = ServoMode::TCPTwist;
     servo_tcp_msg_ = ros_msg;
+    servo_msgs_left_ = servo_frequency_ratio_;
   }
   return grpc::Status::OK;
 }
@@ -222,7 +239,7 @@ void RobotControlServiceImpl::GripperSendGoal(double position,
                                               double max_effort) {
   if (!gripper_client_->wait_for_action_server(action_timeout_)) {
     RCLCPP_ERROR(
-        node_->get_logger(),
+        get_logger(),
         "Gripper Controller action server is not available. Skipping goal.");
     return;
   }
@@ -253,7 +270,7 @@ void RobotControlServiceImpl::GripperSendGoal(double position,
         }
         gripper_cmd_success_ = false;
         gripper_cmd_done_.store(true, std::memory_order_relaxed);
-        RCLCPP_ERROR(this->node_->get_logger(), "Gripper goal result: %s",
+        RCLCPP_ERROR(get_logger(), "Gripper goal result: %s",
                      gripper_cmd_msg_.c_str());
       };
 

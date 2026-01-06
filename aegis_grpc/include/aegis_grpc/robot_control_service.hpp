@@ -68,23 +68,27 @@ class RobotControlServiceImpl final
         proto_aegis_grpc::v1::TriggerResponse *response) override;
 
   private:
+    rclcpp::Logger get_logger() const;
+
     template <class T>
     void DeclareROSParameter(const std::string& name, const T& default_val, const std::string& description);
 
-    void PublishLoop();
+    void ServoPublishLoop();
     void GripperSendGoal(double position, double max_effort);
 
     std::shared_ptr<rclcpp::Node> node_;
     rclcpp::Publisher<control_msgs::msg::JointJog>::SharedPtr servo_joint_pub_;
     rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr servo_tcp_pub_;
     rclcpp_action::Client<GripperCommand>::SharedPtr gripper_client_;
-    rclcpp::TimerBase::SharedPtr pub_timer_;
+    rclcpp::TimerBase::SharedPtr servo_pub_timer_;
 
     std::mutex servo_mutex_;
     ServoMode servo_mode_;
     std::string servo_tcp_link_;
     control_msgs::msg::JointJog servo_joint_msg_;
     geometry_msgs::msg::Twist servo_tcp_msg_;
+    int servo_frequency_ratio_;
+    int servo_msgs_left_;
 
     bool gripper_cmd_success_;
     std::string gripper_cmd_msg_;
