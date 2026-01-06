@@ -41,7 +41,7 @@ class RobotControlServiceImpl final
         const proto_aegis_grpc::v1::Twist *request,
         google::protobuf::Empty *response) override;
 
-    // TODO add MoveIt2 actions to plan&execute trajectories to targets in Joints and Poses.
+    // TODO(issue#83) add MoveIt2 actions to plan&execute trajectories to targets in Joints and Poses.
     // grpc::Status GotoPose(
     //     grpc::ServerContext* context,
     //     const proto_aegis_grpc::v1::Pose *request,
@@ -80,7 +80,6 @@ class RobotControlServiceImpl final
     rclcpp_action::Client<GripperCommand>::SharedPtr gripper_client_;
     rclcpp::TimerBase::SharedPtr pub_timer_;
 
-    // TODO implement messages repeater for given servo frequency
     std::mutex servo_mutex_;
     ServoMode servo_mode_;
     std::string servo_tcp_link_;

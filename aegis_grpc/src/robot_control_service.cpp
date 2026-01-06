@@ -63,7 +63,7 @@ void RobotControlServiceImpl::DeclareROSParameter(
 }
 
 void RobotControlServiceImpl::PublishLoop() {
-  // TODO add mechanism for "frequency ratio"
+  // TODO(issue#86) add mechanism for "frequency clutch"
 
   ServoMode mode;
   control_msgs::msg::JointJog jog_msg;

@@ -37,8 +37,8 @@ class RobotReadServiceImpl final
                         const google::protobuf::Empty *request,
                         proto_aegis_grpc::v1::RobotState *response) override;
 
-    //TODO implement getters for images from cameras (RGB & RGBD)
-    //TODO develop synchronization guard for the freshness of the data
+    // TODO(issue#84) implement getters for images from cameras (RGB & RGBD)
+    // TODO(issue#85) develop synchronization guard to monitor the freshness of the data
 
   private:
     void DeclareROSParameter(const std::string& name, const std::string& default_val, const std::string& description);
@@ -65,7 +65,6 @@ class RobotReadServiceImpl final
     rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr
         joint_state_sub_;
 
-    // TODO add mutexes/atomic access to these variables
     geometry_msgs::msg::Pose pose_data_;
     geometry_msgs::msg::Wrench wrench_data_;
     sensor_msgs::msg::JointState joint_state_data_;
