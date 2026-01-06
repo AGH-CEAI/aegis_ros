@@ -62,15 +62,15 @@ grpcurl -plaintext 127.0.0.1:50051 list proto_aegis_grpc.v1.RobotReadService
 
 The control bridge for MoveIt2 servo and planners are implemented in the [`RobotControlServiceImpl`](./include/aegis_grpc/robot_control_service.hpp) class as the following methods:
 
-| Method name                                              | Desc.                                                           | Impl. | gRPC Request                                                                                      | gRPC Response                                                                              |
-| -------------------------------------------------------- | --------------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `proto_aegis_grpc.v1.RobotControlService.GotoJoints`     | Plan & execute the MoveIt2 trajectory to a given joints target. | ❌     | [`proto_aegis_grpc.v1.sensor_msgs.JointState`](./proto_aegis_grpc/v1/sensor_msgs.proto)           | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
-| `proto_aegis_grpc.v1.RobotControlService.GotoPose`       | Plan & execute the MoveIt2 trajectory to a given pose target.   | ❌     | [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)             | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
-| `proto_aegis_grpc.v1.RobotControlService.GriperClose`    | Closes the gripper.                                             | ✅     | `google.protobuf.Empty`                                                                           | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
-| `proto_aegis_grpc.v1.RobotControlService.GriperOpen`     | Opens the gripper.                                              | ✅     | `google.protobuf.Empty`                                                                           | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
+| Method name                                                  | Desc.                                                           | Impl. | gRPC Request                                                                                         | gRPC Response                                                                              |
+| ------------------------------------------------------------ | --------------------------------------------------------------- | ----- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `proto_aegis_grpc.v1.RobotControlService.GotoJoints`         | Plan & execute the MoveIt2 trajectory to a given joints target. | ❌     | [`proto_aegis_grpc.v1.sensor_msgs.JointState`](./proto_aegis_grpc/v1/sensor_msgs.proto)              | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
+| `proto_aegis_grpc.v1.RobotControlService.GotoPose`           | Plan & execute the MoveIt2 trajectory to a given pose target.   | ❌     | [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)                | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
+| `proto_aegis_grpc.v1.RobotControlService.GriperClose`        | Closes the gripper.                                             | ✅     | `google.protobuf.Empty`                                                                              | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
+| `proto_aegis_grpc.v1.RobotControlService.GriperOpen`         | Opens the gripper.                                              | ✅     | `google.protobuf.Empty`                                                                              | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
 | `proto_aegis_grpc.v1.RobotControlService.GripperSetPosition` | Set the gripper width.                                          | ✅     | [`proto_aegis_grpc.v1.robot_srvs.GripperSetPositionRequest`](./proto_aegis_grpc/v1/robot_srvs.proto) | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
-| `proto_aegis_grpc.v1.RobotControlService.ServoJoint`     | Servoing (w.r.t. joints).                                       | ✅     | [`proto_aegis_grpc.v1.control_msgs.JointJog`](./proto_aegis_grpc/v1/control_msgs.proto)           | `google.protobuf.Empty`                                                                    |
-| `proto_aegis_grpc.v1.RobotControlService.ServoTCP`       | Servoing (w.r.t. TCP).                                          | ✅     | [`proto_aegis_grpc.v1.geometry_msgs.Twist`](./proto_aegis_grpc/v1/geometry_msgs.proto)            | `google.protobuf.Empty`                                                                    |
+| `proto_aegis_grpc.v1.RobotControlService.ServoJoint`         | Servoing (w.r.t. joints).                                       | ✅     | [`proto_aegis_grpc.v1.control_msgs.JointJog`](./proto_aegis_grpc/v1/control_msgs.proto)              | `google.protobuf.Empty`                                                                    |
+| `proto_aegis_grpc.v1.RobotControlService.ServoTCP`           | Servoing (w.r.t. TCP).                                          | ✅     | [`proto_aegis_grpc.v1.geometry_msgs.Twist`](./proto_aegis_grpc/v1/geometry_msgs.proto)               | `google.protobuf.Empty`                                                                    |
 
 You can always list the methods with the `grpcurl` command:
 ```bash
@@ -79,18 +79,71 @@ grpcurl -plaintext 127.0.0.1:50051 list proto_aegis_grpc.v1.RobotControlService
 
 ### All messages
 
-| gRPC message                                                                                      | ROS 2 interface                                                                                                                            |
-| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| [`proto_aegis_grpc.v1.control_msgs.JointJog`](./proto_aegis_grpc/v1/control_msgs.proto)           | [`control_msgs/msg/JointJog`](https://github.com/ros-controls/control_msgs/blob/humble/control_msgs/msg/JointJog.msg)                      |
-| [`proto_aegis_grpc.v1.geometry_msgs.Vector3`](./proto_aegis_grpc/v1/geometry_msgs.proto)          | [`geometry_msgs/msg/Vector3`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Vector3.msg)                         |
-| [`proto_aegis_grpc.v1.geometry_msgs.Point`](./proto_aegis_grpc/v1/geometry_msgs.proto)            | [`geometry_msgs/msg/Point`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Point.msg)                             |
-| [`proto_aegis_grpc.v1.geometry_msgs.Quaternion`](./proto_aegis_grpc/v1/geometry_msgs.proto)       | [`geometry_msgs/msg/Quaternion`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Quaternion.msg)                   |
-| [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)             | [`geometry_msgs/msg/Pose`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Pose.msg)                               |
-| [`proto_aegis_grpc.v1.geometry_msgs.Wrench`](./proto_aegis_grpc/v1/geometry_msgs.proto)           | [`geometry_msgs/msg/Wrench`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Wrench.msg)                           |
-| [`proto_aegis_grpc.v1.geometry_msgs.Twist`](./proto_aegis_grpc/v1/geometry_msgs.proto)            | [`geometry_msgs/msg/Twist`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Twist.msg)                             |
-| [`proto_aegis_grpc.v1.robot_srvs.RobotState`](./proto_aegis_grpc/v1/robot_srvs.proto)             | -                                                                                                                                          |
-| [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto)        | [`std_srvs/srv/Trigger`](https://github.com/ros2/common_interfaces/blob/humble/std_srvs/srv/Trigger.srv)                                   |
+| gRPC message                                                                                         | ROS 2 interface                                                                                                                            |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`proto_aegis_grpc.v1.control_msgs.JointJog`](./proto_aegis_grpc/v1/control_msgs.proto)              | [`control_msgs/msg/JointJog`](https://github.com/ros-controls/control_msgs/blob/humble/control_msgs/msg/JointJog.msg)                      |
+| [`proto_aegis_grpc.v1.geometry_msgs.Vector3`](./proto_aegis_grpc/v1/geometry_msgs.proto)             | [`geometry_msgs/msg/Vector3`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Vector3.msg)                         |
+| [`proto_aegis_grpc.v1.geometry_msgs.Point`](./proto_aegis_grpc/v1/geometry_msgs.proto)               | [`geometry_msgs/msg/Point`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Point.msg)                             |
+| [`proto_aegis_grpc.v1.geometry_msgs.Quaternion`](./proto_aegis_grpc/v1/geometry_msgs.proto)          | [`geometry_msgs/msg/Quaternion`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Quaternion.msg)                   |
+| [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)                | [`geometry_msgs/msg/Pose`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Pose.msg)                               |
+| [`proto_aegis_grpc.v1.geometry_msgs.Wrench`](./proto_aegis_grpc/v1/geometry_msgs.proto)              | [`geometry_msgs/msg/Wrench`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Wrench.msg)                           |
+| [`proto_aegis_grpc.v1.geometry_msgs.Twist`](./proto_aegis_grpc/v1/geometry_msgs.proto)               | [`geometry_msgs/msg/Twist`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Twist.msg)                             |
+| [`proto_aegis_grpc.v1.robot_srvs.RobotState`](./proto_aegis_grpc/v1/robot_srvs.proto)                | -                                                                                                                                          |
+| [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto)           | [`std_srvs/srv/Trigger`](https://github.com/ros2/common_interfaces/blob/humble/std_srvs/srv/Trigger.srv)                                   |
 | [`proto_aegis_grpc.v1.robot_srvs.GripperSetPositionRequest`](./proto_aegis_grpc/v1/robot_srvs.proto) | [`control_msgs/action/GripperCommand`](https://github.com/ros-controls/control_msgs/blob/humble/control_msgs/action/GripperCommand.action) |
+
+## ROS parameters
+
+There is no hardcoded parameters, everything can be modified via ROS:
+
+### RobotControlService
+
+**Initialization parameters**
+
+| Parameter           | Type     | Default                             | Units   | Description                                              |
+| ------------------- | -------- | ----------------------------------- | ------- | -------------------------------------------------------- |
+| `servo_link`        | `string` | `"base_link"`                       | -       | Name of the base link for TCP servoing.                  |
+| `topic_servo_joint` | `string` | `"/servo_node/delta_joint_cmds"`    | -       | Output topic for joint servo commands.                   |
+| `topic_servo_tcp`   | `string` | `"/servo_node/delta_twist_cmds"`    | -       | Output topic for TCP servo commands.                     |
+| `action_gripper`    | `string` | `"/gripper_controller/gripper_cmd"` | -       | `GripperCommand` action name for the gripper controller. |
+| `action_timeout_s`  | `double` | `3.0`                               | seconds | Waiting timeout for actions.                             |
+| `servo_in_rate_hz`  | `double` | `10.0`                              | Hz      | Expected input servo command frequency.                  |
+| `servo_out_rate_hz` | `double` | `250.0`                             | Hz      | Servo command publish loop frequency.                    |
+
+**Runtime parameters**
+
+| Parameter           | Type     | Default | Units  | Description              |
+| ------------------- | -------- | ------- | ------ | ------------------------ |
+| `r_gripper_close_m` | `double` | `0.0`   | meters | Gripper closed position. |
+| `r_gripper_open_m`  | `double` | `0.025` | meters | Gripper open position.   |
+
+### RobotReadService
+
+**Initialization parameters**
+
+| Parameter      | Type     | Default           | Units | Description                                  |
+| -------------- | -------- | ----------------- | ----- | -------------------------------------------- |
+| `topic_pose`   | `string` | `"/tcp_pose"`     | -     | Topic providing the TCP pose.                |
+| `topic_wrench` | `string` | `"/wrench"`       | -     | Topic providing the force/torque (F/T) data. |
+| `topic_joints` | `string` | `"/joint_states"` | -     | Topic providing joint state data.            |
+
+### Run and set examples
+The initialization params can be set via ROS 2 run or launch:
+```bash
+ros2 run aegis_grpc grpc_server \
+  --ros-args \
+  -p servo_link:=tool0 \
+  -p topic_servo_tcp:=/my_servo/delta_twist_cmds \
+  -p action_timeout_s:=5.0 \
+  -p servo_in_rate_hz:=50.0 \
+  -p r_gripper_open_m:=0.030
+```
+
+The runtime params can be set via ROS 2 CLI:
+```bash
+ros2 param set /grpc_server servo_in_rate_hz 20.0
+ros2 param set /grpc_server r_gripper_close_m 0.005
+```
 
 ---
 
