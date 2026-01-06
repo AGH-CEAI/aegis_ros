@@ -4,19 +4,34 @@ namespace aegis_grpc {
 
 RobotReadServiceImpl::RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node)
     : node_(node), pose_data_(), wrench_data_(), joint_state_data_() {
-      //TODO parametrize topic names from ros arguments
+
+  DeclareROSParameter("topic_pose", "/tcp_pose", "[str] Sub: topic with the tcp pose data.");
+  DeclareROSParameter("topic_wrench", "/wrench", "[str] Sub: topic with the F/T data.");
+  DeclareROSParameter("topic_joints", "/joint_states", "[str] Sub: topic with the joint states.");
+
   pose_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
-      "/tcp_pose", 10,
+      node_->get_parameter("topic_pose").as_string(), 10,
       std::bind(&RobotReadServiceImpl::PoseSubCb, this,
                 std::placeholders::_1));
   wrench_sub_ = node_->create_subscription<geometry_msgs::msg::WrenchStamped>(
-      "/wrench", 10,
+      node_->get_parameter("topic_wrench").as_string(), 10,
       std::bind(&RobotReadServiceImpl::WrenchSubCb, this,
                 std::placeholders::_1));
   joint_state_sub_ = node_->create_subscription<sensor_msgs::msg::JointState>(
-      "/joint_states", 10,
+      node_->get_parameter("topic_joints").as_string(), 10,
       std::bind(&RobotReadServiceImpl::JointStateSubCb, this,
                 std::placeholders::_1));
+}
+
+void RobotReadServiceImpl::DeclareROSParameter(const std::string& name, const std::string& default_val, const std::string& description) {
+  auto param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+  param_desc.description = description;
+  node_->declare_parameter(name, default_val, param_desc);
+
+  const auto p = node_->get_parameter(name);
+  RCLCPP_INFO(node_->get_logger(), "> %s := %s",
+              name.c_str(),
+              p.value_to_string().c_str());
 }
 
 void RobotReadServiceImpl::PoseSubCb(

@@ -8,18 +8,49 @@ namespace aegis_grpc {
 RobotControlServiceImpl::RobotControlServiceImpl(
     std::shared_ptr<rclcpp::Node> node)
     : node_(node), servo_joint_msg_(), servo_tcp_msg_(),
-      gripper_cmd_success_(false), gripper_cmd_msg_("") {
-  servo_joint_pub_ = node_->create_publisher<control_msgs::msg::JointJog>(
-      "/servo_node/delta_joint_cmds", 10);
-  servo_tcp_pub_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>(
-      "/servo_node/delta_twist_cmds", 10);
-  gripper_client_ = rclcpp_action::create_client<GripperCommand>(
-      node_, "/gripper_controller/gripper_cmd");
+      gripper_cmd_success_(false), gripper_cmd_msg_(""), action_timeout_(0.0) {
 
-  // TODO pass arguments to setup the frequencies
-  auto pub_period = 500ms;
+  DeclareROSParameter("topic_servo_joint", std::string("/servo_node/delta_joint_cmds"),
+                      "[str] Pub: output topic for joints servo commands.");
+  DeclareROSParameter("topic_servo_tcp", std::string("/servo_node/delta_twist_cmds"),
+                      "[str] Pub: output topic for TCP servo commands.");
+  DeclareROSParameter("action_gripper", std::string("/gripper_controller/gripper_cmd"),
+                      "[str] Action: GripperCommand action.");
+  DeclareROSParameter("action_timeout_s", 3.0, "[double] Waiting timeout for action in seconds.");
+  DeclareROSParameter("publish_rate_hz", 2.0, "[double] Publish loop frequency in Hz.");
+
+  servo_joint_pub_ = node_->create_publisher<control_msgs::msg::JointJog>(
+      node_->get_parameter("topic_servo_joint").as_string(), 10);
+  servo_tcp_pub_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>(
+      node_->get_parameter("topic_servo_tcp").as_string(), 10);
+  gripper_client_ = rclcpp_action::create_client<GripperCommand>(
+      node_, node_->get_parameter("action_gripper").as_string());
+
+
+  double hz = node_->get_parameter("publish_rate_hz").as_double();
+  auto pub_period = std::chrono::duration<double>(1.0 / hz);
+
   pub_timer_ = node_->create_wall_timer(
       pub_period, std::bind(&RobotControlServiceImpl::PublishLoop, this));
+
+  auto action_timeout = node_->get_parameter("action_timeout_s").as_double();
+  action_timeout_ = std::chrono::duration<double>(action_timeout);
+}
+
+template <class T>
+void RobotControlServiceImpl::DeclareROSParameter(
+    const std::string &name,
+    const T& default_val,
+    const std::string &description) {
+  auto param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+  param_desc.description = description;
+
+  node_->declare_parameter<T>(name, default_val, param_desc);
+
+  const auto p = node_->get_parameter(name);
+  RCLCPP_INFO(node_->get_logger(), "> %s := %s",
+              name.c_str(),
+              p.value_to_string().c_str());
 }
 
 void RobotControlServiceImpl::PublishLoop() {
@@ -45,17 +76,17 @@ grpc::Status RobotControlServiceImpl::ServoJoint(
 
   auto N = request->joint_names_size();
   if (N != request->displacements_size()) {
-    std::string err = "The number of joints mismatches the number of displacmenets values!";
-    RCLCPP_WARN(
-        node_->get_logger(),
-        "[RobotControlService][ServoJoint] %s", err.c_str());
+    std::string err =
+        "The number of joints mismatches the number of displacmenets values!";
+    RCLCPP_WARN(node_->get_logger(), "[RobotControlService][ServoJoint] %s",
+                err.c_str());
     return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
   }
   if (N != request->velocities_size()) {
-    std::string err = "The number of joints mismatches the number of velocities values!";
-    RCLCPP_WARN(
-        node_->get_logger(),
-        "[RobotControlService][ServoJoint] %s", err.c_str());
+    std::string err =
+        "The number of joints mismatches the number of velocities values!";
+    RCLCPP_WARN(node_->get_logger(), "[RobotControlService][ServoJoint] %s",
+                err.c_str());
     return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
   }
 
@@ -143,8 +174,7 @@ grpc::Status RobotControlServiceImpl::GriperOpen(
 
 void RobotControlServiceImpl::GripperSendGoal(double position,
                                               double max_effort) {
-  //TODO parametrize the 3s timeout
-  if (!gripper_client_->wait_for_action_server(3s)) {
+  if (!gripper_client_->wait_for_action_server(action_timeout_)) {
     RCLCPP_ERROR(
         node_->get_logger(),
         "Gripper Controller action server is not available. Skipping goal.");

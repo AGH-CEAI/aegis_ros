@@ -39,6 +39,8 @@ class RobotReadServiceImpl final
     //TODO develop synchronization guard for the freshness of the data
 
   private:
+    void DeclareROSParameter(const std::string& name, const std::string& default_val, const std::string& description);
+
     void PoseSubCb(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
     void WrenchSubCb(const geometry_msgs::msg::WrenchStamped::SharedPtr msg);
     void JointStateSubCb(const sensor_msgs::msg::JointState::SharedPtr msg);

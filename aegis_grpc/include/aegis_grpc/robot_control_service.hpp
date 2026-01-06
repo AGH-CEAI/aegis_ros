@@ -59,6 +59,8 @@ class RobotControlServiceImpl final
         proto_aegis_grpc::v1::TriggerResponse *response) override;
 
   private:
+    template <class T>
+    void DeclareROSParameter(const std::string& name, const T& default_val, const std::string& description);
 
     void PublishLoop();
     void GripperSendGoal(double position, double max_effort);
@@ -78,6 +80,7 @@ class RobotControlServiceImpl final
 
     bool gripper_cmd_success_;
     std::string gripper_cmd_msg_;
+    std::chrono::duration<double> action_timeout_;
 };
 
 } // namespace aegis_grpc
