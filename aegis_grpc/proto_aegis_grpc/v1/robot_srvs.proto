@@ -26,8 +26,8 @@ service RobotControlService {
   rpc GotoPose(Pose) returns (TriggerResponse);
   rpc GotoJoints(JointState) returns (TriggerResponse);
   rpc GripperSetPosition(GripperSetPositionRequest) returns (TriggerResponse);
-  rpc GriperClose(google.protobuf.Empty) returns (TriggerResponse);
-  rpc GriperOpen(google.protobuf.Empty) returns (TriggerResponse);
+  rpc GripperClose(google.protobuf.Empty) returns (TriggerResponse);
+  rpc GripperOpen(google.protobuf.Empty) returns (TriggerResponse);
 }
 
 // https://github.com/ros2/common_interfaces/blob/humble/std_srvs/srv/Trigger.srv

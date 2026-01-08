@@ -57,12 +57,12 @@ class RobotControlServiceImpl final
       const proto_aegis_grpc::v1::GripperSetPositionRequest *request,
       proto_aegis_grpc::v1::TriggerResponse *response) override;
 
-    grpc::Status GriperClose(
+    grpc::Status GripperClose(
         grpc::ServerContext* context,
         const google::protobuf::Empty *request,
         proto_aegis_grpc::v1::TriggerResponse *response) override;
 
-    grpc::Status GriperOpen(
+    grpc::Status GripperOpen(
         grpc::ServerContext* context,
         const google::protobuf::Empty *request,
         proto_aegis_grpc::v1::TriggerResponse *response) override;

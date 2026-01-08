@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
   RCLCPP_INFO(logger, "Creating RobotControlService");
   aegis_grpc::RobotControlServiceImpl control_service(node);
 
-  RCLCPP_INFO(logger, "Setuping gRPC server with services");
+  RCLCPP_INFO(logger, "Setting up gRPC server with services");
   std::vector<grpc::Service *> services = {&read_service, &control_service};
   auto server = BuildServer(address, services);
   std::thread grpc_thread([&server]() { server->Wait(); });

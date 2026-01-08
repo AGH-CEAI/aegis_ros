@@ -206,7 +206,7 @@ grpc::Status RobotControlServiceImpl::GripperSetPosition(
   return grpc::Status::OK;
 }
 
-grpc::Status RobotControlServiceImpl::GriperClose(
+grpc::Status RobotControlServiceImpl::GripperClose(
     grpc::ServerContext *context, const google::protobuf::Empty *request,
     proto_aegis_grpc::v1::TriggerResponse *response) {
   (void)context;
@@ -220,7 +220,7 @@ grpc::Status RobotControlServiceImpl::GriperClose(
   return grpc::Status::OK;
 }
 
-grpc::Status RobotControlServiceImpl::GriperOpen(
+grpc::Status RobotControlServiceImpl::GripperOpen(
     grpc::ServerContext *context, const google::protobuf::Empty *request,
     proto_aegis_grpc::v1::TriggerResponse *response) {
 
