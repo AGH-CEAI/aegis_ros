@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 ### Removed
 ### Fixed
+
+* [PR-79](https://github.com/AGH-CEAI/aegis_ros/pull/79) - Fixed the _get_tcp_pose()
+
 ### Security
 
 ## [v202509011041]
