@@ -24,15 +24,14 @@ grpcurl -plaintext 127.0.0.1:50051 list proto_aegis_grpc.v1.RobotReadService
 grpcurl -plaintext 127.0.0.1:50051 describe proto_aegis_grpc.v1.RobotReadService.GetAll
 # or with tool from container
 podman run --network=host docker.io/fullstorydev/grpcurl -plaintext 127.0.0.1:50051 list
+# map grpcurl container alias
+alias grpcurl="podman run --network=host docker.io/fullstorydev/grpcurl"
 ```
 
 Example call to the `GetAll` method with result as a plain json:
 
 ```bash
-grpcurl -plaintext 127.0.0.1:50051 \
-  -d '{}' \
-  127.0.0.1:50051 \
-  proto_aegis_grpc.v1.RobotReadService.GetAll
+grpcurl -plaintext -d '{}' 127.0.0.1:50051 proto_aegis_grpc.v1.RobotReadService.GetAll
 ```
 
 ## Messages architecture
@@ -154,6 +153,18 @@ You can simulate data on ROS topics with these commands:
 ros2 topic pub /tcp_pose geometry_msgs/msg/PoseStamped "{header: auto, pose: {position: {x: 1.0, y: 2.0, z: 3.0}, orientation: {x: 4.0, y: 5.0, z: 6.0, w: 7.0}}}" --once
 ros2 topic pub /joint_states sensor_msgs/msg/JointState "{header: auto, name: ['joint1','joint2'], position: [0.0, 1.0], velocity: [2.0, 3.0], effort: [4.0, 5.0]}" --once
 ros2 topic pub /wrench geometry_msgs/msg/WrenchStamped "{header: auto, wrench: {force: {x: 1.0, y: 2.0, z: 3.0}, torque: {x: 4.0, y: 5.0, z: 6.0}}}" --once
+```
+
+Testing methods with `grpcurl`:
+```bash
+grpcurl -plaintext -d '{}' 127.0.0.1:50051 proto_aegis_grpc.v1.RobotReadService.GetAll
+grpcurl -plaintext -d '{}' 127.0.0.1:50051 proto_aegis_grpc.v1.RobotControlService.GripperClose
+grpcurl -plaintext -d '{}' 127.0.0.1:50051 proto_aegis_grpc.v1.RobotControlService.GripperOpen
+grpcurl -plaintext -d '{"position": "0.01"}' 127.0.0.1:50051 proto_aegis_grpc.v1.RobotControlService.GripperSetPosition
+grpcurl -plaintext -d '{"linear": {"x": "1.0", "y": "2", "z": "3"}, "angular": {"x": "5", "y": "6", "z": 7}}' 127.0.0.1:50051 proto_aegis_grpc.v1.RobotControlService.ServoTCP
+grpcurl -plaintext -d '{"joint_names": ["joint1", "joint2"], "displacements": ["1"], "velocities": ["2", "3"], "duration": "4"}' 127.0.0.1:50051 proto_aegis_grpc.v1.RobotControlService.ServoJoint
+grpcurl -plaintext -d '{"joint_names": ["joint1", "joint2"], "displacements": ["1", "2"], "velocities": ["3"], "duration": "4"}' 127.0.0.1:50051 proto_aegis_grpc.v1.RobotControlService.ServoJoint
+grpcurl -plaintext -d '{"joint_names": ["joint1", "joint2"], "displacements": ["1", "2"], "velocities": ["3", "4"], "duration": "5"}' 127.0.0.1:50051 proto_aegis_grpc.v1.RobotControlService.ServoJoint
 ```
 
 ---
