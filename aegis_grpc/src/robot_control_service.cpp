@@ -7,8 +7,8 @@ namespace aegis_grpc {
 
 RobotControlServiceImpl::RobotControlServiceImpl(
     std::shared_ptr<rclcpp::Node> node)
-    : node_(node), servo_mode_(ServoMode::None), servo_frequency_ratio_(0), servo_msgs_left_(0),
-      gripper_cmd_success_(false), action_timeout_(0.0), gripper_cmd_done_(false) {
+    : node_(node), servo_mode_(ServoMode::None), servo_frequency_ratio_(0), servo_msgs_left_(0), gripper_in_use_(false),
+      action_timeout_(0.0), gripper_cmd_success_(false), gripper_cmd_done_(false) {
 
   // Initialization parameters
   DeclareROSParameter("servo_link", std::string("base_link"),
@@ -196,6 +196,18 @@ grpc::Status RobotControlServiceImpl::GripperSetPosition(
 
   (void)context;
 
+  {
+    std::lock_guard<std::mutex> lock(gripper_mutex_);
+    if(gripper_in_use_.load(std::memory_order_relaxed)){
+      const std::string msg = "Gripper is already in use.";
+      response->set_success(false);
+      response->set_msg(msg);
+      return grpc::Status(grpc::StatusCode::RESOURCE_EXHAUSTED, msg);
+    }
+    gripper_in_use_.store(true, std::memory_order_relaxed);
+  }
+
+
   const double position = request->position();
   const double effort = request->effort();
   GripperSendGoal(position, effort);
@@ -203,6 +215,7 @@ grpc::Status RobotControlServiceImpl::GripperSetPosition(
   response->set_success(gripper_cmd_success_);
   response->set_msg(gripper_cmd_msg_);
 
+  gripper_in_use_.store(false, std::memory_order_relaxed);
   return grpc::Status::OK;
 }
 
@@ -212,11 +225,23 @@ grpc::Status RobotControlServiceImpl::GripperClose(
   (void)context;
   (void)request;
 
+  {
+    std::lock_guard<std::mutex> lock(gripper_mutex_);
+    if(gripper_in_use_.load(std::memory_order_relaxed)){
+      const std::string msg = "Gripper is already in use.";
+      response->set_success(false);
+      response->set_msg(msg);
+      return grpc::Status(grpc::StatusCode::RESOURCE_EXHAUSTED, msg);
+    }
+    gripper_in_use_.store(true, std::memory_order_relaxed);
+  }
+
   double pos = node_->get_parameter("r_gripper_close_m").as_double();
   GripperSendGoal(pos, 0.0);
 
   response->set_success(gripper_cmd_success_);
   response->set_msg(gripper_cmd_msg_);
+  gripper_in_use_.store(false, std::memory_order_relaxed);
   return grpc::Status::OK;
 }
 
@@ -227,11 +252,23 @@ grpc::Status RobotControlServiceImpl::GripperOpen(
   (void)context;
   (void)request;
 
+  {
+    std::lock_guard<std::mutex> lock(gripper_mutex_);
+    if(gripper_in_use_.load(std::memory_order_relaxed)){
+      const std::string msg = "Gripper is already in use.";
+      response->set_success(false);
+      response->set_msg(msg);
+      return grpc::Status(grpc::StatusCode::RESOURCE_EXHAUSTED, msg);
+    }
+    gripper_in_use_.store(true, std::memory_order_relaxed);
+  }
+
   double pos = node_->get_parameter("r_gripper_open_m").as_double();
   GripperSendGoal(pos, 0.0);
 
   response->set_success(gripper_cmd_success_);
   response->set_msg(gripper_cmd_msg_);
+  gripper_in_use_.store(false, std::memory_order_relaxed);
   return grpc::Status::OK;
 }
 

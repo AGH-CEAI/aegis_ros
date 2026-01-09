@@ -78,6 +78,7 @@ class RobotControlServiceImpl final
     void GripperSendGoal(double position, double max_effort);
 
     std::shared_ptr<rclcpp::Node> node_;
+
     rclcpp::Publisher<control_msgs::msg::JointJog>::SharedPtr servo_joint_pub_;
     rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr servo_tcp_pub_;
     rclcpp_action::Client<GripperCommand>::SharedPtr gripper_client_;
@@ -91,9 +92,11 @@ class RobotControlServiceImpl final
     int servo_frequency_ratio_;
     int servo_msgs_left_;
 
-    bool gripper_cmd_success_;
-    std::string gripper_cmd_msg_;
+    std::mutex gripper_mutex_;
+    std::atomic<bool> gripper_in_use_;
     std::chrono::duration<double> action_timeout_;
+    std::string gripper_cmd_msg_;
+    bool gripper_cmd_success_;
     std::atomic<bool> gripper_cmd_done_;
 };
 
