@@ -31,6 +31,7 @@ class RobotControlServiceImpl final
 
     explicit RobotControlServiceImpl(std::shared_ptr<rclcpp::Node> node);
 
+    // TODO(issue#87) Create additional methods to enable and disable servo control.
     grpc::Status ServoJoint(
         grpc::ServerContext* context,
         const proto_aegis_grpc::v1::JointJog *request,

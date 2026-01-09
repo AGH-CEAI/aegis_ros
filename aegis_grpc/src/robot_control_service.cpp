@@ -17,7 +17,7 @@ RobotControlServiceImpl::RobotControlServiceImpl(
                       "[str] Init; Pub: output topic for joints servo commands.");
   DeclareROSParameter("topic_servo_tcp", std::string("/servo_node/delta_twist_cmds"),
                       "[str] Init; Pub: output topic for TCP servo commands.");
-  DeclareROSParameter("action_gripper", std::string("/gripper_controller/gripper_cmd"),
+  DeclareROSParameter("action_gripper", std::string("/gripper_action_controller/gripper_cmd"),
                       "[str] Init; Action: GripperCommand action.");
   DeclareROSParameter("action_timeout_s", 3.0, "[double] Init; Waiting timeout for action in seconds.");
   DeclareROSParameter("servo_in_rate_hz", 10.0, "[double] Init; Servo commands frequency in Hz.");
