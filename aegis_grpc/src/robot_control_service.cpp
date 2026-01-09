@@ -238,9 +238,9 @@ grpc::Status RobotControlServiceImpl::GripperOpen(
 void RobotControlServiceImpl::GripperSendGoal(double position,
                                               double max_effort) {
   if (!gripper_client_->wait_for_action_server(action_timeout_)) {
-    RCLCPP_ERROR(
-        get_logger(),
-        "Gripper Controller action server is not available. Skipping goal.");
+    gripper_cmd_success_ = false;
+    gripper_cmd_msg_ = "Gripper Controller action server is not available. Skipping goal.";
+    RCLCPP_ERROR(get_logger(), gripper_cmd_msg_.c_str());
     return;
   }
 
