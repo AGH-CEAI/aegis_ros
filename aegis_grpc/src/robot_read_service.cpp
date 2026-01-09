@@ -1,0 +1,159 @@
+#include "aegis_grpc/robot_read_service.hpp"
+
+namespace aegis_grpc {
+
+RobotReadServiceImpl::RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node)
+    : node_(node), pose_data_(), wrench_data_(), joint_state_data_() {
+
+  // Initialization parameters
+  DeclareROSParameter("topic_pose", "/tcp_pose", "[str] Init; Sub: topic with the TCP pose data.");
+  DeclareROSParameter("topic_wrench", "/wrench", "[str] Init; Sub: topic with the F/T data.");
+  DeclareROSParameter("topic_joints", "/joint_states", "[str] Init; Sub: topic with the joint states.");
+
+  pose_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
+      node_->get_parameter("topic_pose").as_string(), 10,
+      std::bind(&RobotReadServiceImpl::PoseSubCb, this,
+                std::placeholders::_1));
+  wrench_sub_ = node_->create_subscription<geometry_msgs::msg::WrenchStamped>(
+      node_->get_parameter("topic_wrench").as_string(), 10,
+      std::bind(&RobotReadServiceImpl::WrenchSubCb, this,
+                std::placeholders::_1));
+  joint_state_sub_ = node_->create_subscription<sensor_msgs::msg::JointState>(
+      node_->get_parameter("topic_joints").as_string(), 10,
+      std::bind(&RobotReadServiceImpl::JointStateSubCb, this,
+                std::placeholders::_1));
+}
+
+void RobotReadServiceImpl::DeclareROSParameter(const std::string& name, const std::string& default_val, const std::string& description) {
+  auto param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+  param_desc.description = description;
+  node_->declare_parameter(name, default_val, param_desc);
+
+  const auto p = node_->get_parameter(name);
+  RCLCPP_INFO(node_->get_logger(), "> %s := %s",
+              name.c_str(),
+              p.value_to_string().c_str());
+}
+
+void RobotReadServiceImpl::PoseSubCb(
+    const geometry_msgs::msg::PoseStamped::SharedPtr msg) {
+  std::lock_guard<std::mutex> lock(pose_mutex_);
+  pose_data_ = msg->pose;
+}
+
+void RobotReadServiceImpl::WrenchSubCb(
+    const geometry_msgs::msg::WrenchStamped::SharedPtr msg) {
+  std::lock_guard<std::mutex> lock(wrench_mutex_);
+  wrench_data_ = msg->wrench;
+}
+
+void RobotReadServiceImpl::JointStateSubCb(
+    const sensor_msgs::msg::JointState::SharedPtr msg) {
+  std::lock_guard<std::mutex> lock(joint_state_mutex_);
+  joint_state_data_ = *msg;
+}
+
+grpc::Status
+RobotReadServiceImpl::GetTCPPose(grpc::ServerContext *context,
+                                 const google::protobuf::Empty *request,
+                                 proto_aegis_grpc::v1::Pose *response) {
+    (void) context;
+    (void) request;
+    {
+      std::lock_guard<std::mutex> lock(pose_mutex_);
+      FillProtoPose(pose_data_, response);
+    }
+    return grpc::Status::OK;
+}
+
+grpc::Status
+RobotReadServiceImpl::GetWrench(grpc::ServerContext *context,
+                                const google::protobuf::Empty *request,
+                                proto_aegis_grpc::v1::Wrench *response) {
+  (void) context;
+  (void) request;
+  {
+    std::lock_guard<std::mutex> lock(wrench_mutex_);
+    FillProtoWrench(wrench_data_, response);
+  }
+  return grpc::Status::OK;
+}
+
+grpc::Status RobotReadServiceImpl::GetJointStates(
+    grpc::ServerContext *context, const google::protobuf::Empty *request,
+    proto_aegis_grpc::v1::JointState *response) {
+  (void) context;
+  (void) request;
+  {
+    std::lock_guard<std::mutex> lock(joint_state_mutex_);
+    FillProtoJointState(joint_state_data_, response);
+  }
+  return grpc::Status::OK;
+}
+
+grpc::Status
+RobotReadServiceImpl::GetAll(grpc::ServerContext *context,
+                             const google::protobuf::Empty *request,
+                             proto_aegis_grpc::v1::RobotState *response) {
+  (void) context;
+  (void) request;
+  {
+    std::lock_guard<std::mutex> lock(pose_mutex_);
+    FillProtoPose(pose_data_, response->mutable_pose());
+  }
+  {
+    std::lock_guard<std::mutex> lock(wrench_mutex_);
+    FillProtoWrench(wrench_data_, response->mutable_wrench());
+  }
+  {
+    std::lock_guard<std::mutex> lock(joint_state_mutex_);
+    FillProtoJointState(joint_state_data_, response->mutable_joint_state());
+  }
+  return grpc::Status::OK;
+}
+
+void RobotReadServiceImpl::FillProtoPose(
+    const geometry_msgs::msg::Pose& ros,
+    proto_aegis_grpc::v1::Pose* out) {
+  auto* pos = out->mutable_position();
+  pos->set_x(ros.position.x);
+  pos->set_y(ros.position.y);
+  pos->set_z(ros.position.z);
+
+  auto* ori = out->mutable_orientation();
+  ori->set_x(ros.orientation.x);
+  ori->set_y(ros.orientation.y);
+  ori->set_z(ros.orientation.z);
+  ori->set_w(ros.orientation.w);
+}
+
+void RobotReadServiceImpl::FillProtoWrench(
+    const geometry_msgs::msg::Wrench& ros,
+    proto_aegis_grpc::v1::Wrench* out) {
+  auto* f = out->mutable_force();
+  f->set_x(ros.force.x);
+  f->set_y(ros.force.y);
+  f->set_z(ros.force.z);
+
+  auto* t = out->mutable_torque();
+  t->set_x(ros.torque.x);
+  t->set_y(ros.torque.y);
+  t->set_z(ros.torque.z);
+}
+
+void RobotReadServiceImpl::FillProtoJointState(
+    const sensor_msgs::msg::JointState& ros,
+    proto_aegis_grpc::v1::JointState* out) {
+  out->clear_name();
+  out->clear_position();
+  out->clear_velocity();
+  out->clear_effort();
+
+  for (const auto& v : ros.name) out->add_name(v);
+  for (const auto& v : ros.position) out->add_position(v);
+  for (const auto& v : ros.velocity) out->add_velocity(v);
+  for (const auto& v : ros.effort) out->add_effort(v);
+}
+
+
+} // namespace aegis_grpc

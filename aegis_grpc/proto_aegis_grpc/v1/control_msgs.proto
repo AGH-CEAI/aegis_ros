@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package proto_aegis_grpc.v1;
+
+// https://github.com/ros-controls/control_msgs/blob/humble/control_msgs/msg/JointJog.msg
+message JointJog {
+  // Name list of the joints to jog (case-sensitive).
+  repeated string joint_names = 1;
+
+  // Position command to the joints. Units are meters or radians.
+  repeated double displacements = 2;
+
+  // Velocit command to the joints. Units are m/s or rad/s.
+  repeated double velocities = 3;
+
+  double duration = 4;
+}

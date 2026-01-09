@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package proto_aegis_grpc.v1;
+
+// https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Vector3.msg
+message Vector3 {
+  // This represents a vector in free space.
+  // It is only meant to represent a direction.
+  // If you want your data to be translatable too, use the
+  // geometry_msgs/Point message instead.
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+// https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Point.msg
+message Point {
+  // This contains the position of a point in free space.
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+// https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Quaternion.msg
+message Quaternion {
+  // This represents an orientation in free space in quaternion form.
+  double x = 1;
+  double y = 2;
+  double z = 3;
+  double w = 4;
+}
+
+// https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Pose.msg
+message Pose {
+  // A representation of pose in free space, composed of position and orientation.
+  Point position = 1;
+  Quaternion orientation = 2;
+}
+
+// https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Wrench.msg
+message Wrench {
+  // Force in free space.
+  Vector3 force = 1;
+  Vector3 torque = 2;
+}
+
+// https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Twist.msg
+message Twist {
+  // Velocity in free space.
+  Vector3 linear = 1;
+  Vector3 angular = 2;
+}

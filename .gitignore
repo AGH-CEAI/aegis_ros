@@ -8,3 +8,5 @@ __pycache__
 log/
 *.log
 COLCON_IGNORE
+
+*/include/proto_*
