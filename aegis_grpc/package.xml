@@ -14,6 +14,7 @@
   <author email="macal@agh.edu.pl">Maciej Aleksandrowicz</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
 
   <depend>control_msgs</depend>
   <depend>geometry_msgs</depend>
@@ -27,6 +28,7 @@
   <exec_depend>python3-grpc-tools</exec_depend>
   <exec_depend>python3-grpcio</exec_depend>
   <exec_depend>python3-protobuf</exec_depend>
+  <exec_depend>rclpy</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
