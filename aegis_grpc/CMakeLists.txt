@@ -70,7 +70,7 @@ set(GENERATED_PROTO_CPP_DIR "${GENERATED_PROTO_CPP_DIR_ROOT}/proto_aegis_grpc/v1
 file(MAKE_DIRECTORY ${GENERATED_PROTO_CPP_DIR})
 
 # Specify output directory for script (Python) files
-set(GENERATED_PROTO_PYTHON_DIR_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/aegis_grpc")
+set(GENERATED_PROTO_PYTHON_DIR_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}_py")
 set(GENERATED_PROTO_PYTHON_DIR "${GENERATED_PROTO_PYTHON_DIR_ROOT}/proto_aegis_grpc/v1")
 file(MAKE_DIRECTORY ${GENERATED_PROTO_PYTHON_DIR})
 
@@ -121,7 +121,8 @@ foreach(proto_file ${PROTO_SRC})
     OUTPUT ${PB_PY} ${GRPC_PY}
     COMMAND
       python3 -m grpc_tools.protoc ARGS --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
-      --python_out=${GENERATED_PROTO_PYTHON_DIR_ROOT}
+      # python3 -m grpc_tools.protoc ARGS --proto_path=${GENERATED_PROTO_PYTHON_DIR_ROOT}
+      --proto_path=${PROTO_SRC_DIR} --python_out=${GENERATED_PROTO_PYTHON_DIR_ROOT}
       --grpc_python_out=${GENERATED_PROTO_PYTHON_DIR_ROOT} ${proto_file}
     DEPENDS ${proto_file}
     COMMENT "Compiling ${proto_file} to Python script files")
@@ -172,7 +173,7 @@ target_link_libraries(
   ${PROJECT_NAME}_lib)
 
 ament_target_dependencies(grpc_server ${ROS_DEPENDS})
-ament_python_install_package(${PROJECT_NAME})
+ament_python_install_package(${PROJECT_NAME}_py)
 
 install(TARGETS grpc_server ${PROJECT_NAME}_lib DESTINATION lib/${PROJECT_NAME})
 

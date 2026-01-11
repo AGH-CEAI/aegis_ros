@@ -148,6 +148,19 @@ ros2 param set /grpc_server r_gripper_close_m 0.005
 
 ## Development notes
 
+### Install
+
+There is a chance, that the `rosdep` couldn't resolve the versions for the Python. In such case, try:
+```bash
+pip3 install "protobuf<3.21" "grpcio<1.51" "grpcio-tools<1.51"
+```
+In case of conflict with `onnx` for `rsl-rl-lib`, try to downgrade it to `1.17.0`:
+```bash
+pip3 install "onnx==1.17.0"
+```
+
+### CLI commands
+
 You can simulate data on ROS topics with these commands:
 ```bash
 ros2 topic pub /tcp_pose geometry_msgs/msg/PoseStamped "{header: auto, pose: {position: {x: 1.0, y: 2.0, z: 3.0}, orientation: {x: 4.0, y: 5.0, z: 6.0, w: 7.0}}}" --once
