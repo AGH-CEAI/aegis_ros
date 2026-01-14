@@ -10,3 +10,7 @@ log/
 COLCON_IGNORE
 
 proto_*/
+
+dist/
+*.whl
+*.tar.gz

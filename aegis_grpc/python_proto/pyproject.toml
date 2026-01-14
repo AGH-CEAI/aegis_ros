@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "proto_aegis_grpc"
+version = "1.0.0"
+description = "Package with auto-generated gRPC protobuf messages for the Aegis project."
+authors = ["AGH Center of Excellence in Artificial Intelligence <ceai@agh.edu.pl>"]
+license = "Apache-2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10,<3.14"
+grpcio = "^1.76.0,<2.0"
+grpcio-tools = "^1.14.1,<2.0"
+protobuf = "^6.33.4,<6.34"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
