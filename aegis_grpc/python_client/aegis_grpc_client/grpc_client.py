@@ -6,7 +6,7 @@ import numpy as np
 import grpc
 from google.protobuf.empty_pb2 import Empty
 
-from ..proto_aegis_grpc.v1 import (
+from proto_aegis_grpc.v1 import (
     robot_srvs_pb2,
     robot_srvs_pb2_grpc,
     geometry_msgs_pb2,
