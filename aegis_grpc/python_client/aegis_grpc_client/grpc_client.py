@@ -37,6 +37,10 @@ class AegisRobotClient:
         self.control_stub: Optional[robot_srvs_pb2_grpc.RobotControlServiceStub] = None
         self._connected = False
 
+    @property
+    def is_connected(self) -> bool:
+        return self._connected
+
     async def connect(self) -> None:
         """Establish connection to the gRPC server."""
         try:
