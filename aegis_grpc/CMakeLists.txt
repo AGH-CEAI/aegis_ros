@@ -121,8 +121,7 @@ foreach(proto_file ${PROTO_SRC})
     OUTPUT ${PB_PY} ${GRPC_PY}
     COMMAND
       python3 -m grpc_tools.protoc ARGS --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
-      # python3 -m grpc_tools.protoc ARGS --proto_path=${GENERATED_PROTO_PYTHON_DIR_ROOT}
-      --proto_path=${PROTO_SRC_DIR} --python_out=${GENERATED_PROTO_PYTHON_DIR_ROOT}
+      --python_out=${GENERATED_PROTO_PYTHON_DIR_ROOT}
       --grpc_python_out=${GENERATED_PROTO_PYTHON_DIR_ROOT} ${proto_file}
     DEPENDS ${proto_file}
     COMMENT "Compiling ${proto_file} to Python script files")
