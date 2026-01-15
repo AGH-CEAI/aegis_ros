@@ -152,26 +152,45 @@ class AegisRobotClient:
             self.logger.error(f"GetJointStates failed: {e}")
             raise
 
+    async def get_joint_names(self) -> tuple[str]:
+        """
+        Get joints names.
+
+        Returns:
+            tuple of strings
+        """
+        self._check_connected()
+        try:
+            joint_state = await self.read_stub.GetJointStates(Empty())
+            return tuple(joint_state.name)
+        except grpc.RpcError as e:
+            self.logger.error(f"GetJointStates (names) failed: {e}")
+            raise
+
     def _joints_to_array(self, joints: sensor_msgs_pb2.JointState) -> np.ndarray:
         return np.array(
             [joints.position, joints.velocity, joints.effort], dtype=np.float32
         ).T
 
-    async def get_all(self) -> np.ndarray:
+    # TODO Consider switching return type to TensorDict
+    async def get_all(self) -> dict[str, np.ndarray]:
         """
         Get complete robot state (pose, wrench, joint states) in one call.
         More efficient than calling individual methods.
 
         Returns:
-            Numpy array: [7 (pose) + 6 (wrench) + n_joints*3]
+            dict of numpy arrays with: pose, wrench,  n_joints*3]
         """
         self._check_connected()
         try:
             state = await self.read_stub.GetAll(Empty())
-            pose_arr = self._pose_to_array(state.pose)
-            wrench_arr = self._wrench_to_array(state.wrench)
-            joints_arr = self._joints_to_array(state.joint_state)
-            return np.concatenate([pose_arr, wrench_arr, joints_arr.flatten()])
+            return {
+                "pose": self._pose_to_array(state.pose),
+                "wrench": self._wrench_to_array(state.wrench),
+                "joints_pos": np.array([state.joint_state.position], dtype=np.float32),
+                "joints_vel": np.array([state.joint_state.velocity], dtype=np.float32),
+                "joints_eff": np.array([state.joint_state.effort], dtype=np.float32),
+            }
         except grpc.RpcError as e:
             self.logger.error(f"GetAll failed: {e}")
             raise
