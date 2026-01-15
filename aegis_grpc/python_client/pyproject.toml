@@ -8,10 +8,11 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10,<3.14"
-grpcio = "^1.76.0,<2.0"
-grpcio-tools = "^1.14.1,<2.0"
-protobuf = "^6.33.4,<6.34"
+grpcio = "^1.76.0"
+grpcio-tools = "^1.14.1"
+numpy = ">=1.26.4"
 proto_aegis_grpc = "^1.0.0,<2.0"
+protobuf = "^6.33.4,<6.34"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
