@@ -9,6 +9,12 @@ package aegis_bringup {
     }
 }
 
+package aegis_grpc {
+    class start_server << (L,#FF7700) LaunchFile >> {
+        Node grpc_server()
+    }
+}
+
 package aegis_director {
     class director << (L,#FF7700) LaunchFile >> {
         Node director()
@@ -119,7 +125,8 @@ package aegis_moveit_config {
 
 
 aegis_bringup.bringup *-left- aegis_control.start_drivers
-aegis_bringup.bringup *-left- aegis_director.director
+aegis_bringup.bringup *-left- aegis_grpc.start_server
+aegis_bringup.bringup *-up- aegis_director.director
 aegis_bringup.bringup *-- aegis_moveit_config.move_group
 aegis_bringup.bringup *-- aegis_description.robot_description
 aegis_description.robot_description *-- aegis_description.urdf.aegis_urdf
