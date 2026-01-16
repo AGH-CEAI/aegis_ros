@@ -28,15 +28,16 @@ pip install ./dist/aegis_grpc_client-0.1.0-py3-none-any.whl
 ```
 
 ## Usage
-In your code import the python client and use it freely without ROS dependencies:
+In your code import the Python client and use it freely without ROS dependencies:
 
 ```python
 import asyncio
 from aegis_grpc_client import AegisRobotClient
 
+client = AegisRobotClient("localhost:50051")
+
 async def example_read_sensors():
   """Example: Read robot sensor data."""
-  client = AegisRobotClient("localhost:50051")
   await client.connect()
   try:
       state = await client.get_all()
@@ -45,6 +46,17 @@ async def example_read_sensors():
       await client.disconnect()
 
 asyncio.run(example_read_sensors())
+
+async def example_get_joint_names():
+  """Example: Read joint names."""
+  await client.connect()
+  try:
+      names = await client.get_joint_names()
+      print(f"Received joint names: {names}")
+  finally:
+      await client.disconnect()
+
+asyncio.run(example_get_joint_names())
 ```
 
 ---
