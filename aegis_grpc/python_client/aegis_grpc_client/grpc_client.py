@@ -361,7 +361,7 @@ class AegisRobotClient:
         """Close the gripper."""
         self._check_connected()
         try:
-            response = await self.control_stub.GriperClose(Empty())
+            response = await self.control_stub.GripperClose(Empty())
             return response.success, response.msg
         except grpc.RpcError as e:
             self.logger.error(f"GripperClose failed: {e}")
@@ -371,7 +371,7 @@ class AegisRobotClient:
         """Open the gripper."""
         self._check_connected()
         try:
-            response = await self.control_stub.GriperOpen(Empty())
+            response = await self.control_stub.GripperOpen(Empty())
             return response.success, response.msg
         except grpc.RpcError as e:
             self.logger.error(f"GripperOpen failed: {e}")
