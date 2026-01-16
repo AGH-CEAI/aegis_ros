@@ -104,12 +104,12 @@ The server is split into 2 services defined in [`proto_aegis_grpc.v1.robot_srvs`
 
 The "ROS-getters" are implemented in the [`RobotReadServiceImpl`](./include/aegis_grpc/robot_read_service.hpp) class as the following methods:
 
-| Method name                                          | Desc.                       | Impl. | gRPC Request            | gRPC Response                                                                           |
-| ---------------------------------------------------- | --------------------------- | ----- | ----------------------- | --------------------------------------------------------------------------------------- |
-| `proto_aegis_grpc.v1.RobotReadService.GetAll`        | Get the all available data. | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.robot_srvs.RobotState`](./proto_aegis_grpc/v1/robot_srvs.proto)   |
-| `proto_aegis_grpc.v1.RobotReadService.GetJointState` | Get the joints' states.     | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.sensor_msgs.JointState`](./proto_aegis_grpc/v1/sensor_msgs.proto) |
-| `proto_aegis_grpc.v1.RobotReadService.GetTCPPose`    | Get the TCP pose.           | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)   |
-| `proto_aegis_grpc.v1.RobotReadService.GetWrench`     | Read force/torque sensor.   | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.geometry_msgs.Wrench`](./proto_aegis_grpc/v1/geometry_msgs.proto) |
+| Method name                                           | Desc.                       | Impl. | gRPC Request            | gRPC Response                                                                           |
+|-------------------------------------------------------|-----------------------------|-------|-------------------------|-----------------------------------------------------------------------------------------|
+| `proto_aegis_grpc.v1.RobotReadService.GetAll`         | Get the all available data. | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.robot_srvs.RobotState`](./proto_aegis_grpc/v1/robot_srvs.proto)   |
+| `proto_aegis_grpc.v1.RobotReadService.GetJointStates` | Get the joints' states.     | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.sensor_msgs.JointState`](./proto_aegis_grpc/v1/sensor_msgs.proto) |
+| `proto_aegis_grpc.v1.RobotReadService.GetTCPPose`     | Get the TCP pose.           | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)   |
+| `proto_aegis_grpc.v1.RobotReadService.GetWrench`      | Read force/torque sensor.   | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.geometry_msgs.Wrench`](./proto_aegis_grpc/v1/geometry_msgs.proto) |
 
 You can always list the methods with the `grpcurl` command:
 ```bash

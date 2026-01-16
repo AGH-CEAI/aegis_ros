@@ -282,9 +282,7 @@ class AegisRobotClient:
     async def goto_pose(
         self,
         position: Union[tuple[float, float, float], np.ndarray],  # np.array([vx,vy,vz])
-        orientation: Union[
-            tuple[float, float, float, float], np.ndarray
-        ],
+        orientation: Union[tuple[float, float, float, float], np.ndarray],
     ) -> tuple[bool, str]:
         """
         Move robot to specified TCP pose.
@@ -301,7 +299,7 @@ class AegisRobotClient:
             position = tuple(position.tolist())
         if isinstance(orientation, np.ndarray):
             orientation = tuple(orientation.tolist())
-        
+
         pose = geometry_msgs_pb2.Pose(
             position=geometry_msgs_pb2.Point(
                 x=position[0],

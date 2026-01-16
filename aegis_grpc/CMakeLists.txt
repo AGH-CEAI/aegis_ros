@@ -27,8 +27,8 @@ set(ROS_DEPENDS
 # Hide warnings from importing moveit packages
 cmake_policy(SET CMP0167 NEW)
 
-foreach(ROS_DEP ${ROS_DEPENDS})
-  find_package(${ROS_DEP} REQUIRED)
+foreach(ros_dep ${ROS_DEPENDS})
+  find_package(${ros_dep} REQUIRED)
 endforeach()
 
 # gRPC package for Ubuntu 22.04 (ROS Humble) can't be find by CMake's find_package()
