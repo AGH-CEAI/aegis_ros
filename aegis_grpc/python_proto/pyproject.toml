@@ -8,9 +8,9 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10,<3.14"
-grpcio = "^1.76.0,<2.0"
-grpcio-tools = "^1.14.1,<2.0"
-protobuf = "^6.33.4,<6.34"
+grpcio = "<1.51"
+grpcio-tools = "<1.51"
+protobuf = "<3.21"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.4.0"

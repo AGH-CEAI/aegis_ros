@@ -8,11 +8,11 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10,<3.14"
-grpcio = "^1.76.0"
-grpcio-tools = "^1.14.1"
+grpcio = "<1.51"
+grpcio-tools = "<1.51"
 numpy = ">=1.26.4"
-protobuf = "^6.33.4,<6.34"
 proto_aegis_grpc = { path = "../python_proto", develop = true }
+protobuf = "<3.21"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.4.0"
