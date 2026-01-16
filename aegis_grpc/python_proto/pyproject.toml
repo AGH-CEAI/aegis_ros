@@ -5,6 +5,10 @@ description = "Package with auto-generated gRPC protobuf messages for the Aegis 
 authors = ["AGH Center of Excellence in Artificial Intelligence <ceai@agh.edu.pl>"]
 license = "Apache-2.0"
 readme = "README.md"
+include = [
+    # include files omitted by default by .gitignore
+    { path = "proto_aegis_grpc/**/*.py", format = ["sdist", "wheel"] }
+    ]
 
 [tool.poetry.dependencies]
 python = "^3.10,<3.14"

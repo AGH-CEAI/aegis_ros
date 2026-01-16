@@ -15,6 +15,7 @@ poetry run pytest -v -s
 ```bash
 cd ./test
 python3
+# in python3 console
 import import_test
 import_test.test_import()
 import_test.test_import_v1_messages()

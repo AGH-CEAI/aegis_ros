@@ -18,6 +18,7 @@ cmake --build build --target generate_protos
 ```
 2. Build and install the packages:
 ```bash
+pip uninstall proto_aegis_grpc aegis_grpc_client -y
 cd python_proto
 poetry build
 pip install ./dist/proto_aegis_grpc-1.0.0-py3-none-any.whl
