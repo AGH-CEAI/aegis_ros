@@ -172,7 +172,6 @@ class AegisRobotClient:
             [joints.position, joints.velocity, joints.effort], dtype=np.float32
         ).T
 
-    # TODO Consider switching return type to TensorDict
     async def get_all(self) -> dict[str, np.ndarray]:
         """
         Get complete robot state (pose, wrench, joint states) in one call.
