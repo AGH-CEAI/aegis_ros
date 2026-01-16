@@ -60,6 +60,19 @@ def launch_setup(context: LaunchContext) -> list[IncludeLaunchDescription]:
         launch_arguments=launch_args.items(),
     )
 
+    grpc_server_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution(
+                [
+                    FindPackageShare("aegis_grpc"),
+                    "launch",
+                    "start_server.launch.py",
+                ]
+            )
+        ),
+        launch_arguments=launch_args.items(),
+    )
+
     # TODO(issue#41): enable aegis_director in the bringup's launch when the workflow will be ready
     director_launch = IncludeLaunchDescription(  # noqa: F841
         PythonLaunchDescriptionSource(
@@ -80,6 +93,7 @@ def launch_setup(context: LaunchContext) -> list[IncludeLaunchDescription]:
             robot_description_launch,
             drivers_launch,
             moveit_launch,
+            grpc_server_launch,
             # TODO(issue#41): enable aegis_director in the bringup's launch when the workflow will be ready
             # director_launch,
         ],

@@ -4,6 +4,65 @@ This packages provides a bridge between ROS 2 and [gRPC](https://grpc.io) protoc
 
 It aims to provide a form of "frequency clutch" between real-time domain and low-frequnecy decision making (e.g. an ANN inference in Python).
 
+---
+# Client (Python)
+
+The client needs to Python packages: 1) [proto_aegis_grpc](./python_proto/README.md) and 2) [aegis_grpc_client](./python_client/README.md).
+
+## Build & install
+1. Build the protobuf messages for Python:
+```bash
+# in aegis_ros/aegis_grpc
+cmake -S . -B build
+cmake --build build --target generate_protos
+```
+2. Build and install the packages:
+```bash
+pip uninstall proto_aegis_grpc aegis_grpc_client -y
+cd python_proto
+poetry build
+pip install ./dist/proto_aegis_grpc-1.0.0-py3-none-any.whl
+cd ../python_client
+poetry build
+pip install ./dist/aegis_grpc_client-0.1.0-py3-none-any.whl
+```
+
+## Usage
+In your code import the Python client and use it freely without ROS dependencies:
+
+```python
+import asyncio
+from aegis_grpc_client import AegisRobotClient
+
+client = AegisRobotClient("localhost:50051")
+
+async def example_read_sensors():
+  """Example: Read robot sensor data."""
+  await client.connect()
+  try:
+      state = await client.get_all()
+      print(f"Received robot state: {state}")
+  finally:
+      await client.disconnect()
+
+asyncio.run(example_read_sensors())
+
+async def example_get_joint_names():
+  """Example: Read joint names."""
+  await client.connect()
+  try:
+      names = await client.get_joint_names()
+      print(f"Received joint names: {names}")
+  finally:
+      await client.disconnect()
+
+asyncio.run(example_get_joint_names())
+```
+
+---
+
+# Server (ROS 2 C++)
+
 ## Usage
 
 ### Launch
@@ -147,6 +206,19 @@ ros2 param set /grpc_server r_gripper_close_m 0.005
 ---
 
 ## Development notes
+
+### Install
+
+There is a chance, that the `rosdep` couldn't resolve the versions for the Python. In such case, try:
+```bash
+pip3 install "protobuf<3.21" "grpcio<1.51" "grpcio-tools<1.51"
+```
+In case of conflict with `onnx` for `rsl-rl-lib`, try to downgrade it to `1.17.0`:
+```bash
+pip3 install "onnx==1.17.0"
+```
+
+### CLI commands
 
 You can simulate data on ROS topics with these commands:
 ```bash

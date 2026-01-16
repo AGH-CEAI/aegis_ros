@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "proto_aegis_grpc"
+version = "1.0.0"
+description = "Package with auto-generated gRPC protobuf messages for the Aegis project."
+authors = ["AGH Center of Excellence in Artificial Intelligence <ceai@agh.edu.pl>"]
+license = "Apache-2.0"
+readme = "README.md"
+include = [
+    # include files omitted by default by .gitignore
+    { path = "proto_aegis_grpc/**/*.py", format = ["sdist", "wheel"] }
+    ]
+
+[tool.poetry.dependencies]
+python = "^3.10,<3.14"
+grpcio = "<1.51"
+grpcio-tools = "<1.51"
+protobuf = "<3.21"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.4.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

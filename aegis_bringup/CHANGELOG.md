@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-88](https://github.com/AGH-CEAI/aegis_ros/pull/88) - Added launch of the `grpc_server` from `aegis_grpc` package.
 * [PR-78](https://github.com/AGH-CEAI/aegis_ros/pull/78) - Introduced `disable_cell` and `disable_cell_collision` launch arguments.
 
 ### Changed

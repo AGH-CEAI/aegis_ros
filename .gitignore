@@ -9,4 +9,8 @@ log/
 *.log
 COLCON_IGNORE
 
-*/include/proto_*
+proto_*/
+
+dist/
+*.whl
+*.tar.gz
