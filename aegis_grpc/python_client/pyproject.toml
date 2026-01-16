@@ -11,8 +11,11 @@ python = "^3.10,<3.14"
 grpcio = "^1.76.0"
 grpcio-tools = "^1.14.1"
 numpy = ">=1.26.4"
-proto_aegis_grpc = "^1.0.0,<2.0"
 protobuf = "^6.33.4,<6.34"
+proto_aegis_grpc = { path = "../python_proto", develop = true }
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.4.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
