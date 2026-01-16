@@ -27,6 +27,11 @@ RobotControlServiceImpl::RobotControlServiceImpl(
   DeclareROSParameter("r_gripper_close_m", 0.0, "[double] Runtime; Gripper close position in meters. ");
   DeclareROSParameter("r_gripper_open_m", 0.025, "[double] Runtime; Gripper open position in meters.");
 
+  move_group_ = std::make_unique<moveit::planning_interface::MoveGroupInterface>(
+    node_,
+    "aegis_arm"
+);
+
   servo_tcp_link_ = node_->get_parameter("servo_link").as_string();
 
   auto servo_in_hz = node_->get_parameter("servo_in_rate_hz").as_double();
@@ -269,6 +274,85 @@ grpc::Status RobotControlServiceImpl::GripperOpen(
   response->set_success(gripper_cmd_success_);
   response->set_msg(gripper_cmd_msg_);
   gripper_in_use_.store(false, std::memory_order_relaxed);
+  return grpc::Status::OK;
+}
+
+grpc::Status RobotControlServiceImpl::GotoPose(
+  grpc::ServerContext*,
+  const proto_aegis_grpc::v1::Pose *request,
+  proto_aegis_grpc::v1::TriggerResponse *response)
+{
+  geometry_msgs::msg::Pose pose;
+
+  if (!request->has_position() || !request->has_orientation()) {
+    response->set_success(false);
+    response->set_msg("Missing position or orientation");
+    return grpc::Status::OK;
+  }
+
+  pose.position.x = request->position().x();
+  pose.position.y = request->position().y();
+  pose.position.z = request->position().z();
+
+  pose.orientation.x = request->orientation().x();
+  pose.orientation.y = request->orientation().y();
+  pose.orientation.z = request->orientation().z();
+  pose.orientation.w = request->orientation().w();
+
+  move_group_->setPoseTarget(pose);
+
+  moveit::planning_interface::MoveGroupInterface::Plan plan;
+  auto result = move_group_->plan(plan);
+
+  if (result != moveit::core::MoveItErrorCode::SUCCESS) {
+      response->set_success(false);
+      response->set_msg("Planning failed");
+      return grpc::Status::OK;
+  }
+
+  auto exec = move_group_->execute(plan);
+  bool ok = (exec == moveit::core::MoveItErrorCode::SUCCESS);
+
+  response->set_success(ok);
+  response->set_msg(ok ? "OK" : "Execution failed");
+
+  return grpc::Status::OK;
+}
+
+grpc::Status RobotControlServiceImpl::GotoJoints(
+  grpc::ServerContext*,
+  const proto_aegis_grpc::v1::JointState *request,
+  proto_aegis_grpc::v1::TriggerResponse *response)
+{
+  std::map<std::string, double> target;
+
+  if (request->name_size() != request->position_size()) {
+    response->set_success(false);
+    response->set_msg("Name and position size mismatch");
+    return grpc::Status::OK;
+  }
+
+  for (int i = 0; i < request->name_size(); ++i) {
+      target[request->name(i)] = request->position(i);
+  }
+
+  move_group_->setJointValueTarget(target);
+
+  moveit::planning_interface::MoveGroupInterface::Plan plan;
+  auto result = move_group_->plan(plan);
+
+  if (result != moveit::core::MoveItErrorCode::SUCCESS) {
+      response->set_success(false);
+      response->set_msg("Planning failed");
+      return grpc::Status::OK;
+  }
+
+  auto exec = move_group_->execute(plan);
+  bool ok = (exec == moveit::core::MoveItErrorCode::SUCCESS);
+
+  response->set_success(ok);
+  response->set_msg(ok ? "OK" : "Execution failed");
+
   return grpc::Status::OK;
 }
 
