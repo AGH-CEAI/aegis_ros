@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-88](https://github.com/AGH-CEAI/aegis_ros/pull/88) - Added gRPC robot motion commands with MoveIt.
 * [PR-88](https://github.com/AGH-CEAI/aegis_ros/pull/88) - MVP of the gRPC Python client.
 * [PR-82](https://github.com/AGH-CEAI/aegis_ros/pull/82) - MVP of the gRPC-ROS server.
 

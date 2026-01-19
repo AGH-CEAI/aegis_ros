@@ -236,8 +236,8 @@ class AegisRobotClient:
 
     async def servo_tcp(
         self,
-        linear: Union[tuple[float, float, float], np.ndarray],  # np.array([vx,vy,vz])
-        angular: Union[tuple[float, float, float], np.ndarray],  # np.array([wx,wy,wz])
+        linear: Union[tuple[float, float, float], np.ndarray],
+        angular: Union[tuple[float, float, float], np.ndarray],
     ) -> None:
         """
         Perform TCP servo with Cartesian velocity control.
@@ -278,7 +278,6 @@ class AegisRobotClient:
             self.logger.error(f"ServoTCP failed: {e}")
             raise
 
-    # TODO(issue#83) add MoveIt2 actions to plan&execute trajectories to targets in Joints and Poses.
     async def goto_pose(
         self,
         position: Union[tuple[float, float, float], np.ndarray],
@@ -324,7 +323,7 @@ class AegisRobotClient:
     async def goto_joints(
         self,
         names: list[str],
-        positions: Optional[Union[list[float], np.ndarray]] = None,
+        positions: Union[list[float], np.ndarray],
     ) -> tuple[bool, str]:
         """
         Move robot to specified joint configuration.
