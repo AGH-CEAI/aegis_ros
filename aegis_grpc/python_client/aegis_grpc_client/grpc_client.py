@@ -281,7 +281,7 @@ class AegisRobotClient:
     # TODO(issue#83) add MoveIt2 actions to plan&execute trajectories to targets in Joints and Poses.
     async def goto_pose(
         self,
-        position: Union[tuple[float, float, float], np.ndarray],  # np.array([vx,vy,vz])
+        position: Union[tuple[float, float, float], np.ndarray],
         orientation: Union[tuple[float, float, float, float], np.ndarray],
     ) -> tuple[bool, str]:
         """
@@ -296,9 +296,9 @@ class AegisRobotClient:
         self._check_connected()
 
         if isinstance(position, np.ndarray):
-            position = tuple(position.tolist())
+            position = tuple(position)
         if isinstance(orientation, np.ndarray):
-            orientation = tuple(orientation.tolist())
+            orientation = tuple(orientation)
 
         pose = geometry_msgs_pb2.Pose(
             position=geometry_msgs_pb2.Point(
@@ -321,7 +321,6 @@ class AegisRobotClient:
             self.logger.error(f"Failed to send robot motion command: {e}")
             raise
 
-    # TODO(issue#83) add MoveIt2 actions to plan&execute trajectories to targets in Joints and Poses.
     async def goto_joints(
         self,
         names: list[str],
@@ -339,7 +338,7 @@ class AegisRobotClient:
         self._check_connected()
 
         if isinstance(positions, np.ndarray):
-            positions = positions.tolist()
+            positions = tuple(positions)
 
         joint_state = sensor_msgs_pb2.JointState(
             name=names,

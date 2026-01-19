@@ -44,7 +44,6 @@ class RobotControlServiceImpl final
         const proto_aegis_grpc::v1::Twist* request,
         google::protobuf::Empty* response) override;
 
-    // TODO(issue#83) add MoveIt2 actions to plan&execute trajectories to targets in Joints and Poses.
     grpc::Status GotoPose(
         grpc::ServerContext* context,
         const proto_aegis_grpc::v1::Pose* request,
