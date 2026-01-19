@@ -22,15 +22,11 @@ RobotControlServiceImpl::RobotControlServiceImpl(
   DeclareROSParameter("action_timeout_s", 3.0, "[double] Init; Waiting timeout for action in seconds.");
   DeclareROSParameter("servo_in_rate_hz", 10.0, "[double] Init; Servo commands frequency in Hz.");
   DeclareROSParameter("servo_out_rate_hz", 250.0, "[double] Init; Servo publish loop frequency in Hz.");
+  DeclareROSParameter("move_group", std::string("aegis_arm"), "[str] Init; Name of the planning group to control.");
 
   // Runtime parameters
   DeclareROSParameter("r_gripper_close_m", 0.0, "[double] Runtime; Gripper close position in meters. ");
   DeclareROSParameter("r_gripper_open_m", 0.025, "[double] Runtime; Gripper open position in meters.");
-
-  move_group_ = std::make_unique<moveit::planning_interface::MoveGroupInterface>(
-    node_,
-    "aegis_arm"
-);
 
   servo_tcp_link_ = node_->get_parameter("servo_link").as_string();
 
@@ -46,7 +42,6 @@ RobotControlServiceImpl::RobotControlServiceImpl(
   gripper_client_ = rclcpp_action::create_client<GripperCommand>(
       node_, node_->get_parameter("action_gripper").as_string());
 
-
   double hz = node_->get_parameter("servo_out_rate_hz").as_double();
   auto servo_pub_period = std::chrono::duration<double>(1.0 / hz);
 
@@ -55,6 +50,9 @@ RobotControlServiceImpl::RobotControlServiceImpl(
 
   auto action_timeout = node_->get_parameter("action_timeout_s").as_double();
   action_timeout_ = std::chrono::duration<double>(action_timeout);
+
+  auto move_group_name = node_->get_parameter("move_group").as_string();
+  move_group_ = std::make_unique<moveit::planning_interface::MoveGroupInterface>(node_, move_group_name);
 }
 
 rclcpp::Logger RobotControlServiceImpl::get_logger() const {
@@ -282,22 +280,20 @@ grpc::Status RobotControlServiceImpl::GotoPose(
   const proto_aegis_grpc::v1::Pose *request,
   proto_aegis_grpc::v1::TriggerResponse *response) {
   (void)context;
-  
-  geometry_msgs::msg::Pose pose;
+
   response->set_success(false);
+
   if (!request->has_position() || !request->has_orientation()) {
-    std::string err =
-        "Missing position or orientation.";
-    RCLCPP_WARN(get_logger(), "[RobotControlService][GotoPose] %s",
-                err.c_str());
+    std::string err = "Missing position or orientation.";
+    RCLCPP_WARN(get_logger(), "[RobotControlService][GotoPose] %s", err.c_str());
     response->set_msg(err);
     return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
   }
 
+  geometry_msgs::msg::Pose pose;
   pose.position.x = request->position().x();
   pose.position.y = request->position().y();
   pose.position.z = request->position().z();
-
   pose.orientation.x = request->orientation().x();
   pose.orientation.y = request->orientation().y();
   pose.orientation.z = request->orientation().z();
@@ -307,20 +303,16 @@ grpc::Status RobotControlServiceImpl::GotoPose(
 
   moveit::planning_interface::MoveGroupInterface::Plan plan;
   auto result = move_group_->plan(plan);
-
   if (result != moveit::core::MoveItErrorCode::SUCCESS) {
-    std::string err =
-        "Planning failed.";
-    RCLCPP_WARN(get_logger(), "[RobotControlService][GotoPose] %s",
-                err.c_str());
+    std::string err = "Planning failed.";
+    RCLCPP_WARN(get_logger(), "[RobotControlService][GotoPose] %s", err.c_str());
     response->set_msg(err);
     return grpc::Status(grpc::StatusCode::INTERNAL, err);
   }
 
   auto exec = move_group_->execute(plan);
   if(exec != moveit::core::MoveItErrorCode::SUCCESS) {
-      std::string err =
-          "Execution failed.";
+      std::string err = "Execution failed.";
       RCLCPP_WARN(get_logger(), "[RobotControlService][GoToPose] %s", err.c_str());
       response->set_msg(err);
       return grpc::Status(grpc::StatusCode::INTERNAL, err);
@@ -336,19 +328,17 @@ grpc::Status RobotControlServiceImpl::GotoJoints(
   const proto_aegis_grpc::v1::JointState *request,
   proto_aegis_grpc::v1::TriggerResponse *response) {
   (void)context;
-  
-  std::map<std::string, double> target;
-  response->set_success(false);
-  
 
-  if (request->name_size() != request->position_size()) {
-    std::string err =
-        "The numbers of names and positions do not match.";
+  response->set_success(false);
+
+  if (request->name_size() == 0 || request->name_size() != request->position_size()) {
+    std::string err = "Joint names and positions mismatch or empty.";
     RCLCPP_WARN(get_logger(), "[RobotControlService][GotoJoints] %s", err.c_str());
     response->set_msg(err);
     return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
   }
 
+  std::map<std::string, double> target;
   for (int i = 0; i < request->name_size(); ++i) {
       target[request->name(i)] = request->position(i);
   }
@@ -357,10 +347,8 @@ grpc::Status RobotControlServiceImpl::GotoJoints(
 
   moveit::planning_interface::MoveGroupInterface::Plan plan;
   auto result = move_group_->plan(plan);
-
   if (result != moveit::core::MoveItErrorCode::SUCCESS) {
-std::string err =
-        "Planning failed.";
+    std::string err = "Planning failed.";
     RCLCPP_WARN(get_logger(), "[RobotControlService][GotoJoints] %s", err.c_str());
     response->set_msg(err);
     return grpc::Status(grpc::StatusCode::INTERNAL, err);
@@ -368,8 +356,7 @@ std::string err =
 
   auto exec = move_group_->execute(plan);
   if(exec != moveit::core::MoveItErrorCode::SUCCESS) {
-      std::string err =
-          "Execution failed.";
+      std::string err = "Execution failed.";
       RCLCPP_WARN(get_logger(), "[RobotControlService][GotoJoints] %s", err.c_str());
       response->set_msg(err);
       return grpc::Status(grpc::StatusCode::INTERNAL, err);
