@@ -20,22 +20,22 @@ class RobotReadServiceImpl final
   public:
     explicit RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node);
 
-    grpc::Status GetTCPPose(grpc::ServerContext *context,
-                            const google::protobuf::Empty *request,
-                            proto_aegis_grpc::v1::Pose *response) override;
+    grpc::Status GetTCPPose(grpc::ServerContext* context,
+                            const google::protobuf::Empty* request,
+                            proto_aegis_grpc::v1::Pose* response) override;
 
-    grpc::Status GetWrench(grpc::ServerContext *context,
-                          const google::protobuf::Empty *request,
-                          proto_aegis_grpc::v1::Wrench *response) override;
+    grpc::Status GetWrench(grpc::ServerContext* context,
+                          const google::protobuf::Empty* request,
+                          proto_aegis_grpc::v1::Wrench* response) override;
 
     grpc::Status
-    GetJointStates(grpc::ServerContext *context,
-                  const google::protobuf::Empty *request,
-                  proto_aegis_grpc::v1::JointState *response) override;
+    GetJointStates(grpc::ServerContext* context,
+                  const google::protobuf::Empty* request,
+                  proto_aegis_grpc::v1::JointState* response) override;
 
-    grpc::Status GetAll(grpc::ServerContext *context,
-                        const google::protobuf::Empty *request,
-                        proto_aegis_grpc::v1::RobotState *response) override;
+    grpc::Status GetAll(grpc::ServerContext* context,
+                        const google::protobuf::Empty* request,
+                        proto_aegis_grpc::v1::RobotState* response) override;
 
     // TODO(issue#84) implement getters for images from cameras (RGB & RGBD)
     // TODO(issue#85) develop synchronization guard to monitor the freshness of the data

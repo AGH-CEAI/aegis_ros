@@ -14,20 +14,22 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Dependencies
 
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_action REQUIRED)
-find_package(control_msgs REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(sensor_msgs REQUIRED)
 
 set(ROS_DEPENDS
     rclcpp
     rclcpp_action
     control_msgs
     geometry_msgs
-    sensor_msgs)
+    sensor_msgs
+    moveit_msgs
+    moveit_ros_planning_interface)
 
-find_program(GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin REQUIRED)
+# Hide warnings from importing moveit packages
+cmake_policy(SET CMP0167 NEW)
+
+foreach(ros_dep ${ROS_DEPENDS})
+  find_package(${ros_dep} REQUIRED)
+endforeach()
 
 # gRPC package for Ubuntu 22.04 (ROS Humble) can't be find by CMake's find_package()
 # https://bugs.launchpad.net/ubuntu/+source/grpc/+bug/1935709

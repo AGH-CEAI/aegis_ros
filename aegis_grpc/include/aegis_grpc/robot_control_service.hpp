@@ -13,6 +13,8 @@
 #include <control_msgs/msg/joint_jog.hpp>
 #include <geometry_msgs/msg/twist.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
+#include <geometry_msgs/msg/pose.hpp>
+#include <moveit/move_group_interface/move_group_interface.h>
 
 
 namespace aegis_grpc {
@@ -34,39 +36,38 @@ class RobotControlServiceImpl final
     // TODO(issue#87) Create additional methods to enable and disable servo control.
     grpc::Status ServoJoint(
         grpc::ServerContext* context,
-        const proto_aegis_grpc::v1::JointJog *request,
-        google::protobuf::Empty *response) override;
+        const proto_aegis_grpc::v1::JointJog* request,
+        google::protobuf::Empty* response) override;
 
     grpc::Status ServoTCP(
         grpc::ServerContext* context,
-        const proto_aegis_grpc::v1::Twist *request,
-        google::protobuf::Empty *response) override;
+        const proto_aegis_grpc::v1::Twist* request,
+        google::protobuf::Empty* response) override;
 
-    // TODO(issue#83) add MoveIt2 actions to plan&execute trajectories to targets in Joints and Poses.
-    // grpc::Status GotoPose(
-    //     grpc::ServerContext* context,
-    //     const proto_aegis_grpc::v1::Pose *request,
-    //     proto_aegis_grpc::v1::TriggerResponse *response) override;
+    grpc::Status GotoPose(
+        grpc::ServerContext* context,
+        const proto_aegis_grpc::v1::Pose* request,
+        proto_aegis_grpc::v1::TriggerResponse* response) override;
 
-    // grpc::Status GotoJoints(
-    //     grpc::ServerContext* context,
-    //     const proto_aegis_grpc::v1::JointState *request,
-    //     proto_aegis_grpc::v1::TriggerResponse *response) override;
+    grpc::Status GotoJoints(
+        grpc::ServerContext* context,
+        const proto_aegis_grpc::v1::JointState* request,
+        proto_aegis_grpc::v1::TriggerResponse* response) override;
 
     grpc::Status GripperSetPosition(
       grpc::ServerContext* context,
-      const proto_aegis_grpc::v1::GripperSetPositionRequest *request,
-      proto_aegis_grpc::v1::TriggerResponse *response) override;
+      const proto_aegis_grpc::v1::GripperSetPositionRequest* request,
+      proto_aegis_grpc::v1::TriggerResponse* response) override;
 
     grpc::Status GripperClose(
         grpc::ServerContext* context,
-        const google::protobuf::Empty *request,
-        proto_aegis_grpc::v1::TriggerResponse *response) override;
+        const google::protobuf::Empty* request,
+        proto_aegis_grpc::v1::TriggerResponse* response) override;
 
     grpc::Status GripperOpen(
         grpc::ServerContext* context,
-        const google::protobuf::Empty *request,
-        proto_aegis_grpc::v1::TriggerResponse *response) override;
+        const google::protobuf::Empty* request,
+        proto_aegis_grpc::v1::TriggerResponse* response) override;
 
   private:
     rclcpp::Logger get_logger() const;
@@ -78,6 +79,7 @@ class RobotControlServiceImpl final
     void GripperSendGoal(double position, double max_effort);
 
     std::shared_ptr<rclcpp::Node> node_;
+    std::unique_ptr<moveit::planning_interface::MoveGroupInterface> move_group_;
 
     rclcpp::Publisher<control_msgs::msg::JointJog>::SharedPtr servo_joint_pub_;
     rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr servo_tcp_pub_;

@@ -236,8 +236,8 @@ class AegisRobotClient:
 
     async def servo_tcp(
         self,
-        linear: Union[tuple[float, float, float], np.ndarray],  # np.array([vx,vy,vz])
-        angular: Union[tuple[float, float, float], np.ndarray],  # np.array([wx,wy,wz])
+        linear: Union[tuple[float, float, float], np.ndarray],
+        angular: Union[tuple[float, float, float], np.ndarray],
     ) -> None:
         """
         Perform TCP servo with Cartesian velocity control.
@@ -278,38 +278,52 @@ class AegisRobotClient:
             self.logger.error(f"ServoTCP failed: {e}")
             raise
 
-    # TODO(issue#83) add MoveIt2 actions to plan&execute trajectories to targets in Joints and Poses.
     async def goto_pose(
         self,
-        position: Union[tuple[float, float, float], np.ndarray],  # np.array([vx,vy,vz])
-        orientation: Union[
-            tuple[float, float, float], np.ndarray
-        ],  # np.array([wx,wy,wz])
+        position: Union[tuple[float, float, float], np.ndarray],
+        orientation: Union[tuple[float, float, float, float], np.ndarray],
     ) -> tuple[bool, str]:
         """
         Move robot to specified TCP pose.
 
         Args:
-            pose: Target Pose with position and orientation
+            pose: Target Pose with position and orientation (quaternion)
 
         Returns:
             (success, message) tuple
         """
-        raise NotImplementedError
-        # TODO(issue#83) construct geometry_msgs_pb2.Pose message
-        # self._check_connected()
-        # try:
-        #     response = await self.control_stub.GotoPose(pose)
-        #     return response.success, response.msg
-        # except grpc.RpcError as e:
-        #     self.logger.error(f"GotoPose failed: {e}")
-        #     raise
+        self._check_connected()
 
-    # TODO(issue#83) add MoveIt2 actions to plan&execute trajectories to targets in Joints and Poses.
+        if isinstance(position, np.ndarray):
+            position = tuple(position)
+        if isinstance(orientation, np.ndarray):
+            orientation = tuple(orientation)
+
+        pose = geometry_msgs_pb2.Pose(
+            position=geometry_msgs_pb2.Point(
+                x=position[0],
+                y=position[1],
+                z=position[2],
+            ),
+            orientation=geometry_msgs_pb2.Quaternion(
+                x=orientation[0],
+                y=orientation[1],
+                z=orientation[2],
+                w=orientation[3],
+            ),
+        )
+
+        try:
+            response = await self.control_stub.GotoPose(pose)
+            return response.success, response.msg
+        except grpc.RpcError as e:
+            self.logger.error(f"Failed to send robot motion command: {e}")
+            raise
+
     async def goto_joints(
         self,
-        names: list[str],
-        positions: Optional[Union[list[float], np.ndarray]] = None,
+        names: tuple[str],
+        positions: Union[tuple[float], np.ndarray],
     ) -> tuple[bool, str]:
         """
         Move robot to specified joint configuration.
@@ -320,15 +334,22 @@ class AegisRobotClient:
         Returns:
             (success, message) tuple
         """
-        raise NotImplementedError
-        # TODO(issue#83) construct sensor_msgs_pb2.JointState message
-        # self._check_connected()
-        # try:
-        #     response = await self.control_stub.GotoJoints(joint_state)
-        #     return response.success, response.msg
-        # except grpc.RpcError as e:
-        #     self.logger.error(f"GotoJoints failed: {e}")
-        #     raise
+        self._check_connected()
+
+        if isinstance(positions, np.ndarray):
+            positions = tuple(positions)
+
+        joint_state = sensor_msgs_pb2.JointState(
+            name=names,
+            position=positions,
+        )
+
+        try:
+            response = await self.control_stub.GotoJoints(joint_state)
+            return response.success, response.msg
+        except grpc.RpcError as e:
+            self.logger.error(f"Failed to send robot motion command: {e}")
+            raise
 
     async def gripper_set_position(
         self, position: float, effort: float
