@@ -287,7 +287,7 @@ class AegisRobotClient:
         Move robot to specified TCP pose.
 
         Args:
-            pose: Target Pose with position and orientation
+            pose: Target Pose with position and orientation (quaternion)
 
         Returns:
             (success, message) tuple
@@ -322,8 +322,8 @@ class AegisRobotClient:
 
     async def goto_joints(
         self,
-        names: list[str],
-        positions: Union[list[float], np.ndarray],
+        names: tuple[str],
+        positions: Union[tuple[float], np.ndarray],
     ) -> tuple[bool, str]:
         """
         Move robot to specified joint configuration.
