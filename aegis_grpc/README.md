@@ -10,21 +10,10 @@ It aims to provide a form of "frequency clutch" between real-time domain and low
 The client needs to Python packages: 1) [proto_aegis_grpc](./python_proto/README.md) and 2) [aegis_grpc_client](./python_client/README.md).
 
 ## Build & install
-1. Build the protobuf messages for Python:
+Use the provided script for automated build & installation of the 2 Python packages:
+
 ```bash
-# in aegis_ros/aegis_grpc
-cmake -S . -B build
-cmake --build build --target generate_protos
-```
-2. Build and install the packages:
-```bash
-pip uninstall proto_aegis_grpc aegis_grpc_client -y
-cd python_proto
-poetry build
-pip install ./dist/proto_aegis_grpc-1.0.0-py3-none-any.whl
-cd ../python_client
-poetry build
-pip install ./dist/aegis_grpc_client-0.1.0-py3-none-any.whl
+bash install_client.sh
 ```
 
 ## Usage
