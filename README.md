@@ -2,6 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+[![prek](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/j178/prek/master/docs/assets/badge-v0.json)](https://github.com/j178/prek)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17018771.svg)](https://doi.org/10.5281/zenodo.17018771)
 
 A complete suite of ROS 2 packages for the Aegis UR5e cobot station.
@@ -95,10 +96,13 @@ See the [aegis_utils](./aegis_utils/README.md) package.
 ---
 ## Development notes
 
-This project uses various tools for aiding the quality of the source code. Currently most of them are executed by the `pre-commit`. Please make sure to enable its hooks:
+This project uses various tools for aiding the quality of the source code. Currently most of them are executed by the `pre-commit`. As a faster alternative it is suggested to use `prek`. Please make sure to enable its hooks:
 
 ```bash
+# In case of pre-commit
 pre-commit install
+# In case of prek
+prek install
 ```
 
 ---
