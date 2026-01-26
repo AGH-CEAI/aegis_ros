@@ -26,6 +26,12 @@ class RobotControlServiceImpl final
     using GripperCommand = control_msgs::action::GripperCommand;
     using GoalHandleGripper = rclcpp_action::ClientGoalHandle<GripperCommand>;
 
+    enum class ServoMode {
+      None,
+      JointJog,
+      TCPTwist
+    };
+
     explicit RobotControlServiceImpl(std::shared_ptr<rclcpp::Node> node);
 
     // TODO(issue#87) Create additional methods to enable and disable servo control.
@@ -96,11 +102,6 @@ class RobotControlServiceImpl final
     rclcpp_action::Client<GripperCommand>::SharedPtr gripper_client_;
     rclcpp::TimerBase::SharedPtr servo_pub_timer_;
 
-    enum class ServoMode {
-      None,
-      JointJog,
-      TCPTwist
-    };
     std::mutex servo_mutex_;
     ServoMode servo_mode_;
     std::string servo_tcp_link_;
