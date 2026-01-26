@@ -21,6 +21,8 @@ message RobotState {
 }
 
 service RobotControlService {
+  rpc ServoEnable(google.protobuf.Empty) returns (TriggerResponse);
+  rpc ServoDisable(google.protobuf.Empty) returns (TriggerResponse);
   rpc ServoJoint(JointJog) returns (google.protobuf.Empty);
   rpc ServoTCP(Twist) returns (google.protobuf.Empty);
   rpc GotoPose(Pose) returns (TriggerResponse);
