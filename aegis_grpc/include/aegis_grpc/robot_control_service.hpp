@@ -75,7 +75,7 @@ class RobotControlServiceImpl final
         proto_aegis_grpc::v1::TriggerResponse* response) override;
 
   private:
-    bool switchControllers(
+    bool SwitchControllers(
         const std::vector<std::string>& activate,
         const std::vector<std::string>& deactivate);
 

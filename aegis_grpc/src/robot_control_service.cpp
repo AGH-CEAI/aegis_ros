@@ -76,7 +76,7 @@ void RobotControlServiceImpl::DeclareROSParameter(
               p.value_to_string().c_str());
 }
 
-bool RobotControlServiceImpl::switchControllers(
+bool RobotControlServiceImpl::SwitchControllers(
   const std::vector<std::string>& activate,
   const std::vector<std::string>& deactivate) {
   auto req = std::make_shared<controller_manager_msgs::srv::SwitchController::Request>();
@@ -85,15 +85,16 @@ bool RobotControlServiceImpl::switchControllers(
   req->deactivate_controllers = deactivate;
   req->strictness = controller_manager_msgs::srv::SwitchController::Request::STRICT;
 
-  if (!switch_controller_client_->wait_for_service(2s)) {
+  if (!switch_controller_client_->wait_for_service(action_timeout_)) {
     RCLCPP_WARN(get_logger(), "Switch controller service not available");
     return false;
   }
 
   auto future = switch_controller_client_->async_send_request(req);
+  auto status = future.wait_for(action_timeout_);
 
-  if (rclcpp::spin_until_future_complete(node_, future) != rclcpp::FutureReturnCode::SUCCESS) {
-    RCLCPP_WARN(get_logger(), "Switch controller call failed");
+  if (status != std::future_status::ready || !future.valid()) {
+    RCLCPP_WARN(get_logger(), "Switch controller call failed or timed out.");
     return false;
   }
 
@@ -107,11 +108,13 @@ grpc::Status RobotControlServiceImpl::ServoEnable(
 {
   response->set_success(false);
 
-  if (!switchControllers(
+  if (!SwitchControllers(
         {"forward_position_controller"},
         {"scaled_joint_trajectory_controller"})) {
-    response->set_msg("Failed to switch controllers");
-    return grpc::Status(grpc::StatusCode::INTERNAL, "Controller switch failed");
+    std::string err = "Controller switch failed.";
+    RCLCPP_WARN(get_logger(), "[RobotControlService][ServoEnable] %s", err.c_str());
+    response->set_msg(err);
+    return grpc::Status(grpc::StatusCode::INTERNAL, err);
   }
 
   {
@@ -131,11 +134,14 @@ grpc::Status RobotControlServiceImpl::ServoDisable(
 {
   response->set_success(false);
 
-  if (!switchControllers(
+  if (!SwitchControllers(
         {"scaled_joint_trajectory_controller"},
         {"forward_position_controller"})) {
-    response->set_msg("Failed to switch controllers");
-    return grpc::Status(grpc::StatusCode::INTERNAL, "Controller switch failed");
+
+    std::string err = "Controller switch failed.";
+    RCLCPP_WARN(get_logger(), "[RobotControlService][ServoDisable] %s", err.c_str());
+    response->set_msg(err);
+    return grpc::Status(grpc::StatusCode::INTERNAL, err);
   }
 
   {
@@ -146,6 +152,7 @@ grpc::Status RobotControlServiceImpl::ServoDisable(
 
   response->set_success(true);
   response->set_msg("");
+  RCLCPP_WARN(get_logger(), "[RobotControlService][ServoDisable] RETURN");
   return grpc::Status::OK;
 }
 
