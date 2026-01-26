@@ -35,6 +35,7 @@ RobotControlServiceImpl::RobotControlServiceImpl(
   servo_frequency_ratio_ = std::round(servo_out_hz / servo_in_hz);
   RCLCPP_INFO(get_logger(), "> Frequency ratio for servo re-publishig is %i", servo_frequency_ratio_);
 
+  switch_controller_client_ = node_->create_client<controller_manager_msgs::srv::SwitchController>("/controller_manager/switch_controller");
   servo_joint_pub_ = node_->create_publisher<control_msgs::msg::JointJog>(
       node_->get_parameter("topic_servo_joint").as_string(), 10);
   servo_tcp_pub_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>(
@@ -73,6 +74,85 @@ void RobotControlServiceImpl::DeclareROSParameter(
   RCLCPP_INFO(get_logger(), "> %s := %s",
               name.c_str(),
               p.value_to_string().c_str());
+}
+
+bool RobotControlServiceImpl::SwitchControllers(
+  const std::vector<std::string>& activate,
+  const std::vector<std::string>& deactivate) {
+  auto req = std::make_shared<controller_manager_msgs::srv::SwitchController::Request>();
+
+  req->activate_controllers = activate;
+  req->deactivate_controllers = deactivate;
+  req->strictness = controller_manager_msgs::srv::SwitchController::Request::STRICT;
+
+  if (!switch_controller_client_->wait_for_service(action_timeout_)) {
+    RCLCPP_WARN(get_logger(), "Switch controller service not available");
+    return false;
+  }
+
+  auto future = switch_controller_client_->async_send_request(req);
+  auto status = future.wait_for(action_timeout_);
+
+  if (status != std::future_status::ready || !future.valid()) {
+    RCLCPP_WARN(get_logger(), "Switch controller call failed or timed out.");
+    return false;
+  }
+
+  return future.get()->ok;
+}
+
+grpc::Status RobotControlServiceImpl::ServoEnable(
+  grpc::ServerContext*,
+  const google::protobuf::Empty*,
+  proto_aegis_grpc::v1::TriggerResponse* response)
+{
+  response->set_success(false);
+
+  if (!SwitchControllers(
+        {"forward_position_controller"},
+        {"scaled_joint_trajectory_controller"})) {
+    std::string err = "Controller switch failed.";
+    RCLCPP_WARN(get_logger(), "[RobotControlService][ServoEnable] %s", err.c_str());
+    response->set_msg(err);
+    return grpc::Status(grpc::StatusCode::INTERNAL, err);
+  }
+
+  {
+    std::lock_guard<std::mutex> lock(servo_mutex_);
+    servo_mode_ = ServoMode::JointJog;
+  }
+
+  response->set_success(true);
+  response->set_msg("");
+  return grpc::Status::OK;
+}
+
+grpc::Status RobotControlServiceImpl::ServoDisable(
+  grpc::ServerContext*,
+  const google::protobuf::Empty*,
+  proto_aegis_grpc::v1::TriggerResponse* response)
+{
+  response->set_success(false);
+
+  if (!SwitchControllers(
+        {"scaled_joint_trajectory_controller"},
+        {"forward_position_controller"})) {
+
+    std::string err = "Controller switch failed.";
+    RCLCPP_WARN(get_logger(), "[RobotControlService][ServoDisable] %s", err.c_str());
+    response->set_msg(err);
+    return grpc::Status(grpc::StatusCode::INTERNAL, err);
+  }
+
+  {
+    std::lock_guard<std::mutex> lock(servo_mutex_);
+    servo_mode_ = ServoMode::None;
+    servo_msgs_left_ = 0;
+  }
+
+  response->set_success(true);
+  response->set_msg("");
+  return grpc::Status::OK;
 }
 
 void RobotControlServiceImpl::ServoPublishLoop() {

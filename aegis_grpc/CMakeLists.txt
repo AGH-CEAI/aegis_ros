@@ -18,6 +18,7 @@ find_package(ament_cmake REQUIRED)
 set(ROS_DEPENDS
     rclcpp
     rclcpp_action
+    controller_manager_msgs
     control_msgs
     geometry_msgs
     sensor_msgs
