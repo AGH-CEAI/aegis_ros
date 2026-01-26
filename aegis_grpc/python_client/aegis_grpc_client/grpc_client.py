@@ -396,3 +396,19 @@ class AegisRobotClient:
         except grpc.RpcError as e:
             self.logger.error(f"GripperOpen failed: {e}")
             raise
+
+    async def servo_enable(self) -> tuple[bool, str]:
+        self._check_connected()
+        try:
+            resp = await self.control_stub.ServoEnable(Empty())
+            return resp.success, resp.msg
+        except grpc.RpcError as e:
+            raise RuntimeError("Failed to enable servo") from e
+
+    async def servo_disable(self) -> tuple[bool, str]:
+        self._check_connected()
+        try:
+            resp = await self.control_stub.ServoDisable(Empty())
+            return resp.success, resp.msg
+        except grpc.RpcError as e:
+            raise RuntimeError("Failed to disable servo") from e
