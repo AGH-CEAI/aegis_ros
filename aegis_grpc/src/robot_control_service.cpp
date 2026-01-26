@@ -36,6 +36,8 @@ RobotControlServiceImpl::RobotControlServiceImpl(
   RCLCPP_INFO(get_logger(), "> Frequency ratio for servo re-publishig is %i", servo_frequency_ratio_);
 
   switch_controller_client_ = node_->create_client<controller_manager_msgs::srv::SwitchController>("/controller_manager/switch_controller");
+  start_servo_client_ = node_->create_client<std_srvs::srv::Trigger>("/servo_node/start_servo");
+  stop_servo_client_ = node_->create_client<std_srvs::srv::Trigger>("/servo_node/stop_servo");
   servo_joint_pub_ = node_->create_publisher<control_msgs::msg::JointJog>(
       node_->get_parameter("topic_servo_joint").as_string(), 10);
   servo_tcp_pub_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>(
@@ -101,6 +103,40 @@ bool RobotControlServiceImpl::SwitchControllers(
   return future.get()->ok;
 }
 
+bool RobotControlServiceImpl::CallServoStartService() {
+  if (!start_servo_client_->wait_for_service(action_timeout_)) {
+    RCLCPP_WARN(get_logger(), "Service `/servo_node/start_servo` not available.");
+    return false;
+  }
+
+  auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+  auto result_future = start_servo_client_->async_send_request(request);
+
+  if (result_future.wait_for(action_timeout_) != std::future_status::ready) {
+    RCLCPP_WARN(get_logger(), "Service `/servo_node/start_servo` call timed out.");
+    return false;
+  }
+  auto result = result_future.get();
+  return result->success;
+}
+
+bool RobotControlServiceImpl::CallServoStopService() {
+  if (!stop_servo_client_->wait_for_service(action_timeout_)) {
+    RCLCPP_WARN(get_logger(), "Service `/servo_node/stop_servo` not available.");
+    return false;
+  }
+
+  auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+  auto result_future = stop_servo_client_->async_send_request(request);
+
+  if (result_future.wait_for(action_timeout_) != std::future_status::ready) {
+    RCLCPP_WARN(get_logger(), "Service `/servo_node/stop_servo` call timed out.");
+    return false;
+  }
+  auto result = result_future.get();
+  return result->success;
+}
+
 grpc::Status RobotControlServiceImpl::ServoEnable(
   grpc::ServerContext*,
   const google::protobuf::Empty*,
@@ -117,6 +153,13 @@ grpc::Status RobotControlServiceImpl::ServoEnable(
     return grpc::Status(grpc::StatusCode::INTERNAL, err);
   }
 
+  if (!CallServoStartService()) {
+    std::string err = "Failed to start servo service.";
+    RCLCPP_WARN(get_logger(), "[RobotControlService][ServoEnable] %s", err.c_str());
+    response->set_msg(err);
+    return grpc::Status(grpc::StatusCode::INTERNAL, err);
+  }
+
   {
     std::lock_guard<std::mutex> lock(servo_mutex_);
     servo_mode_ = ServoMode::JointJog;
@@ -124,6 +167,7 @@ grpc::Status RobotControlServiceImpl::ServoEnable(
 
   response->set_success(true);
   response->set_msg("");
+  RCLCPP_INFO(get_logger(), "[RobotControlService][ServoDisable] Servo enabled");
   return grpc::Status::OK;
 }
 
@@ -133,6 +177,13 @@ grpc::Status RobotControlServiceImpl::ServoDisable(
   proto_aegis_grpc::v1::TriggerResponse* response)
 {
   response->set_success(false);
+
+  if (!CallServoStopService()) {
+    std::string err = "Failed to stop servo service.";
+    RCLCPP_WARN(get_logger(), "[RobotControlService][ServoDisable] %s", err.c_str());
+    response->set_msg(err);
+    return grpc::Status(grpc::StatusCode::INTERNAL, err);
+  }
 
   if (!SwitchControllers(
         {"scaled_joint_trajectory_controller"},
@@ -152,7 +203,7 @@ grpc::Status RobotControlServiceImpl::ServoDisable(
 
   response->set_success(true);
   response->set_msg("");
-  RCLCPP_WARN(get_logger(), "[RobotControlService][ServoDisable] RETURN");
+  RCLCPP_INFO(get_logger(), "[RobotControlService][ServoDisable] Servo disabled");
   return grpc::Status::OK;
 }
 

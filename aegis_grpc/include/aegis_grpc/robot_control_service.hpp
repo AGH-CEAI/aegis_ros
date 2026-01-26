@@ -9,13 +9,14 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
-#include <controller_manager_msgs/srv/switch_controller.hpp>
 #include <control_msgs/action/gripper_command.hpp>
 #include <control_msgs/msg/joint_jog.hpp>
-#include <geometry_msgs/msg/twist.hpp>
-#include <geometry_msgs/msg/twist_stamped.hpp>
+#include <controller_manager_msgs/srv/switch_controller.hpp>
 #include <geometry_msgs/msg/pose.hpp>
+#include <geometry_msgs/msg/twist_stamped.hpp>
+#include <geometry_msgs/msg/twist.hpp>
 #include <moveit/move_group_interface/move_group_interface.h>
+#include <std_srvs/srv/trigger.hpp>
 
 
 namespace aegis_grpc {
@@ -84,6 +85,8 @@ class RobotControlServiceImpl final
     bool SwitchControllers(
         const std::vector<std::string>& activate,
         const std::vector<std::string>& deactivate);
+    bool CallServoStartService();
+    bool CallServoStopService();
 
     void ServoPublishLoop();
     void GripperSendGoal(double position, double max_effort);
@@ -97,6 +100,8 @@ class RobotControlServiceImpl final
     std::unique_ptr<moveit::planning_interface::MoveGroupInterface> move_group_;
 
     rclcpp::Client<controller_manager_msgs::srv::SwitchController>::SharedPtr switch_controller_client_;
+    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr start_servo_client_;
+    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr stop_servo_client_;
     rclcpp::Publisher<control_msgs::msg::JointJog>::SharedPtr servo_joint_pub_;
     rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr servo_tcp_pub_;
     rclcpp_action::Client<GripperCommand>::SharedPtr gripper_client_;
