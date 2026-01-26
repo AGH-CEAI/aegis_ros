@@ -152,7 +152,6 @@ grpc::Status RobotControlServiceImpl::ServoDisable(
 
   response->set_success(true);
   response->set_msg("");
-  RCLCPP_WARN(get_logger(), "[RobotControlService][ServoDisable] RETURN");
   return grpc::Status::OK;
 }
 
