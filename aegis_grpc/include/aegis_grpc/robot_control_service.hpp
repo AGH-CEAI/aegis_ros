@@ -9,6 +9,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
+#include <controller_manager_msgs/srv/switch_controller.hpp>
 #include <control_msgs/action/gripper_command.hpp>
 #include <control_msgs/msg/joint_jog.hpp>
 #include <geometry_msgs/msg/twist.hpp>
@@ -25,15 +26,19 @@ class RobotControlServiceImpl final
     using GripperCommand = control_msgs::action::GripperCommand;
     using GoalHandleGripper = rclcpp_action::ClientGoalHandle<GripperCommand>;
 
-    enum class ServoMode {
-      None,
-      JointJog,
-      TCPTwist
-    };
-
     explicit RobotControlServiceImpl(std::shared_ptr<rclcpp::Node> node);
 
     // TODO(issue#87) Create additional methods to enable and disable servo control.
+    grpc::Status ServoEnable(
+        grpc::ServerContext* context,
+        const google::protobuf::Empty* request,
+        proto_aegis_grpc::v1::TriggerResponse* response) override;
+
+    grpc::Status ServoDisable(
+        grpc::ServerContext* context,
+        const google::protobuf::Empty* request,
+        proto_aegis_grpc::v1::TriggerResponse* response) override;
+
     grpc::Status ServoJoint(
         grpc::ServerContext* context,
         const proto_aegis_grpc::v1::JointJog* request,
@@ -70,22 +75,32 @@ class RobotControlServiceImpl final
         proto_aegis_grpc::v1::TriggerResponse* response) override;
 
   private:
+    bool switchControllers(
+        const std::vector<std::string>& activate,
+        const std::vector<std::string>& deactivate);
+
+    void ServoPublishLoop();
+    void GripperSendGoal(double position, double max_effort);
+
     rclcpp::Logger get_logger() const;
 
     template <class T>
     void DeclareROSParameter(const std::string& name, const T& default_val, const std::string& description);
 
-    void ServoPublishLoop();
-    void GripperSendGoal(double position, double max_effort);
-
     std::shared_ptr<rclcpp::Node> node_;
     std::unique_ptr<moveit::planning_interface::MoveGroupInterface> move_group_;
 
+    rclcpp::Client<controller_manager_msgs::srv::SwitchController>::SharedPtr switch_controller_client_;
     rclcpp::Publisher<control_msgs::msg::JointJog>::SharedPtr servo_joint_pub_;
     rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr servo_tcp_pub_;
     rclcpp_action::Client<GripperCommand>::SharedPtr gripper_client_;
     rclcpp::TimerBase::SharedPtr servo_pub_timer_;
 
+    enum class ServoMode {
+      None,
+      JointJog,
+      TCPTwist
+    };
     std::mutex servo_mutex_;
     ServoMode servo_mode_;
     std::string servo_tcp_link_;
