@@ -18,12 +18,13 @@ find_package(ament_cmake REQUIRED)
 set(ROS_DEPENDS
     rclcpp
     rclcpp_action
-    controller_manager_msgs
     control_msgs
+    controller_manager_msgs
     geometry_msgs
-    sensor_msgs
     moveit_msgs
-    moveit_ros_planning_interface)
+    moveit_ros_planning_interface
+    sensor_msgs
+    std_srvs)
 
 # Hide warnings from importing moveit packages
 if(POLICY CMP0167)
