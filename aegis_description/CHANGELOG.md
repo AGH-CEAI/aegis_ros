@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-95](https://github.com/AGH-CEAI/aegis_ros/pull/95) - Added standalone launch script to extract whole URDF model to a given directory.
 * [PR-78](https://github.com/AGH-CEAI/aegis_ros/pull/78) - Added logic to allow selective inclusion of cell visual and collision geometry.
 
 ### Changed

@@ -37,6 +37,7 @@ aegis_description/
 │   └── initial_positions.yaml
 ├── launch
 │   ├── aegis_preview.launch.py
+│   ├── generate_standalone_urdf.launch.py
 │   └── robot_description.launch.py
 ├── urdf
 │   ├── aegis.urdf.xacro
@@ -49,20 +50,21 @@ Legend:
 * 📜 - URDF files
 * 🚀 - Launch files
 
-| File                                                                           | Used in | Description                                                                                                             |
-| ------------------------------------------------------------------------------ | ------- | ----------------------------------------------------------------------------------------------------------------------- |
-| [config/ur5e/calibration.yaml](./config/ur5e/calibration.yaml)                 | 📜🚀      | Calibration parameters extracted from the UR5e robot.                                                                   |
-| [config/ur5e/joint_limits.yaml](./config/ur5e/joint_limits.yaml)               | 📜🚀      | Joint limits used by both `ur_robot_driver` and `aegis_moveit_config`.                                                  |
-| [config/ur5e/physical_parameters.yaml](./config/ur5e/physical_parameters.yaml) | 📜       | Reference to masses and intertias taken from the official `ur_robot_driver`.                                            |
-| [config/ur5e/update_rate.yaml](./config/ur5e/update_rate.yaml)                 | 🚀       | Configuration for the `controller_manager` node from the `ur_robot_driver`.                                             |
-| [config/ur5e/visual_parameters.yaml](./config/ur5e/visual_parameters.yaml)     | 📜       | Paths to the UR5e meshes in the `ur_description` package.                                                               |
-| [config/controllers.yaml](./config/controllers.yaml)                           | 🚀       | Configuration for the `ros2_control` controllers, combining outputs from `ur_robot_driver` and MoveIt2 Setup Assistant. |
-| [config/initial_positions.yaml](./config/initial_positions.yaml)               | 📜       | Default joints positions.                                                                                               |
-| [launch/aegis_preview.launch.py](./launch/aegis_preview.launch.py)             |         | Simple launch file to preview in RViz the Aegis model.                                                                  |
-| [launch/robot_description.launch.py](./launch/robot_description.launch.py)     |         | Launch file to run the robot description node with the Aegis URDF model.                                                |
-| [rviz/preview.rviz](./rviz/preview.rviz)                                       | 🚀       | Default RViz configuration for the `aegis_display.launch.py`                                                            |
-| [urdf/aegis.urdf.xacro](./urdf/aegis.urdf.xacro)                               | 🚀       | The main URDF file, which defines the initial link for the `aegis.xacro` file.                                          |
-| [urdf/aegis.xacro](./urdf/aegis.xacro)                                         | 📜       | The main xacro file, which imports all modules from the `urdf/modules/` dir.                                            |
+| File                                                                                     | Used in | Description                                                                                                             |
+| ---------------------------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------- |
+| [config/ur5e/calibration.yaml](./config/ur5e/calibration.yaml)                           | 📜🚀      | Calibration parameters extracted from the UR5e robot.                                                                   |
+| [config/ur5e/joint_limits.yaml](./config/ur5e/joint_limits.yaml)                         | 📜🚀      | Joint limits used by both `ur_robot_driver` and `aegis_moveit_config`.                                                  |
+| [config/ur5e/physical_parameters.yaml](./config/ur5e/physical_parameters.yaml)           | 📜       | Reference to masses and intertias taken from the official `ur_robot_driver`.                                            |
+| [config/ur5e/update_rate.yaml](./config/ur5e/update_rate.yaml)                           | 🚀       | Configuration for the `controller_manager` node from the `ur_robot_driver`.                                             |
+| [config/ur5e/visual_parameters.yaml](./config/ur5e/visual_parameters.yaml)               | 📜       | Paths to the UR5e meshes in the `ur_description` package.                                                               |
+| [config/controllers.yaml](./config/controllers.yaml)                                     | 🚀       | Configuration for the `ros2_control` controllers, combining outputs from `ur_robot_driver` and MoveIt2 Setup Assistant. |
+| [config/initial_positions.yaml](./config/initial_positions.yaml)                         | 📜       | Default joints positions.                                                                                               |
+| [launch/aegis_preview.launch.py](./launch/aegis_preview.launch.py)                       |         | Simple launch file to preview in RViz the Aegis model.                                                                  |
+| [launch/generate_standalone_urdf.launch.py](./launch/generate_standalone_urdf.launch.py) |         | Script to generate standalone URDF to a given directory with copy of all 3D models.                                     |
+| [launch/robot_description.launch.py](./launch/robot_description.launch.py)               |         | Launch file to run the robot description node with the Aegis URDF model.                                                |
+| [rviz/preview.rviz](./rviz/preview.rviz)                                                 | 🚀       | Default RViz configuration for the `aegis_display.launch.py`                                                            |
+| [urdf/aegis.urdf.xacro](./urdf/aegis.urdf.xacro)                                         | 🚀       | The main URDF file, which defines the initial link for the `aegis.xacro` file.                                          |
+| [urdf/aegis.xacro](./urdf/aegis.xacro)                                                   | 📜       | The main xacro file, which imports all modules from the `urdf/modules/` dir.                                            |
 
 
 
