@@ -9,6 +9,10 @@ RobotReadServiceImpl::RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node)
   DeclareROSParameter("topic_pose", "/tcp_pose", "[str] Init; Sub: topic with the TCP pose data.");
   DeclareROSParameter("topic_wrench", "/wrench", "[str] Init; Sub: topic with the F/T data.");
   DeclareROSParameter("topic_joints", "/joint_states", "[str] Init; Sub: topic with the joint states.");
+  DeclareROSParameter("topic_camera_scene", "/cam_scene_rgb/image_rect", "[str] Camera scene image topic");
+  DeclareROSParameter("topic_camera_right", "/cam_tool_right/image_rect", "[str] Camera scene image topic");
+  DeclareROSParameter("topic_camera_left", "/cam_tool_left/image_rect", "[str] Camera scene image topic");
+
 
   pose_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
       node_->get_parameter("topic_pose").as_string(), 10,
@@ -21,6 +25,18 @@ RobotReadServiceImpl::RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node)
   joint_state_sub_ = node_->create_subscription<sensor_msgs::msg::JointState>(
       node_->get_parameter("topic_joints").as_string(), 10,
       std::bind(&RobotReadServiceImpl::JointStateSubCb, this,
+                std::placeholders::_1));
+  image_scene_sub_ = node_->create_subscription<sensor_msgs::msg::Image>(
+      node_->get_parameter("topic_camera_scene").as_string(), 10,
+      std::bind(&RobotReadServiceImpl::ImageSceneSubCb, this,
+                std::placeholders::_1));
+  image_right_sub_ = node_->create_subscription<sensor_msgs::msg::Image>(
+      node_->get_parameter("topic_camera_right").as_string(), 10,
+      std::bind(&RobotReadServiceImpl::ImageRightSubCb, this,
+                std::placeholders::_1));
+  image_left_sub_ = node_->create_subscription<sensor_msgs::msg::Image>(
+      node_->get_parameter("topic_camera_left").as_string(), 10,
+      std::bind(&RobotReadServiceImpl::ImageLeftSubCb, this,
                 std::placeholders::_1));
 }
 
@@ -51,6 +67,24 @@ void RobotReadServiceImpl::JointStateSubCb(
     const sensor_msgs::msg::JointState::SharedPtr msg) {
   std::lock_guard<std::mutex> lock(joint_state_mutex_);
   joint_state_data_ = *msg;
+}
+
+void RobotReadServiceImpl::ImageSceneSubCb(
+    const sensor_msgs::msg::Image::SharedPtr msg) {
+  std::lock_guard<std::mutex> lock(image_scene_mutex_);
+  image_scene_data_ = *msg;
+}
+
+void RobotReadServiceImpl::ImageRightSubCb(
+    const sensor_msgs::msg::Image::SharedPtr msg) {
+  std::lock_guard<std::mutex> lock(image_right_mutex_);
+  image_right_data_ = *msg;
+}
+
+void RobotReadServiceImpl::ImageLeftSubCb(
+    const sensor_msgs::msg::Image::SharedPtr msg) {
+  std::lock_guard<std::mutex> lock(image_left_mutex_);
+  image_left_data_ = *msg;
 }
 
 grpc::Status
@@ -91,6 +125,45 @@ grpc::Status RobotReadServiceImpl::GetJointStates(
   return grpc::Status::OK;
 }
 
+grpc::Status RobotReadServiceImpl::GetCameraSceneImage(
+    grpc::ServerContext* context,
+    const google::protobuf::Empty* request,
+    proto_aegis_grpc::v1::Image* response) {
+  (void)context;
+  (void)request;
+  {
+    std::lock_guard<std::mutex> lock(image_scene_mutex_);
+    FillProtoImage(image_scene_data_, response);
+  }
+  return grpc::Status::OK;
+}
+
+grpc::Status RobotReadServiceImpl::GetCameraRightImage(
+    grpc::ServerContext* context,
+    const google::protobuf::Empty* request,
+    proto_aegis_grpc::v1::Image* response) {
+  (void)context;
+  (void)request;
+  {
+    std::lock_guard<std::mutex> lock(image_right_mutex_);
+    FillProtoImage(image_right_data_, response);
+  }
+  return grpc::Status::OK;
+}
+
+grpc::Status RobotReadServiceImpl::GetCameraLeftImage(
+    grpc::ServerContext* context,
+    const google::protobuf::Empty* request,
+    proto_aegis_grpc::v1::Image* response) {
+  (void)context;
+  (void)request;
+  {
+    std::lock_guard<std::mutex> lock(image_left_mutex_);
+    FillProtoImage(image_left_data_, response);
+  }
+  return grpc::Status::OK;
+}
+
 grpc::Status
 RobotReadServiceImpl::GetAll(grpc::ServerContext *context,
                              const google::protobuf::Empty *request,
@@ -110,6 +183,42 @@ RobotReadServiceImpl::GetAll(grpc::ServerContext *context,
     FillProtoJointState(joint_state_data_, response->mutable_joint_state());
   }
   return grpc::Status::OK;
+}
+
+grpc::Status RobotReadServiceImpl::GetAllVis(
+    grpc::ServerContext* context,
+    const google::protobuf::Empty* request,
+    proto_aegis_grpc::v1::RobotStateVis* response) {
+
+    (void)context;
+    (void)request;
+
+    {
+        std::lock_guard<std::mutex> lock(pose_mutex_);
+        FillProtoPose(pose_data_, response->mutable_pose());
+    }
+    {
+        std::lock_guard<std::mutex> lock(wrench_mutex_);
+        FillProtoWrench(wrench_data_, response->mutable_wrench());
+    }
+    {
+        std::lock_guard<std::mutex> lock(joint_state_mutex_);
+        FillProtoJointState(joint_state_data_, response->mutable_joint_state());
+    }
+    {
+        std::lock_guard<std::mutex> lock(image_scene_mutex_);
+        FillProtoImage(image_scene_data_, response->mutable_image_scene());
+    }
+    {
+        std::lock_guard<std::mutex> lock(image_right_mutex_);
+        FillProtoImage(image_right_data_, response->mutable_image_right());
+    }
+    {
+        std::lock_guard<std::mutex> lock(image_left_mutex_);
+        FillProtoImage(image_left_data_, response->mutable_image_left());
+    }
+
+    return grpc::Status::OK;
 }
 
 void RobotReadServiceImpl::FillProtoPose(
@@ -153,6 +262,24 @@ void RobotReadServiceImpl::FillProtoJointState(
   for (const auto& v : ros.position) out->add_position(v);
   for (const auto& v : ros.velocity) out->add_velocity(v);
   for (const auto& v : ros.effort) out->add_effort(v);
+}
+
+void RobotReadServiceImpl::FillProtoImage(
+    const sensor_msgs::msg::Image& ros,
+    proto_aegis_grpc::v1::Image* out) {
+  out->set_height(ros.height);
+  out->set_width(ros.width);
+
+  if (ros.encoding == "bgr8") {
+      out->set_encoding(proto_aegis_grpc::v1::Image::BGR8);
+  } else if (ros.encoding == "bayer_rggb8") {
+      out->set_encoding(proto_aegis_grpc::v1::Image::BAYER_RGGB8);
+  } else {
+      out->set_encoding(proto_aegis_grpc::v1::Image::UNKNOWN);
+  }
+
+  out->set_step(ros.step);
+  out->set_data(ros.data.data(), ros.data.size());
 }
 
 
