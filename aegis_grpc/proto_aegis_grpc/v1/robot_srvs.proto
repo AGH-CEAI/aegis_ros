@@ -22,16 +22,13 @@ message RobotState {
   Pose pose = 1;
   Wrench wrench = 2;
   JointState joint_state = 3;
-  Image image = 4;
 }
 
 message RobotStateVis {
-  Pose pose = 1;
-  Wrench wrench = 2;
-  JointState joint_state = 3;
-  Image image_scene = 4;
-  Image image_right = 5;
-  Image image_left = 6;
+  RobotState robot_state = 1;
+  Image image_scene = 2;
+  Image image_right = 3;
+  Image image_left = 4;
 }
 
 service RobotControlService {

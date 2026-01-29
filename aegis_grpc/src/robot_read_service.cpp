@@ -9,9 +9,9 @@ RobotReadServiceImpl::RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node)
   DeclareROSParameter("topic_pose", "/tcp_pose", "[str] Init; Sub: topic with the TCP pose data.");
   DeclareROSParameter("topic_wrench", "/wrench", "[str] Init; Sub: topic with the F/T data.");
   DeclareROSParameter("topic_joints", "/joint_states", "[str] Init; Sub: topic with the joint states.");
-  DeclareROSParameter("topic_camera_scene", "/cam_scene_rgb/image_rect", "[str] Camera scene image topic");
-  DeclareROSParameter("topic_camera_right", "/cam_tool_right/image_rect", "[str] Camera scene image topic");
-  DeclareROSParameter("topic_camera_left", "/cam_tool_left/image_rect", "[str] Camera scene image topic");
+  DeclareROSParameter("topic_camera_scene", "/cam_scene/rgb/image_rect", "[str] Camera scene image topic");
+  DeclareROSParameter("topic_camera_right", "/cam_tool_right/image_raw", "[str] Camera scene image topic");
+  DeclareROSParameter("topic_camera_left", "/cam_tool_left/image_raw", "[str] Camera scene image topic");
 
 
   pose_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
@@ -195,15 +195,15 @@ grpc::Status RobotReadServiceImpl::GetAllVis(
 
     {
         std::lock_guard<std::mutex> lock(pose_mutex_);
-        FillProtoPose(pose_data_, response->mutable_pose());
+        FillProtoPose(pose_data_, response->mutable_robot_state()->mutable_pose());
     }
     {
         std::lock_guard<std::mutex> lock(wrench_mutex_);
-        FillProtoWrench(wrench_data_, response->mutable_wrench());
+        FillProtoWrench(wrench_data_, response->mutable_robot_state()->mutable_wrench());
     }
     {
         std::lock_guard<std::mutex> lock(joint_state_mutex_);
-        FillProtoJointState(joint_state_data_, response->mutable_joint_state());
+        FillProtoJointState(joint_state_data_, response->mutable_robot_state()->mutable_joint_state());
     }
     {
         std::lock_guard<std::mutex> lock(image_scene_mutex_);
