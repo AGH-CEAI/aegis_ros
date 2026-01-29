@@ -11,13 +11,27 @@ service RobotReadService {
   rpc GetTCPPose(google.protobuf.Empty) returns (Pose);
   rpc GetWrench(google.protobuf.Empty) returns (Wrench);
   rpc GetJointStates(google.protobuf.Empty) returns (JointState);
+  rpc GetCameraSceneImage(google.protobuf.Empty) returns (Image);
+  rpc GetCameraRightImage(google.protobuf.Empty) returns (Image);
+  rpc GetCameraLeftImage(google.protobuf.Empty) returns (Image);
   rpc GetAll(google.protobuf.Empty) returns (RobotState);
+  rpc GetAllVis(google.protobuf.Empty) returns (RobotStateVis);
 }
 
 message RobotState {
   Pose pose = 1;
   Wrench wrench = 2;
   JointState joint_state = 3;
+  Image image = 4;
+}
+
+message RobotStateVis {
+  Pose pose = 1;
+  Wrench wrench = 2;
+  JointState joint_state = 3;
+  Image image_scene = 4;
+  Image image_right = 5;
+  Image image_left = 6;
 }
 
 service RobotControlService {
