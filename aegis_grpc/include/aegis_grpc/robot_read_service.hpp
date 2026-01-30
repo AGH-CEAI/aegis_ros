@@ -57,16 +57,22 @@ class RobotReadServiceImpl final
       proto_aegis_grpc::v1::Image* response
     ) override;
 
-    grpc::Status GetAll(
-      grpc::ServerContext* context,
-      const google::protobuf::Empty* request,
-      proto_aegis_grpc::v1::RobotState* response
+    grpc::Status GetRobotState(
+        grpc::ServerContext* context,
+        const google::protobuf::Empty* request,
+        proto_aegis_grpc::v1::RobotState* response
     ) override;
 
-    grpc::Status GetAllVis(
-      grpc::ServerContext* context,
-      const google::protobuf::Empty* request,
-      proto_aegis_grpc::v1::RobotStateVis* response
+    grpc::Status GetRobotVision(
+        grpc::ServerContext* context,
+        const google::protobuf::Empty* request,
+        proto_aegis_grpc::v1::RobotVision* response
+    ) override;
+
+    grpc::Status GetAll(
+        grpc::ServerContext* context,
+        const google::protobuf::Empty* request,
+        proto_aegis_grpc::v1::RobotObservation* response
     ) override;
 
     // TODO(issue#84) implement getters for images from cameras (RGB & RGBD)

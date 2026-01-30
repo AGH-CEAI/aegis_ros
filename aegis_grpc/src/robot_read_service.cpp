@@ -46,51 +46,53 @@ void RobotReadServiceImpl::DeclareROSParameter(const std::string& name, const st
   node_->declare_parameter(name, default_val, param_desc);
 
   const auto p = node_->get_parameter(name);
-  RCLCPP_INFO(node_->get_logger(), "> %s := %s",
-              name.c_str(),
-              p.value_to_string().c_str());
+  RCLCPP_INFO(
+    node_->get_logger(), "> %s := %s",
+    name.c_str(),
+    p.value_to_string().c_str()
+  );
 }
 
 void RobotReadServiceImpl::PoseSubCb(
-    const geometry_msgs::msg::PoseStamped::SharedPtr msg) {
-  std::lock_guard<std::mutex> lock(pose_mutex_);
-  pose_data_ = msg->pose;
+  const geometry_msgs::msg::PoseStamped::SharedPtr msg) {
+    std::lock_guard<std::mutex> lock(pose_mutex_);
+    pose_data_ = msg->pose;
 }
 
 void RobotReadServiceImpl::WrenchSubCb(
-    const geometry_msgs::msg::WrenchStamped::SharedPtr msg) {
-  std::lock_guard<std::mutex> lock(wrench_mutex_);
-  wrench_data_ = msg->wrench;
+  const geometry_msgs::msg::WrenchStamped::SharedPtr msg) {
+    std::lock_guard<std::mutex> lock(wrench_mutex_);
+    wrench_data_ = msg->wrench;
 }
 
 void RobotReadServiceImpl::JointStateSubCb(
-    const sensor_msgs::msg::JointState::SharedPtr msg) {
-  std::lock_guard<std::mutex> lock(joint_state_mutex_);
-  joint_state_data_ = *msg;
+  const sensor_msgs::msg::JointState::SharedPtr msg) {
+    std::lock_guard<std::mutex> lock(joint_state_mutex_);
+    joint_state_data_ = *msg;
 }
 
 void RobotReadServiceImpl::ImageSceneSubCb(
-    const sensor_msgs::msg::Image::SharedPtr msg) {
-  std::lock_guard<std::mutex> lock(image_scene_mutex_);
-  image_scene_data_ = *msg;
+  const sensor_msgs::msg::Image::SharedPtr msg) {
+    std::lock_guard<std::mutex> lock(image_scene_mutex_);
+    image_scene_data_ = *msg;
 }
 
 void RobotReadServiceImpl::ImageRightSubCb(
-    const sensor_msgs::msg::Image::SharedPtr msg) {
-  std::lock_guard<std::mutex> lock(image_right_mutex_);
-  image_right_data_ = *msg;
+  const sensor_msgs::msg::Image::SharedPtr msg) {
+    std::lock_guard<std::mutex> lock(image_right_mutex_);
+    image_right_data_ = *msg;
 }
 
 void RobotReadServiceImpl::ImageLeftSubCb(
-    const sensor_msgs::msg::Image::SharedPtr msg) {
-  std::lock_guard<std::mutex> lock(image_left_mutex_);
-  image_left_data_ = *msg;
+  const sensor_msgs::msg::Image::SharedPtr msg) {
+    std::lock_guard<std::mutex> lock(image_left_mutex_);
+    image_left_data_ = *msg;
 }
 
-grpc::Status
-RobotReadServiceImpl::GetTCPPose(grpc::ServerContext *context,
-                                 const google::protobuf::Empty *request,
-                                 proto_aegis_grpc::v1::Pose *response) {
+grpc::Status RobotReadServiceImpl::GetTCPPose(
+  grpc::ServerContext *context,
+  const google::protobuf::Empty *request,
+  proto_aegis_grpc::v1::Pose *response) {
     (void) context;
     (void) request;
     {
@@ -100,99 +102,119 @@ RobotReadServiceImpl::GetTCPPose(grpc::ServerContext *context,
     return grpc::Status::OK;
 }
 
-grpc::Status
-RobotReadServiceImpl::GetWrench(grpc::ServerContext *context,
-                                const google::protobuf::Empty *request,
-                                proto_aegis_grpc::v1::Wrench *response) {
-  (void) context;
-  (void) request;
-  {
-    std::lock_guard<std::mutex> lock(wrench_mutex_);
-    FillProtoWrench(wrench_data_, response);
-  }
-  return grpc::Status::OK;
+grpc::Status RobotReadServiceImpl::GetWrench(
+  grpc::ServerContext *context,
+  const google::protobuf::Empty *request,
+  proto_aegis_grpc::v1::Wrench *response) {
+    (void) context;
+    (void) request;
+    {
+      std::lock_guard<std::mutex> lock(wrench_mutex_);
+      FillProtoWrench(wrench_data_, response);
+    }
+    return grpc::Status::OK;
 }
 
 grpc::Status RobotReadServiceImpl::GetJointStates(
-    grpc::ServerContext *context, const google::protobuf::Empty *request,
-    proto_aegis_grpc::v1::JointState *response) {
-  (void) context;
-  (void) request;
-  {
-    std::lock_guard<std::mutex> lock(joint_state_mutex_);
-    FillProtoJointState(joint_state_data_, response);
-  }
-  return grpc::Status::OK;
+  grpc::ServerContext *context, const google::protobuf::Empty *request,
+  proto_aegis_grpc::v1::JointState *response) {
+    (void) context;
+    (void) request;
+    {
+      std::lock_guard<std::mutex> lock(joint_state_mutex_);
+      FillProtoJointState(joint_state_data_, response);
+    }
+    return grpc::Status::OK;
 }
 
 grpc::Status RobotReadServiceImpl::GetCameraSceneImage(
-    grpc::ServerContext* context,
-    const google::protobuf::Empty* request,
-    proto_aegis_grpc::v1::Image* response) {
-  (void)context;
-  (void)request;
-  {
-    std::lock_guard<std::mutex> lock(image_scene_mutex_);
-    FillProtoImage(image_scene_data_, response);
-  }
-  return grpc::Status::OK;
+  grpc::ServerContext* context,
+  const google::protobuf::Empty* request,
+  proto_aegis_grpc::v1::Image* response) {
+    (void)context;
+    (void)request;
+    {
+      std::lock_guard<std::mutex> lock(image_scene_mutex_);
+      FillProtoImage(image_scene_data_, response);
+    }
+    return grpc::Status::OK;
 }
 
 grpc::Status RobotReadServiceImpl::GetCameraRightImage(
-    grpc::ServerContext* context,
-    const google::protobuf::Empty* request,
-    proto_aegis_grpc::v1::Image* response) {
-  (void)context;
-  (void)request;
-  {
-    std::lock_guard<std::mutex> lock(image_right_mutex_);
-    FillProtoImage(image_right_data_, response);
-  }
-  return grpc::Status::OK;
+  grpc::ServerContext* context,
+  const google::protobuf::Empty* request,
+  proto_aegis_grpc::v1::Image* response) {
+    (void)context;
+    (void)request;
+    {
+      std::lock_guard<std::mutex> lock(image_right_mutex_);
+      FillProtoImage(image_right_data_, response);
+    }
+    return grpc::Status::OK;
 }
 
 grpc::Status RobotReadServiceImpl::GetCameraLeftImage(
-    grpc::ServerContext* context,
-    const google::protobuf::Empty* request,
-    proto_aegis_grpc::v1::Image* response) {
-  (void)context;
-  (void)request;
-  {
-    std::lock_guard<std::mutex> lock(image_left_mutex_);
-    FillProtoImage(image_left_data_, response);
-  }
-  return grpc::Status::OK;
-}
-
-grpc::Status
-RobotReadServiceImpl::GetAll(grpc::ServerContext *context,
-                             const google::protobuf::Empty *request,
-                             proto_aegis_grpc::v1::RobotState *response) {
-  (void) context;
-  (void) request;
-  {
-    std::lock_guard<std::mutex> lock(pose_mutex_);
-    FillProtoPose(pose_data_, response->mutable_pose());
-  }
-  {
-    std::lock_guard<std::mutex> lock(wrench_mutex_);
-    FillProtoWrench(wrench_data_, response->mutable_wrench());
-  }
-  {
-    std::lock_guard<std::mutex> lock(joint_state_mutex_);
-    FillProtoJointState(joint_state_data_, response->mutable_joint_state());
-  }
-  return grpc::Status::OK;
-}
-
-grpc::Status RobotReadServiceImpl::GetAllVis(
-    grpc::ServerContext* context,
-    const google::protobuf::Empty* request,
-    proto_aegis_grpc::v1::RobotStateVis* response) {
-
+  grpc::ServerContext* context,
+  const google::protobuf::Empty* request,
+  proto_aegis_grpc::v1::Image* response) {
     (void)context;
     (void)request;
+    {
+      std::lock_guard<std::mutex> lock(image_left_mutex_);
+      FillProtoImage(image_left_data_, response);
+    }
+    return grpc::Status::OK;
+}
 
+grpc::Status RobotReadServiceImpl::GetRobotState(
+  grpc::ServerContext* context,
+  const google::protobuf::Empty* request,
+  proto_aegis_grpc::v1::RobotState* response) {
+    (void)context;
+    (void)request;
+    {
+    std::lock_guard<std::mutex> lock(pose_mutex_);
+    FillProtoPose(pose_data_, response->mutable_pose());
+    }
+    {
+    std::lock_guard<std::mutex> lock(wrench_mutex_);
+    FillProtoWrench(wrench_data_, response->mutable_wrench());
+    }
+    {
+    std::lock_guard<std::mutex> lock(joint_state_mutex_);
+    FillProtoJointState(joint_state_data_, response->mutable_joint_state());
+    }
+    return grpc::Status::OK;
+}
+
+
+grpc::Status RobotReadServiceImpl::GetRobotVision(
+  grpc::ServerContext* context,
+  const google::protobuf::Empty* request,
+  proto_aegis_grpc::v1::RobotVision* response) {
+    (void) context;
+    (void) request;
+    {
+    std::lock_guard<std::mutex> lock(image_scene_mutex_);
+    FillProtoImage(image_scene_data_, response->mutable_image_scene());
+    }
+    {
+    std::lock_guard<std::mutex> lock(image_right_mutex_);
+    FillProtoImage(image_right_data_, response->mutable_image_right());
+    }
+    {
+    std::lock_guard<std::mutex> lock(image_left_mutex_);
+    FillProtoImage(image_left_data_, response->mutable_image_left());
+    }
+    return grpc::Status::OK;
+}
+
+grpc::Status RobotReadServiceImpl::GetAll(
+  grpc::ServerContext* context,
+  const google::protobuf::Empty* request,
+  proto_aegis_grpc::v1::RobotObservation* response) {
+    (void) context;
+    (void) request;
     {
         std::lock_guard<std::mutex> lock(pose_mutex_);
         FillProtoPose(pose_data_, response->mutable_robot_state()->mutable_pose());
@@ -207,17 +229,16 @@ grpc::Status RobotReadServiceImpl::GetAllVis(
     }
     {
         std::lock_guard<std::mutex> lock(image_scene_mutex_);
-        FillProtoImage(image_scene_data_, response->mutable_image_scene());
+        FillProtoImage(image_scene_data_, response->mutable_robot_vision()->mutable_image_scene());
     }
     {
         std::lock_guard<std::mutex> lock(image_right_mutex_);
-        FillProtoImage(image_right_data_, response->mutable_image_right());
+        FillProtoImage(image_right_data_, response->mutable_robot_vision()->mutable_image_right());
     }
     {
         std::lock_guard<std::mutex> lock(image_left_mutex_);
-        FillProtoImage(image_left_data_, response->mutable_image_left());
+        FillProtoImage(image_left_data_, response->mutable_robot_vision()->mutable_image_left());
     }
-
     return grpc::Status::OK;
 }
 
