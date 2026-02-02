@@ -73,13 +73,13 @@ grpcurl -plaintext 127.0.0.1:50051 describe proto_aegis_grpc.v1.RobotReadService
 # or with tool from container
 podman run --rm --network=host docker.io/fullstorydev/grpcurl -plaintext 127.0.0.1:50051 list
 # map grpcurl container alias
-alias grpcurl="podman run --network=host docker.io/fullstorydev/grpcurl"
+alias grpcurl="podman run --rm --network=host docker.io/fullstorydev/grpcurl"
 ```
 
 Example call to the `GetAll` method with result as a plain json:
 
 ```bash
-grpcurl -max-msg-sz 20000000 -plaintext -d '{}' 127.0.0.1:50051 proto_aegis_grpc.v1.RobotReadService.GetAll
+grpcurl -max-msg-sz 10485760 -plaintext -d '{}' 127.0.0.1:50051 proto_aegis_grpc.v1.RobotReadService.GetAll
 ```
 
 ## Messages architecture

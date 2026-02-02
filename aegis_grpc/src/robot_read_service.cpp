@@ -170,6 +170,7 @@ grpc::Status RobotReadServiceImpl::GetRobotState(
   grpc::ServerContext* context,
   const google::protobuf::Empty* request,
   proto_aegis_grpc::v1::RobotState* response) {
+    // TODO(issue#85): Guard the freshness of the data in gRPC server
     (void)context;
     (void)request;
     {
@@ -192,6 +193,7 @@ grpc::Status RobotReadServiceImpl::GetRobotVision(
   grpc::ServerContext* context,
   const google::protobuf::Empty* request,
   proto_aegis_grpc::v1::RobotVision* response) {
+    // TODO(issue#85): Guard the freshness of the data in gRPC server
     (void) context;
     (void) request;
     {
