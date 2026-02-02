@@ -245,64 +245,76 @@ grpc::Status RobotReadServiceImpl::GetAll(
 }
 
 void RobotReadServiceImpl::FillProtoPose(
-    const geometry_msgs::msg::Pose& ros,
-    proto_aegis_grpc::v1::Pose* out) {
+  const geometry_msgs::msg::Pose& ros,
+  proto_aegis_grpc::v1::Pose* out) {
   auto* pos = out->mutable_position();
-  pos->set_x(ros.position.x);
-  pos->set_y(ros.position.y);
-  pos->set_z(ros.position.z);
+    pos->set_x(ros.position.x);
+    pos->set_y(ros.position.y);
+    pos->set_z(ros.position.z);
 
-  auto* ori = out->mutable_orientation();
-  ori->set_x(ros.orientation.x);
-  ori->set_y(ros.orientation.y);
-  ori->set_z(ros.orientation.z);
-  ori->set_w(ros.orientation.w);
+    auto* ori = out->mutable_orientation();
+    ori->set_x(ros.orientation.x);
+    ori->set_y(ros.orientation.y);
+    ori->set_z(ros.orientation.z);
+    ori->set_w(ros.orientation.w);
 }
 
 void RobotReadServiceImpl::FillProtoWrench(
-    const geometry_msgs::msg::Wrench& ros,
-    proto_aegis_grpc::v1::Wrench* out) {
-  auto* f = out->mutable_force();
-  f->set_x(ros.force.x);
-  f->set_y(ros.force.y);
-  f->set_z(ros.force.z);
+  const geometry_msgs::msg::Wrench& ros,
+  proto_aegis_grpc::v1::Wrench* out) {
+    auto* f = out->mutable_force();
+    f->set_x(ros.force.x);
+    f->set_y(ros.force.y);
+    f->set_z(ros.force.z);
 
-  auto* t = out->mutable_torque();
-  t->set_x(ros.torque.x);
-  t->set_y(ros.torque.y);
-  t->set_z(ros.torque.z);
+    auto* t = out->mutable_torque();
+    t->set_x(ros.torque.x);
+    t->set_y(ros.torque.y);
+    t->set_z(ros.torque.z);
 }
 
 void RobotReadServiceImpl::FillProtoJointState(
-    const sensor_msgs::msg::JointState& ros,
-    proto_aegis_grpc::v1::JointState* out) {
-  out->clear_name();
-  out->clear_position();
-  out->clear_velocity();
-  out->clear_effort();
+  const sensor_msgs::msg::JointState& ros,
+  proto_aegis_grpc::v1::JointState* out) {
+    out->clear_name();
+    out->clear_position();
+    out->clear_velocity();
+    out->clear_effort();
 
-  for (const auto& v : ros.name) out->add_name(v);
-  for (const auto& v : ros.position) out->add_position(v);
-  for (const auto& v : ros.velocity) out->add_velocity(v);
-  for (const auto& v : ros.effort) out->add_effort(v);
+    for (const auto& v : ros.name) out->add_name(v);
+    for (const auto& v : ros.position) out->add_position(v);
+    for (const auto& v : ros.velocity) out->add_velocity(v);
+    for (const auto& v : ros.effort) out->add_effort(v);
 }
 
 void RobotReadServiceImpl::FillProtoImage(
-    const sensor_msgs::msg::Image& ros,
-    proto_aegis_grpc::v1::Image* out) {
-  out->set_height(ros.height);
-  out->set_width(ros.width);
+  const sensor_msgs::msg::Image& ros,
+  proto_aegis_grpc::v1::Image* out,
+  int target_width = 64,
+  int target_height = 64) {
+    cv_bridge::CvImagePtr cv_ptr;
+    try {
+        cv_ptr = cv_bridge::toCvCopy(ros, ros.encoding);
+    } catch (cv_bridge::Exception& e) {
+        RCLCPP_ERROR(node_->get_logger(), "cv_bridge exception: %s", e.what());
+        return;
+    }
+    cv::Mat image_resized;
+    cv::resize(cv_ptr->image, image_resized, cv::Size(target_width, target_height));
 
-  if (ros.encoding == "bgr8") {
-      out->set_encoding(proto_aegis_grpc::v1::Image::BGR8);
-  } else if (ros.encoding == "bayer_rggb8") {
-      out->set_encoding(proto_aegis_grpc::v1::Image::BAYER_RGGB8);
-  } else {
-      out->set_encoding(proto_aegis_grpc::v1::Image::UNKNOWN);
-  }
+    out->set_height(image_resized.rows);
+    out->set_width(image_resized.cols);
+    out->set_step(image_resized.step);
 
-  out->set_step(ros.step);
-  out->set_data(ros.data.data(), ros.data.size());
+    if (ros.encoding == "bgr8") {
+        out->set_encoding(proto_aegis_grpc::v1::Image::BGR8);
+    } else if (ros.encoding == "bayer_rggb8") {
+        out->set_encoding(proto_aegis_grpc::v1::Image::BAYER_RGGB8);
+    } else {
+        out->set_encoding(proto_aegis_grpc::v1::Image::UNKNOWN);
+    }
+
+    out->set_data(image_resized.data, image_resized.total() * image_resized.elemSize());
 }
 
 

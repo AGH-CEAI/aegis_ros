@@ -1,12 +1,14 @@
 #ifndef AEGIS_GRPC__ROBOT_READ_SERVICE_HPP_
 #define AEGIS_GRPC__ROBOT_READ_SERVICE_HPP_
 #include <mutex>
+#include <opencv2/opencv.hpp>
 
 #include <grpcpp/grpcpp.h>
 #include <google/protobuf/empty.pb.h>
 #include "proto_aegis_grpc/v1/robot_srvs.grpc.pb.h"
 
 #include <rclcpp/rclcpp.hpp>
+#include <cv_bridge/cv_bridge.h>
 #include <geometry_msgs/msg/pose.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/wrench.hpp>
@@ -102,7 +104,9 @@ class RobotReadServiceImpl final
 
   static void FillProtoImage(
     const sensor_msgs::msg::Image& ros,
-    proto_aegis_grpc::v1::Image* out);
+    proto_aegis_grpc::v1::Image* out,
+    int target_width,
+    int target_height);
 
     std::shared_ptr<rclcpp::Node> node_;
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr pose_sub_;
