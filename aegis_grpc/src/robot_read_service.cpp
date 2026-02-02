@@ -6,13 +6,14 @@ RobotReadServiceImpl::RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node)
     : node_(node), pose_data_(), wrench_data_(), joint_state_data_() {
 
   // Initialization parameters
-  DeclareROSParameter("topic_pose", "/tcp_pose", "[str] Init; Sub: topic with the TCP pose data.");
-  DeclareROSParameter("topic_wrench", "/wrench", "[str] Init; Sub: topic with the F/T data.");
-  DeclareROSParameter("topic_joints", "/joint_states", "[str] Init; Sub: topic with the joint states.");
-  DeclareROSParameter("topic_camera_scene", "/cam_scene/rgb/image_rect", "[str] Camera scene image topic");
-  DeclareROSParameter("topic_camera_right", "/cam_tool_right/image_raw", "[str] Camera scene image topic");
-  DeclareROSParameter("topic_camera_left", "/cam_tool_left/image_raw", "[str] Camera scene image topic");
-
+  DeclareROSParameter("topic_pose", std::string("/tcp_pose"), "[str] Init; Sub: topic with the TCP pose data.");
+  DeclareROSParameter("topic_wrench", std::string("/wrench"), "[str] Init; Sub: topic with the F/T data.");
+  DeclareROSParameter("topic_joints", std::string("/joint_states"), "[str] Init; Sub: topic with the joint states.");
+  DeclareROSParameter("topic_camera_scene", std::string("/cam_scene/rgb/image_rect"), "[str] Camera scene image topic");
+  DeclareROSParameter("topic_camera_right", std::string("/cam_tool_right/image_raw"), "[str] Camera scene image topic");
+  DeclareROSParameter("topic_camera_left", std::string("/cam_tool_left/image_raw"), "[str] Camera scene image topic");
+  DeclareROSParameter("target_image_width", 64, "[int] Init; TODO");
+  DeclareROSParameter("target_image_height", 64, "[int] Init; TODO");
 
   pose_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
       node_->get_parameter("topic_pose").as_string(), 10,
@@ -38,19 +39,24 @@ RobotReadServiceImpl::RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node)
       node_->get_parameter("topic_camera_left").as_string(), 10,
       std::bind(&RobotReadServiceImpl::ImageLeftSubCb, this,
                 std::placeholders::_1));
+  target_img_width_ = node_->get_parameter("target_image_width").as_int();
+  target_img_height_ = node_->get_parameter("target_image_height").as_int();
 }
 
-void RobotReadServiceImpl::DeclareROSParameter(const std::string& name, const std::string& default_val, const std::string& description) {
+template <class T>
+void RobotReadServiceImpl::DeclareROSParameter(
+    const std::string &name,
+    const T& default_val,
+    const std::string &description) {
   auto param_desc = rcl_interfaces::msg::ParameterDescriptor{};
   param_desc.description = description;
-  node_->declare_parameter(name, default_val, param_desc);
+
+  node_->declare_parameter<T>(name, default_val, param_desc);
 
   const auto p = node_->get_parameter(name);
-  RCLCPP_INFO(
-    node_->get_logger(), "> %s := %s",
-    name.c_str(),
-    p.value_to_string().c_str()
-  );
+  RCLCPP_INFO(node_->get_logger(), "> %s := %s",
+              name.c_str(),
+              p.value_to_string().c_str());
 }
 
 void RobotReadServiceImpl::PoseSubCb(
@@ -289,9 +295,7 @@ void RobotReadServiceImpl::FillProtoJointState(
 
 void RobotReadServiceImpl::FillProtoImage(
   const sensor_msgs::msg::Image& ros,
-  proto_aegis_grpc::v1::Image* out,
-  int target_width = 64,
-  int target_height = 64) {
+  proto_aegis_grpc::v1::Image* out) {
     cv_bridge::CvImagePtr cv_ptr;
     try {
         cv_ptr = cv_bridge::toCvCopy(ros, ros.encoding);
@@ -300,7 +304,7 @@ void RobotReadServiceImpl::FillProtoImage(
         return;
     }
     cv::Mat image_resized;
-    cv::resize(cv_ptr->image, image_resized, cv::Size(target_width, target_height));
+    cv::resize(cv_ptr->image, image_resized, cv::Size(target_img_width_, target_img_height_));
 
     out->set_height(image_resized.rows);
     out->set_width(image_resized.cols);

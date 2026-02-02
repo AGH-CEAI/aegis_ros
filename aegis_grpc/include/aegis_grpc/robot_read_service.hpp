@@ -81,7 +81,8 @@ class RobotReadServiceImpl final
     // TODO(issue#85) develop synchronization guard to monitor the freshness of the data
 
   private:
-    void DeclareROSParameter(const std::string& name, const std::string& default_val, const std::string& description);
+    template <class T>
+    void DeclareROSParameter(const std::string& name, const T& default_val, const std::string& description);
 
     void PoseSubCb(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
     void WrenchSubCb(const geometry_msgs::msg::WrenchStamped::SharedPtr msg);
@@ -102,11 +103,9 @@ class RobotReadServiceImpl final
       const sensor_msgs::msg::JointState& ros,
       proto_aegis_grpc::v1::JointState* out);
 
-  static void FillProtoImage(
+  void FillProtoImage(
     const sensor_msgs::msg::Image& ros,
-    proto_aegis_grpc::v1::Image* out,
-    int target_width,
-    int target_height);
+    proto_aegis_grpc::v1::Image* out); 
 
     std::shared_ptr<rclcpp::Node> node_;
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr pose_sub_;
@@ -129,6 +128,9 @@ class RobotReadServiceImpl final
     std::mutex image_scene_mutex_;
     std::mutex image_right_mutex_;
     std::mutex image_left_mutex_;
+
+    uint32_t target_img_width_;
+    uint32_t target_img_height_;
 };
 
 } // namespace aegis_grpc
