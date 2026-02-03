@@ -105,7 +105,8 @@ class RobotReadServiceImpl final
 
   void FillProtoImage(
     const sensor_msgs::msg::Image& ros,
-    proto_aegis_grpc::v1::Image* out); 
+    proto_aegis_grpc::v1::Image* out,
+    cv::Mat& resize_buffer); 
 
     std::shared_ptr<rclcpp::Node> node_;
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr pose_sub_;
@@ -131,6 +132,12 @@ class RobotReadServiceImpl final
 
     uint32_t target_img_width_;
     uint32_t target_img_height_;
+
+    cv::Mat scene_resized_;
+    cv::Mat right_resized_;
+    cv::Mat left_resized_;
+
+    bool enable_image_resize_;
 };
 
 } // namespace aegis_grpc

@@ -9,11 +9,12 @@ RobotReadServiceImpl::RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node)
   DeclareROSParameter("topic_pose", std::string("/tcp_pose"), "[str] Init; Sub: topic with the TCP pose data.");
   DeclareROSParameter("topic_wrench", std::string("/wrench"), "[str] Init; Sub: topic with the F/T data.");
   DeclareROSParameter("topic_joints", std::string("/joint_states"), "[str] Init; Sub: topic with the joint states.");
-  DeclareROSParameter("topic_camera_scene", std::string("/cam_scene/rgb/image_rect"), "[str] Camera scene image topic");
-  DeclareROSParameter("topic_camera_right", std::string("/cam_tool_right/image_raw"), "[str] Camera scene image topic");
-  DeclareROSParameter("topic_camera_left", std::string("/cam_tool_left/image_raw"), "[str] Camera scene image topic");
-  DeclareROSParameter("target_image_width", 64, "[int] Init; TODO");
-  DeclareROSParameter("target_image_height", 64, "[int] Init; TODO");
+  DeclareROSParameter("topic_camera_scene", std::string("/cam_scene/rgb/image_rect"), "[str] Init; Sub: Camera scene image topic.");
+  DeclareROSParameter("topic_camera_right", std::string("/cam_tool_right/image_raw"), "[str] Init; Sub: Camera scene image topic.");
+  DeclareROSParameter("topic_camera_left", std::string("/cam_tool_left/image_raw"), "[str] Init; Sub:Camera scene image topic.");
+  DeclareROSParameter("target_image_width", 64, "[int] Init; Target output image width in pixels.");
+  DeclareROSParameter("target_image_height", 64, "[int] Init; Target output image height in pixels.");
+  DeclareROSParameter("enable_image_resize", true, "[bool] Init; Enable resizing images before sending over gRPC.");
 
   pose_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
       node_->get_parameter("topic_pose").as_string(), 10,
@@ -41,6 +42,7 @@ RobotReadServiceImpl::RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node)
                 std::placeholders::_1));
   target_img_width_ = node_->get_parameter("target_image_width").as_int();
   target_img_height_ = node_->get_parameter("target_image_height").as_int();
+  enable_image_resize_ = node_->get_parameter("enable_image_resize").as_bool();
 }
 
 template <class T>
@@ -141,7 +143,7 @@ grpc::Status RobotReadServiceImpl::GetCameraSceneImage(
     (void)request;
     {
       std::lock_guard<std::mutex> lock(image_scene_mutex_);
-      FillProtoImage(image_scene_data_, response);
+      FillProtoImage(image_scene_data_, response, scene_resized_);
     }
     return grpc::Status::OK;
 }
@@ -154,7 +156,7 @@ grpc::Status RobotReadServiceImpl::GetCameraRightImage(
     (void)request;
     {
       std::lock_guard<std::mutex> lock(image_right_mutex_);
-      FillProtoImage(image_right_data_, response);
+      FillProtoImage(image_right_data_, response, right_resized_);
     }
     return grpc::Status::OK;
 }
@@ -167,7 +169,7 @@ grpc::Status RobotReadServiceImpl::GetCameraLeftImage(
     (void)request;
     {
       std::lock_guard<std::mutex> lock(image_left_mutex_);
-      FillProtoImage(image_left_data_, response);
+      FillProtoImage(image_left_data_, response, left_resized_);
     }
     return grpc::Status::OK;
 }
@@ -204,15 +206,15 @@ grpc::Status RobotReadServiceImpl::GetRobotVision(
     (void) request;
     {
     std::lock_guard<std::mutex> lock(image_scene_mutex_);
-    FillProtoImage(image_scene_data_, response->mutable_image_scene());
+    FillProtoImage(image_scene_data_, response->mutable_image_scene(), scene_resized_);
     }
     {
     std::lock_guard<std::mutex> lock(image_right_mutex_);
-    FillProtoImage(image_right_data_, response->mutable_image_right());
+    FillProtoImage(image_right_data_, response->mutable_image_right(), right_resized_);
     }
     {
     std::lock_guard<std::mutex> lock(image_left_mutex_);
-    FillProtoImage(image_left_data_, response->mutable_image_left());
+    FillProtoImage(image_left_data_, response->mutable_image_left(), left_resized_);
     }
     return grpc::Status::OK;
 }
@@ -237,15 +239,15 @@ grpc::Status RobotReadServiceImpl::GetAll(
     }
     {
         std::lock_guard<std::mutex> lock(image_scene_mutex_);
-        FillProtoImage(image_scene_data_, response->mutable_robot_vision()->mutable_image_scene());
+        FillProtoImage(image_scene_data_, response->mutable_robot_vision()->mutable_image_scene(), scene_resized_);
     }
     {
         std::lock_guard<std::mutex> lock(image_right_mutex_);
-        FillProtoImage(image_right_data_, response->mutable_robot_vision()->mutable_image_right());
+        FillProtoImage(image_right_data_, response->mutable_robot_vision()->mutable_image_right(), right_resized_);
     }
     {
         std::lock_guard<std::mutex> lock(image_left_mutex_);
-        FillProtoImage(image_left_data_, response->mutable_robot_vision()->mutable_image_left());
+        FillProtoImage(image_left_data_, response->mutable_robot_vision()->mutable_image_left(), left_resized_);
     }
     return grpc::Status::OK;
 }
@@ -293,33 +295,45 @@ void RobotReadServiceImpl::FillProtoJointState(
     for (const auto& v : ros.effort) out->add_effort(v);
 }
 
-void RobotReadServiceImpl::FillProtoImage(
-  const sensor_msgs::msg::Image& ros,
-  proto_aegis_grpc::v1::Image* out) {
-    cv_bridge::CvImagePtr cv_ptr;
+  void RobotReadServiceImpl::FillProtoImage(
+    const sensor_msgs::msg::Image& ros,
+    proto_aegis_grpc::v1::Image* out,
+    cv::Mat& buffer)
+  {
+    cv_bridge::CvImageConstPtr cv_ptr;
     try {
-        cv_ptr = cv_bridge::toCvCopy(ros, ros.encoding);
+      cv_ptr = cv_bridge::toCvCopy(ros, ros.encoding);
     } catch (cv_bridge::Exception& e) {
-        RCLCPP_ERROR(node_->get_logger(), "cv_bridge exception: %s", e.what());
-        return;
+      RCLCPP_ERROR(node_->get_logger(), "cv_bridge: %s", e.what());
+      return;
     }
-    cv::Mat image_resized;
-    cv::resize(cv_ptr->image, image_resized, cv::Size(target_img_width_, target_img_height_));
 
-    out->set_height(image_resized.rows);
-    out->set_width(image_resized.cols);
-    out->set_step(image_resized.step);
+    const cv::Mat* src = &cv_ptr->image;
 
-    if (ros.encoding == "bgr8") {
-        out->set_encoding(proto_aegis_grpc::v1::Image::BGR8);
-    } else if (ros.encoding == "bayer_rggb8") {
-        out->set_encoding(proto_aegis_grpc::v1::Image::BAYER_RGGB8);
+    if (enable_image_resize_) {
+      cv::resize(
+        cv_ptr->image,
+        buffer,
+        cv::Size(target_img_width_, target_img_height_),
+        0, 0, cv::INTER_LINEAR);
+      src = &buffer;
+    }
+
+    if (ros.encoding == "bayer_rggb8") {
+      cv::cvtColor(*src, buffer, cv::COLOR_BayerRG2BGR);
+      src = &buffer;
+      out->set_encoding(proto_aegis_grpc::v1::Image::BGR8);
+    } else if (ros.encoding == "bgr8") {
+      out->set_encoding(proto_aegis_grpc::v1::Image::BGR8);
     } else {
-        out->set_encoding(proto_aegis_grpc::v1::Image::UNKNOWN);
+      out->set_encoding(proto_aegis_grpc::v1::Image::UNKNOWN);
     }
 
-    out->set_data(image_resized.data, image_resized.total() * image_resized.elemSize());
-}
+    out->set_height(src->rows);
+    out->set_width(src->cols);
+    out->set_step(src->step);
+    out->set_data(src->data, src->total() * src->elemSize());
+  }
 
 
 } // namespace aegis_grpc
