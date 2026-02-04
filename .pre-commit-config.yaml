@@ -35,7 +35,7 @@ repos:
         args: [-w]
 
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.14
+    rev: v0.15.0
     hooks:
     -   id: ruff-check
         args: [--fix, --exit-non-zero-on-fix]
@@ -57,7 +57,7 @@ repos:
 
     # Protobuf & gRPC
 -   repo: https://github.com/bufbuild/buf
-    rev: v1.64.0
+    rev: v1.65.0
     hooks:
     -   id: buf-format
 
