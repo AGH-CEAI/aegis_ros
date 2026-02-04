@@ -153,6 +153,33 @@ class AegisRobotClient:
             self.logger.error(f"GetRobotState failed: {e}")
             raise
 
+    async def get_camera_scene_image(self) -> np.ndarray:
+        self._check_connected()
+        try:
+            vision = await self.read_stub.GetCameraSceneImage(Empty())
+            return self._image_to_array(vision)
+        except grpc.RpcError as e:
+            self.logger.error(f"GetCameraSceneImage failed: {e}")
+            raise
+
+    async def get_camera_right_image(self) -> np.ndarray:
+        self._check_connected()
+        try:
+            vision = await self.read_stub.GetCameraRightImage(Empty())
+            return self._image_to_array(vision)
+        except grpc.RpcError as e:
+            self.logger.error(f"GetCameraRightImage failed: {e}")
+            raise
+
+    async def get_camera_left_image(self) -> np.ndarray:
+        self._check_connected()
+        try:
+            vision = await self.read_stub.GetCameraLeftImage(Empty())
+            return self._image_to_array(vision)
+        except grpc.RpcError as e:
+            self.logger.error(f"GetCameraLeftImage failed: {e}")
+            raise
+
     async def get_robot_vision(self) -> dict[str, np.ndarray]:
         self._check_connected()
         try:
