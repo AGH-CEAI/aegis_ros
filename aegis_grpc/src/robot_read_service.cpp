@@ -1,3 +1,4 @@
+#include <cassert>
 #include "aegis_grpc/robot_read_service.hpp"
 
 namespace aegis_grpc {
@@ -300,6 +301,18 @@ void RobotReadServiceImpl::FillProtoJointState(
     proto_aegis_grpc::v1::Image* out,
     cv::Mat& buffer)
   {
+    assert((ros.encoding == "bgr8" &&"Unsupported image enconding (expected BGR8)."));
+    if (!enable_image_resize_) {
+      out->set_height(ros.height);
+      out->set_width(ros.width);
+      out->set_step(ros.step);
+      out->set_data(
+        const_cast<uint8_t*>(ros.data.data()),
+        static_cast<size_t>(ros.height * ros.step)
+      );
+      return;
+    }
+
     const cv::Mat src(
       ros.height,
       ros.width,
@@ -308,22 +321,17 @@ void RobotReadServiceImpl::FillProtoJointState(
       ros.step
     );
 
-    const cv::Mat* img = &src;
+    cv::resize(
+      src,
+      buffer,
+      cv::Size(target_img_width_, target_img_height_),
+      0, 0, cv::INTER_LINEAR
+    );
 
-    if (enable_image_resize_) {
-      cv::resize(
-        src,
-        buffer,
-        cv::Size(target_img_width_, target_img_height_),
-        0, 0, cv::INTER_LINEAR
-      );
-      img = &buffer;
-    }
-
-    out->set_height(img->rows);
-    out->set_width(img->cols);
-    out->set_step(img->step);
-    out->set_data(img->data, img->total() * img->elemSize());
+    out->set_height(buffer.rows);
+    out->set_width(buffer.cols);
+    out->set_step(buffer.step);
+    out->set_data(buffer.data, buffer.total() * buffer.elemSize());
   }
 
 
