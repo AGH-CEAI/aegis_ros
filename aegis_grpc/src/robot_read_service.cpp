@@ -10,8 +10,8 @@ RobotReadServiceImpl::RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node)
   DeclareROSParameter("topic_wrench", std::string("/wrench"), "[str] Init; Sub: topic with the F/T data.");
   DeclareROSParameter("topic_joints", std::string("/joint_states"), "[str] Init; Sub: topic with the joint states.");
   DeclareROSParameter("topic_camera_scene", std::string("/cam_scene/rgb/image_rect"), "[str] Init; Sub: Camera scene image topic.");
-  DeclareROSParameter("topic_camera_right", std::string("/cam_tool_right/image_raw"), "[str] Init; Sub: Camera scene image topic.");
-  DeclareROSParameter("topic_camera_left", std::string("/cam_tool_left/image_raw"), "[str] Init; Sub:Camera scene image topic.");
+  DeclareROSParameter("topic_camera_right", std::string("/cam_tool_right/image_color"), "[str] Init; Sub: Camera scene image topic.");
+  DeclareROSParameter("topic_camera_left", std::string("/cam_tool_left/image_color"), "[str] Init; Sub:Camera scene image topic.");
   DeclareROSParameter("target_image_width", 64, "[int] Init; Target output image width in pixels.");
   DeclareROSParameter("target_image_height", 64, "[int] Init; Target output image height in pixels.");
   DeclareROSParameter("enable_image_resize", true, "[bool] Init; Enable resizing images before sending over gRPC.");
@@ -300,39 +300,30 @@ void RobotReadServiceImpl::FillProtoJointState(
     proto_aegis_grpc::v1::Image* out,
     cv::Mat& buffer)
   {
-    cv_bridge::CvImageConstPtr cv_ptr;
-    try {
-      cv_ptr = cv_bridge::toCvCopy(ros, ros.encoding);
-    } catch (cv_bridge::Exception& e) {
-      RCLCPP_ERROR(node_->get_logger(), "cv_bridge: %s", e.what());
-      return;
-    }
+    const cv::Mat src(
+      ros.height,
+      ros.width,
+      CV_8UC3,
+      const_cast<uint8_t*>(ros.data.data()),
+      ros.step
+    );
 
-    const cv::Mat* src = &cv_ptr->image;
+    const cv::Mat* img = &src;
 
     if (enable_image_resize_) {
       cv::resize(
-        cv_ptr->image,
+        src,
         buffer,
         cv::Size(target_img_width_, target_img_height_),
-        0, 0, cv::INTER_LINEAR);
-      src = &buffer;
+        0, 0, cv::INTER_LINEAR
+      );
+      img = &buffer;
     }
 
-    if (ros.encoding == "bayer_rggb8") {
-      cv::cvtColor(*src, buffer, cv::COLOR_BayerRG2BGR);
-      src = &buffer;
-      out->set_encoding(proto_aegis_grpc::v1::Image::BGR8);
-    } else if (ros.encoding == "bgr8") {
-      out->set_encoding(proto_aegis_grpc::v1::Image::BGR8);
-    } else {
-      out->set_encoding(proto_aegis_grpc::v1::Image::UNKNOWN);
-    }
-
-    out->set_height(src->rows);
-    out->set_width(src->cols);
-    out->set_step(src->step);
-    out->set_data(src->data, src->total() * src->elemSize());
+    out->set_height(img->rows);
+    out->set_width(img->cols);
+    out->set_step(img->step);
+    out->set_data(img->data, img->total() * img->elemSize());
   }
 
 

@@ -106,7 +106,7 @@ class RobotReadServiceImpl final
   void FillProtoImage(
     const sensor_msgs::msg::Image& ros,
     proto_aegis_grpc::v1::Image* out,
-    cv::Mat& resize_buffer); 
+    cv::Mat& resize_buffer);
 
     std::shared_ptr<rclcpp::Node> node_;
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr pose_sub_;

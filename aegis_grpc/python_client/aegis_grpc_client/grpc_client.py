@@ -219,16 +219,11 @@ class AegisRobotClient:
         ).T
 
     def _image_to_array(self, img: sensor_msgs_pb2.Image) -> np.ndarray:
-        arr = np.frombuffer(img.data, dtype=np.uint8)
-
-        if img.encoding == sensor_msgs_pb2.Image.BGR8:
-            arr = arr.reshape(img.height, img.width, 3)
-        elif img.encoding == sensor_msgs_pb2.Image.BAYER_RGGB8:
-            arr = arr.reshape(img.height, img.width)
-        else:
-            raise ValueError(f"Unsupported image encoding: {img.encoding}")
-
-        return arr
+        return np.moveaxis(
+            np.frombuffer(img.data, dtype=np.uint8).reshape(img.height, img.width, 3),
+            -1,
+            0,
+        )
 
     # ==================== RobotControlService Methods ====================
 
