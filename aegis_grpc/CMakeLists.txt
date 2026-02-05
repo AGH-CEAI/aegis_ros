@@ -13,6 +13,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # ------------------------------
 # Dependencies
 
+find_package(OpenCV REQUIRED)
 find_package(ament_cmake REQUIRED)
 
 set(ROS_DEPENDS
@@ -20,6 +21,7 @@ set(ROS_DEPENDS
     rclcpp_action
     control_msgs
     controller_manager_msgs
+    cv_bridge
     geometry_msgs
     moveit_msgs
     moveit_ros_planning_interface
@@ -177,6 +179,8 @@ target_link_libraries(
   gRPC::grpc++
   grpc++_reflection
   protobuf::libprotobuf
+  opencv_core
+  opencv_imgproc
   ${PROJECT_NAME}_lib)
 
 ament_target_dependencies(grpc_server ${ROS_DEPENDS})

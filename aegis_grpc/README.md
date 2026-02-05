@@ -71,15 +71,15 @@ grpcurl -plaintext 127.0.0.1:50051 list proto_aegis_grpc.v1.RobotControlService
 grpcurl -plaintext 127.0.0.1:50051 list proto_aegis_grpc.v1.RobotReadService
 grpcurl -plaintext 127.0.0.1:50051 describe proto_aegis_grpc.v1.RobotReadService.GetAll
 # or with tool from container
-podman run --network=host docker.io/fullstorydev/grpcurl -plaintext 127.0.0.1:50051 list
+podman run --rm --network=host docker.io/fullstorydev/grpcurl -plaintext 127.0.0.1:50051 list
 # map grpcurl container alias
-alias grpcurl="podman run --network=host docker.io/fullstorydev/grpcurl"
+alias grpcurl="podman run --rm --network=host docker.io/fullstorydev/grpcurl"
 ```
 
 Example call to the `GetAll` method with result as a plain json:
 
 ```bash
-grpcurl -plaintext -d '{}' 127.0.0.1:50051 proto_aegis_grpc.v1.RobotReadService.GetAll
+grpcurl -max-msg-sz 10485760 -plaintext -d '{}' 127.0.0.1:50051 proto_aegis_grpc.v1.RobotReadService.GetAll
 ```
 
 ## Messages architecture
@@ -93,12 +93,18 @@ The server is split into 2 services defined in [`proto_aegis_grpc.v1.robot_srvs`
 
 The "ROS-getters" are implemented in the [`RobotReadServiceImpl`](./include/aegis_grpc/robot_read_service.hpp) class as the following methods:
 
-| Method name                                           | Desc.                       | Impl. | gRPC Request            | gRPC Response                                                                           |
-|-------------------------------------------------------|-----------------------------|-------|-------------------------|-----------------------------------------------------------------------------------------|
-| `proto_aegis_grpc.v1.RobotReadService.GetAll`         | Get the all available data. | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.robot_srvs.RobotState`](./proto_aegis_grpc/v1/robot_srvs.proto)   |
-| `proto_aegis_grpc.v1.RobotReadService.GetJointStates` | Get the joints' states.     | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.sensor_msgs.JointState`](./proto_aegis_grpc/v1/sensor_msgs.proto) |
-| `proto_aegis_grpc.v1.RobotReadService.GetTCPPose`     | Get the TCP pose.           | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)   |
-| `proto_aegis_grpc.v1.RobotReadService.GetWrench`      | Read force/torque sensor.   | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.geometry_msgs.Wrench`](./proto_aegis_grpc/v1/geometry_msgs.proto) |
+| Method name                                                | Desc.                                                | Impl. | gRPC Request            | gRPC Response                                                                               |
+|------------------------------------------------------------|------------------------------------------------------|-------|-------------------------|---------------------------------------------------------------------------------------------|
+| `proto_aegis_grpc.v1.RobotReadService.GetAll`              | Get all available robot data.                        | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.robot_srvs.RobotObservation`](./proto_aegis_grpc/v1/robot_srvs.proto) |
+| `proto_aegis_grpc.v1.RobotReadService.GetRobotState`       | Get consolidated robot state (pose, joints, wrench). | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.robot_srvs.RobotState`](./proto_aegis_grpc/v1/robot_srvs.proto)       |
+| `proto_aegis_grpc.v1.RobotReadService.GetRobotVision`      | Get all camera images (scene, left, right).          | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.robot_srvs.RobotVision`](./proto_aegis_grpc/v1/robot_srvs.proto)      |
+| `proto_aegis_grpc.v1.RobotReadService.GetJointStates`      | Get the joints' states.                              | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.sensor_msgs.JointState`](./proto_aegis_grpc/v1/sensor_msgs.proto)     |
+| `proto_aegis_grpc.v1.RobotReadService.GetTCPPose`          | Get the TCP pose.                                    | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)       |
+| `proto_aegis_grpc.v1.RobotReadService.GetWrench`           | Read force/torque sensor.                            | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.geometry_msgs.Wrench`](./proto_aegis_grpc/v1/geometry_msgs.proto)     |
+| `proto_aegis_grpc.v1.RobotReadService.GetCameraSceneImage` | Get scene camera image.                              | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.sensor_msgs.Image`](./proto_aegis_grpc/v1/sensor_msgs.proto)          |
+| `proto_aegis_grpc.v1.RobotReadService.GetCameraRightImage` | Get right tool camera image.                         | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.sensor_msgs.Image`](./proto_aegis_grpc/v1/sensor_msgs.proto)          |
+| `proto_aegis_grpc.v1.RobotReadService.GetCameraLeftImage`  | Get left tool camera image.                          | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.sensor_msgs.Image`](./proto_aegis_grpc/v1/sensor_msgs.proto)          |
+
 
 You can always list the methods with the `grpcurl` command:
 ```bash

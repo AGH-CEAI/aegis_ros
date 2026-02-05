@@ -20,3 +20,11 @@ message JointState {
   repeated double velocity = 3;
   repeated double effort = 4;
 }
+
+// https://github.com/ros2/common_interfaces/blob/rolling/sensor_msgs/msg/Image.msg
+message Image {
+  uint32 height = 1;
+  uint32 width = 2;
+  uint32 step = 3;
+  bytes data = 4;
+}
