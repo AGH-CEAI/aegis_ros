@@ -301,7 +301,7 @@ void RobotReadServiceImpl::FillProtoJointState(
     proto_aegis_grpc::v1::Image* out,
     cv::Mat& buffer)
   {
-    assert((ros.encoding == "bgr8" &&"Unsupported image enconding (expected BGR8)."));
+    assert((ros.encoding == "bgr8" && "Unsupported image encoding (expected BGR8)."));
     if (!enable_image_resize_) {
       out->set_height(ros.height);
       out->set_width(ros.width);

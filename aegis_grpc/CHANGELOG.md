@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-98](https://github.com/AGH-CEAI/aegis_ros/pull/98) - Added gRPC-based camera image reading.
 * [PR-97](https://github.com/AGH-CEAI/aegis_ros/pull/97) - Added gRPC func: MoveIt2 servo start & stop service.
 * [PR-96](https://github.com/AGH-CEAI/aegis_ros/pull/96) - Added gRPC func: ros2_control controller switching.
 * [PR-92](https://github.com/AGH-CEAI/aegis_ros/pull/92) - Added Python client installation script.
