@@ -95,20 +95,6 @@ class AegisRobotClient:
             self.logger.error(f"GetTCPPose failed: {e}")
             raise
 
-    def _pose_to_array(self, pose: geometry_msgs_pb2.Pose) -> np.ndarray:
-        return np.array(
-            [
-                pose.position.x,
-                pose.position.y,
-                pose.position.z,
-                pose.orientation.x,
-                pose.orientation.y,
-                pose.orientation.z,
-                pose.orientation.w,
-            ],
-            dtype=np.float32,
-        )
-
     async def get_wrench(self) -> np.ndarray:
         """
         Get current force and torque measurements.
@@ -123,19 +109,6 @@ class AegisRobotClient:
         except grpc.RpcError as e:
             self.logger.error(f"GetWrench failed: {e}")
             raise
-
-    def _wrench_to_array(self, wrench: geometry_msgs_pb2.Wrench) -> np.ndarray:
-        return np.array(
-            [
-                wrench.force.x,
-                wrench.force.y,
-                wrench.force.z,
-                wrench.torque.x,
-                wrench.torque.y,
-                wrench.torque.z,
-            ],
-            dtype=np.float32,
-        )
 
     async def get_joint_states(self) -> np.ndarray:
         """
@@ -167,32 +140,117 @@ class AegisRobotClient:
             self.logger.error(f"GetJointStates (names) failed: {e}")
             raise
 
+    async def get_robot_state(self) -> dict[str, np.ndarray]:
+        self._check_connected()
+        try:
+            state = await self.read_stub.GetRobotState(Empty())
+            return {
+                "pose": self._pose_to_array(state.pose),
+                "wrench": self._wrench_to_array(state.wrench),
+                "joints": self._joints_to_array(state.joint_state),
+            }
+        except grpc.RpcError as e:
+            self.logger.error(f"GetRobotState failed: {e}")
+            raise
+
+    async def get_camera_scene_image(self) -> np.ndarray:
+        self._check_connected()
+        try:
+            vision = await self.read_stub.GetCameraSceneImage(Empty())
+            return self._image_to_array(vision)
+        except grpc.RpcError as e:
+            self.logger.error(f"GetCameraSceneImage failed: {e}")
+            raise
+
+    async def get_camera_right_image(self) -> np.ndarray:
+        self._check_connected()
+        try:
+            vision = await self.read_stub.GetCameraRightImage(Empty())
+            return self._image_to_array(vision)
+        except grpc.RpcError as e:
+            self.logger.error(f"GetCameraRightImage failed: {e}")
+            raise
+
+    async def get_camera_left_image(self) -> np.ndarray:
+        self._check_connected()
+        try:
+            vision = await self.read_stub.GetCameraLeftImage(Empty())
+            return self._image_to_array(vision)
+        except grpc.RpcError as e:
+            self.logger.error(f"GetCameraLeftImage failed: {e}")
+            raise
+
+    async def get_robot_vision(self) -> dict[str, np.ndarray]:
+        self._check_connected()
+        try:
+            vision = await self.read_stub.GetRobotVision(Empty())
+            return {
+                "scene": self._image_to_array(vision.image_scene),
+                "right": self._image_to_array(vision.image_right),
+                "left": self._image_to_array(vision.image_left),
+            }
+        except grpc.RpcError as e:
+            self.logger.error(f"GetRobotVision failed: {e}")
+            raise
+
+    async def get_all(self) -> dict[str, object]:
+        self._check_connected()
+        try:
+            obs = await self.read_stub.GetAll(Empty())
+            return {
+                "state": {
+                    "pose": self._pose_to_array(obs.robot_state.pose),
+                    "wrench": self._wrench_to_array(obs.robot_state.wrench),
+                    "joints": self._joints_to_array(obs.robot_state.joint_state),
+                },
+                "vision": {
+                    "scene": self._image_to_array(obs.robot_vision.image_scene),
+                    "right": self._image_to_array(obs.robot_vision.image_right),
+                    "left": self._image_to_array(obs.robot_vision.image_left),
+                },
+            }
+        except grpc.RpcError as e:
+            self.logger.error(f"GetAll failed: {e}")
+            raise
+
+    def _pose_to_array(self, pose: geometry_msgs_pb2.Pose) -> np.ndarray:
+        return np.array(
+            [
+                pose.position.x,
+                pose.position.y,
+                pose.position.z,
+                pose.orientation.x,
+                pose.orientation.y,
+                pose.orientation.z,
+                pose.orientation.w,
+            ],
+            dtype=np.float32,
+        )
+
+    def _wrench_to_array(self, wrench: geometry_msgs_pb2.Wrench) -> np.ndarray:
+        return np.array(
+            [
+                wrench.force.x,
+                wrench.force.y,
+                wrench.force.z,
+                wrench.torque.x,
+                wrench.torque.y,
+                wrench.torque.z,
+            ],
+            dtype=np.float32,
+        )
+
     def _joints_to_array(self, joints: sensor_msgs_pb2.JointState) -> np.ndarray:
         return np.array(
             [joints.position, joints.velocity, joints.effort], dtype=np.float32
         ).T
 
-    async def get_all(self) -> dict[str, np.ndarray]:
-        """
-        Get complete robot state (pose, wrench, joint states) in one call.
-        More efficient than calling individual methods.
-
-        Returns:
-            dict of numpy arrays with: pose, wrench,  n_joints*3]
-        """
-        self._check_connected()
-        try:
-            state = await self.read_stub.GetAll(Empty())
-            return {
-                "pose": self._pose_to_array(state.pose),
-                "wrench": self._wrench_to_array(state.wrench),
-                "joints_pos": np.array([state.joint_state.position], dtype=np.float32),
-                "joints_vel": np.array([state.joint_state.velocity], dtype=np.float32),
-                "joints_eff": np.array([state.joint_state.effort], dtype=np.float32),
-            }
-        except grpc.RpcError as e:
-            self.logger.error(f"GetAll failed: {e}")
-            raise
+    def _image_to_array(self, img: sensor_msgs_pb2.Image) -> np.ndarray:
+        return np.moveaxis(
+            np.frombuffer(img.data, dtype=np.uint8).reshape(img.height, img.width, 3),
+            -1,
+            0,
+        )
 
     # ==================== RobotControlService Methods ====================
 
