@@ -118,7 +118,6 @@ class MeasureCameraError:
                         2) With deadman button pressed, set the end effector at the corner of the calibration board
                         3) Change back to REMOTE
                         4) Press ENTER on the keyboard to start measuring camera error\033[93m
-                        thank
             """)
             )
             input()

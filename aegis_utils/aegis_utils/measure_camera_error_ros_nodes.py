@@ -97,7 +97,7 @@ class CollectImageNode(Node):
         """
         try:
             t = self.tf_buffer.lookup_transform(
-                "ur_base",  # target frame
+                "base_link",  # target frame
                 "calibration_tool",  # source frame
                 Time(),  # latest available
             )
