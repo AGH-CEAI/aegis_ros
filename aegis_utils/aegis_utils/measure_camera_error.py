@@ -2,7 +2,6 @@ import argparse
 import math
 import sys
 import termios
-import textwrap
 import threading
 import time
 import tty
@@ -19,7 +18,6 @@ from aegis_director import RobotDirector
 from aegis_utils.measure_camera_error_ros_nodes import (
     CalibrationTool,
     CollectImageNode,
-    SafeProgramControl,
 )
 
 
@@ -45,16 +43,19 @@ class MeasureCameraError:
         self.res_path = res_path
         self.data_path = data_path
         self.errors = []
+        self.errors_tf = []
         self.iteration = 0
         self.aruco_dict = aruco_dict
         self.marker_size = marker_size
         self.T_base2cam, self.camera_matrix, self.dist_coeffs = self.load_data()
-        self.safe_program_control = SafeProgramControl()
+        # self.safe_program_control = SafeProgramControl()
 
     def destroy(self):
-        if self.safe_program_control is not None:
-            self.safe_program_control.destroy_node()
-            self.safe_program_control = None
+        pass
+
+    #     if self.safe_program_control is not None:
+    #         self.safe_program_control.destroy_node()
+    #         self.safe_program_control = None
 
     # TODO(issue#80) Get the home position from the SRDF file
     def move_to_home(self) -> None:
@@ -98,56 +99,73 @@ class MeasureCameraError:
     def working_loop(self) -> None:
         next_measure = True
         while next_measure:
-            self.robot._switch_controllers(
-                activate=["freedrive_mode_controller"],
-                deactivate=["scaled_joint_trajectory_controller"],
-            )
-            time.sleep(0.5)
-            while not self.safe_program_control.is_remote():
-                self.log("Waiting for REMOTE control...")
-                time.sleep(1)
+            # self.robot._switch_controllers(
+            #     activate=["freedrive_mode_controller"],
+            #     deactivate=["scaled_joint_trajectory_controller"],
+            # )
+            # time.sleep(0.5)
+            # while not self.safe_program_control.is_remote():
+            #     self.log("Waiting for REMOTE control...")
+            #     time.sleep(1)
 
-            while not self.safe_program_control.stop_if_remote():
-                self.log("Program has not stopped, trying one more time...")
+            # while not self.safe_program_control.stop_if_remote():
+            #     self.log("Program has not stopped, trying one more time...")
 
-            self.log(
-                textwrap.dedent("""\
-                    \033[93mINSTRUCTIONS::
-                        (With teach pendant)
-                        1) Change REMOTE to LOCAL (top-right corner of screen)
-                        2) With deadman button pressed, set the end effector at the corner of the calibration board
-                        3) Change back to REMOTE
-                        4) Press ENTER on the keyboard to start measuring camera error\033[93m
-            """)
-            )
-            input()
+            # self.log(
+            #     textwrap.dedent("""\
+            #         \033[93mINSTRUCTIONS::
+            #             (With teach pendant)
+            #             1) Change REMOTE to LOCAL (top-right corner of screen)
+            #             2) With deadman button pressed, set the end effector at the corner of the calibration board
+            #             3) Change back to REMOTE
+            #             4) Press ENTER on the keyboard to start measuring camera error\033[93m
+            # """)
+            # )
+            # input()
 
-            while not self.safe_program_control.is_remote():
-                self.log("Waiting for REMOTE control...")
-                time.sleep(1)
+            # while not self.safe_program_control.is_remote():
+            #     self.log("Waiting for REMOTE control...")
+            #     time.sleep(1)
 
-            self.safe_program_control.reconnect_dashboard()
-            while not self.safe_program_control.play_if_remote():
-                self.log("Program has not started, trying one more time...")
+            # self.safe_program_control.reconnect_dashboard()
+            # while not self.safe_program_control.play_if_remote():
+            #     self.log("Program has not started, trying one more time...")
 
-            self.robot._switch_controllers(
-                activate=["scaled_joint_trajectory_controller"],
-                deactivate=["freedrive_mode_controller"],
-            )
-            time.sleep(1.0)
+            # self.robot._switch_controllers(
+            #     activate=["scaled_joint_trajectory_controller"],
+            #     deactivate=["freedrive_mode_controller"],
+            # )
+            # time.sleep(1.0)
 
+            time.sleep(2)
             tcp_pose_robot = self.image_node.get_calibration_tool_pose_in_base()
             tcp_pose_robot = tcp_pose_robot["position"].flatten().tolist()
 
             self.move_to_home()
             time.sleep(1.0)
 
-            image = self.get_image_from_camera()
+            # image = self.get_image_from_camera()
+            image = cv2.imread(
+                "/home/antrad/ceai_ws/src/aegis_ros/aegis_utils/test_data/test_data.png"
+            )
             if image is None:
                 next_measure = self.ask_for_next_measure()
                 continue
 
-            tcp_pose_camera_frame_tvec = self.measure_position_from_marker(image)
+            cv2.imshow("image", image)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+
+            _, tcp_pose_camera_frame_rvec, tcp_pose_camera_frame_tvec = (
+                self.measure_position_from_marker(image)
+            )
+
+            self.image_node.last_object_tf = (
+                tcp_pose_camera_frame_rvec,
+                tcp_pose_camera_frame_tvec,
+            )
+
+            time.sleep(1.0)
 
             if tcp_pose_camera_frame_tvec is not None:
                 tcp_pose_camera_frame_tvec = np.vstack(
@@ -157,16 +175,26 @@ class MeasureCameraError:
                 tcp_pose_camera = self.T_base2cam @ tcp_pose_camera_frame_tvec
                 tcp_pose_camera = tcp_pose_camera[:3].flatten().tolist()
 
+                tcp_pose_camera_tf = self.image_node.get_object_pose_in_base()
+                tcp_pose_camera_tf = tcp_pose_camera_tf["position"].flatten().tolist()
+
                 self.log(f"TCP pose from camera: {tcp_pose_camera}")
+                self.log(f"TCP pose from camera tf: {tcp_pose_camera_tf}")
                 self.log(f"TCP pose from robot: {tcp_pose_robot}")
 
                 TCP_error = self.calculate_TCP_error(tcp_pose_camera, tcp_pose_robot)
                 self.errors.append(TCP_error)
                 self.log(f"Error of the position:: {TCP_error[3]}")
 
+                TCP_error_tf = self.calculate_TCP_error(
+                    tcp_pose_camera_tf, tcp_pose_robot
+                )
+                self.errors_tf.append(TCP_error_tf)
+
             next_measure = self.ask_for_next_measure()
 
-        self.analyze_results()
+        self.analyze_results(self.errors, "results.yaml")
+        self.analyze_results(self.errors_tf, "results_tf.yaml")
         self.log("\033[92mFinished measuring camera error.\033[92m")
 
     def get_image_from_camera(self) -> np.ndarray | None:
@@ -184,7 +212,7 @@ class MeasureCameraError:
         return image
 
     def measure_position_from_marker(self, image: np.ndarray) -> np.ndarray:
-        parameters = cv2.aruco.DetectorParameters()
+        parameters = cv2.aruco.DetectorParameters_create()
 
         corners, ids, _ = cv2.aruco.detectMarkers(
             image, self.aruco_dict, parameters=parameters
@@ -211,7 +239,7 @@ class MeasureCameraError:
             obj_points, image_points, self.camera_matrix, self.dist_coeffs
         )
 
-        return tvec
+        return retval, rvec, tvec
 
     def calculate_TCP_error(
         self, c: np.ndarray, r: np.ndarray
@@ -221,11 +249,11 @@ class MeasureCameraError:
         dz = c[2] - r[2]
         return (abs(dx), abs(dy), abs(dz), math.sqrt(dx * dx + dy * dy + dz * dz))
 
-    def analyze_results(self) -> None:
-        errors_x = [row[0] for row in self.errors]
-        errors_y = [row[1] for row in self.errors]
-        errors_z = [row[2] for row in self.errors]
-        errors_all = [row[3] for row in self.errors]
+    def analyze_results(self, errors: list, file_name: str) -> None:
+        errors_x = [row[0] for row in errors]
+        errors_y = [row[1] for row in errors]
+        errors_z = [row[2] for row in errors]
+        errors_all = [row[3] for row in errors]
         mean_errors = {
             "x": float(np.mean(errors_x)),
             "y": float(np.mean(errors_y)),
@@ -252,7 +280,7 @@ class MeasureCameraError:
             },
         }
 
-        yaml_file = self.res_path / "results.yaml"
+        yaml_file = self.res_path / file_name  # "results.yaml"
         with open(yaml_file, "w") as f:
             yaml.dump(data_to_save, f, default_flow_style=False)
 

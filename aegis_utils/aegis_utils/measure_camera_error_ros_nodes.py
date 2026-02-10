@@ -7,8 +7,9 @@ import numpy as np
 import rclpy
 from cv_bridge import CvBridge
 from rclpy.node import Node
+from scipy.spatial.transform import Rotation
 from tf2_ros.static_transform_broadcaster import StaticTransformBroadcaster
-from tf2_ros import Buffer, TransformListener
+from tf2_ros import Buffer, TransformListener, TransformBroadcaster
 
 from aegis_director import RobotDirector
 from builtin_interfaces.msg import Time
@@ -48,11 +49,16 @@ class CollectImageNode(Node):
         self.bridge = CvBridge()
         self.res_path = res_path
         self.mutex = threading.Lock()
+        self.object_tf_brodcaster = TransformBroadcaster(self)
         self.sub = self.create_subscription(Image, image_topic, self.image_callback, 10)
         self.get_logger().info(f"Subscribed to image topic: {image_topic}")
 
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
+
+        self.last_object_tf = None
+        self.last_tf_time = None
+        self.create_timer(0.1, self._republish_last_tf)
 
     def image_callback(self, msg: Image) -> None:
         try:
@@ -127,6 +133,90 @@ class CollectImageNode(Node):
         )
 
         return {"position": pos, "orientation": ori}
+
+    def get_object_pose_in_base(self) -> dict[str, np.ndarray]:
+        """
+        Returns (position, orientation) of calibration_tool in base frame.
+
+        position: np.array([x, y, z])
+        orientation: np.array([qx, qy, qz, qw])
+        """
+        try:
+            t = self.tf_buffer.lookup_transform(
+                "base_link",  # target frame
+                "detected_object",  # source frame
+                Time(),  # latest available
+            )
+        except Exception as e:
+            self.get_logger().error(
+                f"Failed to lookup transform base->detected_object: {e}"
+            )
+            return None
+
+        pos = np.array(
+            [
+                t.transform.translation.x,
+                t.transform.translation.y,
+                t.transform.translation.z,
+            ],
+            dtype=float,
+        )
+
+        ori = np.array(
+            [
+                t.transform.rotation.x,
+                t.transform.rotation.y,
+                t.transform.rotation.z,
+                t.transform.rotation.w,
+            ],
+            dtype=float,
+        )
+
+        return {"position": pos, "orientation": ori}
+
+    def _republish_last_tf(self):
+        if self.last_object_tf is None:
+            return
+        rvec, tvec = self.last_object_tf
+        tf_camera_name = "cam_scene_rgb_camera_optical_frame"
+        self._publish_detected_object_tf(
+            rvec=rvec,
+            tvec=tvec,
+            parent_frame=tf_camera_name,
+            child_frame="detected_object",
+        )
+
+    def _publish_detected_object_tf(
+        self,
+        rvec: np.ndarray,
+        tvec: np.ndarray,
+        parent_frame: str,
+        child_frame: str,
+    ) -> Node:
+        rvec = np.asarray(rvec).reshape(3)
+        tvec = np.asarray(tvec).reshape(3)
+
+        R_cam_obj, _ = cv2.Rodrigues(rvec)
+
+        quat = Rotation.from_matrix(R_cam_obj).as_quat()
+        qx, qy, qz, qw = quat
+
+        x, y, z = tvec
+
+        t = TransformStamped()
+        t.header.stamp = self.get_clock().now().to_msg()
+        t.header.frame_id = parent_frame
+        t.child_frame_id = child_frame
+
+        t.transform.translation.x = float(x)
+        t.transform.translation.y = float(y)
+        t.transform.translation.z = float(z)
+        t.transform.rotation.x = float(qx)
+        t.transform.rotation.y = float(qy)
+        t.transform.rotation.z = float(qz)
+        t.transform.rotation.w = float(qw)
+
+        self.object_tf_brodcaster.sendTransform(t)
 
     def log(self, msg: str) -> None:
         self.get_logger().info(msg)
