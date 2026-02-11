@@ -45,16 +45,13 @@ class MeasureCameraError:
         self.res_path = res_path
         self.data_path = data_path
         self.errors = []
-        self.errors_tf = []
         self.iteration = 0
         self.aruco_dict = aruco_dict
         self.marker_size = marker_size
-        self.T_base2cam, self.camera_matrix, self.dist_coeffs = self.load_data()
+        self.camera_matrix, self.dist_coeffs = self.load_data()
         self.safe_program_control = SafeProgramControl()
 
     def destroy(self):
-        pass
-
         if self.safe_program_control is not None:
             self.safe_program_control.destroy_node()
             self.safe_program_control = None
@@ -74,13 +71,10 @@ class MeasureCameraError:
             max_accel=0.5,
         )
 
-    def load_data(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def load_data(self) -> tuple[np.ndarray, np.ndarray]:
         intrinsics_path = self.data_path / f"{self.camera_name}_intrinsics.yaml"
-        extrinsics_path = self.data_path / f"{self.camera_name}_extrinsics.yaml"
         with intrinsics_path.open("r") as f:
             intrinsics = yaml.safe_load(f)
-        with extrinsics_path.open("r") as f:
-            extrinsics = yaml.safe_load(f)
         camera_matrix = np.array(
             intrinsics["camera_matrix"]["data"], dtype=np.float32
         ).reshape((3, 3))
@@ -92,11 +86,8 @@ class MeasureCameraError:
                 intrinsics["distortion_coefficients"]["rows"],
             )
         )
-        T_base2cam = np.array(extrinsics["T_base2cam"], dtype=np.float32).reshape(
-            (4, 4)
-        )
 
-        return T_base2cam, camera_matrix, dist_coeffs
+        return camera_matrix, dist_coeffs
 
     def working_loop(self) -> None:
         next_measure = True
@@ -170,9 +161,6 @@ class MeasureCameraError:
                 tcp_pose_camera_frame_tvec = np.vstack(
                     (tcp_pose_camera_frame_tvec, [1])
                 )
-
-                # tcp_pose_camera = self.T_base2cam @ tcp_pose_camera_frame_tvec
-                # tcp_pose_camera = tcp_pose_camera[:3].flatten().tolist()
 
                 tcp_pose_camera = self.image_node.get_object_pose_in_base()
                 tcp_pose_camera = tcp_pose_camera["position"].flatten().tolist()
