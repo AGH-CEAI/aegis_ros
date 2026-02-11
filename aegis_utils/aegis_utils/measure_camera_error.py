@@ -137,9 +137,8 @@ class MeasureCameraError:
                 activate=["scaled_joint_trajectory_controller"],
                 deactivate=["freedrive_mode_controller"],
             )
-            time.sleep(1.0)
+            time.sleep(2.0)
 
-            time.sleep(2)
             tcp_pose_robot = self.image_node.get_calibration_tool_pose_in_base()
             tcp_pose_robot = tcp_pose_robot["position"].flatten().tolist()
 
@@ -147,23 +146,18 @@ class MeasureCameraError:
             time.sleep(1.0)
 
             image = self.get_image_from_camera()
-            # image = cv2.imread(
-            #     "/home/antrad/ceai_ws/src/aegis_ros/aegis_utils/test_data/test_data.png"
-            # )
             if image is None:
                 next_measure = self.ask_for_next_measure()
                 continue
-
-            cv2.imshow("image", image)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
 
             tcp_pos_camera = self.measure_position_from_marker(image)
             if tcp_pos_camera is None:
                 next_measure = self.ask_for_next_measure()
                 continue
-
-            _, tcp_pose_camera_frame_rvec, tcp_pose_camera_frame_tvec = tcp_pos_camera
+            else:
+                _, tcp_pose_camera_frame_rvec, tcp_pose_camera_frame_tvec = (
+                    tcp_pos_camera
+                )
 
             self.image_node.last_object_tf = (
                 tcp_pose_camera_frame_rvec,
@@ -177,29 +171,22 @@ class MeasureCameraError:
                     (tcp_pose_camera_frame_tvec, [1])
                 )
 
-                tcp_pose_camera = self.T_base2cam @ tcp_pose_camera_frame_tvec
-                tcp_pose_camera = tcp_pose_camera[:3].flatten().tolist()
+                # tcp_pose_camera = self.T_base2cam @ tcp_pose_camera_frame_tvec
+                # tcp_pose_camera = tcp_pose_camera[:3].flatten().tolist()
 
-                tcp_pose_camera_tf = self.image_node.get_object_pose_in_base()
-                tcp_pose_camera_tf = tcp_pose_camera_tf["position"].flatten().tolist()
+                tcp_pose_camera = self.image_node.get_object_pose_in_base()
+                tcp_pose_camera = tcp_pose_camera["position"].flatten().tolist()
 
                 self.log(f"TCP pose from camera: {tcp_pose_camera}")
-                self.log(f"TCP pose from camera tf: {tcp_pose_camera_tf}")
                 self.log(f"TCP pose from robot: {tcp_pose_robot}")
 
                 TCP_error = self.calculate_TCP_error(tcp_pose_camera, tcp_pose_robot)
                 self.errors.append(TCP_error)
                 self.log(f"Error of the position:: {TCP_error[3]}")
 
-                TCP_error_tf = self.calculate_TCP_error(
-                    tcp_pose_camera_tf, tcp_pose_robot
-                )
-                self.errors_tf.append(TCP_error_tf)
-
             next_measure = self.ask_for_next_measure()
 
         self.analyze_results(self.errors, "results.yaml")
-        self.analyze_results(self.errors_tf, "results_tf.yaml")
         self.log("\033[92mFinished measuring camera error.\033[92m")
 
     def get_image_from_camera(self) -> np.ndarray | None:
@@ -218,7 +205,6 @@ class MeasureCameraError:
 
     def measure_position_from_marker(self, image: np.ndarray) -> np.ndarray:
         parameters = cv2.aruco.DetectorParameters()
-        # parameters = cv2.aruco.DetectorParameters_create() # TODO: remove -> testing for laptop
 
         corners, ids, _ = cv2.aruco.detectMarkers(
             image, self.aruco_dict, parameters=parameters

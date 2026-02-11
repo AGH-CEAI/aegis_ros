@@ -3,7 +3,13 @@ T_base2cam:
 - [1.0, 0.0, 0.0, -0.029242202]
 - [0.0, 0.0, -1.0, 1.170050432]
 - [0.0, 0.0, 0.0, 1.0]
+T_cam2base:
+- [0.0, 1.0, 0.0, 0.0292422]
+- [1.0, 0.0, 0.0, -0.33946892]
+- [0.0, 0.0, 0.0, 1.0]
+- [0.0, 0.0, 0.0, 1.0]
 
+# TODO(issue#XX) Calibration needs to be corrected. The visible matrices are calculated based on position error without taking camera rotation into account
 
 # T_base2cam:
 # - [0.019393463529861155, 0.9996413820847947, 0.018466206863277983, 0.3240708510322008]
