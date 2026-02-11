@@ -2,6 +2,7 @@ import argparse
 import math
 import sys
 import termios
+import textwrap
 import threading
 import time
 import tty
@@ -18,6 +19,7 @@ from aegis_director import RobotDirector
 from aegis_utils.measure_camera_error_ros_nodes import (
     CalibrationTool,
     CollectImageNode,
+    SafeProgramControl,
 )
 
 
@@ -48,14 +50,14 @@ class MeasureCameraError:
         self.aruco_dict = aruco_dict
         self.marker_size = marker_size
         self.T_base2cam, self.camera_matrix, self.dist_coeffs = self.load_data()
-        # self.safe_program_control = SafeProgramControl()
+        self.safe_program_control = SafeProgramControl()
 
     def destroy(self):
         pass
 
-    #     if self.safe_program_control is not None:
-    #         self.safe_program_control.destroy_node()
-    #         self.safe_program_control = None
+        if self.safe_program_control is not None:
+            self.safe_program_control.destroy_node()
+            self.safe_program_control = None
 
     # TODO(issue#80) Get the home position from the SRDF file
     def move_to_home(self) -> None:
@@ -99,43 +101,43 @@ class MeasureCameraError:
     def working_loop(self) -> None:
         next_measure = True
         while next_measure:
-            # self.robot._switch_controllers(
-            #     activate=["freedrive_mode_controller"],
-            #     deactivate=["scaled_joint_trajectory_controller"],
-            # )
-            # time.sleep(0.5)
-            # while not self.safe_program_control.is_remote():
-            #     self.log("Waiting for REMOTE control...")
-            #     time.sleep(1)
+            self.robot._switch_controllers(
+                activate=["freedrive_mode_controller"],
+                deactivate=["scaled_joint_trajectory_controller"],
+            )
+            time.sleep(0.5)
+            while not self.safe_program_control.is_remote():
+                self.log("Waiting for REMOTE control...")
+                time.sleep(1)
 
-            # while not self.safe_program_control.stop_if_remote():
-            #     self.log("Program has not stopped, trying one more time...")
+            while not self.safe_program_control.stop_if_remote():
+                self.log("Program has not stopped, trying one more time...")
 
-            # self.log(
-            #     textwrap.dedent("""\
-            #         \033[93mINSTRUCTIONS::
-            #             (With teach pendant)
-            #             1) Change REMOTE to LOCAL (top-right corner of screen)
-            #             2) With deadman button pressed, set the end effector at the corner of the calibration board
-            #             3) Change back to REMOTE
-            #             4) Press ENTER on the keyboard to start measuring camera error\033[93m
-            # """)
-            # )
-            # input()
+            self.log(
+                textwrap.dedent("""\
+                    \033[93mINSTRUCTIONS::
+                        (With teach pendant)
+                        1) Change REMOTE to LOCAL (top-right corner of screen)
+                        2) With deadman button pressed, set the end effector at the corner of the calibration board
+                        3) Change back to REMOTE
+                        4) Press ENTER on the keyboard to start measuring camera error\033[93m
+            """)
+            )
+            input()
 
-            # while not self.safe_program_control.is_remote():
-            #     self.log("Waiting for REMOTE control...")
-            #     time.sleep(1)
+            while not self.safe_program_control.is_remote():
+                self.log("Waiting for REMOTE control...")
+                time.sleep(1)
 
-            # self.safe_program_control.reconnect_dashboard()
-            # while not self.safe_program_control.play_if_remote():
-            #     self.log("Program has not started, trying one more time...")
+            self.safe_program_control.reconnect_dashboard()
+            while not self.safe_program_control.play_if_remote():
+                self.log("Program has not started, trying one more time...")
 
-            # self.robot._switch_controllers(
-            #     activate=["scaled_joint_trajectory_controller"],
-            #     deactivate=["freedrive_mode_controller"],
-            # )
-            # time.sleep(1.0)
+            self.robot._switch_controllers(
+                activate=["scaled_joint_trajectory_controller"],
+                deactivate=["freedrive_mode_controller"],
+            )
+            time.sleep(1.0)
 
             time.sleep(2)
             tcp_pose_robot = self.image_node.get_calibration_tool_pose_in_base()
@@ -144,10 +146,10 @@ class MeasureCameraError:
             self.move_to_home()
             time.sleep(1.0)
 
-            # image = self.get_image_from_camera()
-            image = cv2.imread(
-                "/home/antrad/ceai_ws/src/aegis_ros/aegis_utils/test_data/test_data.png"
-            )
+            image = self.get_image_from_camera()
+            # image = cv2.imread(
+            #     "/home/antrad/ceai_ws/src/aegis_ros/aegis_utils/test_data/test_data.png"
+            # )
             if image is None:
                 next_measure = self.ask_for_next_measure()
                 continue
@@ -156,9 +158,12 @@ class MeasureCameraError:
             cv2.waitKey(0)
             cv2.destroyAllWindows()
 
-            _, tcp_pose_camera_frame_rvec, tcp_pose_camera_frame_tvec = (
-                self.measure_position_from_marker(image)
-            )
+            tcp_pos_camera = self.measure_position_from_marker(image)
+            if tcp_pos_camera is None:
+                next_measure = self.ask_for_next_measure()
+                continue
+
+            _, tcp_pose_camera_frame_rvec, tcp_pose_camera_frame_tvec = tcp_pos_camera
 
             self.image_node.last_object_tf = (
                 tcp_pose_camera_frame_rvec,
@@ -212,7 +217,8 @@ class MeasureCameraError:
         return image
 
     def measure_position_from_marker(self, image: np.ndarray) -> np.ndarray:
-        parameters = cv2.aruco.DetectorParameters_create()
+        parameters = cv2.aruco.DetectorParameters()
+        # parameters = cv2.aruco.DetectorParameters_create() # TODO: remove -> testing for laptop
 
         corners, ids, _ = cv2.aruco.detectMarkers(
             image, self.aruco_dict, parameters=parameters
