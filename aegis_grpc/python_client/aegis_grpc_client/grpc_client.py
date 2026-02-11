@@ -15,6 +15,11 @@ from proto_aegis_grpc.v1 import (
 )
 
 
+class PrefixedLoggerAdapter(logging.LoggerAdapter):
+    def process(self, msg, kwargs):
+        return f"[aegis_robot_client] {msg}", kwargs
+
+
 class AegisRobotClient:
     """
     Async gRPC client for Aegis Robot Control System.
@@ -30,7 +35,8 @@ class AegisRobotClient:
         Args:
             server_address: gRPC server address in format "host:port"
         """
-        self.logger = logging.getLogger("aegis_grpc_client")
+        self.logger = PrefixedLoggerAdapter(logging.getLogger("aegis_grpc_client"), {})
+
         self.server_address = server_address
         self.channel: Optional[grpc.aio.Channel] = None
         self.read_stub: Optional[robot_srvs_pb2_grpc.RobotReadServiceStub] = None

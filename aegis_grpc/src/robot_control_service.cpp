@@ -167,7 +167,7 @@ grpc::Status RobotControlServiceImpl::ServoEnable(
 
   response->set_success(true);
   response->set_msg("");
-  RCLCPP_INFO(get_logger(), "[RobotControlService][ServoDisable] Servo enabled");
+  RCLCPP_INFO(get_logger(), "[RobotControlService][ServoEnable] Servo enabled");
   return grpc::Status::OK;
 }
 
@@ -208,30 +208,37 @@ grpc::Status RobotControlServiceImpl::ServoDisable(
 }
 
 void RobotControlServiceImpl::ServoPublishLoop() {
-  static ServoMode mode;
+  static ServoMode mode(ServoMode::TCPTwist);
   static control_msgs::msg::JointJog jog_msg;
   static geometry_msgs::msg::TwistStamped twist_msg;
 
   {
     std::lock_guard<std::mutex> lock(servo_mutex_);
-    if(servo_msgs_left_ == 0) {
-      servo_mode_ = ServoMode::None;
-      return;
-    }
-
     mode = servo_mode_;
-    switch(mode) {
-      case ServoMode::JointJog:
-        jog_msg = servo_joint_msg_;
-        break;
-      case ServoMode::TCPTwist:
-        twist_msg.twist = servo_tcp_msg_;
-        break;
-      default:
-        break;
+    if(servo_msgs_left_ == 0) {
+      switch(mode) {
+        case ServoMode::JointJog:
+          jog_msg = servo_joint_msg_zeros_;
+          break;
+        case ServoMode::TCPTwist:
+          twist_msg.twist = servo_tcp_msg_zeros_;
+          break;
+        default:
+          break;
+      }
+    } else {
+      switch(mode) {
+        case ServoMode::JointJog:
+          jog_msg = servo_joint_msg_;
+          break;
+        case ServoMode::TCPTwist:
+          twist_msg.twist = servo_tcp_msg_;
+          break;
+        default:
+          break;
+      }
+      servo_msgs_left_--;
     }
-
-    servo_msgs_left_--;
   }
 
   switch(mode) {
@@ -303,11 +310,11 @@ RobotControlServiceImpl::ServoTCP(grpc::ServerContext *context,
 
   (void)context;
   (void)response;
+  static geometry_msgs::msg::Twist ros_msg;
 
   const auto &lin = request->linear();
   const auto &ang = request->angular();
 
-  auto ros_msg = geometry_msgs::msg::Twist();
   ros_msg.linear.x = lin.x();
   ros_msg.linear.y = lin.y();
   ros_msg.linear.z = lin.z();
@@ -435,6 +442,7 @@ grpc::Status RobotControlServiceImpl::GotoPose(
 
   moveit::planning_interface::MoveGroupInterface::Plan plan;
   auto result = move_group_->plan(plan);
+
   if (result != moveit::core::MoveItErrorCode::SUCCESS) {
     std::string err = "Planning failed.";
     RCLCPP_WARN(get_logger(), "[RobotControlService][GotoPose] %s", err.c_str());
@@ -443,6 +451,7 @@ grpc::Status RobotControlServiceImpl::GotoPose(
   }
 
   auto exec = move_group_->execute(plan);
+
   if(exec != moveit::core::MoveItErrorCode::SUCCESS) {
       std::string err = "Execution failed.";
       RCLCPP_WARN(get_logger(), "[RobotControlService][GoToPose] %s", err.c_str());
