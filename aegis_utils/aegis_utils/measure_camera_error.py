@@ -20,12 +20,15 @@ from aegis_utils.measure_camera_error_ros_nodes import (
     CalibrationTool,
     CollectImageNode,
     SafeProgramControl,
+    TcpPosCamera,
 )
 
 
 CAMERA_CONFIG = {
     "scene": {"pos_config": "cam_scene.yaml", "topic": "/cam_scene/rgb/image_raw"},
 }
+
+RESULTS_FILENAME = "results.yaml"
 
 
 class MeasureCameraError:
@@ -48,7 +51,7 @@ class MeasureCameraError:
         self.iteration = 0
         self.aruco_dict = aruco_dict
         self.marker_size = marker_size
-        self.T_base2cam, self.camera_matrix, self.dist_coeffs = self.load_data()
+        self.camera_matrix, self.dist_coeffs = self.load_data()
         self.safe_program_control = SafeProgramControl()
 
     def destroy(self):
@@ -71,13 +74,10 @@ class MeasureCameraError:
             max_accel=0.5,
         )
 
-    def load_data(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def load_data(self) -> tuple[np.ndarray, np.ndarray]:
         intrinsics_path = self.data_path / f"{self.camera_name}_intrinsics.yaml"
-        extrinsics_path = self.data_path / f"{self.camera_name}_extrinsics.yaml"
         with intrinsics_path.open("r") as f:
             intrinsics = yaml.safe_load(f)
-        with extrinsics_path.open("r") as f:
-            extrinsics = yaml.safe_load(f)
         camera_matrix = np.array(
             intrinsics["camera_matrix"]["data"], dtype=np.float32
         ).reshape((3, 3))
@@ -89,11 +89,8 @@ class MeasureCameraError:
                 intrinsics["distortion_coefficients"]["rows"],
             )
         )
-        T_base2cam = np.array(extrinsics["T_base2cam"], dtype=np.float32).reshape(
-            (4, 4)
-        )
 
-        return T_base2cam, camera_matrix, dist_coeffs
+        return camera_matrix, dist_coeffs
 
     def working_loop(self) -> None:
         next_measure = True
@@ -134,7 +131,7 @@ class MeasureCameraError:
                 activate=["scaled_joint_trajectory_controller"],
                 deactivate=["freedrive_mode_controller"],
             )
-            time.sleep(1.0)
+            time.sleep(2.0)
 
             tcp_pose_robot = self.image_node.get_calibration_tool_pose_in_base()
             tcp_pose_robot = tcp_pose_robot["position"].flatten().tolist()
@@ -147,26 +144,34 @@ class MeasureCameraError:
                 next_measure = self.ask_for_next_measure()
                 continue
 
-            tcp_pose_camera_frame_tvec = self.measure_position_from_marker(image)
-
-            if tcp_pose_camera_frame_tvec is not None:
-                tcp_pose_camera_frame_tvec = np.vstack(
-                    (tcp_pose_camera_frame_tvec, [1])
+            tcp_pos_in_camera_frame = self.measure_position_from_marker(image)
+            if tcp_pos_in_camera_frame is None:
+                next_measure = self.ask_for_next_measure()
+                continue
+            else:
+                self.image_node.last_object_tf = (
+                    tcp_pos_in_camera_frame.rvec,
+                    tcp_pos_in_camera_frame.tvec,
                 )
 
-                tcp_pose_camera = self.T_base2cam @ tcp_pose_camera_frame_tvec
-                tcp_pose_camera = tcp_pose_camera[:3].flatten().tolist()
+                time.sleep(1.0)
+                tcp_pos_in_camera_frame.tvec = np.vstack(
+                    (tcp_pos_in_camera_frame.tvec, [1])
+                )
 
-                self.log(f"TCP pose from camera: {tcp_pose_camera}")
+                detect_object_pos = self.image_node.get_object_pose_in_base()
+                detect_object_pos = detect_object_pos["position"].flatten().tolist()
+
+                self.log(f"TCP pose from camera: {detect_object_pos}")
                 self.log(f"TCP pose from robot: {tcp_pose_robot}")
 
-                TCP_error = self.calculate_TCP_error(tcp_pose_camera, tcp_pose_robot)
+                TCP_error = self.calculate_TCP_error(detect_object_pos, tcp_pose_robot)
                 self.errors.append(TCP_error)
                 self.log(f"Error of the position:: {TCP_error[3]}")
 
             next_measure = self.ask_for_next_measure()
 
-        self.analyze_results()
+        self.analyze_results(self.errors, RESULTS_FILENAME)
         self.log("\033[92mFinished measuring camera error.\033[92m")
 
     def get_image_from_camera(self) -> np.ndarray | None:
@@ -183,7 +188,7 @@ class MeasureCameraError:
             self.image_node.log("\033[91mFailed to get image from camera.\033[91m")
         return image
 
-    def measure_position_from_marker(self, image: np.ndarray) -> np.ndarray:
+    def measure_position_from_marker(self, image: np.ndarray) -> TcpPosCamera | None:
         parameters = cv2.aruco.DetectorParameters()
 
         corners, ids, _ = cv2.aruco.detectMarkers(
@@ -211,7 +216,7 @@ class MeasureCameraError:
             obj_points, image_points, self.camera_matrix, self.dist_coeffs
         )
 
-        return tvec
+        return TcpPosCamera(retval=retval, rvec=rvec, tvec=tvec)
 
     def calculate_TCP_error(
         self, c: np.ndarray, r: np.ndarray
@@ -221,30 +226,38 @@ class MeasureCameraError:
         dz = c[2] - r[2]
         return (abs(dx), abs(dy), abs(dz), math.sqrt(dx * dx + dy * dy + dz * dz))
 
-    def analyze_results(self) -> None:
-        errors_x = [row[0] for row in self.errors]
-        errors_y = [row[1] for row in self.errors]
-        errors_z = [row[2] for row in self.errors]
-        errors_all = [row[3] for row in self.errors]
+    def analyze_results(self, errors: list, file_name: str) -> None:
+        if not errors:
+            self.log("No errors collected; nothing to analyze/save.")
+            return
+
+        errors_np = np.asarray(errors, dtype=float)
+
+        if errors_np.ndim != 2 or errors_np.shape[1] != 4:
+            raise ValueError(f"'errors' must have shape (N, 4). Got {errors_np.shape}")
+
+        errors_x, errors_y, errors_z, errors_all = errors_np.T
+
         mean_errors = {
-            "x": float(np.mean(errors_x)),
-            "y": float(np.mean(errors_y)),
-            "z": float(np.mean(errors_z)),
-            "total": float(np.mean(errors_all)),
-        }  # Prepare YAML structure
+            "x": float(errors_x.mean()),
+            "y": float(errors_y.mean()),
+            "z": float(errors_z.mean()),
+            "total": float(errors_all.mean()),
+        }
 
         std_errors = {
-            "x": float(np.std(errors_x)),
-            "y": float(np.std(errors_y)),
-            "z": float(np.std(errors_z)),
-            "total": float(np.std(errors_all)),
+            "x": float(errors_x.std()),
+            "y": float(errors_y.std()),
+            "z": float(errors_z.std()),
+            "total": float(errors_all.std()),
         }
+
         data_to_save = {
             "errors": {
-                "x": errors_x,
-                "y": errors_y,
-                "z": errors_z,
-                "total": errors_all,
+                "x": errors_x.tolist(),
+                "y": errors_y.tolist(),
+                "z": errors_z.tolist(),
+                "total": errors_all.tolist(),
             },
             "statistics": {
                 "mean": mean_errors,
@@ -252,9 +265,9 @@ class MeasureCameraError:
             },
         }
 
-        yaml_file = self.res_path / "results.yaml"
+        yaml_file = self.res_path / file_name
         with open(yaml_file, "w") as f:
-            yaml.dump(data_to_save, f, default_flow_style=False)
+            yaml.safe_dump(data_to_save, f, default_flow_style=False, sort_keys=False)
 
         self.log(f"Mean error: {mean_errors}")
         self.log(f"STD: {std_errors}")

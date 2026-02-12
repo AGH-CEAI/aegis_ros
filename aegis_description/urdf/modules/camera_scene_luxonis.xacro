@@ -18,7 +18,7 @@
       cam_pos_z="1.166"
       cam_roll="0"
       cam_pitch="${pi / 2}"
-      cam_yaw="0"
+      cam_yaw="${pi}"
       rs_compat="$(arg scene_camera_rs_compat)"
     />
   </xacro:macro>

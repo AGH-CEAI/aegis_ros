@@ -9,6 +9,8 @@ authors:
     orcid: https://orcid.org/0009-0004-6749-1833
   - family-names: Płachno
     given-names: Jakub
+  - family-names: Radomiński-Lasek
+    given-names: Antoni
 title: "Aegis Robotic Station ROS 2 Meta Repository"
 version: v202509011041
 identifiers:

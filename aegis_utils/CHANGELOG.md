@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-99](https://github.com/AGH-CEAI/aegis_ros/pull/99) - T_base2cam was measured and set experimentally.
 * [PR-64](https://github.com/AGH-CEAI/aegis_ros/pull/64) - Switched calibration configuration from JSON to YAML and updated formatting style.
 
 ### Deprecated
