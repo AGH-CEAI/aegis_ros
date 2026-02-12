@@ -24,6 +24,7 @@ set(ROS_DEPENDS
     cv_bridge
     geometry_msgs
     moveit_msgs
+    moveit_ros_planning
     moveit_ros_planning_interface
     sensor_msgs
     std_srvs)

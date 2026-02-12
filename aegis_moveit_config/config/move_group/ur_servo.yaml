@@ -86,6 +86,7 @@ joint_topic: /joint_states
 status_topic: ~/status # Publish status to this topic
 # command_out_topic: /scaled_joint_trajectory_controller/joint_trajectory # Publish outgoing commands here
 command_out_topic: /forward_position_controller/commands
+# command_out_topic: /forward_velocity_controller/commands
 # command_out_topic: /ur_controller/joint_trajectory # Publish outgoing commands here
 monitored_planning_scene_topic: /monitored_planning_scene
 

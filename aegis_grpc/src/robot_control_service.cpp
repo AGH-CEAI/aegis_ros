@@ -56,6 +56,7 @@ RobotControlServiceImpl::RobotControlServiceImpl(
 
   auto move_group_name = node_->get_parameter("move_group").as_string();
   move_group_ = std::make_unique<moveit::planning_interface::MoveGroupInterface>(node_, move_group_name);
+  move_group_->setEndEffectorLink("robotiq_hande_end");
 }
 
 rclcpp::Logger RobotControlServiceImpl::get_logger() const {
@@ -429,16 +430,37 @@ grpc::Status RobotControlServiceImpl::GotoPose(
     return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
   }
 
-  geometry_msgs::msg::Pose pose;
-  pose.position.x = request->position().x();
-  pose.position.y = request->position().y();
-  pose.position.z = request->position().z();
-  pose.orientation.x = request->orientation().x();
-  pose.orientation.y = request->orientation().y();
-  pose.orientation.z = request->orientation().z();
-  pose.orientation.w = request->orientation().w();
+  char request_str[512];
+  snprintf(request_str, sizeof(request_str),
+      "Pose(position={x:%.3f, y:%.3f, z:%.3f}, orientation={x:%.4f, y:%.4f, z:%.4f, w:%.4f})",
+      request->position().x(), request->position().y(), request->position().z(),
+      request->orientation().x(), request->orientation().y(),
+      request->orientation().z(), request->orientation().w());
 
-  move_group_->setPoseTarget(pose);
+  RCLCPP_WARN(get_logger(), "[RobotControlService][GotoPose] %s", request_str);
+
+  geometry_msgs::msg::PoseStamped pose_goal;
+  pose_goal.header.frame_id = "world";
+  pose_goal.header.stamp = node_->now();
+  pose_goal.pose.position.x = request->position().x();
+  pose_goal.pose.position.y = request->position().y();
+  pose_goal.pose.position.z = request->position().z();
+  pose_goal.pose.orientation.x = request->orientation().x();
+  pose_goal.pose.orientation.y = request->orientation().y();
+  pose_goal.pose.orientation.z = request->orientation().z();
+  pose_goal.pose.orientation.w = request->orientation().w();
+
+  move_group_->clearPoseTargets();
+  moveit::core::RobotStatePtr current_state = move_group_->getCurrentState(2.0);
+  if (!current_state) {
+    RCLCPP_ERROR(get_logger(), "Failed to fetch current state");
+    return grpc::Status::CANCELLED;
+  }
+  move_group_->setStartState(*current_state);
+  move_group_->setPoseTarget(pose_goal);;
+
+  move_group_->setPlanningTime(10.0); // in secs
+  move_group_->setNumPlanningAttempts(10);
 
   moveit::planning_interface::MoveGroupInterface::Plan plan;
   auto result = move_group_->plan(plan);
