@@ -238,20 +238,6 @@ class MeasureCameraError:
 
         errors_x, errors_y, errors_z, errors_all = errors_np.T
 
-        # mean_errors = {
-        #     "x": float(np.mean(errors_x)),
-        #     "y": float(np.mean(errors_y)),
-        #     "z": float(np.mean(errors_z)),
-        #     "total": float(np.mean(errors_all)),
-        # }  # Prepare YAML structure
-
-        # std_errors = {
-        #     "x": float(np.std(errors_x)),
-        #     "y": float(np.std(errors_y)),
-        #     "z": float(np.std(errors_z)),
-        #     "total": float(np.std(errors_all)),
-        # }
-
         mean_errors = {
             "x": float(errors_x.mean()),
             "y": float(errors_y.mean()),
