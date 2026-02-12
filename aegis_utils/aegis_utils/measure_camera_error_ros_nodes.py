@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 import rclpy
 from cv_bridge import CvBridge
+from dataclasses import dataclass
 from rclpy.node import Node
 from scipy.spatial.transform import Rotation
 from tf2_ros.static_transform_broadcaster import StaticTransformBroadcaster
@@ -17,6 +18,13 @@ from geometry_msgs.msg import TransformStamped
 from ur_dashboard_msgs.srv import IsInRemoteControl, GetProgramState
 from sensor_msgs.msg import Image
 from std_srvs.srv import Trigger
+
+
+@dataclass
+class TcpPosCamera:
+    retval: bool
+    rvec: np.ndarray
+    tvec: np.ndarray
 
 
 class CalibrationTool(Node):
