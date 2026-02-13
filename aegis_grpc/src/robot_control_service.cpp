@@ -56,7 +56,6 @@ RobotControlServiceImpl::RobotControlServiceImpl(
 
   auto move_group_name = node_->get_parameter("move_group").as_string();
   move_group_ = std::make_unique<moveit::planning_interface::MoveGroupInterface>(node_, move_group_name);
-  move_group_->setEndEffectorLink("robotiq_hande_end");
 }
 
 rclcpp::Logger RobotControlServiceImpl::get_logger() const {
@@ -425,58 +424,54 @@ grpc::Status RobotControlServiceImpl::GotoPose(
 
   if (!request->has_position() || !request->has_orientation()) {
     std::string err = "Missing position or orientation.";
-    RCLCPP_WARN(get_logger(), "[RobotControlService][GotoPose] %s", err.c_str());
+    RCLCPP_ERROR(get_logger(), "[RobotControlService][GotoPose] %s", err.c_str());
     response->set_msg(err);
     return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
   }
 
-  char request_str[512];
-  snprintf(request_str, sizeof(request_str),
-      "Pose(position={x:%.3f, y:%.3f, z:%.3f}, orientation={x:%.4f, y:%.4f, z:%.4f, w:%.4f})",
-      request->position().x(), request->position().y(), request->position().z(),
-      request->orientation().x(), request->orientation().y(),
-      request->orientation().z(), request->orientation().w());
+  // TODO remove after debug
+  [&]{
+      char request_str[512];
+      snprintf(request_str, sizeof(request_str),
+          "Pose(position={x:%.3f, y:%.3f, z:%.3f}, orientation={x:%.4f, y:%.4f, z:%.4f, w:%.4f})",
+          request->position().x(), request->position().y(), request->position().z(),
+          request->orientation().x(), request->orientation().y(),
+          request->orientation().z(), request->orientation().w());
+      RCLCPP_INFO(get_logger(), "[RobotControlService][GotoPose] %s", request_str);
+  }();
+  // -------
 
-  RCLCPP_WARN(get_logger(), "[RobotControlService][GotoPose] %s", request_str);
+  auto const target_pose = [&request]{
+    geometry_msgs::msg::Pose goal;
+    goal.position.x = request->position().x();
+    goal.position.y = request->position().y();
+    goal.position.z = request->position().z();
+    goal.orientation.x = request->orientation().x();
+    goal.orientation.y = request->orientation().y();
+    goal.orientation.z = request->orientation().z();
+    goal.orientation.w = request->orientation().w();
+    return goal;
+  }();
+  move_group_->setPoseTarget(target_pose);
 
-  geometry_msgs::msg::PoseStamped pose_goal;
-  pose_goal.header.frame_id = "world";
-  pose_goal.header.stamp = node_->now();
-  pose_goal.pose.position.x = request->position().x();
-  pose_goal.pose.position.y = request->position().y();
-  pose_goal.pose.position.z = request->position().z();
-  pose_goal.pose.orientation.x = request->orientation().x();
-  pose_goal.pose.orientation.y = request->orientation().y();
-  pose_goal.pose.orientation.z = request->orientation().z();
-  pose_goal.pose.orientation.w = request->orientation().w();
+  auto const [success, plan] = [&]{
+    moveit::planning_interface::MoveGroupInterface::Plan msg;
+    auto const ok = static_cast<bool>(move_group_->plan(msg));
+    return std::make_pair(ok, msg);
+  }();
 
-  move_group_->clearPoseTargets();
-  moveit::core::RobotStatePtr current_state = move_group_->getCurrentState(2.0);
-  if (!current_state) {
-    RCLCPP_ERROR(get_logger(), "Failed to fetch current state");
-    return grpc::Status::CANCELLED;
-  }
-  move_group_->setStartState(*current_state);
-  move_group_->setPoseTarget(pose_goal);;
-
-  move_group_->setPlanningTime(10.0); // in secs
-  move_group_->setNumPlanningAttempts(10);
-
-  moveit::planning_interface::MoveGroupInterface::Plan plan;
-  auto result = move_group_->plan(plan);
-
-  if (result != moveit::core::MoveItErrorCode::SUCCESS) {
+  if (!success) {
     std::string err = "Planning failed.";
-    RCLCPP_WARN(get_logger(), "[RobotControlService][GotoPose] %s", err.c_str());
+    RCLCPP_ERROR(get_logger(), "[RobotControlService][GotoPose] %s", err.c_str());
     response->set_msg(err);
     return grpc::Status(grpc::StatusCode::INTERNAL, err);
   }
 
-  auto exec = move_group_->execute(plan);
+  auto const exec = static_cast<bool>(move_group_->execute(plan));
 
-  if(exec != moveit::core::MoveItErrorCode::SUCCESS) {
+  if(!exec) {
       std::string err = "Execution failed.";
-      RCLCPP_WARN(get_logger(), "[RobotControlService][GoToPose] %s", err.c_str());
+      RCLCPP_ERROR(get_logger(), "[RobotControlService][GoToPose] %s", err.c_str());
       response->set_msg(err);
       return grpc::Status(grpc::StatusCode::INTERNAL, err);
   }
@@ -501,24 +496,31 @@ grpc::Status RobotControlServiceImpl::GotoJoints(
     return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
   }
 
-  std::map<std::string, double> target;
-  for (int i = 0; i < request->name_size(); ++i) {
-      target[request->name(i)] = request->position(i);
-  }
-
+  auto const target = [&request]{
+    std::map<std::string, double> joints_goal;
+    for (int i = 0; i < request->name_size(); ++i) {
+      joints_goal[request->name(i)] = request->position(i);
+    }
+    return joints_goal;
+  }();
   move_group_->setJointValueTarget(target);
 
-  moveit::planning_interface::MoveGroupInterface::Plan plan;
-  auto result = move_group_->plan(plan);
-  if (result != moveit::core::MoveItErrorCode::SUCCESS) {
+  auto const [success, plan] = [&]{
+    moveit::planning_interface::MoveGroupInterface::Plan plan;
+    auto const ok = static_cast<bool>(move_group_->plan(plan));
+    return std::make_pair(ok, plan);
+  }();
+
+  if (!success) {
     std::string err = "Planning failed.";
     RCLCPP_WARN(get_logger(), "[RobotControlService][GotoJoints] %s", err.c_str());
     response->set_msg(err);
     return grpc::Status(grpc::StatusCode::INTERNAL, err);
   }
 
-  auto exec = move_group_->execute(plan);
-  if(exec != moveit::core::MoveItErrorCode::SUCCESS) {
+  auto const exec = static_cast<bool>(move_group_->execute(plan));
+
+  if(!exec) {
       std::string err = "Execution failed.";
       RCLCPP_WARN(get_logger(), "[RobotControlService][GotoJoints] %s", err.c_str());
       response->set_msg(err);
