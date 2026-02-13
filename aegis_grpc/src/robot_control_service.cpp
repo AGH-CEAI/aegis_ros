@@ -5,6 +5,98 @@ using namespace std::chrono_literals;
 
 namespace aegis_grpc {
 
+// Helper function: check if two poses are approximately equal
+// TODO fix it and move inside the class
+bool are_poses_approximately_equal(
+    const geometry_msgs::msg::Pose& pose1,
+    const geometry_msgs::msg::Pose& pose2,
+    double position_tolerance = 0.002,
+    double orientation_tolerance = 0.0255)  // ~1.5 degree in radians
+{
+  // Check position
+  double dx = pose1.position.x - pose2.position.x;
+  double dy = pose1.position.y - pose2.position.y;
+  double dz = pose1.position.z - pose2.position.z;
+  double position_distance = std::sqrt(dx * dx + dy * dy + dz * dz);
+
+  if (position_distance > position_tolerance) {
+    return false;
+  }
+
+  // Check orientation: convert to roll-pitch-yaw and compare
+  tf2::Quaternion q1(pose1.orientation.x, pose1.orientation.y,
+                     pose1.orientation.z, pose1.orientation.w);
+  tf2::Quaternion q2(pose2.orientation.x, pose2.orientation.y,
+                     pose2.orientation.z, pose2.orientation.w);
+
+  // Compute angular distance using quaternion dot product
+  double dot_product = q1.dot(q2);
+  // Clamp to [-1, 1] to avoid numerical issues with acos
+  dot_product = std::max(-1.0, std::min(1.0, dot_product));
+  double angle_distance = 2.0 * std::acos(std::abs(dot_product));
+
+  return angle_distance < orientation_tolerance;
+}
+
+// Helper function: check if joint targets are approximately equal
+// TODO, THIS IS WORKING move inside class
+bool are_joints_approximately_equal(
+    moveit::planning_interface::MoveGroupInterface& move_group,
+    const std::map<std::string, double>& target_joints,
+    double joint_tolerance = 0.017)  // ~1 degree in radians
+{
+  // Get current joint values from MoveGroup
+  std::vector<double> current_joints = move_group.getCurrentJointValues();
+
+  // Get joint model group to map names to indices
+  const moveit::core::JointModelGroup* joint_model_group =
+      move_group.getRobotModel()->getJointModelGroup(move_group.getName());
+
+  if (!joint_model_group) {
+    RCLCPP_ERROR(rclcpp::get_logger("RobotControlService"), "Failed to get joint model group");
+    return false;
+  }
+
+  // Check each joint in target
+  for (const auto& [joint_name, target_value] : target_joints) {
+    const moveit::core::JointModel* joint_model = joint_model_group->getJointModel(joint_name);
+
+    if (!joint_model) {
+      RCLCPP_WARN(rclcpp::get_logger("RobotControlService"),
+        "Joint '%s' not found in planning group", joint_name.c_str());
+      continue;
+    }
+
+    // **FIXED**: Use getVariableGroupIndex() - returns index within GROUP
+    int joint_index = joint_model_group->getVariableGroupIndex(joint_name);
+    if (joint_index < 0 || joint_index >= static_cast<int>(current_joints.size())) {
+      RCLCPP_WARN(rclcpp::get_logger("RobotControlService"),
+        "Joint '%s' invalid index %d (size: %zu)",
+        joint_name.c_str(), joint_index, current_joints.size());
+      continue;
+    }
+
+    double current_value = current_joints[joint_index];
+
+    // **FIXED**: Check joint type on JointModel, not VariableBounds
+    if (joint_model->getType() == moveit::core::JointModel::REVOLUTE) {
+      // For revolute joints, use angular distance (handles wrapping)
+      double diff = std::abs(target_value - current_value);
+      double min_angle = std::min(diff, 2.0 * M_PI - diff);
+      if (min_angle > joint_tolerance) {
+        return false;
+      }
+    } else {
+      // Prismatic or other bounded joints - direct comparison
+      if (std::abs(target_value - current_value) > joint_tolerance) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 RobotControlServiceImpl::RobotControlServiceImpl(
     std::shared_ptr<rclcpp::Node> node)
     : node_(node), servo_mode_(ServoMode::None), servo_frequency_ratio_(0), servo_msgs_left_(0), gripper_in_use_(false),
@@ -452,6 +544,31 @@ grpc::Status RobotControlServiceImpl::GotoPose(
     goal.orientation.w = request->orientation().w();
     return goal;
   }();
+
+    // Get current end-effector pose
+  geometry_msgs::msg::PoseStamped current_pose = move_group_->getCurrentPose();
+
+  [&]{
+      char request_str[512];
+      snprintf(request_str, sizeof(request_str),
+          "CurrentPose(position={x:%.3f, y:%.3f, z:%.3f}, orientation={x:%.4f, y:%.4f, z:%.4f, w:%.4f})",
+          current_pose.pose.position.x, current_pose.pose.position.y, current_pose.pose.position.z,
+          current_pose.pose.orientation.x, current_pose.pose.orientation.y,
+          current_pose.pose.orientation.z, current_pose.pose.orientation.w);
+      RCLCPP_INFO(get_logger(), "[RobotControlService][GotoPose] %s", request_str);
+  }();
+
+  // Check if target is approximately the same as current
+  if (are_poses_approximately_equal(target_pose, current_pose.pose)) {
+    RCLCPP_INFO(get_logger(),
+      "[RobotControlService][GotoPose] Target pose is already at current pose. "
+      "Skipping planning and returning success.");
+    // Return a trivial trajectory (just the current state) if needed
+    // or simply return success without executing
+    response->set_msg("Already at target pose.");
+    return grpc::Status::OK;
+  }
+
   move_group_->setPoseTarget(target_pose);
 
   auto const [success, plan] = [&]{
@@ -503,6 +620,18 @@ grpc::Status RobotControlServiceImpl::GotoJoints(
     }
     return joints_goal;
   }();
+
+
+  // Check if we're already at the target joint configuration**
+  if (are_joints_approximately_equal(*move_group_, target)) {
+    RCLCPP_INFO(get_logger(),
+      "[RobotControlService][GotoJoints] Already at target joint configuration. "
+      "Skipping planning and execution.");
+    response->set_success(true);
+    response->set_msg("Already at target joint positions.");
+    return grpc::Status::OK;
+  }
+
   move_group_->setJointValueTarget(target);
 
   auto const [success, plan] = [&]{
