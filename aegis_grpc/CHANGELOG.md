@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [PR-82](https://github.com/AGH-CEAI/aegis_ros/pull/82) - MVP of the gRPC-ROS server.
 
 ### Changed
+
+* [PR-102](https://github.com/AGH-CEAI/aegis_ros/pull/102) - The end effector's TCP pose is now taken from the tf2 transform instead of a given topic.
+
 ### Deprecated
 ### Removed
 ### Fixed
