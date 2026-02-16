@@ -438,7 +438,7 @@ grpc::Status RobotControlServiceImpl::GotoPose(grpc::ServerContext* context,
 
   if (IsPoseAtGoal(target_pose)) {
     RCLCPP_INFO(get_logger(),
-                "[RobotControlService][GotoPose] Target pose is already at the current pose. "
+                "[RobotControlService][GotoPose] Target pose is the same as at the current pose. "
                 "Skipping planning and returning success.");
     response->set_msg("Already at target pose.");
     return grpc::Status::OK;
@@ -526,8 +526,8 @@ grpc::Status RobotControlServiceImpl::GotoJoints(grpc::ServerContext* context,
 
   if (AreJointsAtGoal(target)) {
     RCLCPP_INFO(get_logger(),
-                "[RobotControlService][GotoJoints] Already at target joint configuration. "
-                "Skipping planning and execution.");
+                "[RobotControlService][GotoJoints] Already at the target joint configuration. "
+                "Skipping planning and returning success.");
     response->set_success(true);
     response->set_msg("Already at target joint positions.");
     return grpc::Status::OK;
