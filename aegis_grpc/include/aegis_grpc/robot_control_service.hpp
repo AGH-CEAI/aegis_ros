@@ -71,6 +71,8 @@ class RobotControlServiceImpl final : public proto_aegis_grpc::v1::RobotControlS
   bool SwitchControllers(const std::vector<std::string>& activate, const std::vector<std::string>& deactivate);
   bool CallServoStartService();
   bool CallServoStopService();
+  bool IsPoseAtGoal(const geometry_msgs::msg::Pose& target_pose);
+  bool AreJointsAtGoal(const std::map<std::string, double>& target_joints);
 
   void ServoPublishLoop();
   void GripperSendGoal(double position, double max_effort);
@@ -107,6 +109,10 @@ class RobotControlServiceImpl final : public proto_aegis_grpc::v1::RobotControlS
   std::string gripper_cmd_msg_;
   bool gripper_cmd_success_;
   std::atomic<bool> gripper_cmd_done_;
+
+  double JOINT_TOLERANCE_;
+  double POSITION_TOLERANCE_;
+  double ORIENTATION_TOLERANCE_;
 };
 
 }  // namespace aegis_grpc

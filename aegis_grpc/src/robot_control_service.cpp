@@ -27,11 +27,23 @@ RobotControlServiceImpl::RobotControlServiceImpl(std::shared_ptr<rclcpp::Node> n
   DeclareROSParameter("servo_in_rate_hz", 10.0, "[double] Init; Servo commands frequency in Hz.");
   DeclareROSParameter("servo_out_rate_hz", 250.0, "[double] Init; Servo publish loop frequency in Hz.");
   DeclareROSParameter("move_group", std::string("aegis_arm"), "[str] Init; Name of the planning group to control.");
+  DeclareROSParameter(
+      "joint_tolerance", 0.017,
+      "[double] Init; Ignore MoveIt joints call if the joints target is closer than this absolute value in radians.");
+  DeclareROSParameter(
+      "position_tolerance", 0.001,
+      "[double] Init; Ignore MoveIt pose call if the position target is closer than this absolute value in meters.");
+  DeclareROSParameter("orientation_tolerance", 0.017,
+                      "[double] Init; Ignore MoveIt pose call if the orientation target is closer than this absolute "
+                      "value in radians.");
 
   // Runtime parameters
   DeclareROSParameter("r_gripper_close_m", 0.0, "[double] Runtime; Gripper close position in meters. ");
   DeclareROSParameter("r_gripper_open_m", 0.025, "[double] Runtime; Gripper open position in meters.");
 
+  JOINT_TOLERANCE_ = node_->get_parameter("joint_tolerance").as_double();
+  POSITION_TOLERANCE_ = node_->get_parameter("position_tolerance").as_double();
+  ORIENTATION_TOLERANCE_ = node_->get_parameter("orientation_tolerance").as_double();
   servo_tcp_link_ = node_->get_parameter("servo_link").as_string();
 
   auto servo_in_hz = node_->get_parameter("servo_in_rate_hz").as_double();
@@ -61,6 +73,9 @@ RobotControlServiceImpl::RobotControlServiceImpl(std::shared_ptr<rclcpp::Node> n
 
   auto move_group_name = node_->get_parameter("move_group").as_string();
   move_group_ = std::make_unique<moveit::planning_interface::MoveGroupInterface>(node_, move_group_name);
+  move_group_->setPlanningTime(10.0);
+  move_group_->setNumPlanningAttempts(10);
+  move_group_->startStateMonitor(0.01);
 }
 
 rclcpp::Logger RobotControlServiceImpl::get_logger() const {
@@ -409,28 +424,43 @@ grpc::Status RobotControlServiceImpl::GotoPose(grpc::ServerContext* context,
     return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
   }
 
-  geometry_msgs::msg::Pose pose;
-  pose.position.x = request->position().x();
-  pose.position.y = request->position().y();
-  pose.position.z = request->position().z();
-  pose.orientation.x = request->orientation().x();
-  pose.orientation.y = request->orientation().y();
-  pose.orientation.z = request->orientation().z();
-  pose.orientation.w = request->orientation().w();
+  auto const target_pose = [&request] {
+    geometry_msgs::msg::Pose goal;
+    goal.position.x = request->position().x();
+    goal.position.y = request->position().y();
+    goal.position.z = request->position().z();
+    goal.orientation.x = request->orientation().x();
+    goal.orientation.y = request->orientation().y();
+    goal.orientation.z = request->orientation().z();
+    goal.orientation.w = request->orientation().w();
+    return goal;
+  }();
 
-  move_group_->setPoseTarget(pose);
+  if (IsPoseAtGoal(target_pose)) {
+    RCLCPP_INFO(get_logger(),
+                "[RobotControlService][GotoPose] Target pose is already at the current pose. "
+                "Skipping planning and returning success.");
+    response->set_msg("Already at target pose.");
+    return grpc::Status::OK;
+  }
 
-  moveit::planning_interface::MoveGroupInterface::Plan plan;
-  auto result = move_group_->plan(plan);
-  if (result != moveit::core::MoveItErrorCode::SUCCESS) {
+  move_group_->setPoseTarget(target_pose);
+
+  auto const [success, plan] = [&] {
+    moveit::planning_interface::MoveGroupInterface::Plan msg;
+    auto const ok = static_cast<bool>(move_group_->plan(msg));
+    return std::make_pair(ok, msg);
+  }();
+
+  if (!success) {
     std::string err = "Planning failed.";
     RCLCPP_ERROR(get_logger(), "[RobotControlService][GotoPose] %s", err.c_str());
     response->set_msg(err);
     return grpc::Status(grpc::StatusCode::INTERNAL, err);
   }
 
-  auto exec = move_group_->execute(plan);
-  if (exec != moveit::core::MoveItErrorCode::SUCCESS) {
+  auto const exec = static_cast<bool>(move_group_->execute(plan));
+  if (!exec) {
     std::string err = "Execution failed.";
     RCLCPP_ERROR(get_logger(), "[RobotControlService][GoToPose] %s", err.c_str());
     response->set_msg(err);
@@ -440,6 +470,36 @@ grpc::Status RobotControlServiceImpl::GotoPose(grpc::ServerContext* context,
   response->set_success(true);
   response->set_msg("");
   return grpc::Status::OK;
+}
+
+bool RobotControlServiceImpl::IsPoseAtGoal(const geometry_msgs::msg::Pose& target_pose) {
+  geometry_msgs::msg::Pose current_pose = move_group_->getCurrentPose().pose;
+
+  double const position_distance = [&target_pose, &current_pose] {
+    double dx = target_pose.position.x - current_pose.position.x;
+    double dy = target_pose.position.y - current_pose.position.y;
+    double dz = target_pose.position.z - current_pose.position.z;
+    return std::sqrt(dx * dx + dy * dy + dz * dz);
+  }();
+
+  if (position_distance > POSITION_TOLERANCE_)
+    return false;
+
+  double const angle_distance = [&target_pose, &current_pose] {
+    // Check orientation: convert to roll-pitch-yaw and compare
+    tf2::Quaternion q1(target_pose.orientation.x, target_pose.orientation.y, target_pose.orientation.z,
+                       target_pose.orientation.w);
+    tf2::Quaternion q2(current_pose.orientation.x, current_pose.orientation.y, current_pose.orientation.z,
+                       current_pose.orientation.w);
+
+    // Compute angular distance using quaternion dot product
+    double dot_product = q1.dot(q2);
+    // Clamp to [-1, 1] to avoid numerical issues with acos
+    dot_product = std::max(-1.0, std::min(1.0, dot_product));
+    return 2.0 * std::acos(std::abs(dot_product));
+  }();
+
+  return angle_distance < ORIENTATION_TOLERANCE_;
 }
 
 grpc::Status RobotControlServiceImpl::GotoJoints(grpc::ServerContext* context,
@@ -456,24 +516,40 @@ grpc::Status RobotControlServiceImpl::GotoJoints(grpc::ServerContext* context,
     return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
   }
 
-  std::map<std::string, double> target;
-  for (int i = 0; i < request->name_size(); ++i) {
-    target[request->name(i)] = request->position(i);
+  auto const target = [&request] {
+    std::map<std::string, double> joints_goal;
+    for (int i = 0; i < request->name_size(); ++i) {
+      joints_goal[request->name(i)] = request->position(i);
+    }
+    return joints_goal;
+  }();
+
+  if (AreJointsAtGoal(target)) {
+    RCLCPP_INFO(get_logger(),
+                "[RobotControlService][GotoJoints] Already at target joint configuration. "
+                "Skipping planning and execution.");
+    response->set_success(true);
+    response->set_msg("Already at target joint positions.");
+    return grpc::Status::OK;
   }
 
   move_group_->setJointValueTarget(target);
 
-  moveit::planning_interface::MoveGroupInterface::Plan plan;
-  auto result = move_group_->plan(plan);
-  if (result != moveit::core::MoveItErrorCode::SUCCESS) {
+  auto const [success, plan] = [&] {
+    moveit::planning_interface::MoveGroupInterface::Plan plan;
+    auto const ok = static_cast<bool>(move_group_->plan(plan));
+    return std::make_pair(ok, plan);
+  }();
+
+  if (!success) {
     std::string err = "Planning failed.";
     RCLCPP_ERROR(get_logger(), "[RobotControlService][GotoJoints] %s", err.c_str());
     response->set_msg(err);
     return grpc::Status(grpc::StatusCode::INTERNAL, err);
   }
 
-  auto exec = move_group_->execute(plan);
-  if (exec != moveit::core::MoveItErrorCode::SUCCESS) {
+  auto const exec = static_cast<bool>(move_group_->execute(plan));
+  if (!exec) {
     std::string err = "Execution failed.";
     RCLCPP_ERROR(get_logger(), "[RobotControlService][GotoJoints] %s", err.c_str());
     response->set_msg(err);
@@ -483,6 +559,56 @@ grpc::Status RobotControlServiceImpl::GotoJoints(grpc::ServerContext* context,
   response->set_success(true);
   response->set_msg("");
   return grpc::Status::OK;
+}
+
+bool RobotControlServiceImpl::AreJointsAtGoal(const std::map<std::string, double>& target_joints) {
+  // Get current state - use timeout for fresh data
+  moveit::core::RobotStatePtr current_state = move_group_->getCurrentState(0.1);
+
+  // Get joint model group FIRST (needed for copyJointGroupPositions)
+  const moveit::core::RobotModelConstPtr robot_model = move_group_->getRobotModel();
+  const moveit::core::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(move_group_->getName());
+
+  if (!joint_model_group) {
+    RCLCPP_ERROR(get_logger(), "Failed to get joint model group");
+    return false;
+  }
+
+  std::vector<double> current_joints;
+  current_state->copyJointGroupPositions(joint_model_group, current_joints);
+
+  // Check each joint in target
+  for (const auto& [joint_name, target_value] : target_joints) {
+    const moveit::core::JointModel* joint_model = joint_model_group->getJointModel(joint_name);
+
+    if (!joint_model) {
+      RCLCPP_WARN(get_logger(), "Joint '%s' not found in planning group", joint_name.c_str());
+      continue;
+    }
+
+    int joint_index = joint_model_group->getVariableGroupIndex(joint_name);
+    if (joint_index < 0 || joint_index >= static_cast<int>(current_joints.size())) {
+      RCLCPP_WARN(get_logger(), "Joint '%s' invalid index %d (size: %zu)", joint_name.c_str(), joint_index,
+                  current_joints.size());
+      continue;
+    }
+
+    double current_value = current_joints[joint_index];
+
+    if (joint_model->getType() == moveit::core::JointModel::REVOLUTE) {
+      // For revolute joints, use angular distance (handles wrapping)
+      double diff = std::abs(target_value - current_value);
+      double min_angle = std::min(diff, 2.0 * M_PI - diff);
+      if (min_angle > JOINT_TOLERANCE_)
+        return false;
+    } else {
+      // Prismatic or other bounded joints - direct comparison
+      if (std::abs(target_value - current_value) > JOINT_TOLERANCE_)
+        return false;
+    }
+  }
+
+  return true;
 }
 
 void RobotControlServiceImpl::GripperSendGoal(double position, double max_effort) {
