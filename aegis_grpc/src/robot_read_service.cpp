@@ -288,7 +288,10 @@ void RobotReadServiceImpl::FillProtoJointState(const sensor_msgs::msg::JointStat
 void RobotReadServiceImpl::FillProtoImage(const sensor_msgs::msg::Image& ros,
                                           proto_aegis_grpc::v1::Image* out,
                                           cv::Mat& buffer) {
-  assert((ros.encoding == "bgr8" && "Unsupported image encoding (expected BGR8)."));
+  if (ros.encoding != "bgr8") {
+    RCLCPP_ERROR(node_->get_logger(), "Unsupported image encoding (expected 'bgr8'), got: '%s'", ros.encoding.c_str());
+    return;
+  }
   if (!enable_image_resize_) {
     out->set_height(ros.height);
     out->set_width(ros.width);
