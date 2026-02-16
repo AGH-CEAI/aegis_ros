@@ -10,7 +10,7 @@
     <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
     <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
     <group name="aegis_arm">
-         <chain base_link="base_link" tip_link="tool0" />
+         <chain base_link="base_link" tip_link="robotiq_hande_end" />
     </group>
     <group name="aegis_manipulator">
         <link name="adapter_to_sensor"/>
@@ -45,8 +45,19 @@
     <group_state name="close" group="aegis_manipulator">
         <joint name="robotiq_hande_left_finger_joint" value="0"/>
     </group_state>
+    <group_state name="home" group="aegis">
+        <joint name="shoulder_pan_joint" value="0"/>
+        <joint name="shoulder_lift_joint" value="-2.094395"/>
+        <joint name="elbow_joint" value="2.094395"/>
+        <joint name="wrist_1_joint" value="-1.570796"/>
+        <joint name="wrist_2_joint" value="-1.570796"/>
+        <joint name="wrist_3_joint" value="0"/>
+        <joint name="robotiq_hande_left_finger_joint" value="0.025"/>
+    </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
-    <end_effector name="aegis_manipulator" parent_link="tool0" group="aegis_manipulator" parent_group="aegis_arm"/>
+    <!-- <end_effector name="aegis_manipulator" parent_link="tool0" group="aegis_manipulator" parent_group="aegis_arm"/> -->
+    <!-- <end_effector name="robotiq_hand" parent_link="robotiq_hande_end" group="aegis_manipulator" parent_group="aegis"/> -->
+    <end_effector name="robotiq_hande" parent_link="robotiq_hande_end" group="aegis_manipulator" parent_group="aegis_arm"/>
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="virtual_joint" type="fixed" parent_frame="world" child_link="base_link"/>
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
