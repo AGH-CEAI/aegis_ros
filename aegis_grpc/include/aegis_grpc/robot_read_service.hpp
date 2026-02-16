@@ -61,7 +61,6 @@ class RobotReadServiceImpl final : public proto_aegis_grpc::v1::RobotReadService
                       const google::protobuf::Empty* request,
                       proto_aegis_grpc::v1::RobotObservation* response) override;
 
-  // TODO(issue#84) implement getters for images from cameras (RGB & RGBD)
   // TODO(issue#85) develop synchronization guard to monitor the freshness of the data
 
  private:

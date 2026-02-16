@@ -2,6 +2,7 @@
 #define AEGIS_GRPC__ROBOT_CONTROL_SERVICE_HPP_
 #include <atomic>
 #include <chrono>
+#include <memory>
 
 #include <grpcpp/grpcpp.h>
 #include <google/protobuf/empty.pb.h>

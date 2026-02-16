@@ -164,7 +164,7 @@ grpc::Status RobotControlServiceImpl::ServoEnable(grpc::ServerContext*,
 
   response->set_success(true);
   response->set_msg("");
-  RCLCPP_INFO(get_logger(), "[RobotControlService][ServoDisable] Servo enabled");
+  RCLCPP_INFO(get_logger(), "[RobotControlService][ServoEnable] Servo enabled");
   return grpc::Status::OK;
 }
 
@@ -252,12 +252,12 @@ grpc::Status RobotControlServiceImpl::ServoJoint(grpc::ServerContext* context,
   auto N = request->joint_names_size();
   if (N != request->displacements_size()) {
     std::string err = "The number of joints mismatches the number of displacmenets values!";
-    RCLCPP_WARN(get_logger(), "[RobotControlService][ServoJoint] %s", err.c_str());
+    RCLCPP_ERROR(get_logger(), "[RobotControlService][ServoJoint] %s", err.c_str());
     return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
   }
   if (N != request->velocities_size()) {
     std::string err = "The number of joints mismatches the number of velocities values!";
-    RCLCPP_WARN(get_logger(), "[RobotControlService][ServoJoint] %s", err.c_str());
+    RCLCPP_ERROR(get_logger(), "[RobotControlService][ServoJoint] %s", err.c_str());
     return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
   }
 
@@ -397,7 +397,7 @@ grpc::Status RobotControlServiceImpl::GotoPose(grpc::ServerContext* context,
 
   if (!request->has_position() || !request->has_orientation()) {
     std::string err = "Missing position or orientation.";
-    RCLCPP_WARN(get_logger(), "[RobotControlService][GotoPose] %s", err.c_str());
+    RCLCPP_ERROR(get_logger(), "[RobotControlService][GotoPose] %s", err.c_str());
     response->set_msg(err);
     return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
   }
@@ -417,7 +417,7 @@ grpc::Status RobotControlServiceImpl::GotoPose(grpc::ServerContext* context,
   auto result = move_group_->plan(plan);
   if (result != moveit::core::MoveItErrorCode::SUCCESS) {
     std::string err = "Planning failed.";
-    RCLCPP_WARN(get_logger(), "[RobotControlService][GotoPose] %s", err.c_str());
+    RCLCPP_ERROR(get_logger(), "[RobotControlService][GotoPose] %s", err.c_str());
     response->set_msg(err);
     return grpc::Status(grpc::StatusCode::INTERNAL, err);
   }
@@ -425,7 +425,7 @@ grpc::Status RobotControlServiceImpl::GotoPose(grpc::ServerContext* context,
   auto exec = move_group_->execute(plan);
   if (exec != moveit::core::MoveItErrorCode::SUCCESS) {
     std::string err = "Execution failed.";
-    RCLCPP_WARN(get_logger(), "[RobotControlService][GoToPose] %s", err.c_str());
+    RCLCPP_ERROR(get_logger(), "[RobotControlService][GoToPose] %s", err.c_str());
     response->set_msg(err);
     return grpc::Status(grpc::StatusCode::INTERNAL, err);
   }
@@ -444,7 +444,7 @@ grpc::Status RobotControlServiceImpl::GotoJoints(grpc::ServerContext* context,
 
   if (request->name_size() == 0 || request->name_size() != request->position_size()) {
     std::string err = "Joint names and positions mismatch or empty.";
-    RCLCPP_WARN(get_logger(), "[RobotControlService][GotoJoints] %s", err.c_str());
+    RCLCPP_ERROR(get_logger(), "[RobotControlService][GotoJoints] %s", err.c_str());
     response->set_msg(err);
     return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
   }
@@ -460,7 +460,7 @@ grpc::Status RobotControlServiceImpl::GotoJoints(grpc::ServerContext* context,
   auto result = move_group_->plan(plan);
   if (result != moveit::core::MoveItErrorCode::SUCCESS) {
     std::string err = "Planning failed.";
-    RCLCPP_WARN(get_logger(), "[RobotControlService][GotoJoints] %s", err.c_str());
+    RCLCPP_ERROR(get_logger(), "[RobotControlService][GotoJoints] %s", err.c_str());
     response->set_msg(err);
     return grpc::Status(grpc::StatusCode::INTERNAL, err);
   }
@@ -468,7 +468,7 @@ grpc::Status RobotControlServiceImpl::GotoJoints(grpc::ServerContext* context,
   auto exec = move_group_->execute(plan);
   if (exec != moveit::core::MoveItErrorCode::SUCCESS) {
     std::string err = "Execution failed.";
-    RCLCPP_WARN(get_logger(), "[RobotControlService][GotoJoints] %s", err.c_str());
+    RCLCPP_ERROR(get_logger(), "[RobotControlService][GotoJoints] %s", err.c_str());
     response->set_msg(err);
     return grpc::Status(grpc::StatusCode::INTERNAL, err);
   }
