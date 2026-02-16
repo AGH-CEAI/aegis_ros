@@ -61,12 +61,6 @@ repos:
     -   id: ros-include-guard
     -   id: sort-package-xml
 
-    # Protobuf & gRPC
--   repo: https://github.com/bufbuild/buf
-    rev: v1.65.0
-    hooks:
-    -   id: buf-format
-
       # TODO(issue#1) Re-enable warehouse integration
       # - repo: https://github.com/macmacal/pre-commit-sqlite-dump
       #   rev: "1.0.0"
