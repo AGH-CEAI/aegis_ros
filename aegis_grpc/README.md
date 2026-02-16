@@ -94,7 +94,7 @@ The server is split into 2 services defined in [`proto_aegis_grpc.v1.robot_srvs`
 The "ROS-getters" are implemented in the [`RobotReadServiceImpl`](./include/aegis_grpc/robot_read_service.hpp) class as the following methods:
 
 | Method name                                                | Desc.                                                | Impl. | gRPC Request            | gRPC Response                                                                               |
-|------------------------------------------------------------|------------------------------------------------------|-------|-------------------------|---------------------------------------------------------------------------------------------|
+| ---------------------------------------------------------- | ---------------------------------------------------- | ----- | ----------------------- | ------------------------------------------------------------------------------------------- |
 | `proto_aegis_grpc.v1.RobotReadService.GetAll`              | Get all available robot data.                        | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.robot_srvs.RobotObservation`](./proto_aegis_grpc/v1/robot_srvs.proto) |
 | `proto_aegis_grpc.v1.RobotReadService.GetRobotState`       | Get consolidated robot state (pose, joints, wrench). | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.robot_srvs.RobotState`](./proto_aegis_grpc/v1/robot_srvs.proto)       |
 | `proto_aegis_grpc.v1.RobotReadService.GetRobotVision`      | Get all camera images (scene, left, right).          | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.robot_srvs.RobotVision`](./proto_aegis_grpc/v1/robot_srvs.proto)      |
@@ -119,8 +119,8 @@ The control bridge for MoveIt2 servo and planners are implemented in the [`Robot
 | ------------------------------------------------------------ | --------------------------------------------------------------- | ----- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | `proto_aegis_grpc.v1.RobotControlService.GotoJoints`         | Plan & execute the MoveIt2 trajectory to a given joints target. | ❌     | [`proto_aegis_grpc.v1.sensor_msgs.JointState`](./proto_aegis_grpc/v1/sensor_msgs.proto)              | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
 | `proto_aegis_grpc.v1.RobotControlService.GotoPose`           | Plan & execute the MoveIt2 trajectory to a given pose target.   | ❌     | [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)                | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
-| `proto_aegis_grpc.v1.RobotControlService.GripperClose`        | Closes the gripper.                                             | ✅     | `google.protobuf.Empty`                                                                              | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
-| `proto_aegis_grpc.v1.RobotControlService.GripperOpen`         | Opens the gripper.                                              | ✅     | `google.protobuf.Empty`                                                                              | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
+| `proto_aegis_grpc.v1.RobotControlService.GripperClose`       | Closes the gripper.                                             | ✅     | `google.protobuf.Empty`                                                                              | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
+| `proto_aegis_grpc.v1.RobotControlService.GripperOpen`        | Opens the gripper.                                              | ✅     | `google.protobuf.Empty`                                                                              | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
 | `proto_aegis_grpc.v1.RobotControlService.GripperSetPosition` | Set the gripper width.                                          | ✅     | [`proto_aegis_grpc.v1.robot_srvs.GripperSetPositionRequest`](./proto_aegis_grpc/v1/robot_srvs.proto) | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
 | `proto_aegis_grpc.v1.RobotControlService.ServoJoint`         | Servoing (w.r.t. joints).                                       | ✅     | [`proto_aegis_grpc.v1.control_msgs.JointJog`](./proto_aegis_grpc/v1/control_msgs.proto)              | `google.protobuf.Empty`                                                                    |
 | `proto_aegis_grpc.v1.RobotControlService.ServoTCP`           | Servoing (w.r.t. TCP).                                          | ✅     | [`proto_aegis_grpc.v1.geometry_msgs.Twist`](./proto_aegis_grpc/v1/geometry_msgs.proto)               | `google.protobuf.Empty`                                                                    |
@@ -174,11 +174,21 @@ There is no hardcoded parameters, everything can be modified via ROS:
 
 **Initialization parameters**
 
-| Parameter      | Type     | Default           | Units | Description                                  |
-| -------------- | -------- | ----------------- | ----- | -------------------------------------------- |
-| `topic_pose`   | `string` | `"/tcp_pose"`     | -     | Topic providing the TCP pose.                |
-| `topic_wrench` | `string` | `"/wrench"`       | -     | Topic providing the force/torque (F/T) data. |
-| `topic_joints` | `string` | `"/joint_states"` | -     | Topic providing joint state data.            |
+| Parameter             | Type     | Default                         | Units | Description                                      |
+| --------------------- | -------- | ------------------------------- | ----- | ------------------------------------------------ |
+| `tcp_frame`            | `string` | `"robotiq_hande_end"`           | -     | TF2 frame ID of the end-effector.                |
+| `base_frame`          | `string` | `"world"`                       | -     | TF2 base frame ID for EE pose lookup.            |
+| `topic_wrench`        | `string` | `"/wrench"`                     | -     | Topic providing force/torque (F/T) data.         |
+| `topic_joints`        | `string` | `"/joint_states"`               | -     | Topic providing joint state data.                |
+| `topic_camera_scene`  | `string` | `"/cam_scene/rgb/image_rect"`   | -     | Camera scene image topic.                        |
+| `topic_camera_right`  | `string` | `"/cam_tool_right/image_color"` | -     | Right tool camera image topic.                   |
+| `topic_camera_left`   | `string` | `"/cam_tool_left/image_color"`  | -     | Left tool camera image topic.                    |
+| `target_image_width`  | `int`    | `64`                            | px    | Target output image width in pixels.             |
+| `target_image_height` | `int`    | `64`                            | px    | Target output image height in pixels.            |
+| `enable_image_resize` | `bool`   | `true`                          | -     | Enable resizing images before sending over gRPC. |
+
+>[!TIP]
+> The end-effector's TCP pose is obtained from the tf2 transform (using `tcp_frame` and `base_frame`).
 
 ### Run and set examples
 The initialization params can be set via ROS 2 run or launch:

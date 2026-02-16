@@ -11,7 +11,8 @@ def generate_launch_description():
                 output="both",
                 parameters=[
                     {
-                        "topic_pose": "/tcp_pose_broadcaster/pose",
+                        "tcp_frame": "robotiq_hande_end",
+                        "base_frame": "world",
                         "topic_wrench": "/net_ft_sensor_broadcaster/wrench",
                     }
                 ],

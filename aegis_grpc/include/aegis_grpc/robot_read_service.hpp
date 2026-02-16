@@ -9,12 +9,15 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <cv_bridge/cv_bridge.h>
-#include <geometry_msgs/msg/pose.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
-#include <geometry_msgs/msg/wrench.hpp>
+#include <geometry_msgs/msg/pose.hpp>
 #include <geometry_msgs/msg/wrench_stamped.hpp>
-#include <sensor_msgs/msg/joint_state.hpp>
+#include <geometry_msgs/msg/wrench.hpp>
 #include <sensor_msgs/msg/image.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
 
 namespace aegis_grpc {
 
@@ -65,14 +68,15 @@ class RobotReadServiceImpl final : public proto_aegis_grpc::v1::RobotReadService
   template <class T>
   void DeclareROSParameter(const std::string& name, const T& default_val, const std::string& description);
 
-  void PoseSubCb(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
   void WrenchSubCb(const geometry_msgs::msg::WrenchStamped::SharedPtr msg);
   void JointStateSubCb(const sensor_msgs::msg::JointState::SharedPtr msg);
   void ImageSceneSubCb(const sensor_msgs::msg::Image::SharedPtr msg);
   void ImageRightSubCb(const sensor_msgs::msg::Image::SharedPtr msg);
   void ImageLeftSubCb(const sensor_msgs::msg::Image::SharedPtr msg);
 
-  static void FillProtoPose(const geometry_msgs::msg::Pose& ros, proto_aegis_grpc::v1::Pose* out);
+  void PoseTransformUpdate();
+
+  static void FillProtoPose(const geometry_msgs::msg::TransformStamped& ros, proto_aegis_grpc::v1::Pose* out);
 
   static void FillProtoWrench(const geometry_msgs::msg::Wrench& ros, proto_aegis_grpc::v1::Wrench* out);
 
@@ -81,14 +85,19 @@ class RobotReadServiceImpl final : public proto_aegis_grpc::v1::RobotReadService
   void FillProtoImage(const sensor_msgs::msg::Image& ros, proto_aegis_grpc::v1::Image* out, cv::Mat& resize_buffer);
 
   std::shared_ptr<rclcpp::Node> node_;
-  rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr pose_sub_;
+
+  std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+  std::string tcp_frame_;
+  std::string base_frame_;
+
   rclcpp::Subscription<geometry_msgs::msg::WrenchStamped>::SharedPtr wrench_sub_;
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_sub_;
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_scene_sub_;
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_right_sub_;
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_left_sub_;
 
-  geometry_msgs::msg::Pose pose_data_;
+  geometry_msgs::msg::TransformStamped pose_tf_data_;
   geometry_msgs::msg::Wrench wrench_data_;
   sensor_msgs::msg::JointState joint_state_data_;
   sensor_msgs::msg::Image image_scene_data_;
