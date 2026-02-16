@@ -96,6 +96,8 @@ class RobotControlServiceImpl final : public proto_aegis_grpc::v1::RobotControlS
   std::string servo_tcp_link_;
   control_msgs::msg::JointJog servo_joint_msg_;
   geometry_msgs::msg::Twist servo_tcp_msg_;
+  const control_msgs::msg::JointJog servo_joint_msg_zeros_;
+  const geometry_msgs::msg::Twist servo_tcp_msg_zeros_;
   int servo_frequency_ratio_;
   int servo_msgs_left_;
 

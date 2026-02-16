@@ -206,24 +206,31 @@ void RobotControlServiceImpl::ServoPublishLoop() {
 
   {
     std::lock_guard<std::mutex> lock(servo_mutex_);
-    if (servo_msgs_left_ == 0) {
-      servo_mode_ = ServoMode::None;
-      return;
-    }
-
     mode = servo_mode_;
-    switch (mode) {
-      case ServoMode::JointJog:
-        jog_msg = servo_joint_msg_;
-        break;
-      case ServoMode::TCPTwist:
-        twist_msg.twist = servo_tcp_msg_;
-        break;
-      default:
-        break;
+    if (servo_msgs_left_ == 0) {
+      switch (mode) {
+        case ServoMode::JointJog:
+          jog_msg = servo_joint_msg_zeros_;
+          break;
+        case ServoMode::TCPTwist:
+          twist_msg.twist = servo_tcp_msg_zeros_;
+          break;
+        default:
+          break;
+      }
+    } else {
+      switch (mode) {
+        case ServoMode::JointJog:
+          jog_msg = servo_joint_msg_;
+          break;
+        case ServoMode::TCPTwist:
+          twist_msg.twist = servo_tcp_msg_;
+          break;
+        default:
+          break;
+      }
+      servo_msgs_left_--;
     }
-
-    servo_msgs_left_--;
   }
 
   switch (mode) {
@@ -288,11 +295,11 @@ grpc::Status RobotControlServiceImpl::ServoTCP(grpc::ServerContext* context,
                                                google::protobuf::Empty* response) {
   (void)context;
   (void)response;
+  static auto ros_msg = geometry_msgs::msg::Twist();
 
   const auto& lin = request->linear();
   const auto& ang = request->angular();
 
-  auto ros_msg = geometry_msgs::msg::Twist();
   ros_msg.linear.x = lin.x();
   ros_msg.linear.y = lin.y();
   ros_msg.linear.z = lin.z();
