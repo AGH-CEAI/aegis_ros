@@ -154,15 +154,19 @@ There is no hardcoded parameters, everything can be modified via ROS:
 
 **Initialization parameters**
 
-| Parameter           | Type     | Default                             | Units   | Description                                              |
-| ------------------- | -------- | ----------------------------------- | ------- | -------------------------------------------------------- |
-| `servo_link`        | `string` | `"base_link"`                       | -       | Name of the base link for TCP servoing.                  |
-| `topic_servo_joint` | `string` | `"/servo_node/delta_joint_cmds"`    | -       | Output topic for joint servo commands.                   |
-| `topic_servo_tcp`   | `string` | `"/servo_node/delta_twist_cmds"`    | -       | Output topic for TCP servo commands.                     |
-| `action_gripper`    | `string` | `"/gripper_controller/gripper_cmd"` | -       | `GripperCommand` action name for the gripper controller. |
-| `action_timeout_s`  | `double` | `3.0`                               | seconds | Waiting timeout for actions.                             |
-| `servo_in_rate_hz`  | `double` | `10.0`                              | Hz      | Expected input servo command frequency.                  |
-| `servo_out_rate_hz` | `double` | `250.0`                             | Hz      | Servo command publish loop frequency.                    |
+| Parameter               | Type     | Default                             | Units   | Description                                                                  |
+| ----------------------- | -------- | ----------------------------------- | ------- | ---------------------------------------------------------------------------- |
+| `servo_link`            | `string` | `"base_link"`                       | -       | Name of the base link for TCP servoing.                                      |
+| `topic_servo_joint`     | `string` | `"/servo_node/delta_joint_cmds"`    | -       | Output topic for joint servo commands.                                       |
+| `topic_servo_tcp`       | `string` | `"/servo_node/delta_twist_cmds"`    | -       | Output topic for TCP servo commands.                                         |
+| `action_gripper`        | `string` | `"/gripper_controller/gripper_cmd"` | -       | `GripperCommand` action name for the gripper controller.                     |
+| `action_timeout_s`      | `double` | `3.0`                               | seconds | Waiting timeout for actions.                                                 |
+| `servo_in_rate_hz`      | `double` | `10.0`                              | Hz      | Expected input servo command frequency.                                      |
+| `servo_out_rate_hz`     | `double` | `250.0`                             | Hz      | Servo command publish loop frequency.                                        |
+| `move_group`            | `string` | `"aegis_arm"`                       | -       | Name of the planning group to control.                                       |
+| `joint_tolerance`       | `double` | `0.017`                             | radians | Ignore MoveIt joints call if target closer than this absolute value.         |
+| `position_tolerance`    | `double` | `0.001`                             | meters  | Ignore MoveIt pose call if position target closer than this absolute value.  |
+| `orientation_tolerance` | `double` | `0.017`                             | radians | Ignore MoveIt pose call if orientation target closer than this absolute val. |
 
 **Runtime parameters**
 
