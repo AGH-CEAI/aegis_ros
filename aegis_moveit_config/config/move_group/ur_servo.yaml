@@ -8,14 +8,32 @@ use_gazebo: false # Whether the robot is started in a Gazebo simulation environm
 command_in_type: "unitless"
 scale:
   # Scale parameters are only used if command_in_type=="unitless"
-  linear: 0.5 # Max linear velocity. Meters per publish_period. Unit is [m/s]. Only used for Cartesian commands.
-  rotational: 0.35 # Max angular velocity. Rads per publish_period. Unit is [rad/s]. Only used for Cartesian commands.
+  # linear: 0.5 # Max linear velocity. Meters per publish_period. Unit is [m/s]. Only used for Cartesian commands.
+  # rotational: 0.35 # Max angular velocity. Rads per publish_period. Unit is [rad/s]. Only used for Cartesian commands.
   # Max joint angular/linear velocity. Rads or Meters per publish period. Only used for joint commands on joint_command_in_topic.
-  joint: 0.35 # ~ 20 deg/s
+  # joint: 0.35 # ~ 20 deg/s
+
+  # For publlisnihg 25 msgs with 25Hz (for "Robot Limit 300W")
+  # target: 2.0 m/s measured: 0.113m/s for publish_period 1/250
+  # target: 1.0 m/s measured: 0.102 m/s for publish_period 1/250
+  # target: 3.1416 rad/s measured: 0,302 rad/s for publish_period 1/250
+  # target: 0.6 m/s measured: 0.054m/s for publish_period 1/250
+  # target: 1.0 m/s measured: 0.052m/s for publish_period 1/500
+  # target: 2.5 m/s measured: 0.068 m/s for publish_period 1/500
+  # target: 5.0 m/s measured: 0.071 m/s for publish_period 1/500
+  # For publlisnihg 25 msgs with 25Hz (for "Robot Limit 1000W")
+  # target: 0.6 m/s measured: 0.048m/s for publish_period 1/250
+  # target: 0.6 m/s measured: 0.032m/s for publish_period 1/500
+  # target: 1.0 m/s measured: 0,098m/s for publish_period 1/250
+  # target: 1.0 m/s measured: 0,053m/s for publish_period 1/500
+  linear: 1.0
+  rotational: 3.1416
+  joint: 3.1416
+
 # This is a fudge factor to account for any latency in the system, e.g. network latency or poor low-level
 # controller performance. It essentially increases the timestep when calculating the target pose, to move the target
 # pose farther away. [seconds]
-system_latency_compensation: 0.04
+system_latency_compensation: 0.0
 
 ## Properties of outgoing commands
 publish_period: 0.004 # 1/Nominal publish rate [seconds]
@@ -68,6 +86,7 @@ joint_topic: /joint_states
 status_topic: ~/status # Publish status to this topic
 # command_out_topic: /scaled_joint_trajectory_controller/joint_trajectory # Publish outgoing commands here
 command_out_topic: /forward_position_controller/commands
+# command_out_topic: /forward_velocity_controller/commands
 # command_out_topic: /ur_controller/joint_trajectory # Publish outgoing commands here
 monitored_planning_scene_topic: /monitored_planning_scene
 
@@ -84,4 +103,4 @@ self_collision_proximity_threshold: 0.01 # Start decelerating when a self-collis
 scene_collision_proximity_threshold: 0.01 # Start decelerating when a scene collision is this far [m]
 # Parameters for "stop_distance"-type collision checking
 collision_distance_safety_factor: 1000.0 # Must be >= 1. A large safety factor is recommended to account for latency
-min_allowable_collision_distance: 0.01 # Stop if a collision is closer than this [m]
+min_allowable_collision_distance: 0.007 # Stop if a collision is closer than this [m]

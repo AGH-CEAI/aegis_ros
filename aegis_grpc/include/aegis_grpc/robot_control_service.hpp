@@ -30,7 +30,6 @@ class RobotControlServiceImpl final : public proto_aegis_grpc::v1::RobotControlS
 
   explicit RobotControlServiceImpl(std::shared_ptr<rclcpp::Node> node);
 
-  // TODO(issue#87) Create additional methods to enable and disable servo control.
   grpc::Status ServoEnable(grpc::ServerContext* context,
                            const google::protobuf::Empty* request,
                            proto_aegis_grpc::v1::TriggerResponse* response) override;
