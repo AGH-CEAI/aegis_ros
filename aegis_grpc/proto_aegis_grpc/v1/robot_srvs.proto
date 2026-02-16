@@ -56,6 +56,6 @@ message TriggerResponse {
 
 // https://github.com/ros-controls/control_msgs/blob/humble/control_msgs/action/GripperCommand.action
 message GripperSetPositionRequest {
-  double position = 1; // The goal gripper gap size (in meters)
-  double effort = 2; // The goal effort exerted (in Newtons)
+  double position = 1;  // The goal gripper gap size (in meters)
+  double effort = 2;    // The goal effort exerted (in Newtons)
 }

@@ -5,11 +5,15 @@ using namespace std::chrono_literals;
 
 namespace aegis_grpc {
 
-RobotControlServiceImpl::RobotControlServiceImpl(
-    std::shared_ptr<rclcpp::Node> node)
-    : node_(node), servo_mode_(ServoMode::None), servo_frequency_ratio_(0), servo_msgs_left_(0), gripper_in_use_(false),
-      action_timeout_(0.0), gripper_cmd_success_(false), gripper_cmd_done_(false) {
-
+RobotControlServiceImpl::RobotControlServiceImpl(std::shared_ptr<rclcpp::Node> node)
+    : node_(node),
+      servo_mode_(ServoMode::None),
+      servo_frequency_ratio_(0),
+      servo_msgs_left_(0),
+      gripper_in_use_(false),
+      action_timeout_(0.0),
+      gripper_cmd_success_(false),
+      gripper_cmd_done_(false) {
   // Initialization parameters
   DeclareROSParameter("servo_link", std::string("base_link"),
                       "[str] Init; Name of the base link for the TCP servoing.");
@@ -35,21 +39,22 @@ RobotControlServiceImpl::RobotControlServiceImpl(
   servo_frequency_ratio_ = std::round(servo_out_hz / servo_in_hz);
   RCLCPP_INFO(get_logger(), "> Frequency ratio for servo re-publishig is %i", servo_frequency_ratio_);
 
-  switch_controller_client_ = node_->create_client<controller_manager_msgs::srv::SwitchController>("/controller_manager/switch_controller");
+  switch_controller_client_ =
+      node_->create_client<controller_manager_msgs::srv::SwitchController>("/controller_manager/switch_controller");
   start_servo_client_ = node_->create_client<std_srvs::srv::Trigger>("/servo_node/start_servo");
   stop_servo_client_ = node_->create_client<std_srvs::srv::Trigger>("/servo_node/stop_servo");
-  servo_joint_pub_ = node_->create_publisher<control_msgs::msg::JointJog>(
-      node_->get_parameter("topic_servo_joint").as_string(), 10);
+  servo_joint_pub_ =
+      node_->create_publisher<control_msgs::msg::JointJog>(node_->get_parameter("topic_servo_joint").as_string(), 10);
   servo_tcp_pub_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>(
       node_->get_parameter("topic_servo_tcp").as_string(), 10);
-  gripper_client_ = rclcpp_action::create_client<GripperCommand>(
-      node_, node_->get_parameter("action_gripper").as_string());
+  gripper_client_ =
+      rclcpp_action::create_client<GripperCommand>(node_, node_->get_parameter("action_gripper").as_string());
 
   double hz = node_->get_parameter("servo_out_rate_hz").as_double();
   auto servo_pub_period = std::chrono::duration<double>(1.0 / hz);
 
-  servo_pub_timer_ = node_->create_wall_timer(
-      servo_pub_period, std::bind(&RobotControlServiceImpl::ServoPublishLoop, this));
+  servo_pub_timer_ =
+      node_->create_wall_timer(servo_pub_period, std::bind(&RobotControlServiceImpl::ServoPublishLoop, this));
 
   auto action_timeout = node_->get_parameter("action_timeout_s").as_double();
   action_timeout_ = std::chrono::duration<double>(action_timeout);
@@ -63,24 +68,20 @@ rclcpp::Logger RobotControlServiceImpl::get_logger() const {
 }
 
 template <class T>
-void RobotControlServiceImpl::DeclareROSParameter(
-    const std::string &name,
-    const T& default_val,
-    const std::string &description) {
+void RobotControlServiceImpl::DeclareROSParameter(const std::string& name,
+                                                  const T& default_val,
+                                                  const std::string& description) {
   auto param_desc = rcl_interfaces::msg::ParameterDescriptor{};
   param_desc.description = description;
 
   node_->declare_parameter<T>(name, default_val, param_desc);
 
   const auto p = node_->get_parameter(name);
-  RCLCPP_INFO(get_logger(), "> %s := %s",
-              name.c_str(),
-              p.value_to_string().c_str());
+  RCLCPP_INFO(get_logger(), "> %s := %s", name.c_str(), p.value_to_string().c_str());
 }
 
-bool RobotControlServiceImpl::SwitchControllers(
-  const std::vector<std::string>& activate,
-  const std::vector<std::string>& deactivate) {
+bool RobotControlServiceImpl::SwitchControllers(const std::vector<std::string>& activate,
+                                                const std::vector<std::string>& deactivate) {
   auto req = std::make_shared<controller_manager_msgs::srv::SwitchController::Request>();
 
   req->activate_controllers = activate;
@@ -137,16 +138,12 @@ bool RobotControlServiceImpl::CallServoStopService() {
   return result->success;
 }
 
-grpc::Status RobotControlServiceImpl::ServoEnable(
-  grpc::ServerContext*,
-  const google::protobuf::Empty*,
-  proto_aegis_grpc::v1::TriggerResponse* response)
-{
+grpc::Status RobotControlServiceImpl::ServoEnable(grpc::ServerContext*,
+                                                  const google::protobuf::Empty*,
+                                                  proto_aegis_grpc::v1::TriggerResponse* response) {
   response->set_success(false);
 
-  if (!SwitchControllers(
-        {"forward_position_controller"},
-        {"scaled_joint_trajectory_controller"})) {
+  if (!SwitchControllers({"forward_position_controller"}, {"scaled_joint_trajectory_controller"})) {
     std::string err = "Controller switch failed.";
     RCLCPP_WARN(get_logger(), "[RobotControlService][ServoEnable] %s", err.c_str());
     response->set_msg(err);
@@ -171,11 +168,9 @@ grpc::Status RobotControlServiceImpl::ServoEnable(
   return grpc::Status::OK;
 }
 
-grpc::Status RobotControlServiceImpl::ServoDisable(
-  grpc::ServerContext*,
-  const google::protobuf::Empty*,
-  proto_aegis_grpc::v1::TriggerResponse* response)
-{
+grpc::Status RobotControlServiceImpl::ServoDisable(grpc::ServerContext*,
+                                                   const google::protobuf::Empty*,
+                                                   proto_aegis_grpc::v1::TriggerResponse* response) {
   response->set_success(false);
 
   if (!CallServoStopService()) {
@@ -185,10 +180,7 @@ grpc::Status RobotControlServiceImpl::ServoDisable(
     return grpc::Status(grpc::StatusCode::INTERNAL, err);
   }
 
-  if (!SwitchControllers(
-        {"scaled_joint_trajectory_controller"},
-        {"forward_position_controller"})) {
-
+  if (!SwitchControllers({"scaled_joint_trajectory_controller"}, {"forward_position_controller"})) {
     std::string err = "Controller switch failed.";
     RCLCPP_WARN(get_logger(), "[RobotControlService][ServoDisable] %s", err.c_str());
     response->set_msg(err);
@@ -214,13 +206,13 @@ void RobotControlServiceImpl::ServoPublishLoop() {
 
   {
     std::lock_guard<std::mutex> lock(servo_mutex_);
-    if(servo_msgs_left_ == 0) {
+    if (servo_msgs_left_ == 0) {
       servo_mode_ = ServoMode::None;
       return;
     }
 
     mode = servo_mode_;
-    switch(mode) {
+    switch (mode) {
       case ServoMode::JointJog:
         jog_msg = servo_joint_msg_;
         break;
@@ -234,7 +226,7 @@ void RobotControlServiceImpl::ServoPublishLoop() {
     servo_msgs_left_--;
   }
 
-  switch(mode) {
+  switch (mode) {
     case ServoMode::JointJog:
       jog_msg.header.stamp = node_->now();
       servo_joint_pub_->publish(jog_msg);
@@ -251,26 +243,21 @@ void RobotControlServiceImpl::ServoPublishLoop() {
   }
 }
 
-grpc::Status RobotControlServiceImpl::ServoJoint(
-    grpc::ServerContext *context, const proto_aegis_grpc::v1::JointJog *request,
-    google::protobuf::Empty *response) {
-
+grpc::Status RobotControlServiceImpl::ServoJoint(grpc::ServerContext* context,
+                                                 const proto_aegis_grpc::v1::JointJog* request,
+                                                 google::protobuf::Empty* response) {
   (void)context;
   (void)response;
 
   auto N = request->joint_names_size();
   if (N != request->displacements_size()) {
-    std::string err =
-        "The number of joints mismatches the number of displacmenets values!";
-    RCLCPP_WARN(get_logger(), "[RobotControlService][ServoJoint] %s",
-                err.c_str());
+    std::string err = "The number of joints mismatches the number of displacmenets values!";
+    RCLCPP_WARN(get_logger(), "[RobotControlService][ServoJoint] %s", err.c_str());
     return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
   }
   if (N != request->velocities_size()) {
-    std::string err =
-        "The number of joints mismatches the number of velocities values!";
-    RCLCPP_WARN(get_logger(), "[RobotControlService][ServoJoint] %s",
-                err.c_str());
+    std::string err = "The number of joints mismatches the number of velocities values!";
+    RCLCPP_WARN(get_logger(), "[RobotControlService][ServoJoint] %s", err.c_str());
     return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, err);
   }
 
@@ -296,16 +283,14 @@ grpc::Status RobotControlServiceImpl::ServoJoint(
   return grpc::Status::OK;
 }
 
-grpc::Status
-RobotControlServiceImpl::ServoTCP(grpc::ServerContext *context,
-                                  const proto_aegis_grpc::v1::Twist *request,
-                                  google::protobuf::Empty *response) {
-
+grpc::Status RobotControlServiceImpl::ServoTCP(grpc::ServerContext* context,
+                                               const proto_aegis_grpc::v1::Twist* request,
+                                               google::protobuf::Empty* response) {
   (void)context;
   (void)response;
 
-  const auto &lin = request->linear();
-  const auto &ang = request->angular();
+  const auto& lin = request->linear();
+  const auto& ang = request->angular();
 
   auto ros_msg = geometry_msgs::msg::Twist();
   ros_msg.linear.x = lin.x();
@@ -324,16 +309,14 @@ RobotControlServiceImpl::ServoTCP(grpc::ServerContext *context,
   return grpc::Status::OK;
 }
 
-grpc::Status RobotControlServiceImpl::GripperSetPosition(
-    grpc::ServerContext *context,
-    const proto_aegis_grpc::v1::GripperSetPositionRequest *request,
-    proto_aegis_grpc::v1::TriggerResponse *response) {
-
+grpc::Status RobotControlServiceImpl::GripperSetPosition(grpc::ServerContext* context,
+                                                         const proto_aegis_grpc::v1::GripperSetPositionRequest* request,
+                                                         proto_aegis_grpc::v1::TriggerResponse* response) {
   (void)context;
 
   {
     std::lock_guard<std::mutex> lock(gripper_mutex_);
-    if(gripper_in_use_.load(std::memory_order_relaxed)){
+    if (gripper_in_use_.load(std::memory_order_relaxed)) {
       const std::string msg = "Gripper is already in use.";
       response->set_success(false);
       response->set_msg(msg);
@@ -341,7 +324,6 @@ grpc::Status RobotControlServiceImpl::GripperSetPosition(
     }
     gripper_in_use_.store(true, std::memory_order_relaxed);
   }
-
 
   const double position = request->position();
   const double effort = request->effort();
@@ -354,15 +336,15 @@ grpc::Status RobotControlServiceImpl::GripperSetPosition(
   return grpc::Status::OK;
 }
 
-grpc::Status RobotControlServiceImpl::GripperClose(
-    grpc::ServerContext *context, const google::protobuf::Empty *request,
-    proto_aegis_grpc::v1::TriggerResponse *response) {
+grpc::Status RobotControlServiceImpl::GripperClose(grpc::ServerContext* context,
+                                                   const google::protobuf::Empty* request,
+                                                   proto_aegis_grpc::v1::TriggerResponse* response) {
   (void)context;
   (void)request;
 
   {
     std::lock_guard<std::mutex> lock(gripper_mutex_);
-    if(gripper_in_use_.load(std::memory_order_relaxed)){
+    if (gripper_in_use_.load(std::memory_order_relaxed)) {
       const std::string msg = "Gripper is already in use.";
       response->set_success(false);
       response->set_msg(msg);
@@ -380,16 +362,15 @@ grpc::Status RobotControlServiceImpl::GripperClose(
   return grpc::Status::OK;
 }
 
-grpc::Status RobotControlServiceImpl::GripperOpen(
-    grpc::ServerContext *context, const google::protobuf::Empty *request,
-    proto_aegis_grpc::v1::TriggerResponse *response) {
-
+grpc::Status RobotControlServiceImpl::GripperOpen(grpc::ServerContext* context,
+                                                  const google::protobuf::Empty* request,
+                                                  proto_aegis_grpc::v1::TriggerResponse* response) {
   (void)context;
   (void)request;
 
   {
     std::lock_guard<std::mutex> lock(gripper_mutex_);
-    if(gripper_in_use_.load(std::memory_order_relaxed)){
+    if (gripper_in_use_.load(std::memory_order_relaxed)) {
       const std::string msg = "Gripper is already in use.";
       response->set_success(false);
       response->set_msg(msg);
@@ -407,10 +388,9 @@ grpc::Status RobotControlServiceImpl::GripperOpen(
   return grpc::Status::OK;
 }
 
-grpc::Status RobotControlServiceImpl::GotoPose(
-  grpc::ServerContext* context,
-  const proto_aegis_grpc::v1::Pose *request,
-  proto_aegis_grpc::v1::TriggerResponse *response) {
+grpc::Status RobotControlServiceImpl::GotoPose(grpc::ServerContext* context,
+                                               const proto_aegis_grpc::v1::Pose* request,
+                                               proto_aegis_grpc::v1::TriggerResponse* response) {
   (void)context;
 
   response->set_success(false);
@@ -443,11 +423,11 @@ grpc::Status RobotControlServiceImpl::GotoPose(
   }
 
   auto exec = move_group_->execute(plan);
-  if(exec != moveit::core::MoveItErrorCode::SUCCESS) {
-      std::string err = "Execution failed.";
-      RCLCPP_WARN(get_logger(), "[RobotControlService][GoToPose] %s", err.c_str());
-      response->set_msg(err);
-      return grpc::Status(grpc::StatusCode::INTERNAL, err);
+  if (exec != moveit::core::MoveItErrorCode::SUCCESS) {
+    std::string err = "Execution failed.";
+    RCLCPP_WARN(get_logger(), "[RobotControlService][GoToPose] %s", err.c_str());
+    response->set_msg(err);
+    return grpc::Status(grpc::StatusCode::INTERNAL, err);
   }
 
   response->set_success(true);
@@ -455,10 +435,9 @@ grpc::Status RobotControlServiceImpl::GotoPose(
   return grpc::Status::OK;
 }
 
-grpc::Status RobotControlServiceImpl::GotoJoints(
-  grpc::ServerContext* context,
-  const proto_aegis_grpc::v1::JointState *request,
-  proto_aegis_grpc::v1::TriggerResponse *response) {
+grpc::Status RobotControlServiceImpl::GotoJoints(grpc::ServerContext* context,
+                                                 const proto_aegis_grpc::v1::JointState* request,
+                                                 proto_aegis_grpc::v1::TriggerResponse* response) {
   (void)context;
 
   response->set_success(false);
@@ -472,7 +451,7 @@ grpc::Status RobotControlServiceImpl::GotoJoints(
 
   std::map<std::string, double> target;
   for (int i = 0; i < request->name_size(); ++i) {
-      target[request->name(i)] = request->position(i);
+    target[request->name(i)] = request->position(i);
   }
 
   move_group_->setJointValueTarget(target);
@@ -487,11 +466,11 @@ grpc::Status RobotControlServiceImpl::GotoJoints(
   }
 
   auto exec = move_group_->execute(plan);
-  if(exec != moveit::core::MoveItErrorCode::SUCCESS) {
-      std::string err = "Execution failed.";
-      RCLCPP_WARN(get_logger(), "[RobotControlService][GotoJoints] %s", err.c_str());
-      response->set_msg(err);
-      return grpc::Status(grpc::StatusCode::INTERNAL, err);
+  if (exec != moveit::core::MoveItErrorCode::SUCCESS) {
+    std::string err = "Execution failed.";
+    RCLCPP_WARN(get_logger(), "[RobotControlService][GotoJoints] %s", err.c_str());
+    response->set_msg(err);
+    return grpc::Status(grpc::StatusCode::INTERNAL, err);
   }
 
   response->set_success(true);
@@ -499,8 +478,7 @@ grpc::Status RobotControlServiceImpl::GotoJoints(
   return grpc::Status::OK;
 }
 
-void RobotControlServiceImpl::GripperSendGoal(double position,
-                                              double max_effort) {
+void RobotControlServiceImpl::GripperSendGoal(double position, double max_effort) {
   if (!gripper_client_->wait_for_action_server(action_timeout_)) {
     gripper_cmd_success_ = false;
     gripper_cmd_msg_ = "Gripper Controller action server is not available. Skipping goal.";
@@ -514,36 +492,34 @@ void RobotControlServiceImpl::GripperSendGoal(double position,
 
   rclcpp_action::Client<GripperCommand>::SendGoalOptions options;
 
-  options.result_callback =
-      [this](const GoalHandleGripper::WrappedResult &result) {
-        switch (result.code) {
-        case rclcpp_action::ResultCode::SUCCEEDED:
-          gripper_cmd_success_ = true;
-          gripper_cmd_msg_ = "";
-          gripper_cmd_done_.store(true, std::memory_order_relaxed);
-          return;
-        case rclcpp_action::ResultCode::ABORTED:
-          gripper_cmd_msg_ = "ABORTED";
-          break;
-        case rclcpp_action::ResultCode::CANCELED:
-          gripper_cmd_msg_ = "CANCELED";
-          break;
-        default:
-          gripper_cmd_msg_ = "UNKNOWN";
-          break;
-        }
-        gripper_cmd_success_ = false;
+  options.result_callback = [this](const GoalHandleGripper::WrappedResult& result) {
+    switch (result.code) {
+      case rclcpp_action::ResultCode::SUCCEEDED:
+        gripper_cmd_success_ = true;
+        gripper_cmd_msg_ = "";
         gripper_cmd_done_.store(true, std::memory_order_relaxed);
-        RCLCPP_ERROR(get_logger(), "Gripper goal result: %s",
-                     gripper_cmd_msg_.c_str());
-      };
+        return;
+      case rclcpp_action::ResultCode::ABORTED:
+        gripper_cmd_msg_ = "ABORTED";
+        break;
+      case rclcpp_action::ResultCode::CANCELED:
+        gripper_cmd_msg_ = "CANCELED";
+        break;
+      default:
+        gripper_cmd_msg_ = "UNKNOWN";
+        break;
+    }
+    gripper_cmd_success_ = false;
+    gripper_cmd_done_.store(true, std::memory_order_relaxed);
+    RCLCPP_ERROR(get_logger(), "Gripper goal result: %s", gripper_cmd_msg_.c_str());
+  };
 
   gripper_cmd_done_.store(false, std::memory_order_relaxed);
   gripper_client_->async_send_goal(goal, options);
 
-  while(!gripper_cmd_done_.load(std::memory_order_relaxed)){
+  while (!gripper_cmd_done_.load(std::memory_order_relaxed)) {
     std::this_thread::sleep_for(1ms);
   }
 }
 
-} // namespace aegis_grpc
+}  // namespace aegis_grpc
