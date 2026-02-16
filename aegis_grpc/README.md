@@ -105,7 +105,6 @@ The "ROS-getters" are implemented in the [`RobotReadServiceImpl`](./include/aegi
 | `proto_aegis_grpc.v1.RobotReadService.GetCameraRightImage` | Get right tool camera image.                         | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.sensor_msgs.Image`](./proto_aegis_grpc/v1/sensor_msgs.proto)          |
 | `proto_aegis_grpc.v1.RobotReadService.GetCameraLeftImage`  | Get left tool camera image.                          | ✅     | `google.protobuf.Empty` | [`proto_aegis_grpc.v1.sensor_msgs.Image`](./proto_aegis_grpc/v1/sensor_msgs.proto)          |
 
-
 You can always list the methods with the `grpcurl` command:
 ```bash
 grpcurl -plaintext 127.0.0.1:50051 list proto_aegis_grpc.v1.RobotReadService
@@ -117,10 +116,12 @@ The control bridge for MoveIt2 servo and planners are implemented in the [`Robot
 
 | Method name                                                  | Desc.                                                           | Impl. | gRPC Request                                                                                         | gRPC Response                                                                              |
 | ------------------------------------------------------------ | --------------------------------------------------------------- | ----- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `proto_aegis_grpc.v1.RobotControlService.GotoJoints`         | Plan & execute the MoveIt2 trajectory to a given joints target. | ❌     | [`proto_aegis_grpc.v1.sensor_msgs.JointState`](./proto_aegis_grpc/v1/sensor_msgs.proto)              | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
-| `proto_aegis_grpc.v1.RobotControlService.GotoPose`           | Plan & execute the MoveIt2 trajectory to a given pose target.   | ❌     | [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)                | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
+| `proto_aegis_grpc.v1.RobotControlService.GotoJoints`         | Plan & execute the MoveIt2 trajectory to a given joints target. | ✅     | [`proto_aegis_grpc.v1.sensor_msgs.JointState`](./proto_aegis_grpc/v1/sensor_msgs.proto)              | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
+| `proto_aegis_grpc.v1.RobotControlService.GotoPose`           | Plan & execute the MoveIt2 trajectory to a given pose target.   | ✅     | [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)                | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
 | `proto_aegis_grpc.v1.RobotControlService.GripperClose`       | Closes the gripper.                                             | ✅     | `google.protobuf.Empty`                                                                              | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
 | `proto_aegis_grpc.v1.RobotControlService.GripperOpen`        | Opens the gripper.                                              | ✅     | `google.protobuf.Empty`                                                                              | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
+| `proto_aegis_grpc.v1.RobotControlService.ServoEnable`        | Enable servo control.                                           | ✅     | `google.protobuf.Empty`                                                                              | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
+| `proto_aegis_grpc.v1.RobotControlService.ServoDisable`       | Disable servo control.                                          | ✅     | `google.protobuf.Empty`                                                                              | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
 | `proto_aegis_grpc.v1.RobotControlService.GripperSetPosition` | Set the gripper width.                                          | ✅     | [`proto_aegis_grpc.v1.robot_srvs.GripperSetPositionRequest`](./proto_aegis_grpc/v1/robot_srvs.proto) | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
 | `proto_aegis_grpc.v1.RobotControlService.ServoJoint`         | Servoing (w.r.t. joints).                                       | ✅     | [`proto_aegis_grpc.v1.control_msgs.JointJog`](./proto_aegis_grpc/v1/control_msgs.proto)              | `google.protobuf.Empty`                                                                    |
 | `proto_aegis_grpc.v1.RobotControlService.ServoTCP`           | Servoing (w.r.t. TCP).                                          | ✅     | [`proto_aegis_grpc.v1.geometry_msgs.Twist`](./proto_aegis_grpc/v1/geometry_msgs.proto)               | `google.protobuf.Empty`                                                                    |
@@ -176,7 +177,7 @@ There is no hardcoded parameters, everything can be modified via ROS:
 
 | Parameter             | Type     | Default                         | Units | Description                                      |
 | --------------------- | -------- | ------------------------------- | ----- | ------------------------------------------------ |
-| `tcp_frame`            | `string` | `"robotiq_hande_end"`           | -     | TF2 frame ID of the end-effector.                |
+| `tcp_frame`           | `string` | `"robotiq_hande_end"`           | -     | TF2 frame ID of the end-effector.                |
 | `base_frame`          | `string` | `"world"`                       | -     | TF2 base frame ID for EE pose lookup.            |
 | `topic_wrench`        | `string` | `"/wrench"`                     | -     | Topic providing force/torque (F/T) data.         |
 | `topic_joints`        | `string` | `"/joint_states"`               | -     | Topic providing joint state data.                |

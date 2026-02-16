@@ -2,6 +2,7 @@
 #define AEGIS_GRPC__ROBOT_CONTROL_SERVICE_HPP_
 #include <atomic>
 #include <chrono>
+#include <memory>
 
 #include <grpcpp/grpcpp.h>
 #include <google/protobuf/empty.pb.h>
@@ -29,7 +30,6 @@ class RobotControlServiceImpl final : public proto_aegis_grpc::v1::RobotControlS
 
   explicit RobotControlServiceImpl(std::shared_ptr<rclcpp::Node> node);
 
-  // TODO(issue#87) Create additional methods to enable and disable servo control.
   grpc::Status ServoEnable(grpc::ServerContext* context,
                            const google::protobuf::Empty* request,
                            proto_aegis_grpc::v1::TriggerResponse* response) override;
@@ -95,6 +95,8 @@ class RobotControlServiceImpl final : public proto_aegis_grpc::v1::RobotControlS
   std::string servo_tcp_link_;
   control_msgs::msg::JointJog servo_joint_msg_;
   geometry_msgs::msg::Twist servo_tcp_msg_;
+  const control_msgs::msg::JointJog servo_joint_msg_zeros_;
+  const geometry_msgs::msg::Twist servo_tcp_msg_zeros_;
   int servo_frequency_ratio_;
   int servo_msgs_left_;
 
