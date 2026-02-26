@@ -1,0 +1,10 @@
+basler_left:
+  offset_x: 564
+  offset_y: 176
+  roi_width: 768
+  roi_height: 768
+basler_right:
+  offset_x: 558
+  offset_y: 190
+  roi_width: 768
+  roi_height: 768

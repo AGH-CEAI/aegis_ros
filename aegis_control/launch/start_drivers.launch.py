@@ -100,7 +100,7 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
         gripper_driver,
         ft_sensor_driver,
         depthai_cameras_driver,
-        pylon_cameras_driver,
+        # pylon_cameras_driver,
     ]
 
 

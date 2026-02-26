@@ -38,7 +38,10 @@
     #  Mode of camera's shutter.
     #  The supported modes are "rolling", "global" and "global_reset"
     #  Default value is "" (empty) means default_shutter_mode
-    # shutter_mode: "global"
+    shutter_mode: "global"
+
+    # Camera white balance auto
+    white_balance_auto: 1
 
     ##########################################################################
     ######################## Image Intensity Settings ########################
@@ -49,12 +52,12 @@
     ##########################################################################
 
     #  The exposure time in microseconds to be set after opening the camera.
-    # exposure: 1000.0
+    exposure: 1000.0
 
     #  The target gain in percent of the maximal value the camera supports
     #  For USB cameras, the gain is in dB, for GigE cameras it is given in so
     #  called 'device specific units'.
-    gain: 0.0
+    # gain: 0.5
 
     #  Gamma correction of pixel intensity.
     #  Adjusts the brightness of the pixel values output by the camera's sensor
@@ -70,7 +73,7 @@
     #  try to reach the desired brightness by only varying the exposure time. If
     #  gain AND exposure are given, it is not possible to reach the brightness,
     #  because both are assumed to be fix.
-    brightness: 100
+    brightness: 25
 
     #  Only relevant, if 'brightness' is set:
     #  The brightness_continuous flag controls the auto brightness function.

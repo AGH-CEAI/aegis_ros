@@ -237,12 +237,15 @@ def launch_node(context: LaunchContext):
         "cam_tool_left",
     )
 
+    roi_setter_node = create_roi_setter_node()
+
     return [
         node_camera_left,
         node_camera_right,
         rectify_tool_node,
         static_tf_tool_right_node,
         static_tf_tool_left_node,
+        roi_setter_node,
     ]
 
 
@@ -304,5 +307,20 @@ def create_static_tf_node(
             str(qw),
             parent_frame,
             f"{child_frame}_camera_optical_frame_cal",
+        ],
+    )
+
+
+def create_roi_setter_node() -> Node:
+    return Node(
+        package="aegis_control",
+        executable="pylon_roi_setter.py",
+        name="pylon_roi_setter",
+        output="screen",
+        arguments=[
+            LaunchConfiguration("config_file"),
+            LaunchConfiguration("camera_names"),
+            LaunchConfiguration("left_prefix"),
+            LaunchConfiguration("right_prefix"),
         ],
     )
