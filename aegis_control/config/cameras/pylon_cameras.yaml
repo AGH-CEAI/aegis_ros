@@ -54,7 +54,7 @@
     #  The target gain in percent of the maximal value the camera supports
     #  For USB cameras, the gain is in dB, for GigE cameras it is given in so
     #  called 'device specific units'.
-    # gain: 0.0
+    gain: 0.0
 
     #  Gamma correction of pixel intensity.
     #  Adjusts the brightness of the pixel values output by the camera's sensor
@@ -70,7 +70,7 @@
     #  try to reach the desired brightness by only varying the exposure time. If
     #  gain AND exposure are given, it is not possible to reach the brightness,
     #  because both are assumed to be fix.
-    # brightness: 100
+    brightness: 100
 
     #  Only relevant, if 'brightness' is set:
     #  The brightness_continuous flag controls the auto brightness function.
@@ -80,7 +80,7 @@
     #  trying to adapt to changing light conditions. This is only possible for
     #  values in the possible auto range of the pylon API which is e.g., [50 - 205]
     #  for acA2500-14um and acA1920-40gm
-    # brightness_continuous: true
+    brightness_continuous: true
 
     #  Only relevant, if 'brightness' is set:
     #  If the camera should try to reach and / or keep the brightness, hence
