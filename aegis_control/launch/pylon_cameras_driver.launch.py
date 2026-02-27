@@ -1,118 +1,35 @@
 import os
 import time
+import yaml
 from pathlib import Path
-from typing import Dict
 
 import numpy as np
-import yaml
-from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.conditions import UnlessCondition
 from launch.launch_context import LaunchContext
-from launch.substitutions import LaunchConfiguration, TextSubstitution
+from launch.substitutions import (
+    LaunchConfiguration,
+    TextSubstitution,
+    PathJoinSubstitution,
+)
 from launch_ros.actions import ComposableNodeContainer, LoadComposableNodes, Node
 from launch_ros.descriptions import ComposableNode
+from launch_ros.substitutions import FindPackageShare
 from rclpy.logging import get_logger
 from scipy.spatial.transform import Rotation
 
 
 def generate_launch_description():
-    default_config_file = os.path.join(
-        get_package_share_directory("aegis_control"),
-        "config",
-        "cameras",
-        "pylon_cameras.yaml",
-    )
-
-    declare_node_name_left_cmd = DeclareLaunchArgument(
-        "node_name_left",
-        default_value="cam_tool_left",
-        description="Name of the wrapper node.",
-    )
-
-    declare_node_name_right_cmd = DeclareLaunchArgument(
-        "node_name_right",
-        default_value="cam_tool_right",
-        description="Name of the wrapper node.",
-    )
-
-    declare_camera_id_cmd = DeclareLaunchArgument(
-        "camera_id",
-        default_value="my_camera",
-        description="Id of the camera. Used as node namespace.",
-    )
-
-    declare_device_user_id_left_cmd = DeclareLaunchArgument(
-        "device_user_id_left",
-        default_value="basler_left",
-        description="Device user id of the camera.",
-    )
-
-    declare_device_user_id_right_cmd = DeclareLaunchArgument(
-        "device_user_id_right",
-        default_value="basler_right",
-        description="Device user id of the camera.",
-    )
-
-    declare_config_file_cmd = DeclareLaunchArgument(
-        "config_file",
-        default_value=default_config_file,
-        description="Camera parameters structured in a .yaml file.",
-    )
-
-    declare_mtu_size_cmd = DeclareLaunchArgument(
-        "mtu_size",
-        default_value="1500",
-        description="Maximum transfer unit size. To enable jumbo frames, set it to a high value (8192 recommended)",
-    )
-
-    declare_startup_user_set_cmd = DeclareLaunchArgument(
-        "startup_user_set",
-        # possible value: Default, UserSet1, UserSet2, UserSet3, CurrentSetting
-        default_value="CurrentSetting",
-        description="Specific user set defining user parameters to run the camera.",
-    )
-
-    declare_enable_status_publisher_cmd = DeclareLaunchArgument(
-        "enable_status_publisher",
-        default_value="true",
-        description="Enable/Disable the status publishing.",
-    )
-
-    declare_enable_current_params_publisher_cmd = DeclareLaunchArgument(
-        "enable_current_params_publisher",
-        default_value="true",
-        description="Enable/Disable the current parameter publishing.",
-    )
-
-    declare_respawn_cmd = DeclareLaunchArgument(
-        "respawn",
-        default_value="false",
-        description="If true, the node will be respawned if it exits.",
-    )
-
     return LaunchDescription(
-        [
-            # declare_node_name_cmd,
-            declare_node_name_left_cmd,
-            declare_node_name_right_cmd,
-            declare_camera_id_cmd,
-            # declare_device_user_id_cmd.
-            declare_device_user_id_left_cmd,
-            declare_device_user_id_right_cmd,
-            declare_config_file_cmd,
-            declare_mtu_size_cmd,
-            declare_startup_user_set_cmd,
-            declare_enable_status_publisher_cmd,
-            declare_enable_current_params_publisher_cmd,
-            declare_respawn_cmd,
-            OpaqueFunction(function=launch_node),
+        declare_launch_arguments()
+        + [
+            OpaqueFunction(function=launch_nodes),
         ]
     )
 
 
-def launch_node(context: LaunchContext):
+def launch_nodes(context: LaunchContext):
     """Return the action to launch `pylon_ros2_camera_wrapper`.
     This is required to evaluate `respawn` as boolean.
     """
@@ -125,10 +42,14 @@ def launch_node(context: LaunchContext):
     # launch configuration variables
     node_name_left = LaunchConfiguration("node_name_left")
     node_name_right = LaunchConfiguration("node_name_right")
+    node_name_left_str = node_name_left.perform(context)
+    node_name_right_str = node_name_right.perform(context)
+
     device_user_id_left = LaunchConfiguration("device_user_id_left")
     device_user_id_right = LaunchConfiguration("device_user_id_right")
 
     config_file = LaunchConfiguration("config_file")
+    roi_file = LaunchConfiguration("roi_file")
 
     mtu_size = LaunchConfiguration("mtu_size")
     startup_user_set = LaunchConfiguration("startup_user_set")
@@ -152,10 +73,10 @@ def launch_node(context: LaunchContext):
     logger = get_logger("pylon_cameras_driver")
 
     calibration_extrinsics_paths = {
-        "cam_tool_right": Path(
+        node_name_right_str: Path(
             "~/ceai_ws/src/aegis_ros/aegis_utils/config/tool_right_extrinsics.yaml"
         ).expanduser(),
-        "cam_tool_left": Path(
+        node_name_left_str: Path(
             "~/ceai_ws/src/aegis_ros/aegis_utils/config/tool_left_extrinsics.yaml"
         ).expanduser(),
     }
@@ -223,21 +144,25 @@ def launch_node(context: LaunchContext):
         ],
     )
 
-    rectify_tool_node = create_rectify_node()
+    rectify_tool_node = create_rectify_node(
+        cam_tool_left_str=node_name_left_str, cam_tool_right_str=node_name_right_str
+    )
     static_tf_tool_right_node = create_static_tf_node(
         files_missing,
         calibration_extrinsics_paths,
         "robotiq_hande_end",
-        "cam_tool_right",
+        node_name_right_str,
     )
     static_tf_tool_left_node = create_static_tf_node(
         files_missing,
         calibration_extrinsics_paths,
         "robotiq_hande_end",
-        "cam_tool_left",
+        node_name_left_str,
     )
 
-    roi_setter_node = create_roi_setter_node()
+    roi_setter_node = create_roi_setter_node(
+        config_file=roi_file, camera_names=f"{node_name_left_str},{node_name_right_str}"
+    )
 
     return [
         node_camera_left,
@@ -250,7 +175,9 @@ def launch_node(context: LaunchContext):
 
 
 # TODO(issue#55) Add rectifying nodes
-def create_rectify_node() -> LoadComposableNodes:
+def create_rectify_node(
+    cam_tool_left_str: str, cam_tool_right_str: str
+) -> LoadComposableNodes:
     return ComposableNodeContainer(
         name="cam_tool_rectify_container",
         namespace="",
@@ -261,13 +188,13 @@ def create_rectify_node() -> LoadComposableNodes:
                 package="image_proc",
                 plugin="image_proc::DebayerNode",
                 name="cam_tool_left_debayer_node",
-                namespace="cam_tool_left",
+                namespace=cam_tool_left_str,
             ),
             ComposableNode(
                 package="image_proc",
                 plugin="image_proc::DebayerNode",
                 name="cam_tool_right_debayer_node",
-                namespace="cam_tool_right",
+                namespace=cam_tool_right_str,
             ),
         ],
         arguments=["--ros-args", "--log-level", "info"],
@@ -276,8 +203,8 @@ def create_rectify_node() -> LoadComposableNodes:
 
 
 def create_static_tf_node(
-    files_missing: Dict[str, bool],
-    calibration_extrinsics_paths: Dict[str, Path],
+    files_missing: dict[str, bool],
+    calibration_extrinsics_paths: dict[str, Path],
     parent_frame: str,
     child_frame: str,
 ) -> Node:
@@ -311,16 +238,115 @@ def create_static_tf_node(
     )
 
 
-def create_roi_setter_node() -> Node:
+def create_roi_setter_node(
+    config_file: LaunchConfiguration, camera_names: LaunchConfiguration
+) -> Node:
     return Node(
         package="aegis_control",
         executable="pylon_roi_setter.py",
         name="pylon_roi_setter",
         output="screen",
-        arguments=[
-            LaunchConfiguration("config_file"),
-            LaunchConfiguration("camera_names"),
-            LaunchConfiguration("left_prefix"),
-            LaunchConfiguration("right_prefix"),
+        parameters=[
+            {
+                "config_file": config_file,
+                "camera_names": camera_names,
+            }
         ],
     )
+
+
+def declare_launch_arguments() -> list:
+    default_config_file = PathJoinSubstitution(
+        [FindPackageShare("aegis_control"), "config", "cameras", "pylon_cameras.yaml"]
+    )
+    default_roi_file = PathJoinSubstitution(
+        [FindPackageShare("aegis_control"), "config", "cameras", "roi.yaml"]
+    )
+
+    declare_node_name_left_cmd = DeclareLaunchArgument(
+        "node_name_left",
+        default_value="cam_tool_left",
+        description="Name of the wrapper node.",
+    )
+
+    declare_node_name_right_cmd = DeclareLaunchArgument(
+        "node_name_right",
+        default_value="cam_tool_right",
+        description="Name of the wrapper node.",
+    )
+
+    declare_camera_id_cmd = DeclareLaunchArgument(
+        "camera_id",
+        default_value="my_camera",
+        description="Id of the camera. Used as node namespace.",
+    )
+
+    declare_device_user_id_left_cmd = DeclareLaunchArgument(
+        "device_user_id_left",
+        default_value="basler_left",
+        description="Device user id of the camera.",
+    )
+
+    declare_device_user_id_right_cmd = DeclareLaunchArgument(
+        "device_user_id_right",
+        default_value="basler_right",
+        description="Device user id of the camera.",
+    )
+
+    declare_config_file_cmd = DeclareLaunchArgument(
+        "config_file",
+        default_value=default_config_file,
+        description="Camera parameters structured in a .yaml file.",
+    )
+
+    declare_roi_file_cmd = DeclareLaunchArgument(
+        "roi_file",
+        default_value=default_roi_file,
+        description="Cameras ROI in a .yaml file.",
+    )
+
+    declare_mtu_size_cmd = DeclareLaunchArgument(
+        "mtu_size",
+        default_value="1500",
+        description="Maximum transfer unit size. To enable jumbo frames, set it to a high value (8192 recommended)",
+    )
+
+    declare_startup_user_set_cmd = DeclareLaunchArgument(
+        "startup_user_set",
+        # possible value: Default, UserSet1, UserSet2, UserSet3, CurrentSetting
+        default_value="CurrentSetting",
+        description="Specific user set defining user parameters to run the camera.",
+    )
+
+    declare_enable_status_publisher_cmd = DeclareLaunchArgument(
+        "enable_status_publisher",
+        default_value="true",
+        description="Enable/Disable the status publishing.",
+    )
+
+    declare_enable_current_params_publisher_cmd = DeclareLaunchArgument(
+        "enable_current_params_publisher",
+        default_value="true",
+        description="Enable/Disable the current parameter publishing.",
+    )
+
+    declare_respawn_cmd = DeclareLaunchArgument(
+        "respawn",
+        default_value="false",
+        description="If true, the node will be respawned if it exits.",
+    )
+
+    return [
+        declare_node_name_left_cmd,
+        declare_node_name_right_cmd,
+        declare_camera_id_cmd,
+        declare_device_user_id_left_cmd,
+        declare_device_user_id_right_cmd,
+        declare_config_file_cmd,
+        declare_roi_file_cmd,
+        declare_mtu_size_cmd,
+        declare_startup_user_set_cmd,
+        declare_enable_status_publisher_cmd,
+        declare_enable_current_params_publisher_cmd,
+        declare_respawn_cmd,
+    ]
