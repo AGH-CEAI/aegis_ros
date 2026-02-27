@@ -6,4 +6,6 @@ find_package(ament_cmake_python REQUIRED)
 
 install(DIRECTORY config launch DESTINATION share/${PROJECT_NAME})
 
+install(PROGRAMS scripts/pylon_roi_setter.py DESTINATION lib/${PROJECT_NAME})
+
 ament_package()
