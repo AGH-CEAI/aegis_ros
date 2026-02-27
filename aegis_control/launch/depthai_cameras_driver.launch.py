@@ -19,7 +19,7 @@ from scipy.spatial.transform import Rotation
 
 class DepthAIConfig:
     def __init__(self):
-        self._modify_config()
+        self._modify_config(enable_nn=False)
 
         # TODO(issue#26) Introduce a mock for the DepthAI cameras
         self.mock_hardware = LaunchConfiguration("mock_hardware", default="false")
@@ -60,14 +60,19 @@ class DepthAIConfig:
         self.cam_tool_pitch = LaunchConfiguration("cam_tool_pitch", default="1.5701")
         self.cam_tool_yaw = LaunchConfiguration("cam_tool_yaw", default="0")
 
-    def _modify_config(self) -> None:
+    def _modify_config(self, enable_nn: bool=False) -> None:
         # TODO(issue#31) Fix YOLO configuration not being applied correctly
         package_share_path = Path(get_package_share_directory("aegis_control"))
-        model_path = Path.home() / "ceai_models" / "yolo.blob"
-        yolo_src_cfg_path = package_share_path / "config" / "cameras" / "yolo.json"
         cam_src_params_path = (
             package_share_path / "config" / "cameras" / "depthai_cameras.yaml"
         )
+
+        if not enable_nn:
+            self.cam_params_path = cam_src_params_path
+            return
+
+        model_path = Path.home() / "ceai_models" / "yolo.blob"
+        yolo_src_cfg_path = package_share_path / "config" / "cameras" / "yolo.json"
 
         self.yolo_cfg_path = Path(
             tempfile.NamedTemporaryFile(suffix=".json", delete=False).name
@@ -221,12 +226,12 @@ def launch_setup(context: LaunchContext) -> list[Node]:
 
     return [
         camera_scene_node,
-        camera_tool_node,
+        # camera_tool_node,
         rectify_scene_node,
         rectify_tool_right_node,
         rectify_tool_left_node,
-        spatial_bb_node,
-        point_cloud_node,
+        # spatial_bb_node,
+        # point_cloud_node,
         static_tf_scene_node,
         static_tf_tool_front_right_node,
         static_tf_tool_front_left_node,
