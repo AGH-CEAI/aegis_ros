@@ -1,3 +1,4 @@
+# TODO(issue#107) Make DepthAI camera pipeline configurable
 /cam_scene:
   ros__parameters:
     camera:

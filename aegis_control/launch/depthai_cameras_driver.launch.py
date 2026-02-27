@@ -17,6 +17,7 @@ from rclpy.logging import get_logger
 from scipy.spatial.transform import Rotation
 
 
+# TODO(issue#107) Make DepthAI camera pipeline configurable
 class DepthAIConfig:
     def __init__(self):
         self._modify_config(enable_nn=False)
