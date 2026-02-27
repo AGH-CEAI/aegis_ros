@@ -61,7 +61,7 @@ class DepthAIConfig:
         self.cam_tool_pitch = LaunchConfiguration("cam_tool_pitch", default="1.5701")
         self.cam_tool_yaw = LaunchConfiguration("cam_tool_yaw", default="0")
 
-    def _modify_config(self, enable_nn: bool=False) -> None:
+    def _modify_config(self, enable_nn: bool = False) -> None:
         # TODO(issue#31) Fix YOLO configuration not being applied correctly
         package_share_path = Path(get_package_share_directory("aegis_control"))
         cam_src_params_path = (
