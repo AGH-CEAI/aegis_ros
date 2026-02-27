@@ -11,7 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* [PR-90](https://github.com/AGH-CEAI/aegis_ros/pull/90) - Updated repos for robotiq_hande_driver `v0.2.2-humble`.
+* [PR-106](https://github.com/AGH-CEAI/aegis_ros/pull/106) - Updated `aegis.repos`: `pylon_ros_camera` to `a739e4c303`.
+* [PR-90](https://github.com/AGH-CEAI/aegis_ros/pull/90) - Updated `aegis.repos`: `robotiq_hande_driver` to `v0.2.2-humble`.
+* [PR-90](https://github.com/AGH-CEAI/aegis_ros/pull/90) - Updated `aegis.repos`: `robotiq_hande_driver` to `v0.2.2-humble`.
 * [PR-75](https://github.com/AGH-CEAI/aegis_ros/pull/75) - Changed `pymoveit2` upstream repo to a [custom fork](https://github.com/macmacal/pymoveit2).
 * [PR-68](https://github.com/AGH-CEAI/aegis_ros/pull/68) - Updated repos for new robotiq_hande_driver fix.
 
