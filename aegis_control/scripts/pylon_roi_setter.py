@@ -47,7 +47,7 @@ class PylonROISetter(Node):
 
                 self.get_logger().info(f"Created 'set_roi' client for {cam_name}")
 
-    def wait_for_service(self, client, timeout: float = 1.0) -> None:
+    def wait_for_service(self, client, timeout: float = 1.0) -> bool:
         """Wait for service with timeout"""
         while not client.wait_for_service(timeout_sec=timeout) and rclpy.ok():
             self.get_logger().info(f"Waiting for service {client.srv_name}...")
