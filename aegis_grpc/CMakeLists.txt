@@ -65,96 +65,12 @@ else()
 endif()
 find_package(Protobuf REQUIRED)
 
-# ------------------------------
-# Protbuf & gRPC generation
-
-# Set the directory where .proto files are located
-set(PROTO_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/proto_aegis_grpc/v1")
-file(GLOB PROTO_SRC "${PROTO_SRC_DIR}/*.proto")
-message(STATUS "Proto files path: ${PROTO_SRC_DIR}")
-message(STATUS "Found PROTO_SRC files: ${PROTO_SRC}")
-
-# Specify output directory for header, and source (CPP) files
-set(GENERATED_PROTO_CPP_DIR_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/include")
-set(GENERATED_PROTO_CPP_DIR "${GENERATED_PROTO_CPP_DIR_ROOT}/proto_aegis_grpc/v1")
-file(MAKE_DIRECTORY ${GENERATED_PROTO_CPP_DIR})
-
-# Specify output directory for script (Python) files
-set(GENERATED_PROTO_PYTHON_DIR_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/python_proto")
-set(GENERATED_PROTO_PYTHON_DIR "${GENERATED_PROTO_PYTHON_DIR_ROOT}/proto_aegis_grpc/v1")
-file(MAKE_DIRECTORY ${GENERATED_PROTO_PYTHON_DIR})
-
-# gRPC C++/Python stubs
-set(PROTO_SRCS)
-set(PROTO_HDRS)
-set(PROTO_PYS)
-set(GRPC_SRCS)
-set(GRPC_HDRS)
-set(GRPC_PYS)
-
-# Generate C++ and Python code from .proto files
-foreach(proto_file ${PROTO_SRC})
-  get_filename_component(proto_name ${proto_file} NAME_WE)
-  message(STATUS "Processing Proto definition: ${proto_name}")
-
-  # ------------------------------
-  # C++
-
-  # Add custom command to generate C++ code for each .proto file
-  set(PB_CC ${GENERATED_PROTO_CPP_DIR}/${proto_name}.pb.cc)
-  set(PB_H ${GENERATED_PROTO_CPP_DIR}/${proto_name}.pb.h)
-  set(GRPC_CC ${GENERATED_PROTO_CPP_DIR}/${proto_name}.grpc.pb.cc)
-  set(GRPC_H ${GENERATED_PROTO_CPP_DIR}/${proto_name}.grpc.pb.h)
-
-  add_custom_command(
-    OUTPUT ${PB_CC} ${PB_H} ${GRPC_CC} ${GRPC_H}
-    COMMAND
-      # ${Protobuf_PROTOC_EXECUTABLE} --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
-      ${Protobuf_PROTOC_EXECUTABLE} --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
-      --grpc_out=${GENERATED_PROTO_CPP_DIR_ROOT} --cpp_out=${GENERATED_PROTO_CPP_DIR_ROOT}
-      --plugin=protoc-gen-grpc=${GRPC_CPP_PLUGIN_EXECUTABLE} ${proto_file}
-    DEPENDS ${proto_file} ${GRPC_CPP_PLUGIN_EXECUTABLE}
-    COMMENT "Compiling ${proto_file} to C++ header & source files")
-
-  list(APPEND PROTO_SRCS ${PB_CC})
-  list(APPEND PROTO_HDRS ${PB_H})
-  list(APPEND GRPC_SRCS ${GRPC_CC})
-  list(APPEND GRPC_HDRS ${GRPC_H})
-
-  # ------------------------------
-  # Python
-
-  set(PB_PY ${GENERATED_PROTO_PYTHON_DIR}/${proto_name}_pb2.py)
-  set(GRPC_PY ${GENERATED_PROTO_PYTHON_DIR}/${proto_name}_pb2_grpc.py)
-
-  add_custom_command(
-    OUTPUT ${PB_PY} ${GRPC_PY}
-    COMMAND
-      python3 -m grpc_tools.protoc ARGS --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
-      --python_out=${GENERATED_PROTO_PYTHON_DIR_ROOT}
-      --grpc_python_out=${GENERATED_PROTO_PYTHON_DIR_ROOT} ${proto_file}
-    DEPENDS ${proto_file}
-    COMMENT "Compiling ${proto_file} to Python script files")
-  list(APPEND PROTO_PYS ${PB_PY})
-  list(APPEND GRPC_PYS ${GRPC_PY})
-
-endforeach()
-
-# Create a custom target to trigger code generation for all proto files
-add_custom_target(
-  generate_protos ALL
-  DEPENDS ${PROTO_SRCS}
-          ${PROTO_HDRS}
-          ${PROTO_PYS}
-          ${GRPC_SRCS}
-          ${GRPC_HDRS}
-          ${GRPC_PYS}
-  COMMENT "Generating gRPC and Protobuf files (C++/Python)")
+add_subdirectory(protogen)
 
 # ------------------------------
 # Static library with all CPP files
-
 add_library(${PROJECT_NAME}_lib STATIC src/robot_read_service.cpp src/robot_control_service.cpp)
+add_dependencies(${PROJECT_NAME}_lib generate_protos)
 
 target_include_directories(
   ${PROJECT_NAME}_lib PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -164,8 +80,10 @@ ament_target_dependencies(${PROJECT_NAME}_lib ${ROS_DEPENDS})
 
 target_link_libraries(${PROJECT_NAME}_lib gRPC::grpc++ protobuf::libprotobuf)
 
-add_dependencies(${PROJECT_NAME}_lib generate_protos)
 target_sources(${PROJECT_NAME}_lib PRIVATE ${PROTO_SRCS} ${GRPC_SRCS})
+
+# Mark generated sources as generated so CMake doesn't check for them during configuration
+set_source_files_properties(${PROTO_SRCS} ${GRPC_SRCS} PROPERTIES GENERATED TRUE)
 
 # ------------------------------
 # Executable target
