@@ -61,6 +61,11 @@ repos:
     -   id: ros-include-guard
     -   id: sort-package-xml
 
+-   repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.10.7
+    hooks:
+    -   id: uv-lock
+
       # TODO(issue#1) Re-enable warehouse integration
       # - repo: https://github.com/macmacal/pre-commit-sqlite-dump
       #   rev: "1.0.0"
