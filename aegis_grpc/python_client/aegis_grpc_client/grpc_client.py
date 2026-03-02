@@ -1,4 +1,5 @@
 import logging
+from enum import Enum
 from typing import Optional, Union
 from contextlib import asynccontextmanager
 
@@ -13,6 +14,16 @@ from proto_aegis_grpc.v1 import (
     control_msgs_pb2,
     sensor_msgs_pb2,
 )
+
+
+class AegisJointIndex(Enum):
+    ROBOTIQ_HANDE_LEFT_FINGER_JOINT = 0
+    SHOULDER_PAN_JOINT = 1
+    WRIST_3_JOINT = 2
+    WRIST_2_JOINT = 3
+    WRIST_1_JOINT = 4
+    ELBOW_JOINT = 5
+    SHOULDER_LIFT_JOINT = 6
 
 
 class PrefixedLoggerAdapter(logging.LoggerAdapter):
