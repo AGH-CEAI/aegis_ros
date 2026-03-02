@@ -1,3 +1,3 @@
-from .grpc_client import AegisRobotClient
+from .grpc_client import AegisJointIndex, AegisRobotClient
 
-__all__ = ["AegisRobotClient"]
+__all__ = ["AegisJointIndex", "AegisRobotClient"]
