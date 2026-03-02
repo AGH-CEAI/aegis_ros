@@ -100,11 +100,15 @@ Visualization Manager:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          adapter_to_mount_camera_tool_left:
+          adapter_mount_front:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          adapter_to_mount_camera_tool_right:
+          adapter_mount_left:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          adapter_mount_right:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -126,16 +130,6 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
           base_link_inertia:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          basler_camera_left:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          basler_camera_right:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -206,18 +200,16 @@ Visualization Manager:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera_to_lens_left:
+          cam_tool_left:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera_to_lens_right:
+            Value: true
+          cam_tool_right:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera_tool:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
+            Value: true
           cell:
             Alpha: 1
             Show Axes: false
@@ -241,40 +233,40 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          lens_computar_left:
+          lens_left:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          lens_computar_right:
+          lens_right:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          mount:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          mount_camera:
+          mount_front:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          mount_camera_tool_balser_left:
+          mount_front_end:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          mount_left:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          mount_camera_tool_balser_right:
+          mount_left_end:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          mount_right:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          mount_to_camera_left:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          mount_to_camera_right:
+          mount_right_end:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -320,10 +312,6 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          world:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
           world:
             Alpha: 1
             Show Axes: false
@@ -398,11 +386,15 @@ Visualization Manager:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          adapter_to_mount_camera_tool_left:
+          adapter_mount_front:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          adapter_to_mount_camera_tool_right:
+          adapter_mount_left:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          adapter_mount_right:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -424,16 +416,6 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
           base_link_inertia:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          basler_camera_left:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          basler_camera_right:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -504,18 +486,16 @@ Visualization Manager:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera_to_lens_left:
+          cam_tool_left:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera_to_lens_right:
+            Value: true
+          cam_tool_right:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          camera_tool:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
+            Value: true
           cell:
             Alpha: 1
             Show Axes: false
@@ -539,40 +519,40 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          lens_computar_left:
+          lens_left:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          lens_computar_right:
+          lens_right:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          mount:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          mount_camera:
+          mount_front:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          mount_camera_tool_balser_left:
+          mount_front_end:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          mount_left:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          mount_camera_tool_balser_right:
+          mount_left_end:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          mount_right:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          mount_to_camera_left:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          mount_to_camera_right:
+          mount_right_end:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -618,10 +598,6 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          world:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
           world:
             Alpha: 1
             Show Axes: false
@@ -936,7 +912,7 @@ Visualization Manager:
       Pitch: 0.44499996304512024
       Target Frame: world
       Value: Orbit (rviz_default_plugins)
-      Yaw: 0.8100001811981201
+      Yaw: 0.8050001859664917
     Saved: ~
 Window Geometry:
   Camera Scene Depth:
@@ -966,7 +942,7 @@ Window Geometry:
     collapsed: false
   Motion Planning - Trajectory Slider:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000200000000000002d100000525fc0200000016fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000000000000000fb000000100044006900730070006c006100790073010000003b00000152000000c700fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e0067010000019a000001690000000000000000fb0000000800480065006c0070000000029a0000006e0000006e00fffffffb0000000a0056006900650077007300000004510000010d000000a000fffffffb0000000c00430061006d0065007200610100000309000000f80000000000000000fb0000000c00430061006d0065007200610100000407000001390000000000000000fb0000000c00430061006d00650072006101000003520000020c0000000000000000fb0000000a0049006d0061006700650000000469000000620000000000000000fb0000000a0049006d00610067006500000004c7000000790000000000000000fb0000000a0049006d0061006700650000000468000000d80000000000000000fb0000000c00430061006d006500720061010000044b000000f50000000000000000fb0000000a0049006d0061006700650000000476000000ca0000000000000000fb0000000a0049006d0061006700650000000469000000d70000000000000000fb0000002e00430061006d0065007200610020005300630065006e00650020004f007600650072006c00610079002000420042000000013e000000680000002800fffffffb0000002400430061006d0065007200610020005300630065006e00650020004400650070007400680000000156000000730000002800fffffffb00000046004d006f00740069006f006e00200050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000003f00fffffffb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000193000002010000016900fffffffb0000002000430061006d0065007200610020005300630065006e00650020005200470042010000039a000001080000002800fffffffb0000003600430061006d00650072006100200054006f006f006c002000460072006f006e0074002000520069006700680074002000520047004201000004a8000000b80000002800fffffffb0000002e00430061006d00650072006100200054006f006f006c002000460072006f006e007400200044006500700074006800000003b6000000800000002800fffffffb0000003400430061006d00650072006100200054006f006f006c002000460072006f006e00740020004c0065006600740020005200470042000000049f000000a10000002800ffffff000000010000014000000525fc0200000002fb0000002a00430061006d00650072006100200054006f006f006c0020005200690067006800740020005200470042000000003b000002c00000002800fffffffb0000002800430061006d00650072006100200054006f006f006c0020004c006500660074002000520047004200000003010000025f0000002800ffffff000007290000052500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000200000000000002d100000525fc0200000016fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000000000000000fb000000100044006900730070006c006100790073010000003b00000152000000c700fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e0067010000019a000001690000000000000000fb0000000800480065006c0070000000029a0000006e0000006e00fffffffb0000000a0056006900650077007300000004510000010d000000a000fffffffb0000000c00430061006d0065007200610100000309000000f80000000000000000fb0000000c00430061006d0065007200610100000407000001390000000000000000fb0000000c00430061006d00650072006101000003520000020c0000000000000000fb0000000a0049006d0061006700650000000469000000620000000000000000fb0000000a0049006d00610067006500000004c7000000790000000000000000fb0000000a0049006d0061006700650000000468000000d80000000000000000fb0000000c00430061006d006500720061010000044b000000f50000000000000000fb0000000a0049006d0061006700650000000476000000ca0000000000000000fb0000000a0049006d0061006700650000000469000000d70000000000000000fb0000002e00430061006d0065007200610020005300630065006e00650020004f007600650072006c00610079002000420042000000013e000000680000002800fffffffb0000002400430061006d0065007200610020005300630065006e00650020004400650070007400680000000156000000730000002800fffffffb00000046004d006f00740069006f006e00200050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000003f00fffffffb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000193000002010000016900fffffffb0000002000430061006d0065007200610020005300630065006e00650020005200470042010000039a000001080000002800fffffffb0000003600430061006d00650072006100200054006f006f006c002000460072006f006e0074002000520069006700680074002000520047004201000004a8000000b80000002800fffffffb0000002e00430061006d00650072006100200054006f006f006c002000460072006f006e007400200044006500700074006800000003b6000000800000002800fffffffb0000003400430061006d00650072006100200054006f006f006c002000460072006f006e00740020004c0065006600740020005200470042000000049f000000a10000002800ffffff000000010000039300000525fc0200000002fb0000002a00430061006d00650072006100200054006f006f006c0020005200690067006800740020005200470042000000003b0000028e0000002800fffffffb0000002800430061006d00650072006100200054006f006f006c0020004c006500660074002000520047004200000002cf000002910000002800ffffff000007290000052500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
     collapsed: false
   Width: 2560
