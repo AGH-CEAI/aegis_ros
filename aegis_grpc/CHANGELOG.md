@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-109](https://github.com/AGH-CEAI/aegis_ros/pull/109) - Client: Enum with indexes of all joints.
 * [PR-104](https://github.com/AGH-CEAI/aegis_ros/pull/104) - Server: Omit MoveIt2 call if the target is close to current pose.
 * [PR-103](https://github.com/AGH-CEAI/aegis_ros/pull/103) - Server: Adds servo idling with zero commands.
 * [PR-98](https://github.com/AGH-CEAI/aegis_ros/pull/98) - Added gRPC-based camera image reading.
