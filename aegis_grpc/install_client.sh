@@ -1,10 +1,11 @@
 #!/bin/bash
 
-cmake -S . -B build
-cmake --build build --target generate_protos
+cd ./protogen
+cmake -S . -B /tmp/build
+cmake --build /tmp/build --target generate_protos
 
 pip uninstall proto_aegis_grpc aegis_grpc_client -y
-cd python_proto
+cd ../python_proto
 poetry build
 pip install ./dist/proto_aegis_grpc-*.whl
 cd ../python_client
