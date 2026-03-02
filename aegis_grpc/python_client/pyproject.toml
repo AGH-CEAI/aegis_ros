@@ -1,22 +1,32 @@
-[tool.poetry]
+[project]
 name = "aegis_grpc_client"
 version = "0.1.0"
 description = "A gRPC client to read and control the Aegis robot."
-authors = ["AGH Center of Excellence in Artificial Intelligence <ceai@agh.edu.pl>"]
-license = "Apache-2.0"
+authors = [
+    { name = "AGH Center of Excellence in Artificial Intelligence", email = "ceai@agh.edu.pl" }
+]
+license = { text = "Apache-2.0" }
 readme = "README.md"
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "grpcio<1.51",
+    "grpcio-tools<1.51",
+    "numpy>=1.26.4",
+    "proto-aegis-grpc",
+    "protobuf<3.21",
+]
 
-[tool.poetry.dependencies]
-python = "^3.10,<3.14"
-grpcio = "<1.51"
-grpcio-tools = "<1.51"
-numpy = ">=1.26.4"
-proto_aegis_grpc = { path = "../python_proto", develop = true }
-protobuf = "<3.21"
-
-[tool.poetry.group.test.dependencies]
-pytest = "^8.4.0"
+[project.optional-dependencies]
+test = [
+    "pytest>=8.4.0",
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.uv.sources]
+proto-aegis-grpc = { path = "../python_proto", editable = true }
