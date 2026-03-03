@@ -217,9 +217,31 @@ class RobotDirector:
         self.moveit2.cartesian_avoid_collisions = cartesian_avoid_collisions
         self.moveit2.cartesian_jump_threshold = cartesian_jump_threshold
 
+        # self.node.get_logger().info(
+        #     f"Moving to {{position: {position}, quat: {quat_xyzw}, max_vel: {max_vel:.2f}, max_accel: {max_accel:.2f}}}"
+        # )
+
+        pos_str = None
+        quat_str = None
+
+        if pose is not None:
+            p = pose.pose if hasattr(pose, "pose") else pose
+            pos_str = (p.position.x, p.position.y, p.position.z)
+            quat_str = (
+                p.orientation.x,
+                p.orientation.y,
+                p.orientation.z,
+                p.orientation.w,
+            )
+        else:
+            pos_str = position
+            quat_str = quat_xyzw
+
         self.node.get_logger().info(
-            f"Moving to {{position: {position}, quat: {quat_xyzw}}}, max_vel: {max_vel:.2f}, max_accel: {max_accel:.2f}}}"
+            f"Moving to {{pos: {pos_str}, quat: {quat_str}}}, "
+            f"max_vel: {max_vel:.2f}, max_accel: {max_accel:.2f}"
         )
+
         self.moveit2.move_to_pose(
             pose=pose,
             position=position,
