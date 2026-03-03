@@ -17,6 +17,7 @@ setup(
                 "config/cam_tool_right.yaml",
                 "config/cam_tool_left.yaml",
                 "config/charuco_board.yaml",
+                "config/scene_intrinsics.yaml",  # TODO: cancel it later, take config from luxonis camera
             ],
         ),
     ],
