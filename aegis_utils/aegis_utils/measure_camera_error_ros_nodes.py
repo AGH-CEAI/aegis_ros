@@ -186,7 +186,7 @@ class CollectImageNode(Node):
         if self.last_object_tf is None:
             return
         rvec, tvec = self.last_object_tf
-        tf_camera_name = "cam_scene_rgb_camera_optical_frame"
+        tf_camera_name = "cam_scene_rgb_camera_optical_frame_cal"
         self._publish_detected_object_tf(
             rvec=rvec,
             tvec=tvec,
