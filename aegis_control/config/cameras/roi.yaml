@@ -8,3 +8,5 @@ cam_tool_right:
   offset_y: 190
   roi_width: 768
   roi_height: 768
+# TODO(issue#113) Unify ROI configuration for all cameras
+# Checkout the `depthai_cameras.yaml` file to setup the scene camera's ROI

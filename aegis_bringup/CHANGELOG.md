@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-112](https://github.com/AGH-CEAI/aegis_ros/pull/112) - Updated PlantUML launch files diagram.
 * [PR-78](https://github.com/AGH-CEAI/aegis_ros/pull/78) - Updated README.
 * [PR-73](https://github.com/AGH-CEAI/aegis_ros/pull/73) - Updated PlantUML launch files diagram.
 * [PR-63](https://github.com/AGH-CEAI/aegis_ros/pull/63) - Updated README.
