@@ -6,12 +6,15 @@
       i_pipeline_type: RGB # RGB, RGBD
       i_nn_type: None # rgb, spatial
     rgb:
-     # Setup camera ROI with:
-     # i_height x i_width (size)
-     # i_output_isp (false - center, true - from the 0,0 px)
+      # TODO(issue#113) Unify ROI configuration for all cameras
+      # ---- ROI ----
+      # Setup camera ROI with:
+      # i_height x i_width (size)
+      # i_output_isp (false - center, true - from the 0,0 px)
       i_height: 704 # 720
       i_width: 704 # 1280
       i_output_isp: false
+      # -------------
       i_enable_preview: false
       # i_enable_passthrough: true
       # i_keep_preview_aspect_ratio: true
