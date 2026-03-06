@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-112](https://github.com/AGH-CEAI/aegis_ros/pull/112) - Updated RViz visualization.
 * [PR-106](https://github.com/AGH-CEAI/aegis_ros/pull/106) - Updated RViz config for better Pylon cameras preview.
 * [PR-105](https://github.com/AGH-CEAI/aegis_ros/pull/105) - Calibrated servo configuration for Sim2Real experiments.
 * [PR-77](https://github.com/AGH-CEAI/aegis_ros/pull/77) - Changed `ur_base` frame to the `world` frame (simulation simplification).
