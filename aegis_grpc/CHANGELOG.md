@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [v202603091730]
+
+### Added
 
 * [PR-109](https://github.com/AGH-CEAI/aegis_ros/pull/109) - Client: Enum with indexes of all joints.
 * [PR-104](https://github.com/AGH-CEAI/aegis_ros/pull/104) - Server: Omit MoveIt2 call if the target is close to current pose.
@@ -22,12 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-114](https://github.com/AGH-CEAI/aegis_ros/pull/114) - Updated docs before release.
 * [PR-103](https://github.com/AGH-CEAI/aegis_ros/pull/103) - Server: Changed `assert()` in `FillProtoImage()` to `if` which loggs an error message.
 * [PR-103](https://github.com/AGH-CEAI/aegis_ros/pull/103) - Client: The Python client `aegis_grpc.py` will now log every message with the prefix `[aegis_robot_client]`.
 * [PR-102](https://github.com/AGH-CEAI/aegis_ros/pull/102) - Server: The end effector's TCP pose is now taken from the tf2 transform instead of a given topic.
-
-### Deprecated
-### Removed
-### Fixed
-
-### Security

@@ -8,20 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [v202603091730]
+
+### Added
 
 * [PR-75](https://github.com/AGH-CEAI/aegis_ros/pull/75) - Added methods for controlling MoveIt2 Servo (Twist & Jog).
 
 ### Changed
 
+* [PR-114](https://github.com/AGH-CEAI/aegis_ros/pull/114) - Updated docs before release.
 * [PR-82](https://github.com/AGH-CEAI/aegis_ros/pull/82) - Set initial package version to `0.1.0`.
 
-### Deprecated
-### Removed
 ### Fixed
 
 * [PR-79](https://github.com/AGH-CEAI/aegis_ros/pull/79) - Fixed the _get_tcp_pose()
-
-### Security
 
 ## [v202509011041]
 

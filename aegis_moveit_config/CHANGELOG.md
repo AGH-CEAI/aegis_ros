@@ -8,12 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [v202603091730]
+
+### Added
 
 * [PR-73](https://github.com/AGH-CEAI/aegis_ros/pull/73) - Enabled MoveIt2 servo.
 * [PR-60](https://github.com/AGH-CEAI/aegis_ros/pull/60) - Added maximum acceleration limits config for Moveit planning.
 
 ### Changed
 
+* [PR-114](https://github.com/AGH-CEAI/aegis_ros/pull/114) - Updated docs before release.
 * [PR-112](https://github.com/AGH-CEAI/aegis_ros/pull/112) - Updated RViz visualization.
 * [PR-106](https://github.com/AGH-CEAI/aegis_ros/pull/106) - Updated RViz config for better Pylon cameras preview.
 * [PR-105](https://github.com/AGH-CEAI/aegis_ros/pull/105) - Calibrated servo configuration for Sim2Real experiments.
@@ -22,11 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [PR-71](https://github.com/AGH-CEAI/aegis_ros/pull/71) - Updated collision checking.
 * [PR-68](https://github.com/AGH-CEAI/aegis_ros/pull/68) - Updated RViz config for proper QoS RGB camera config.
 * [PR-60](https://github.com/AGH-CEAI/aegis_ros/pull/60) - Disabled MoveIt's Trajectory Execution Monitoring (TEM) - it is now possible to scale down robot speeds without trajectory errors.
-
-### Deprecated
-### Removed
-### Fixed
-### Security
 
 ## [v202509011041]
 
