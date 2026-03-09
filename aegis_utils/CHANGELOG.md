@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [v202603091730]
+
+### Added
 
 * [PR-79](https://github.com/AGH-CEAI/aegis_ros/pull/79) - Added method to check scene camera transformation
 * [PR-66](https://github.com/AGH-CEAI/aegis_ros/pull/66) - Added calibration positions for data collection.
@@ -16,16 +25,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-114](https://github.com/AGH-CEAI/aegis_ros/pull/114) - Updated docs before release.
 * [PR-99](https://github.com/AGH-CEAI/aegis_ros/pull/99) - T_base2cam was measured and set experimentally.
 * [PR-64](https://github.com/AGH-CEAI/aegis_ros/pull/64) - Switched calibration configuration from JSON to YAML and updated formatting style.
 
-### Deprecated
-### Removed
 ### Fixed
 
 * [PR-59](https://github.com/AGH-CEAI/aegis_ros/pull/59) - Fixed handling of scene camera in calibration of camera extrinsics program.
-
-### Security
 
 ## [v202509011041]
 
