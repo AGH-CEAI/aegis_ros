@@ -1,4 +1,4 @@
-# new calibration forluxonis intinsics
+# new calibration for luxonis intinsics
 T_base2cam:
 - [0.0, 1.0, 0.0, 0.329395049]
 - [1.0, 0.0, 0.0, -0.020626899]

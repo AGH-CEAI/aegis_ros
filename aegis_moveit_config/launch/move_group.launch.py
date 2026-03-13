@@ -36,6 +36,9 @@ class AegisPathsCfg:
         self.description_cfg_pkg_name = "aegis_description"
         self.description_cfg_pkg = FindPackageShare(self.description_cfg_pkg_name)
 
+        self.scene_objects_cfg_pkg_name = "scene_objects_manager"
+        self.scene_objects_cfg_pkg = FindPackageShare(self.scene_objects_cfg_pkg_name)
+
         self.kinematics_cfg = PathJoinSubstitution(
             [self.moveit_cfg_pkg, "config", "move_group", "kinematics.yaml"]
         )
@@ -50,6 +53,10 @@ class AegisPathsCfg:
 
         self.scene_objects_cfg = PathJoinSubstitution(
             [self.moveit_cfg_pkg, "config", "scene_objects.yaml"]
+        )
+
+        self.object_pose_detector_cfg = PathJoinSubstitution(
+            [self.scene_objects_cfg_pkg, "config", "object_pose_detector_config.yaml"]
         )
 
         self.rviz_cfg = PathJoinSubstitution(
@@ -271,6 +278,7 @@ def prepare_scene_objects_manager_node(paths: AegisPathsCfg) -> Node:
         # name="scene_objects_manager",
         output="screen",
         arguments=["--cfg", paths.scene_objects_cfg, "--frame", "world"],
+        parameters=[paths.object_pose_detector_cfg],
     )
 
 
