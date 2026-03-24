@@ -2,20 +2,24 @@
   ros__parameters:
     camera:
       i_mx_id: 184430108157970F00
-      i_nn_type: spatial
-      i_pipeline_type: RGBD
-    nn:
-      i_disable_resize: true
-      i_enable_passthrough: true
+      i_nn_type: None
+      i_pipeline_type: CamArray
     rgb:
-      i_enable_preview: true
-      i_keep_preview_aspect_ratio: true
-      i_preview_size: 416
+      # i_enable_preview: true
+      # i_keep_preview_aspect_ratio: true
+      # i_preview_size: 416
+      i_publish_topic: true
+      i_width: 1280
+      i_height: 720
     stereo:
+      i_publish_topic: true
       i_subpixel: true
-  spatial_bb_node:
-    ros__parameters:
-      desqueeze: true
+    right:
+      i_publish_topic: true
+    left:
+      i_publish_topic: true
+    depth:
+      i_publish_topic: true
 /cam_tool_front:
   ros__parameters:
     camera:

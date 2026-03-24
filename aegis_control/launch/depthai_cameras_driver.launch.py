@@ -87,9 +87,9 @@ class DepthAIConfig:
         with open(cam_src_params_path, "r") as file:
             cam_params = yaml.safe_load(file)
 
-        cam_params["/cam_scene"]["ros__parameters"]["nn"]["i_nn_config_path"] = str(
-            self.yolo_cfg_path
-        )
+        # cam_params["/cam_scene"]["ros__parameters"]["nn"]["i_nn_config_path"] = str(
+        #     self.yolo_cfg_path
+        # )
 
         with open(self.cam_params_path, "w") as file:
             yaml.safe_dump(cam_params, file)
