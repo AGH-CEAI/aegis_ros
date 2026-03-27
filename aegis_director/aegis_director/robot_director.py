@@ -217,10 +217,6 @@ class RobotDirector:
         self.moveit2.cartesian_avoid_collisions = cartesian_avoid_collisions
         self.moveit2.cartesian_jump_threshold = cartesian_jump_threshold
 
-        # self.node.get_logger().info(
-        #     f"Moving to {{position: {position}, quat: {quat_xyzw}, max_vel: {max_vel:.2f}, max_accel: {max_accel:.2f}}}"
-        # )
-
         pos_str = None
         quat_str = None
 
