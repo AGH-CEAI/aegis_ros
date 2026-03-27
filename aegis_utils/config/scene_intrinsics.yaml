@@ -1,4 +1,3 @@
-# calibration from luxonis
 image_width: 1280
 image_height: 720
 camera_name: scene
@@ -19,25 +18,3 @@ projection_matrix:
   rows: 3
   cols: 4
   data: [1035.415283203125, 0.0, 623.8995361328125, 0.0, 0.0, 1034.0101318359375, 377.0184020996094, 0.0, 0.0, 0.0, 1.0, 0.0]
-
-# calibration after aegis_utils/calib_inntrinsics
-# image_width: 1280
-# image_height: 720
-# camera_name: scene
-# camera_matrix:
-#   rows: 3
-#   cols: 3
-#   data: [1045.253469873161, 0.0, 616.7886604727472, 0.0, 1043.2430632943033, 386.8198966768913, 0.0, 0.0, 1.0]
-# distortion_model: plumb_bob
-# distortion_coefficients:
-#   rows: 1
-#   cols: 5
-#   data: [0.08083301537530861, -0.04332893272558069, 0.003319516691409084, -0.0016267198557977577, -0.2800871865529448]
-# rectification_matrix:
-#   rows: 3
-#   cols: 3
-#   data: [1, 0, 0, 0, 1, 0, 0, 0, 1]
-# projection_matrix:
-#   rows: 3
-#   cols: 4
-#   data: [1045.253469873161, 0, 616.7886604727472, 0, 0, 1043.2430632943033, 386.8198966768913, 0, 0, 0, 1, 0]
