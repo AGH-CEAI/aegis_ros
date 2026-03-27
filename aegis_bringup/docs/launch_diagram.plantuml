@@ -67,6 +67,7 @@ package aegis_control {
             class depthai_cameras << (Y,#ffffc9) YAML >> {}
             class pylon_cameras << (Y,#ffffc9) YAML >> {}
             class yolo << (J,#ffffc9) JSON >> {}
+            class roi << (Y,#ffffc9) YAML >> {}
         }
     }
 }
@@ -140,6 +141,7 @@ aegis_control.start_drivers *-- aegis_control.config.controllers
 aegis_control.depthai_cameras_driver *-up- aegis_control.config.cameras.depthai_cameras
 aegis_control.depthai_cameras_driver *-up- aegis_control.config.cameras.yolo
 aegis_control.pylon_cameras_driver *-left- aegis_control.config.cameras.pylon_cameras
+aegis_control.pylon_cameras_driver *-left- aegis_control.config.cameras.roi
 
 aegis_moveit_config.move_group *-- aegis_moveit_config.config
 aegis_moveit_config.move_group *-- aegis_description.config.ur5e

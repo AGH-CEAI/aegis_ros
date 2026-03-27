@@ -1,12 +1,10 @@
 #!/bin/bash
+# Run this script as root (designed for containers)
 
-cmake -S . -B build
-cmake --build build --target generate_protos
+cd ./protogen
+cmake -S . -B /tmp/build -Wno-dev
+cmake --build /tmp/build --target generate_protos
 
-pip uninstall proto_aegis_grpc aegis_grpc_client -y
-cd python_proto
-poetry build
-pip install ./dist/proto_aegis_grpc-*.whl
-cd ../python_client
-poetry build
-pip install ./dist/aegis_grpc_client-*.whl
+uv pip uninstall --system proto_aegis_grpc aegis_grpc_client
+uv pip install --system ../python_proto
+uv pip install --system ../python_client

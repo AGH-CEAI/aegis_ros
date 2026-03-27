@@ -8,21 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [v202603091730]
+
+### Added
 
 * [PR-88](https://github.com/AGH-CEAI/aegis_ros/pull/88) - Added launch of the `grpc_server` from `aegis_grpc` package.
 * [PR-78](https://github.com/AGH-CEAI/aegis_ros/pull/78) - Introduced `disable_cell` and `disable_cell_collision` launch arguments.
 
 ### Changed
 
+* [PR-114](https://github.com/AGH-CEAI/aegis_ros/pull/114) - Updated docs before release.
+* [PR-112](https://github.com/AGH-CEAI/aegis_ros/pull/112) - Updated PlantUML launch files diagram.
 * [PR-78](https://github.com/AGH-CEAI/aegis_ros/pull/78) - Updated README.
 * [PR-73](https://github.com/AGH-CEAI/aegis_ros/pull/73) - Updated PlantUML launch files diagram.
 * [PR-63](https://github.com/AGH-CEAI/aegis_ros/pull/63) - Updated README.
 * [PR-60](https://github.com/AGH-CEAI/aegis_ros/pull/60) - Updated launch files diagram.
-
-### Deprecated
-### Removed
-### Fixed
-### Security
 
 ## [v202509011041]
 
