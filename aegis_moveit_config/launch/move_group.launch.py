@@ -275,7 +275,6 @@ def prepare_scene_objects_manager_node(paths: AegisPathsCfg) -> Node:
     return Node(
         package="scene_objects_manager",
         executable="scene_objects_manager_node",
-        # name="scene_objects_manager",
         output="screen",
         arguments=["--cfg", paths.scene_objects_cfg, "--frame", "world"],
         parameters=[paths.object_pose_detector_cfg],
