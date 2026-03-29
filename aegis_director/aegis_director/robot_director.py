@@ -218,7 +218,11 @@ class RobotDirector:
         self.moveit2.cartesian_jump_threshold = cartesian_jump_threshold
 
         self._print_pose_move_info(
-            position=position, quat_xyzw=quat_xyzw, pose=pose, max_vel=max_vel, max_accel=max_accel
+            position=position,
+            quat_xyzw=quat_xyzw,
+            pose=pose,
+            max_vel=max_vel,
+            max_accel=max_accel,
         )
 
         self.moveit2.move_to_pose(
@@ -230,7 +234,6 @@ class RobotDirector:
             cartesian_fraction_threshold=cartesian_fraction_threshold,
         )
         self._wait_for_move_execution(cancel_after_secs)
-
 
     def _print_pose_move_info(
         self,
@@ -264,7 +267,6 @@ class RobotDirector:
             f"Moving to {{pos: {pos_str}, quat: {quat_str}}}, "
             f"max_vel: {max_vel:.2f}, max_accel: {max_accel:.2f}"
         )
-
 
     def gripper_move(
         self, width: Optional[float] = None, action: Optional[str] = None
