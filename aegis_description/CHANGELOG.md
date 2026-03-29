@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-115](https://github.com/AGH-CEAI/aegis_ros/pull/115) - Changed the camera position.
 * [PR-114](https://github.com/AGH-CEAI/aegis_ros/pull/114) - Updated docs before release.
 * [PR-77](https://github.com/AGH-CEAI/aegis_ros/pull/77) - Changed `ur_base` frame to the `world` frame (simulation simplification).
 * [PR-62](https://github.com/AGH-CEAI/aegis_ros/pull/62) - Replaced cell collision mesh with primitive shapes.
