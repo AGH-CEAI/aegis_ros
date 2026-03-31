@@ -3,7 +3,7 @@
   ros__parameters:
     camera:
       i_mx_id: 184430108157970F00
-      i_pipeline_type: RGB # RGB, RGBD, CamArray
+      i_pipeline_type: CamArray # RGB, RGBD, CamArray
       i_nn_type: None # rgb, spatial
     rgb:
       # TODO(issue#113) Unify ROI configuration for all cameras
@@ -25,8 +25,12 @@
       i_subpixel: true
     right:
       i_publish_topic: true
+      i_height: 720
+      i_width: 1280
     left:
       i_publish_topic: true
+      i_height: 720
+      i_width: 1280
     depth:
       i_publish_topic: true
 /cam_tool_front:
