@@ -3,7 +3,7 @@
   ros__parameters:
     camera:
       i_mx_id: 184430108157970F00
-      i_pipeline_type: CamArray # RGB, RGBD, CamArray
+      i_pipeline_type: RGB # RGBD, CamArray
       i_nn_type: None # rgb, spatial
     rgb:
       # TODO(issue#113) Unify ROI configuration for all cameras
