@@ -20,15 +20,16 @@
       # i_enable_passthrough: true
       # i_keep_preview_aspect_ratio: true
       # i_preview_size: 416
-    stereo:
-      i_publish_topic: true
-      i_subpixel: true
-    right:
-      i_publish_topic: true
-    left:
-      i_publish_topic: true
-    depth:
-      i_publish_topic: true
+    # TODO(issue#116) Enable right and left scene camera.
+    # stereo:
+    #   i_publish_topic: true
+    #   i_subpixel: true
+    # right:
+    #   i_publish_topic: true
+    # left:
+    #   i_publish_topic: true
+    # depth:
+    #   i_publish_topic: true
 /cam_tool_front:
   ros__parameters:
     camera:
