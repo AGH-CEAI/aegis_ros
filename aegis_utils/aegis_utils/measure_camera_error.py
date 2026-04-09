@@ -352,7 +352,7 @@ def parse_args() -> argparse.Namespace:
         "--tool_offset",
         type=float,
         nargs=3,
-        default=[0.00077, 0.00053, 0.26455],
+        default=[0.0, 0.0, 0.264],
         help="Offset of the calibration tool from tool0 frame in meters (x y z)",
     )
     parser.add_argument(

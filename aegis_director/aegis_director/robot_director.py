@@ -217,9 +217,14 @@ class RobotDirector:
         self.moveit2.cartesian_avoid_collisions = cartesian_avoid_collisions
         self.moveit2.cartesian_jump_threshold = cartesian_jump_threshold
 
-        self.node.get_logger().info(
-            f"Moving to {{position: {position}, quat: {quat_xyzw}}}, max_vel: {max_vel:.2f}, max_accel: {max_accel:.2f}}}"
+        self._print_pose_move_info(
+            position=position,
+            quat_xyzw=quat_xyzw,
+            pose=pose,
+            max_vel=max_vel,
+            max_accel=max_accel,
         )
+
         self.moveit2.move_to_pose(
             pose=pose,
             position=position,
@@ -229,6 +234,39 @@ class RobotDirector:
             cartesian_fraction_threshold=cartesian_fraction_threshold,
         )
         self._wait_for_move_execution(cancel_after_secs)
+
+    def _print_pose_move_info(
+        self,
+        position: Optional[
+            Union[Point, tuple[float, float, float], dict[str, float]]
+        ] = None,
+        quat_xyzw: Optional[
+            Union[Quaternion, tuple[float, float, float, float], dict[str, float]]
+        ] = None,
+        pose: Optional[Union[PoseStamped, Pose]] = None,
+        max_vel: float = 1.0,
+        max_accel: float = 1.0,
+    ) -> None:
+        pos_str = None
+        quat_str = None
+
+        if pose is not None:
+            p = pose.pose if hasattr(pose, "pose") else pose
+            pos_str = (p.position.x, p.position.y, p.position.z)
+            quat_str = (
+                p.orientation.x,
+                p.orientation.y,
+                p.orientation.z,
+                p.orientation.w,
+            )
+        else:
+            pos_str = position
+            quat_str = quat_xyzw
+
+        self.node.get_logger().info(
+            f"Moving to {{pos: {pos_str}, quat: {quat_str}}}, "
+            f"max_vel: {max_vel:.2f}, max_accel: {max_accel:.2f}"
+        )
 
     def gripper_move(
         self, width: Optional[float] = None, action: Optional[str] = None

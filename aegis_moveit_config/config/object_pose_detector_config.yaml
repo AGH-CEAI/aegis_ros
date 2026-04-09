@@ -1,0 +1,7 @@
+object_pose_detector:
+  ros__parameters:
+    aruco_size: 0.02
+    image_topic: "/cam_scene/rgb/image_rect"
+    cam_info_topic: "/cam_scene/rgb/camera_info"
+    output_frame: "base_link"
+    cam_frame: "cam_scene_rgb_camera_optical_frame"

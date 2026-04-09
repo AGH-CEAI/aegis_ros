@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-115](https://github.com/AGH-CEAI/aegis_ros/pull/115) - Setup scene camera setup.
 * [PR-114](https://github.com/AGH-CEAI/aegis_ros/pull/114) - Updated docs before release.
 * [PR-112](https://github.com/AGH-CEAI/aegis_ros/pull/112) - Cropped scene camera image output.
 * [PR-108](https://github.com/AGH-CEAI/aegis_ros/pull/108) - Reduced DepthAI pipeline for scene camera to RGB-only.

@@ -1,26 +1,33 @@
 # TODO(issue#107) Make DepthAI camera pipeline configurable
+# TODO(issue#113) Unify ROI configuration for all cameras
+# TODO(issue#116) Enable right and left scene camera
 /cam_scene:
   ros__parameters:
     camera:
       i_mx_id: 184430108157970F00
-      i_pipeline_type: RGB # RGB, RGBD
+      i_pipeline_type: RGB # RGB, RGBD, CamArray
       i_nn_type: None # rgb, spatial
     rgb:
-      # TODO(issue#113) Unify ROI configuration for all cameras
       # ---- ROI ----
       # Setup camera ROI with:
       # i_height x i_width (size)
-      # i_output_isp (false - center, true - from the 0,0 px)
+      # i_output_isp (false – center, true – from the (0, 0) px)
       i_height: 704 # 720
       i_width: 704 # 1280
       i_output_isp: false
-      # -------------
       i_enable_preview: false
       # i_enable_passthrough: true
       # i_keep_preview_aspect_ratio: true
       # i_preview_size: 416
     # stereo:
+    #   i_publish_topic: true
     #   i_subpixel: true
+    # right:
+    #   i_publish_topic: true
+    # left:
+    #   i_publish_topic: true
+    # depth:
+    #   i_publish_topic: true
     # spatial_bb_node:
     #   ros__parameters:
     #     desqueeze: true
