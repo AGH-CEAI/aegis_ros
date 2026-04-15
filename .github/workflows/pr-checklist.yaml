@@ -1,0 +1,20 @@
+name: PR checklist enforcement
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  checklist:
+    name: PR Checklist
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if PR checklist is incomplete
+        uses: mheap/require-checklist-action@v2.5.0
+        with:
+          requireChecklist: true
+          checklistRegex: '^- \[( |x|X)\]'
+          failIfNoChecklist: true
