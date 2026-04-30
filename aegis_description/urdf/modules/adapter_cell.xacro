@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="adapter_cell" params="parent prefix disable_cell disable_cell_collision">
+    <xacro:unless value="${disable_cell}">
+      <xacro:property name="height" value="0.015"/>
+      <xacro:property name="radius" value="0.0755"/>
+
+      <joint name="${prefix}adapter_cell_joint" type="fixed">
+        <origin xyz="0 0 -${height}" rpy="0 0 0"/>
+        <parent link="${parent}"/>
+        <child link="${prefix}adapter_cell"/>
+      </joint>
+
+      <link name="${prefix}adapter_cell">
+        <visual>
+          <origin xyz="0 0 ${0.5 * height}" rpy="0 0 0"/>
+          <geometry>
+            <cylinder radius="${radius}" length="${height}"/>
+          </geometry>
+          <material name="black">
+            <color rgba="0.04 0.04 0.04 1"/>
+          </material>
+        </visual>
+        <xacro:unless value="${disable_cell_collision}">
+          <collision>
+            <origin xyz="0 0 ${0.5 * height}" rpy="0 0 0"/>
+            <geometry>
+              <cylinder radius="${radius}" length="${height}"/>
+            </geometry>
+          </collision>
+        </xacro:unless>
+      </link>
+    </xacro:unless>
+  </xacro:macro>
+</robot>

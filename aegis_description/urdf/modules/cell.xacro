@@ -3,7 +3,7 @@
   <xacro:macro name="cell" params="parent disable_cell disable_cell_collision">
     <xacro:unless value="${disable_cell}">
       <joint name="world_to_cell" type="fixed">
-        <origin xyz="0 0 -0.806" rpy="0 0 -${0.5 * pi}"/>
+        <origin xyz="0 0 -0.821" rpy="0 0 -${0.5 * pi}"/>
         <parent link="${parent}"/>
         <child link="cell"/>
       </joint>
