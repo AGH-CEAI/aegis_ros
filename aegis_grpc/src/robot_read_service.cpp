@@ -23,20 +23,21 @@ RobotReadServiceImpl::RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node)
   tf_buffer_ = std::make_unique<tf2_ros::Buffer>(node_->get_clock());
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_, node_, false);
 
+  // TODO parametrize the queue (buffer size) from the cofnig
   wrench_sub_ = node_->create_subscription<geometry_msgs::msg::WrenchStamped>(
-      node_->get_parameter("topic_wrench").as_string(), 10,
+      node_->get_parameter("topic_wrench").as_string(), 1,
       std::bind(&RobotReadServiceImpl::WrenchSubCb, this, std::placeholders::_1));
   joint_state_sub_ = node_->create_subscription<sensor_msgs::msg::JointState>(
-      node_->get_parameter("topic_joints").as_string(), 10,
+      node_->get_parameter("topic_joints").as_string(), 1,
       std::bind(&RobotReadServiceImpl::JointStateSubCb, this, std::placeholders::_1));
   image_scene_sub_ = node_->create_subscription<sensor_msgs::msg::Image>(
-      node_->get_parameter("topic_camera_scene").as_string(), 10,
+      node_->get_parameter("topic_camera_scene").as_string(), 1,
       std::bind(&RobotReadServiceImpl::ImageSceneSubCb, this, std::placeholders::_1));
   image_right_sub_ = node_->create_subscription<sensor_msgs::msg::Image>(
-      node_->get_parameter("topic_camera_right").as_string(), 10,
+      node_->get_parameter("topic_camera_right").as_string(), 1,
       std::bind(&RobotReadServiceImpl::ImageRightSubCb, this, std::placeholders::_1));
   image_left_sub_ = node_->create_subscription<sensor_msgs::msg::Image>(
-      node_->get_parameter("topic_camera_left").as_string(), 10,
+      node_->get_parameter("topic_camera_left").as_string(), 1,
       std::bind(&RobotReadServiceImpl::ImageLeftSubCb, this, std::placeholders::_1));
 
   tcp_frame_ = node_->get_parameter("tcp_frame").as_string();
