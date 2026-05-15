@@ -16,7 +16,7 @@ RobotReadServiceImpl::RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node)
                       "[str] Init; Sub: Camera scene image topic.");
   DeclareROSParameter("topic_camera_left", std::string("/cam_tool_left/image_color"),
                       "[str] Init; Sub:Camera scene image topic.");
-  DeclareROSParameter("topics_history_depth", 1, "[bool] Init; The message history (buffer) size.");
+  DeclareROSParameter("topics_history_depth", 1, "[bool] Init; The topics messages history (buffer) size.");
   DeclareROSParameter("target_image_width", 64, "[int] Init; Target output image width in pixels.");
   DeclareROSParameter("target_image_height", 64, "[int] Init; Target output image height in pixels.");
   DeclareROSParameter("enable_image_resize", true, "[bool] Init; Enable resizing images before sending over gRPC.");

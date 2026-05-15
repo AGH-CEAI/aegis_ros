@@ -179,18 +179,19 @@ There is no hardcoded parameters, everything can be modified via ROS:
 
 **Initialization parameters**
 
-| Parameter             | Type     | Default                         | Units | Description                                      |
-| --------------------- | -------- | ------------------------------- | ----- | ------------------------------------------------ |
-| `tcp_frame`           | `string` | `"robotiq_hande_end"`           | -     | TF2 frame ID of the end-effector.                |
-| `base_frame`          | `string` | `"world"`                       | -     | TF2 base frame ID for EE pose lookup.            |
-| `topic_wrench`        | `string` | `"/wrench"`                     | -     | Topic providing force/torque (F/T) data.         |
-| `topic_joints`        | `string` | `"/joint_states"`               | -     | Topic providing joint state data.                |
-| `topic_camera_scene`  | `string` | `"/cam_scene/rgb/image_rect"`   | -     | Camera scene image topic.                        |
-| `topic_camera_right`  | `string` | `"/cam_tool_right/image_color"` | -     | Right tool camera image topic.                   |
-| `topic_camera_left`   | `string` | `"/cam_tool_left/image_color"`  | -     | Left tool camera image topic.                    |
-| `target_image_width`  | `int`    | `64`                            | px    | Target output image width in pixels.             |
-| `target_image_height` | `int`    | `64`                            | px    | Target output image height in pixels.            |
-| `enable_image_resize` | `bool`   | `true`                          | -     | Enable resizing images before sending over gRPC. |
+| Parameter              | Type     | Default                         | Units | Description                                      |
+| ---------------------- | -------- | ------------------------------- | ----- | ------------------------------------------------ |
+| `tcp_frame`            | `string` | `"robotiq_hande_end"`           | -     | TF2 frame ID of the end-effector.                |
+| `base_frame`           | `string` | `"world"`                       | -     | TF2 base frame ID for EE pose lookup.            |
+| `topic_wrench`         | `string` | `"/wrench"`                     | -     | Topic providing force/torque (F/T) data.         |
+| `topic_joints`         | `string` | `"/joint_states"`               | -     | Topic providing joint state data.                |
+| `topic_camera_scene`   | `string` | `"/cam_scene/rgb/image_rect"`   | -     | Camera scene image topic.                        |
+| `topic_camera_right`   | `string` | `"/cam_tool_right/image_color"` | -     | Right tool camera image topic.                   |
+| `topic_camera_left`    | `string` | `"/cam_tool_left/image_color"`  | -     | Left tool camera image topic.                    |
+| `topics_history_depth` | `int`    | `1`                             | -     | The topics messages history (buffer) size.       |
+| `target_image_width`   | `int`    | `64`                            | px    | Target output image width in pixels.             |
+| `target_image_height`  | `int`    | `64`                            | px    | Target output image height in pixels.            |
+| `enable_image_resize`  | `bool`   | `true`                          | -     | Enable resizing images before sending over gRPC. |
 
 >[!TIP]
 > The end-effector's TCP pose is obtained from the tf2 transform (using `tcp_frame` and `base_frame`).
