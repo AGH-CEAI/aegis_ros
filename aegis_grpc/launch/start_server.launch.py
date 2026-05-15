@@ -14,6 +14,7 @@ def generate_launch_description():
                         "tcp_frame": "robotiq_hande_end",
                         "base_frame": "world",
                         "topic_wrench": "/net_ft_sensor_broadcaster/wrench",
+                        "topics_history_depth": 1,
                     }
                 ],
             )
