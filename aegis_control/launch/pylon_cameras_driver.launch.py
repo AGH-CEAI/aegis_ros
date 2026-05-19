@@ -164,6 +164,11 @@ def launch_nodes(context: LaunchContext):
         config_file=roi_file, camera_names=f"{node_name_left_str},{node_name_right_str}"
     )
 
+    white_balance_setter_node = create_white_balance_setter_node(
+        config_file=config_file,
+        camera_names=f"{node_name_left_str},{node_name_right_str}",
+    )
+
     return [
         node_camera_left,
         node_camera_right,
@@ -171,6 +176,7 @@ def launch_nodes(context: LaunchContext):
         static_tf_tool_right_node,
         static_tf_tool_left_node,
         roi_setter_node,
+        white_balance_setter_node,
     ]
 
 
@@ -245,6 +251,23 @@ def create_roi_setter_node(
         package="aegis_control",
         executable="pylon_roi_setter.py",
         name="pylon_roi_setter",
+        output="screen",
+        parameters=[
+            {
+                "config_file": config_file,
+                "camera_names": camera_names,
+            }
+        ],
+    )
+
+
+def create_white_balance_setter_node(
+    config_file: LaunchConfiguration, camera_names: LaunchConfiguration
+) -> Node:
+    return Node(
+        package="aegis_control",
+        executable="pylon_white_balance_setter.py",
+        name="pylon_white_balance_setter",
         output="screen",
         parameters=[
             {
