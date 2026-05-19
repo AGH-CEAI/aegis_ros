@@ -290,7 +290,8 @@ void RobotReadServiceImpl::FillProtoImage(const sensor_msgs::msg::Image& ros,
                                           proto_aegis_grpc::v1::Image* out,
                                           cv::Mat& buffer) {
   if (ros.encoding != "bgr8") {
-    RCLCPP_ERROR(node_->get_logger(), "Unsupported image encoding (expected 'bgr8'), got: '%s'", ros.encoding.c_str());
+    RCLCPP_ERROR(node_->get_logger(), "[CAMERA FRAME: %s] Unsupported image encoding (expected 'bgr8'), got: '%s'",
+                 ros.header.frame_id.c_str(), ros.encoding.c_str());
     return;
   }
   if (!enable_image_resize_) {
