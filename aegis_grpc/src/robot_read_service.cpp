@@ -16,6 +16,7 @@ RobotReadServiceImpl::RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node)
                       "[str] Init; Sub: Camera scene image topic.");
   DeclareROSParameter("topic_camera_left", std::string("/cam_tool_left/image_color"),
                       "[str] Init; Sub:Camera scene image topic.");
+  DeclareROSParameter("topics_history_depth", 1, "[bool] Init; The topics messages history (buffer) size.");
   DeclareROSParameter("target_image_width", 64, "[int] Init; Target output image width in pixels.");
   DeclareROSParameter("target_image_height", 64, "[int] Init; Target output image height in pixels.");
   DeclareROSParameter("enable_image_resize", true, "[bool] Init; Enable resizing images before sending over gRPC.");
@@ -24,19 +25,19 @@ RobotReadServiceImpl::RobotReadServiceImpl(std::shared_ptr<rclcpp::Node> node)
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_, node_, false);
 
   wrench_sub_ = node_->create_subscription<geometry_msgs::msg::WrenchStamped>(
-      node_->get_parameter("topic_wrench").as_string(), 10,
+      node_->get_parameter("topic_wrench").as_string(), node_->get_parameter("topics_history_depth").as_int(),
       std::bind(&RobotReadServiceImpl::WrenchSubCb, this, std::placeholders::_1));
   joint_state_sub_ = node_->create_subscription<sensor_msgs::msg::JointState>(
-      node_->get_parameter("topic_joints").as_string(), 10,
+      node_->get_parameter("topic_joints").as_string(), node_->get_parameter("topics_history_depth").as_int(),
       std::bind(&RobotReadServiceImpl::JointStateSubCb, this, std::placeholders::_1));
   image_scene_sub_ = node_->create_subscription<sensor_msgs::msg::Image>(
-      node_->get_parameter("topic_camera_scene").as_string(), 10,
+      node_->get_parameter("topic_camera_scene").as_string(), node_->get_parameter("topics_history_depth").as_int(),
       std::bind(&RobotReadServiceImpl::ImageSceneSubCb, this, std::placeholders::_1));
   image_right_sub_ = node_->create_subscription<sensor_msgs::msg::Image>(
-      node_->get_parameter("topic_camera_right").as_string(), 10,
+      node_->get_parameter("topic_camera_right").as_string(), node_->get_parameter("topics_history_depth").as_int(),
       std::bind(&RobotReadServiceImpl::ImageRightSubCb, this, std::placeholders::_1));
   image_left_sub_ = node_->create_subscription<sensor_msgs::msg::Image>(
-      node_->get_parameter("topic_camera_left").as_string(), 10,
+      node_->get_parameter("topic_camera_left").as_string(), node_->get_parameter("topics_history_depth").as_int(),
       std::bind(&RobotReadServiceImpl::ImageLeftSubCb, this, std::placeholders::_1));
 
   tcp_frame_ = node_->get_parameter("tcp_frame").as_string();
@@ -289,7 +290,8 @@ void RobotReadServiceImpl::FillProtoImage(const sensor_msgs::msg::Image& ros,
                                           proto_aegis_grpc::v1::Image* out,
                                           cv::Mat& buffer) {
   if (ros.encoding != "bgr8") {
-    RCLCPP_ERROR(node_->get_logger(), "Unsupported image encoding (expected 'bgr8'), got: '%s'", ros.encoding.c_str());
+    RCLCPP_ERROR(node_->get_logger(), "[CAMERA FRAME: %s] Unsupported image encoding (expected 'bgr8'), got: '%s'",
+                 ros.header.frame_id.c_str(), ros.encoding.c_str());
     return;
   }
   if (!enable_image_resize_) {
