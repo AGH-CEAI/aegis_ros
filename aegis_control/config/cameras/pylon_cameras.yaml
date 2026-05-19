@@ -1,9 +1,8 @@
 # Camera parameters - default: pylon_ros_camera/pylon_ros2_camera_wrapper/config/default.yaml
-
-/**:
+cam_tool_left:
   ros__parameters:
     #  The tf frame under which the images were published
-    camera_frame: pylon_camera
+    camera_frame: tool_left
 
     #  The DeviceUserID of the camera. If empty, the first camera found in the
     #  device list will be used
@@ -41,7 +40,7 @@
     shutter_mode: "global"
 
     # Camera white balance auto
-    white_balance_auto: 1
+    white_balance_auto: 2 # 0 - off, 1 - once, 2 - continuous
 
     ##########################################################################
     ######################## Image Intensity Settings ########################
@@ -130,4 +129,32 @@
     #  you can use the frame transmission delay parameter to stagger the
     #  start of image data transmissions from each camera.
     # gige:
+    #  frame_transmission_delay: 0
+
+cam_tool_right:
+  ros__parameters:
+    camera_frame: tool_right
+    device_user_id: ""
+    camera_info_url: ""
+    image_encoding: "bayer_rggb8"
+
+    # binning_x: 1
+    # binning_y: 1
+
+    frame_rate: 25.0
+    shutter_mode: "global"
+    white_balance_auto: 2
+
+    exposure: 1000.0
+    # gain: 0.5
+    # gamma: 1.0
+    brightness: 25
+    brightness_continuous: true
+    # exposure_auto: true
+    # gain_auto: true
+    # exposure_search_timeout: 5.0
+    # auto_exposure_upper_limit: 2000000.0
+
+    # gige/mtu_size: 3000
+    # gige/inter_pkg_delay: 1000
     #  frame_transmission_delay: 0
