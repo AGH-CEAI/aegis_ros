@@ -16,7 +16,9 @@ aegis_control/
 │         ├── net_ft_broadcaster.yaml
 │         ├── update_rate.yaml
 │         └── ur_drivers.yaml
-│
+├── scripts
+│    ├── pylon_roi_setter.py
+│    └── pylon_white_balance_setter.py
 └── launch
     ├── depthai_cameras_driver.launch.py
     ├── ft_sensor_driver.launch.py
@@ -26,18 +28,20 @@ aegis_control/
     └── ur_driver.launch.py
 ```
 
-| File/Directory                                                                 | Description                                                                                                                                                   |
-| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`config/cameras/depthai_cameras.yaml`](./config/cameras/depthai_cameras.yaml) | Parameters for the Luxonis DepthAI camera node, which is composed in the `depthai_cameras_driver.launch.py` file.                                             |
-| [`config/cameras/pylon_cameras.yaml`](./config/cameras/pylon_cameras.yaml)     | Parameters for the Basler ace (Pylon) cameras nodes, which are composed in the `pylon_cameras_driver.launch.py` file.                                         |
-| [`config/cameras/yolo.json`](./config/cameras/yolo.json)                       | Parameters for the default YOLOv5 detection model for Luxonis scene camera.                                                                                     |
-| `config/controllers/*.yaml`                                                    | All `controller_manager` node's parameters, which are composed in the `start_drivers.launch.py` file.                                                         |
-| [depthai_cameras_driver.launch.py](./launch/depthai_cameras_driver.launch.py)  | Launches DepthAI nodes from the [depthai_ros_driver](https://github.com/luxonis/depthai-ros/tree/humble/depthai_ros_driver) to acquire data from the cameras. |
-| [ft_sensor_driver.launch.py](./launch/ft_sensor_driver.launch.py)              | Launches the [ros2_net_ft_driver](https://github.com/AGH-CEAI/ros2_net_ft_driver) to control the Schunk FT AXIA80 sensor.                                     |
-| [gripper_driver.launch.py](./launch/gripper_driver.launch.py)                  | Launches the [robotiq_hande_driver](https://github.com/AGH-CEAI/robotiq_hande_driver) to control the Robotiq Hand-E gripper.                                  |
-| [pylon_cameras_driver.launch.py](./launch/pylon_cameras_driver.launch.py)      | Launches the [pylon_ros2_camera_wrapper](https://github.com/basler/pylon-ros-camera) to control the Basler ace cameras.                                  |
-| [start_drivers.launch.py](./launch/start_drivers.launch.py)                    | The main launch file to run the entire Aegis' `ros2_control` stack.                                                                                           |
-| [ur_driver.launch.py](./launch/ur_driver.launch.py)                            | Launches nodes from the [ur_robot_driver](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver) to control the UR5e robot.                         |
+| File/Directory                                                                     | Description                                                                                                                                                   |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`config/cameras/depthai_cameras.yaml`](./config/cameras/depthai_cameras.yaml)     | Parameters for the Luxonis DepthAI camera node, which is composed in the `depthai_cameras_driver.launch.py` file.                                             |
+| [`config/cameras/pylon_cameras.yaml`](./config/cameras/pylon_cameras.yaml)         | Parameters for the Basler ace (Pylon) cameras nodes, which are composed in the `pylon_cameras_driver.launch.py` file.                                         |
+| [`config/cameras/yolo.json`](./config/cameras/yolo.json)                           | Parameters for the default YOLOv5 detection model for Luxonis scene camera.                                                                                   |
+| `config/controllers/*.yaml`                                                        | All `controller_manager` node's parameters, which are composed in the `start_drivers.launch.py` file.                                                         |
+| [`scripts/pylon_roi_setter.py`](./scripts/pylon_roi_setter.py)                     | Script-node included in launch to automatically setup the Pylon cameras ROI.                                                                                   |
+| [`scripts/pylon_white_balance_setter.py`](./scripts/pylon_white_balance_setter.py) | Script-node included in launch to automatically setup the Pylon cameras white balance.                                                                                   |
+| [depthai_cameras_driver.launch.py](./launch/depthai_cameras_driver.launch.py)      | Launches DepthAI nodes from the [depthai_ros_driver](https://github.com/luxonis/depthai-ros/tree/humble/depthai_ros_driver) to acquire data from the cameras. |
+| [ft_sensor_driver.launch.py](./launch/ft_sensor_driver.launch.py)                  | Launches the [ros2_net_ft_driver](https://github.com/AGH-CEAI/ros2_net_ft_driver) to control the Schunk FT AXIA80 sensor.                                     |
+| [gripper_driver.launch.py](./launch/gripper_driver.launch.py)                      | Launches the [robotiq_hande_driver](https://github.com/AGH-CEAI/robotiq_hande_driver) to control the Robotiq Hand-E gripper.                                  |
+| [pylon_cameras_driver.launch.py](./launch/pylon_cameras_driver.launch.py)          | Launches the [pylon_ros2_camera_wrapper](https://github.com/basler/pylon-ros-camera) to control the Basler ace cameras.                                       |
+| [start_drivers.launch.py](./launch/start_drivers.launch.py)                        | The main launch file to run the entire Aegis' `ros2_control` stack.                                                                                           |
+| [ur_driver.launch.py](./launch/ur_driver.launch.py)                                | Launches nodes from the [ur_robot_driver](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver) to control the UR5e robot.                         |
 
 ## Neural network
 For details on training and deploying YOLOv5 model on Luxonis cameras (DepthAI nodes), see the [tutorial](./docs/yolov5_tutorial.md).
@@ -46,3 +50,4 @@ For details on training and deploying YOLOv5 model on Luxonis cameras (DepthAI n
 
 - ROS 2 Humble ships with the older structure of the [Universal_Robots_ROS2_Driver](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver/tree/humble) Due to the complexity of our project (where we need to merge several other controllers into a single `control_manager` ode configuration), the `ur_driver.launch.py` file is based on version `2.5.1` of UR's `ur_robot_driver` [launch file](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver/blob/humble/ur_robot_driver/launch/ur_control.launch.py). The main difference is the removal of all unused parameters, which are set by default by the driver itself.
 - Consequently, any distribution change (for instance, an upgrade to ROS 2 Jazzy) will result in catastrophic failure due to the incompatibility of parameters in the newer version of the driver (currently `3.0.1`). On the other hand, the newer driver simplifies many of our headaches regarding different configuration parameters.
+- The configuration from [pylon-ros-camera](https://github.com/basler/pylon-ros-camera) is not working correctly. To mitigate this problem there are additional node-scripts just to setup the cameras via the services.
