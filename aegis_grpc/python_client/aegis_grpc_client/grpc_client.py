@@ -1,12 +1,12 @@
 import logging
-from enum import Enum
+from enum import Enum, auto
 from typing import Optional, Union
 from contextlib import asynccontextmanager
 
 import numpy as np
 import grpc
 from google.protobuf.empty_pb2 import Empty
-from strenum import StrEnum
+from strenum import StrEnum, LowercaseStrEnum
 
 from proto_aegis_grpc.v1 import (
     robot_srvs_pb2,
@@ -34,14 +34,35 @@ class StateModality(StrEnum):
     WRENCH = "wrench"
 
 
+class AegisJointName(LowercaseStrEnum):
+    ROBOTIQ_HANDE_LEFT_FINGER_JOINT = auto()
+    SHOULDER_PAN_JOINT = auto()
+    WRIST_3_JOINT = auto()
+    WRIST_2_JOINT = auto()
+    WRIST_1_JOINT = auto()
+    ELBOW_JOINT = auto()
+    SHOULDER_LIFT_JOINT = auto()
+
+
+AEGIS_JOINTS_ORDER: tuple[AegisJointName, ...] = (
+    AegisJointName.SHOULDER_PAN_JOINT,
+    AegisJointName.SHOULDER_LIFT_JOINT,
+    AegisJointName.ELBOW_JOINT,
+    AegisJointName.WRIST_1_JOINT,
+    AegisJointName.WRIST_2_JOINT,
+    AegisJointName.WRIST_3_JOINT,
+    AegisJointName.ROBOTIQ_HANDE_LEFT_FINGER_JOINT,
+)
+
+
 class AegisJointIndex(Enum):
-    ROBOTIQ_HANDE_LEFT_FINGER_JOINT = 0
-    SHOULDER_PAN_JOINT = 1
-    WRIST_3_JOINT = 2
-    WRIST_2_JOINT = 3
-    WRIST_1_JOINT = 4
-    ELBOW_JOINT = 5
-    SHOULDER_LIFT_JOINT = 6
+    SHOULDER_PAN_JOINT = 0
+    SHOULDER_LIFT_JOINT = 1
+    ELBOW_JOINT = 2
+    WRIST_1_JOINT = 3
+    WRIST_2_JOINT = 4
+    WRIST_3_JOINT = 5
+    ROBOTIQ_HANDE_LEFT_FINGER_JOINT = 6
 
 
 class PrefixedLoggerAdapter(logging.LoggerAdapter):
