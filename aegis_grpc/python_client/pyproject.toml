@@ -1,6 +1,6 @@
 [project]
 name = "aegis_grpc_client"
-version = "0.1.0"
+version = "0.2.0"
 description = "A gRPC client to read and control the Aegis robot."
 authors = [
     { name = "AGH Center of Excellence in Artificial Intelligence", email = "ceai@agh.edu.pl" }
