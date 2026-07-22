@@ -4,6 +4,7 @@ package aegis_bringup {
     class bringup << (L,#FF7700) LaunchFile >> {
         Arg mock_hardware="false"
         Arg launch_rviz="true"
+        Arg disable_cameras="false"
         Param namespace=""
         Param tf_prefix=""
     }
@@ -25,6 +26,7 @@ package aegis_control {
     class start_drivers << (L,#FF7700) LaunchFile >> {
         Param tf_prefix
         Param mock_hardware
+        Param disable_cameras
         Node ros2_control::controller_manager()
     }
     class ur_driver << (L,#FF7700) LaunchFile >> {
@@ -41,6 +43,10 @@ package aegis_control {
     }
     class gripper_driver << (L,#FF7700) LaunchFile >> {
         Node ros2_control::controllers_spawner()
+    }
+    class cameras_driver << (L,#FF7700) LaunchFile >> {
+        Param tf_prefix
+        Param mock_hardware
     }
     class depthai_cameras_driver << (L,#FF7700) LaunchFile >> {
         Node depthai_ros_driver::cam_scene()
@@ -135,8 +141,9 @@ aegis_description.robot_description *-- aegis_description.urdf.aegis_urdf
 aegis_control.start_drivers *-- aegis_control.ur_driver
 aegis_control.start_drivers *-- aegis_control.ft_sensor_driver
 aegis_control.start_drivers *-- aegis_control.gripper_driver
-aegis_control.start_drivers *-- aegis_control.depthai_cameras_driver
-aegis_control.start_drivers *-- aegis_control.pylon_cameras_driver
+aegis_control.start_drivers *-- aegis_control.cameras_driver
+aegis_control.cameras_driver *-- aegis_control.depthai_cameras_driver
+aegis_control.cameras_driver *-- aegis_control.pylon_cameras_driver
 aegis_control.start_drivers *-- aegis_control.config.controllers
 aegis_control.depthai_cameras_driver *-up- aegis_control.config.cameras.depthai_cameras
 aegis_control.depthai_cameras_driver *-up- aegis_control.config.cameras.yolo

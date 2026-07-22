@@ -28,6 +28,7 @@ Possible launch arguments:
 * `launch_rviz:={false, true}` (default: `true`) – launches visualization in RViz
 * `disable_cell:={false, true}` (default: `false`) – completely removes the cell from the robot description
 * `disable_cell_collision:={false, true}` (default: `false`) – keeps the cell visual geometry but removes its collision geometry
+* `disable_cameras:={false, true}` (default: `false`) – do not launch the cameras drivers
 
 ### Control the client program on the robot via dashboard service:
 
