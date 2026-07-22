@@ -252,13 +252,14 @@ def create_camera_node(
         name=name + "_container",
         namespace="",
         package="rclcpp_components",
-        executable="component_container",
+        executable="component_container_mt",
         composable_node_descriptions=[
             ComposableNode(
                 package="depthai_ros_driver",
                 plugin="depthai_ros_driver::Camera",
                 name=name,
                 parameters=[cam_params_path, tf_params],
+                extra_arguments=[{"use_intra_process_comms": True}],
             )
         ],
         arguments=["--ros-args", "--log-level", log_level],
@@ -289,6 +290,7 @@ def create_rectify_node(
                     ),
                     ("image_rect/theora", name + type + "/image_rect/theora"),
                 ],
+                extra_arguments=[{"use_intra_process_comms": True}],
             )
         ],
     )
@@ -315,6 +317,7 @@ def create_spatial_bb_node(
                     ("spatial_bb", name + "/spatial_bb"),
                 ],
                 parameters=[cam_params_path],
+                extra_arguments=[{"use_intra_process_comms": True}],
             ),
         ],
     )
@@ -337,6 +340,7 @@ def create_point_cloud_node(
                     ("depth_registered/image_rect", name + "/stereo/image_raw"),
                     ("/points", name + "/pointcloud"),
                 ],
+                extra_arguments=[{"use_intra_process_comms": True}],
             ),
         ],
     )
