@@ -1,4 +1,3 @@
-#include <thread>
 #include "aegis_grpc/robot_control_service.hpp"
 
 using namespace std::chrono_literals;
