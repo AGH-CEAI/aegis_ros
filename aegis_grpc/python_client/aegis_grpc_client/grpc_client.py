@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 import numpy as np
 import grpc
 from google.protobuf.empty_pb2 import Empty
+from strenum import StrEnum
 
 from proto_aegis_grpc.v1 import (
     robot_srvs_pb2,
@@ -14,6 +15,23 @@ from proto_aegis_grpc.v1 import (
     control_msgs_pb2,
     sensor_msgs_pb2,
 )
+
+
+class ModalityGroup(StrEnum):
+    STATE = "state"
+    VISION = "vision"
+
+
+class CameraName(StrEnum):
+    CAMERA_SCENE = "scene"
+    CAMERA_TOOL_LEFT = "tool_left"
+    CAMERA_TOOL_RIGHT = "tool_right"
+
+
+class StateModality(StrEnum):
+    POSE = "pose"
+    JOINTS = "joints"
+    WRENCH = "wrench"
 
 
 class AegisJointIndex(Enum):
@@ -161,9 +179,9 @@ class AegisRobotClient:
         try:
             state = await self.read_stub.GetRobotState(Empty())
             return {
-                "pose": self._pose_to_array(state.pose),
-                "wrench": self._wrench_to_array(state.wrench),
-                "joints": self._joints_to_array(state.joint_state),
+                StateModality.POSE: self._pose_to_array(state.pose),
+                StateModality.WRENCH: self._wrench_to_array(state.wrench),
+                StateModality.JOINTS: self._joints_to_array(state.joint_state),
             }
         except grpc.RpcError as e:
             self.logger.error(f"GetRobotState failed: {e}")
@@ -201,9 +219,9 @@ class AegisRobotClient:
         try:
             vision = await self.read_stub.GetRobotVision(Empty())
             return {
-                "scene": self._image_to_array(vision.image_scene),
-                "right": self._image_to_array(vision.image_right),
-                "left": self._image_to_array(vision.image_left),
+                CameraName.CAMERA_SCENE: self._image_to_array(vision.image_scene),
+                CameraName.CAMERA_TOOL_RIGHT: self._image_to_array(vision.image_right),
+                CameraName.CAMERA_TOOL_LEFT: self._image_to_array(vision.image_left),
             }
         except grpc.RpcError as e:
             self.logger.error(f"GetRobotVision failed: {e}")
@@ -214,15 +232,23 @@ class AegisRobotClient:
         try:
             obs = await self.read_stub.GetAll(Empty())
             return {
-                "state": {
-                    "pose": self._pose_to_array(obs.robot_state.pose),
-                    "wrench": self._wrench_to_array(obs.robot_state.wrench),
-                    "joints": self._joints_to_array(obs.robot_state.joint_state),
+                ModalityGroup.STATE: {
+                    StateModality.POSE: self._pose_to_array(obs.robot_state.pose),
+                    StateModality.WRENCH: self._wrench_to_array(obs.robot_state.wrench),
+                    StateModality.JOINTS: self._joints_to_array(
+                        obs.robot_state.joint_state
+                    ),
                 },
-                "vision": {
-                    "scene": self._image_to_array(obs.robot_vision.image_scene),
-                    "right": self._image_to_array(obs.robot_vision.image_right),
-                    "left": self._image_to_array(obs.robot_vision.image_left),
+                ModalityGroup.VISION: {
+                    CameraName.CAMERA_SCENE: self._image_to_array(
+                        obs.robot_vision.image_scene
+                    ),
+                    CameraName.CAMERA_TOOL_RIGHT: self._image_to_array(
+                        obs.robot_vision.image_right
+                    ),
+                    CameraName.CAMERA_TOOL_LEFT: self._image_to_array(
+                        obs.robot_vision.image_left
+                    ),
                 },
             }
         except grpc.RpcError as e:
