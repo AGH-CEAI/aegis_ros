@@ -57,27 +57,13 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
         launch_arguments=launch_args.items(),
     )
 
-    depthai_cameras_driver = IncludeLaunchDescription(
+    cameras_driver = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
                 [
                     FindPackageShare("aegis_control"),
                     "launch",
-                    "depthai_cameras_driver.launch.py",
-                ]
-            )
-        ),
-        launch_arguments=launch_args.items(),
-        condition=UnlessCondition(disable_cameras),
-    )
-
-    pylon_cameras_driver = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            PathJoinSubstitution(
-                [
-                    FindPackageShare("aegis_control"),
-                    "launch",
-                    "pylon_cameras_driver.launch.py",
+                    "cameras_driver.launch.py",
                 ]
             )
         ),
@@ -103,8 +89,7 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
         control_node,
         gripper_driver,
         ft_sensor_driver,
-        depthai_cameras_driver,
-        pylon_cameras_driver,
+        cameras_driver,
     ]
 
 
