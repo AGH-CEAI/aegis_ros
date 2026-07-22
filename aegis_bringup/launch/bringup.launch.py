@@ -23,6 +23,7 @@ def launch_setup(context: LaunchContext) -> list[IncludeLaunchDescription]:
         "tf_prefix": LaunchConfiguration("tf_prefix", default=""),
         "mock_hardware": LaunchConfiguration("mock_hardware"),
         "launch_rviz": LaunchConfiguration("launch_rviz"),
+        "disable_cameras": LaunchConfiguration("disable_cameras"),
     }
 
     robot_description_launch = IncludeLaunchDescription(
@@ -157,6 +158,14 @@ def generate_launch_description() -> LaunchDescription:
             "launch_rviz",
             default_value=EnvironmentVariable("LAUNCH_RVIZ", default_value="true"),
             description="Launch RViz for robot state visualization & MoveIt2 manual control.",
+        )
+    )
+
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "disable_cameras",
+            default_value=EnvironmentVariable("DISABLE_CAMERAS", default_value="false"),
+            description="Do not launch the cameras drivers.",
         )
     )
 

@@ -8,7 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+* [PR-127](https://github.com/AGH-CEAI/aegis_ros/pull/127) - Introduced `disable_cameras` launch argument to start bringup without the camera drivers.
+
 ### Changed
+
+* [PR-127](https://github.com/AGH-CEAI/aegis_ros/pull/127) - Updated README and UML diagram.
+
 ### Deprecated
 ### Removed
 ### Fixed

@@ -1,5 +1,6 @@
 from launch import LaunchDescription, LaunchContext, LaunchDescriptionEntity
 from launch.actions import IncludeLaunchDescription, OpaqueFunction
+from launch.conditions import UnlessCondition
 
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
@@ -29,6 +30,7 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
         "mock_hardware": LaunchConfiguration("mock_hardware", default="false"),
     }
     mock_hardware_bool = str2bool(launch_args["mock_hardware"].perform(context))
+    disable_cameras = LaunchConfiguration("disable_cameras", default="false")
 
     control_params_files = prepare_params_files()
     control_node = prepare_control_node(mock_hardware_bool, control_params_files)
@@ -55,30 +57,18 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
         launch_arguments=launch_args.items(),
     )
 
-    depthai_cameras_driver = IncludeLaunchDescription(
+    cameras_driver = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
                 [
                     FindPackageShare("aegis_control"),
                     "launch",
-                    "depthai_cameras_driver.launch.py",
+                    "cameras_driver.launch.py",
                 ]
             )
         ),
         launch_arguments=launch_args.items(),
-    )
-
-    pylon_cameras_driver = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            PathJoinSubstitution(
-                [
-                    FindPackageShare("aegis_control"),
-                    "launch",
-                    "pylon_cameras_driver.launch.py",
-                ]
-            )
-        ),
-        launch_arguments=launch_args.items(),
+        condition=UnlessCondition(disable_cameras),
     )
 
     gripper_driver = IncludeLaunchDescription(
@@ -99,8 +89,7 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
         control_node,
         gripper_driver,
         ft_sensor_driver,
-        depthai_cameras_driver,
-        pylon_cameras_driver,
+        cameras_driver,
     ]
 
 
