@@ -29,14 +29,14 @@ repos:
         args: ["--autofix", "--no-sort-keys", "--indent", "2"]
 
 -   repo: https://github.com/codespell-project/codespell
-    rev: v2.4.2
+    rev: v2.4.3
     hooks:
     -   id: codespell
         args: [-w]
 
 -   repo: https://github.com/astral-sh/ruff-pre-commit
 
-    rev: v0.15.13
+    rev: v0.15.22
     hooks:
     -   id: ruff-check
         args: [--fix, --exit-non-zero-on-fix]
@@ -49,7 +49,7 @@ repos:
     -   id: cmake-lint
 
 -   repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v22.1.5
+    rev: v22.1.8
     hooks:
     -   id: clang-format
         types_or: [c++, proto]
@@ -63,7 +63,7 @@ repos:
     -   id: sort-package-xml
 
 -   repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.11.15
+    rev: 0.11.31
     hooks:
     -   id: uv-lock
 

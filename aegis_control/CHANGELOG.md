@@ -14,7 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 ### Deprecated
 ### Removed
+
 ### Fixed
+
+* [PR-126](https://github.com/AGH-CEAI/aegis_ros/pull/126) - Fixed frame drops on the DepthAI rectified image by enabling intra-process comms and a multithreaded component container.
+
 ### Security
 
 ## [v202603091730]
