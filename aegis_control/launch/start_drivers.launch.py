@@ -1,5 +1,6 @@
 from launch import LaunchDescription, LaunchContext, LaunchDescriptionEntity
 from launch.actions import IncludeLaunchDescription, OpaqueFunction
+from launch.conditions import UnlessCondition
 
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
@@ -29,6 +30,7 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
         "mock_hardware": LaunchConfiguration("mock_hardware", default="false"),
     }
     mock_hardware_bool = str2bool(launch_args["mock_hardware"].perform(context))
+    disable_cameras = LaunchConfiguration("disable_cameras", default="false")
 
     control_params_files = prepare_params_files()
     control_node = prepare_control_node(mock_hardware_bool, control_params_files)
@@ -66,6 +68,7 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
             )
         ),
         launch_arguments=launch_args.items(),
+        condition=UnlessCondition(disable_cameras),
     )
 
     pylon_cameras_driver = IncludeLaunchDescription(
@@ -79,6 +82,7 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
             )
         ),
         launch_arguments=launch_args.items(),
+        condition=UnlessCondition(disable_cameras),
     )
 
     gripper_driver = IncludeLaunchDescription(
