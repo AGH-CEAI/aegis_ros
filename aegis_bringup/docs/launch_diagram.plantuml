@@ -45,7 +45,7 @@ package aegis_control {
         Node ros2_control::controllers_spawner()
     }
     class cameras_driver << (L,#FF7700) LaunchFile >> {
-          Param tf_prefix
+        Param tf_prefix
         Param mock_hardware
     }
     class depthai_cameras_driver << (L,#FF7700) LaunchFile >> {
