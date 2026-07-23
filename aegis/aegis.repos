@@ -26,4 +26,4 @@ repositories:
   wled_ros_driver:
     type: git
     url: https://github.com/BeniaminBuzun/wled_ros_driver_fork.git
-    version: fafa5c2a4988ae9c2a0aaf79105fb39191800f6c
+    version: 4ae40346186ffd408e6e65bcb23246b8a6910ff5
