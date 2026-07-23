@@ -1,0 +1,17 @@
+wled_service_node:
+  ros__parameters:
+    wled_url: "192.168.100.50"
+    led_count: 44
+    scenes:
+      scene_1:
+        color: [255, 0, 0]   # Red in RGB
+        brightness: 255
+      scene_2:
+        color: [0, 255, 0]   # Green in RGB
+        brightness: 255
+      scene_3:
+        color: [0, 0, 255]   # Blue in RGB
+        brightness: 127
+      scene_4:
+        color: [255, 255, 0] # Yellow in RGB
+        brightness: 127

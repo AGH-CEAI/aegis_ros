@@ -23,3 +23,7 @@ repositories:
     type: git
     url: https://github.com/basler/pylon-ros-camera.git
     version: a739e4c30393705e3e63a55c9aafaeb64471ff09
+  wled_ros_driver:
+    type: git
+    url: https://github.com/BeniaminBuzun/wled_ros_driver_fork.git
+    version: fafa5c2a4988ae9c2a0aaf79105fb39191800f6c

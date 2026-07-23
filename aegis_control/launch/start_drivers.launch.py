@@ -83,13 +83,25 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
         ),
         launch_arguments=launch_args.items(),
     )
-
+    wled_service_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution(
+                [
+                    FindPackageShare("aegis_control"),
+                    "launch",
+                    "wled_service.launch.py",
+                ]
+            )
+        ),
+        launch_arguments=launch_args.items(),
+    )
     return [
         ur_driver,
         control_node,
         gripper_driver,
         ft_sensor_driver,
         cameras_driver,
+        wled_service_launch,
     ]
 
 
