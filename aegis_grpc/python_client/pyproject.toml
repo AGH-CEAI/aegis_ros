@@ -1,6 +1,6 @@
 [project]
 name = "aegis_grpc_client"
-version = "0.1.0"
+version = "0.2.0"
 description = "A gRPC client to read and control the Aegis robot."
 authors = [
     { name = "AGH Center of Excellence in Artificial Intelligence", email = "ceai@agh.edu.pl" }
@@ -9,11 +9,12 @@ license = { text = "Apache-2.0" }
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
 dependencies = [
-    "grpcio<1.51",
     "grpcio-tools<1.51",
+    "grpcio<1.51",
     "numpy>=1.26.4",
     "proto-aegis-grpc",
     "protobuf<3.21",
+    "strenum>=0.4.15",
 ]
 
 [project.optional-dependencies]
