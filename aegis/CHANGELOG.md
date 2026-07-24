@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+* [PR-128](https://github.com/AGH-CEAI/aegis_ros/pull/128) - Added a remote setup guide for connecting to the robot station over the network.
+
 ### Changed
 ### Deprecated
 ### Removed

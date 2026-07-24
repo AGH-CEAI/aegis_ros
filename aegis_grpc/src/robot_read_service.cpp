@@ -276,14 +276,30 @@ void RobotReadServiceImpl::FillProtoJointState(const sensor_msgs::msg::JointStat
   out->clear_velocity();
   out->clear_effort();
 
-  for (const auto& v : ros.name)
-    out->add_name(v);
-  for (const auto& v : ros.position)
-    out->add_position(v);
-  for (const auto& v : ros.velocity)
-    out->add_velocity(v);
-  for (const auto& v : ros.effort)
-    out->add_effort(v);
+  const bool has_velocity = ros.velocity.size() == ros.name.size();
+  const bool has_effort = ros.effort.size() == ros.name.size();
+
+  out->mutable_name()->Reserve(AEGIS_JOINT_ORDER.size());
+  out->mutable_position()->Reserve(AEGIS_JOINT_ORDER.size());
+  if (has_velocity)
+    out->mutable_velocity()->Reserve(AEGIS_JOINT_ORDER.size());
+  if (has_effort)
+    out->mutable_effort()->Reserve(AEGIS_JOINT_ORDER.size());
+
+  for (const auto& target_name : AEGIS_JOINT_ORDER) {
+    const int idx = FindJointIndex(ros.name, target_name);
+    if (idx < 0) {
+      RCLCPP_ERROR(node_->get_logger(), "JointState is missing expected joint: %s", std::string(target_name).c_str());
+      continue;
+    }
+
+    out->add_name(std::string(target_name));
+    out->add_position(ros.position[idx]);
+    if (has_velocity)
+      out->add_velocity(ros.velocity[idx]);
+    if (has_effort)
+      out->add_effort(ros.effort[idx]);
+  }
 }
 
 void RobotReadServiceImpl::FillProtoImage(const sensor_msgs::msg::Image& ros,

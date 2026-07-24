@@ -88,6 +88,12 @@ You should see `/opt/pylon` in terminal. Build project and ignore warnings that 
 
 See the [aegis_bringup](./aegis_bringup/README.md) package.
 
+### Remote setup
+
+To control the physical robot station from a machine other than the onboard
+robot PC (network setup, `/etc/hosts`, `ROS_DOMAIN_ID`, cameras), see
+[docs/remote_setup.md](./docs/remote_setup.md).
+
 ### Camera calibration
 
 See the [aegis_utils](./aegis_utils/README.md) package.

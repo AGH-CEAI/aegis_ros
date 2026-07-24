@@ -1,5 +1,6 @@
 #ifndef AEGIS_GRPC__ROBOT_READ_SERVICE_HPP_
 #define AEGIS_GRPC__ROBOT_READ_SERVICE_HPP_
+#include <array>
 #include <mutex>
 #include <opencv2/opencv.hpp>
 
@@ -20,6 +21,24 @@
 #include <tf2_ros/transform_listener.h>
 
 namespace aegis_grpc {
+
+constexpr std::array<std::string_view, 7> AEGIS_JOINT_ORDER = {
+    "shoulder_lift_joint",
+    "shoulder_pan_joint",
+    "elbow_joint",
+    "wrist_1_joint",
+    "wrist_2_joint",
+    "wrist_3_joint",
+    "robotiq_hande_left_finger_joint",
+};
+
+inline int FindJointIndex(const std::vector<std::string>& haystack, std::string_view name) {
+  for (std::size_t i = 0; i < haystack.size(); ++i) {
+    if (haystack[i] == name)
+      return static_cast<int>(i);
+  }
+  return -1;
+}
 
 class RobotReadServiceImpl final : public proto_aegis_grpc::v1::RobotReadService::Service {
  public:
@@ -79,7 +98,7 @@ class RobotReadServiceImpl final : public proto_aegis_grpc::v1::RobotReadService
 
   static void FillProtoWrench(const geometry_msgs::msg::Wrench& ros, proto_aegis_grpc::v1::Wrench* out);
 
-  static void FillProtoJointState(const sensor_msgs::msg::JointState& ros, proto_aegis_grpc::v1::JointState* out);
+  void FillProtoJointState(const sensor_msgs::msg::JointState& ros, proto_aegis_grpc::v1::JointState* out);
 
   void FillProtoImage(const sensor_msgs::msg::Image& ros, proto_aegis_grpc::v1::Image* out, cv::Mat& resize_buffer);
 

@@ -1,11 +1,12 @@
 import logging
-from enum import Enum
+from enum import Enum, auto
 from typing import Optional, Union
 from contextlib import asynccontextmanager
 
 import numpy as np
 import grpc
 from google.protobuf.empty_pb2 import Empty
+from strenum import StrEnum, LowercaseStrEnum
 
 from proto_aegis_grpc.v1 import (
     robot_srvs_pb2,
@@ -16,14 +17,52 @@ from proto_aegis_grpc.v1 import (
 )
 
 
+class ModalityGroup(StrEnum):
+    STATE = "state"
+    VISION = "vision"
+
+
+class CameraName(StrEnum):
+    CAMERA_SCENE = "scene"
+    CAMERA_TOOL_LEFT = "tool_left"
+    CAMERA_TOOL_RIGHT = "tool_right"
+
+
+class StateModality(StrEnum):
+    POSE = "pose"
+    JOINTS = "joints"
+    WRENCH = "wrench"
+
+
+class AegisJointName(LowercaseStrEnum):
+    ROBOTIQ_HANDE_LEFT_FINGER_JOINT = auto()
+    SHOULDER_PAN_JOINT = auto()
+    WRIST_3_JOINT = auto()
+    WRIST_2_JOINT = auto()
+    WRIST_1_JOINT = auto()
+    ELBOW_JOINT = auto()
+    SHOULDER_LIFT_JOINT = auto()
+
+
+AEGIS_JOINTS_ORDER: tuple[AegisJointName, ...] = (
+    AegisJointName.SHOULDER_PAN_JOINT,
+    AegisJointName.SHOULDER_LIFT_JOINT,
+    AegisJointName.ELBOW_JOINT,
+    AegisJointName.WRIST_1_JOINT,
+    AegisJointName.WRIST_2_JOINT,
+    AegisJointName.WRIST_3_JOINT,
+    AegisJointName.ROBOTIQ_HANDE_LEFT_FINGER_JOINT,
+)
+
+
 class AegisJointIndex(Enum):
-    ROBOTIQ_HANDE_LEFT_FINGER_JOINT = 0
-    SHOULDER_PAN_JOINT = 1
-    WRIST_3_JOINT = 2
-    WRIST_2_JOINT = 3
-    WRIST_1_JOINT = 4
-    ELBOW_JOINT = 5
-    SHOULDER_LIFT_JOINT = 6
+    SHOULDER_PAN_JOINT = 0
+    SHOULDER_LIFT_JOINT = 1
+    ELBOW_JOINT = 2
+    WRIST_1_JOINT = 3
+    WRIST_2_JOINT = 4
+    WRIST_3_JOINT = 5
+    ROBOTIQ_HANDE_LEFT_FINGER_JOINT = 6
 
 
 class PrefixedLoggerAdapter(logging.LoggerAdapter):
@@ -161,9 +200,9 @@ class AegisRobotClient:
         try:
             state = await self.read_stub.GetRobotState(Empty())
             return {
-                "pose": self._pose_to_array(state.pose),
-                "wrench": self._wrench_to_array(state.wrench),
-                "joints": self._joints_to_array(state.joint_state),
+                StateModality.POSE: self._pose_to_array(state.pose),
+                StateModality.WRENCH: self._wrench_to_array(state.wrench),
+                StateModality.JOINTS: self._joints_to_array(state.joint_state),
             }
         except grpc.RpcError as e:
             self.logger.error(f"GetRobotState failed: {e}")
@@ -201,9 +240,9 @@ class AegisRobotClient:
         try:
             vision = await self.read_stub.GetRobotVision(Empty())
             return {
-                "scene": self._image_to_array(vision.image_scene),
-                "right": self._image_to_array(vision.image_right),
-                "left": self._image_to_array(vision.image_left),
+                CameraName.CAMERA_SCENE: self._image_to_array(vision.image_scene),
+                CameraName.CAMERA_TOOL_RIGHT: self._image_to_array(vision.image_right),
+                CameraName.CAMERA_TOOL_LEFT: self._image_to_array(vision.image_left),
             }
         except grpc.RpcError as e:
             self.logger.error(f"GetRobotVision failed: {e}")
@@ -214,15 +253,23 @@ class AegisRobotClient:
         try:
             obs = await self.read_stub.GetAll(Empty())
             return {
-                "state": {
-                    "pose": self._pose_to_array(obs.robot_state.pose),
-                    "wrench": self._wrench_to_array(obs.robot_state.wrench),
-                    "joints": self._joints_to_array(obs.robot_state.joint_state),
+                ModalityGroup.STATE: {
+                    StateModality.POSE: self._pose_to_array(obs.robot_state.pose),
+                    StateModality.WRENCH: self._wrench_to_array(obs.robot_state.wrench),
+                    StateModality.JOINTS: self._joints_to_array(
+                        obs.robot_state.joint_state
+                    ),
                 },
-                "vision": {
-                    "scene": self._image_to_array(obs.robot_vision.image_scene),
-                    "right": self._image_to_array(obs.robot_vision.image_right),
-                    "left": self._image_to_array(obs.robot_vision.image_left),
+                ModalityGroup.VISION: {
+                    CameraName.CAMERA_SCENE: self._image_to_array(
+                        obs.robot_vision.image_scene
+                    ),
+                    CameraName.CAMERA_TOOL_RIGHT: self._image_to_array(
+                        obs.robot_vision.image_right
+                    ),
+                    CameraName.CAMERA_TOOL_LEFT: self._image_to_array(
+                        obs.robot_vision.image_left
+                    ),
                 },
             }
         except grpc.RpcError as e:
