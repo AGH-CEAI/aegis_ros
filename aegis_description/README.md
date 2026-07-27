@@ -14,10 +14,17 @@ This package contains a description of the Aegis robot station, which consists o
 - Basler ace acA1920-40gc Camera
 - Computar Lens for Basler Tool Camera
 
-## Preview
+## Standalone preview
 
 ```bash
-ros2 launch aegis_description display.launch.py
+ros2 launch aegis_description aegis_preview.launch.py
+```
+
+## Generate standalone URDF files
+
+Useful for exporting model to simulation (or ClearML dataset).
+```bash
+ros2 launch aegis_description generate_standalone_urdf.launch.py save_dir:="~/ceai_ws/aegis_urdf" disable_cell:="false" disable_cell_collision:="false"
 ```
 
 ![aegis_preview](./docs/aegis_preview.png)
