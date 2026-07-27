@@ -1,9 +1,8 @@
 import argparse
 import threading
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import cv2
 import numpy as np
@@ -70,31 +69,32 @@ class CalibCollectNode(Node):
             with self.mutex:
                 self.image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
                 self.timestamp = self.get_timestamp(msg.header.stamp)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.get_logger().error(f"Failed to convert image: {e}")
 
     def get_timestamp(self, stamp: Time) -> float:
         return stamp.sec + stamp.nanosec * 1e-9
 
-    def get_image(
-        self, time_start: float, timeout: float = 3.0
-    ) -> Optional[np.ndarray]:
+    def get_image(self, time_start: float, timeout: float = 3.0) -> np.ndarray | None:
         while self.get_clock().now().nanoseconds / 1e9 - time_start < timeout:
             with self.mutex:
-                if self.image is not None and self.timestamp is not None:
-                    if self.timestamp > time_start:
-                        return self.image.copy()
+                if (
+                    self.image is not None
+                    and self.timestamp is not None
+                    and self.timestamp > time_start
+                ):
+                    return self.image.copy()
             time.sleep(1)
         return None
 
-    def save_image(self, image: Optional[np.ndarray], path: Path) -> None:
+    def save_image(self, image: np.ndarray | None, path: Path) -> None:
         if image is None:
             self.get_logger().warn("No image to save")
             return
         cv2.imwrite(str(path), image)
         self.get_logger().info(f"Saved image to: {path}")
 
-    def save_tcp(self, tcp_pose: Dict[str, List[float]], path: Path) -> None:
+    def save_tcp(self, tcp_pose: dict[str, list[float]], path: Path) -> None:
         with open(path, "w") as f:
             yaml.dump(
                 {
@@ -116,7 +116,7 @@ def main() -> None:
     cam_name = args.camera
     path_name = args.path
 
-    timestamp = datetime.now().strftime("%y-%m-%d_%H-%M-%S")
+    timestamp = datetime.now(timezone.utc).strftime("%y-%m-%d_%H-%M-%S")
 
     if path_name:
         data_path = Path(path_name).expanduser() / f"{cam_name}_{timestamp}"
@@ -170,7 +170,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def load_positions(config_file_path: Path) -> List[Dict[str, float]]:
+def load_positions(config_file_path: Path) -> list[dict[str, float]]:
     with open(config_file_path, "r") as f:
         data = yaml.safe_load(f)
     return data.get("positions", data)
@@ -181,7 +181,7 @@ def collect_data(
     robot: RobotDirector,
     camera_name: str,
     data_path: Path,
-    positions: List[Dict[str, float]],
+    positions: list[dict[str, float]],
 ) -> None:
     node.move_to_home()
     time.sleep(2)

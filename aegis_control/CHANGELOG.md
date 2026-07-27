@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-130](https://github.com/AGH-CEAI/aegis_ros/pull/130) - New ruff formatting.
 * [PR-127](https://github.com/AGH-CEAI/aegis_ros/pull/127) - Camera drivers can now be skipped in `start_drivers.launch.py` via the `disable_cameras` argument.
 
 ### Deprecated

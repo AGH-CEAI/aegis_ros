@@ -1,7 +1,7 @@
 import argparse
 import glob
 from pathlib import Path
-from typing import Dict, List, NamedTuple, Optional, Tuple
+from typing import NamedTuple
 
 import cv2
 import numpy as np
@@ -86,11 +86,11 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def get_latest_folder(base_path: Path, camera: str) -> Optional[Path]:
+def get_latest_folder(base_path: Path, camera: str) -> Path | None:
     folders = glob.glob(str(base_path / f"{camera}_*"))
     if not folders:
         return None
-    latest_folder = sorted(folders, reverse=True)[0]
+    latest_folder = max(folders)
     return Path(latest_folder)
 
 
@@ -183,7 +183,7 @@ def calibrate_extrinsics(
     print(f"Extrinsics saved to {extrinsics_path}")
 
 
-def load_intrinsics(intrinsics_path: Path) -> Tuple[np.ndarray, np.ndarray]:
+def load_intrinsics(intrinsics_path: Path) -> tuple[np.ndarray, np.ndarray]:
     with open(intrinsics_path, "r") as f:
         data = yaml.safe_load(f)
     camera_matrix = np.array(data["camera_matrix"]["data"]).reshape(
@@ -205,7 +205,7 @@ def process_view(
     aruco_dict: cv2.aruco_Dictionary,
     camera_matrix: np.ndarray,
     dist_coeffs: np.ndarray,
-) -> Optional[ViewTransforms]:
+) -> ViewTransforms | None:
     try:
         image_idx = int(image_path.stem.split("_")[-1])
         tcp_idx = int(tcp_path.stem.split("_")[-1])
@@ -257,7 +257,7 @@ def process_view(
     )
 
 
-def load_tcp(tcp_path: Path) -> Tuple[np.ndarray, np.ndarray]:
+def load_tcp(tcp_path: Path) -> tuple[np.ndarray, np.ndarray]:
     with open(tcp_path, "r") as f:
         data = yaml.safe_load(f)
     pos = np.array(data["tcp_pose"]["position"], dtype=float)
@@ -266,11 +266,11 @@ def load_tcp(tcp_path: Path) -> Tuple[np.ndarray, np.ndarray]:
 
 
 def calibrate_eye_to_hand(
-    tcp2base_list_R: List[np.ndarray],
-    tcp2base_list_t: List[np.ndarray],
-    cam2target_list_R: List[np.ndarray],
-    cam2target_list_t: List[np.ndarray],
-) -> Dict[str, List[List[float]]]:
+    tcp2base_list_R: list[np.ndarray],
+    tcp2base_list_t: list[np.ndarray],
+    cam2target_list_R: list[np.ndarray],
+    cam2target_list_t: list[np.ndarray],
+) -> dict[str, list[list[float]]]:
     R_base2cam, t_base2cam = cv2.calibrateHandEye(
         tcp2base_list_R,
         tcp2base_list_t,
@@ -294,11 +294,11 @@ def calibrate_eye_to_hand(
 
 
 def calibrate_eye_in_hand(
-    base2tcp_list_R: List[np.ndarray],
-    base2tcp_list_t: List[np.ndarray],
-    cam2target_list_R: List[np.ndarray],
-    cam2target_list_t: List[np.ndarray],
-) -> Dict[str, List[List[float]]]:
+    base2tcp_list_R: list[np.ndarray],
+    base2tcp_list_t: list[np.ndarray],
+    cam2target_list_R: list[np.ndarray],
+    cam2target_list_t: list[np.ndarray],
+) -> dict[str, list[list[float]]]:
     R_tcp2cam, t_tcp2cam = cv2.calibrateHandEye(
         base2tcp_list_R,
         base2tcp_list_t,
