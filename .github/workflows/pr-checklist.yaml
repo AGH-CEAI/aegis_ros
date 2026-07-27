@@ -3,6 +3,7 @@ name: PR checklist enforcement
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
+  workflow_dispatch:
 
 permissions:
   pull-requests: write
