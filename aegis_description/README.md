@@ -17,7 +17,7 @@ This package contains a description of the Aegis robot station, which consists o
 ## Preview
 
 ```bash
-ros2 launch aegis_description display.launch.py
+ros2 launch aegis_description aegis_preview.launch.py
 ```
 
 ![aegis_preview](./docs/aegis_preview.png)
