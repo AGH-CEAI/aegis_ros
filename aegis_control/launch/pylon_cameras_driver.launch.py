@@ -1,17 +1,17 @@
 import os
 import time
-import yaml
 from pathlib import Path
 
 import numpy as np
+import yaml
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.conditions import UnlessCondition
 from launch.launch_context import LaunchContext
 from launch.substitutions import (
     LaunchConfiguration,
-    TextSubstitution,
     PathJoinSubstitution,
+    TextSubstitution,
 )
 from launch_ros.actions import ComposableNodeContainer, LoadComposableNodes, Node
 from launch_ros.descriptions import ComposableNode
@@ -86,7 +86,7 @@ def launch_nodes(context: LaunchContext):
     }
 
     if any(files_missing.values()):
-        logger.warn(
+        logger.warning(
             "Following calibration files are missing:\n"
             + "\n".join(
                 str(calibration_extrinsics_paths[name])
@@ -94,7 +94,7 @@ def launch_nodes(context: LaunchContext):
                 if missing
             )
         )
-        logger.warn(
+        logger.warning(
             "[WARN] Static TF will not be published for cameras:\n"
             + "\n".join(name for name, missing in files_missing.items() if missing)
         )
