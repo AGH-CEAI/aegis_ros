@@ -7,6 +7,7 @@
 
 #include "aegis_grpc/robot_control_service.hpp"
 #include "aegis_grpc/robot_read_service.hpp"
+#include "aegis_grpc/wled_service.hpp"
 
 std::unique_ptr<grpc::Server> BuildServer(const std::string& address, std::vector<grpc::Service*>& services) {
   grpc::ServerBuilder builder;
@@ -41,8 +42,11 @@ int main(int argc, char* argv[]) {
   RCLCPP_INFO(logger, "Creating RobotControlService");
   aegis_grpc::RobotControlServiceImpl control_service(node);
 
+  RCLCPP_INFO(logger, "Creating WledService");
+  aegis_grpc::WledServiceImpl wled_service(node);
+
   RCLCPP_INFO(logger, "Setting up gRPC server with services");
-  std::vector<grpc::Service*> services = {&read_service, &control_service};
+  std::vector<grpc::Service*> services = {&read_service, &control_service, &wled_service};
   auto server = BuildServer(address, services);
   std::thread grpc_thread([&server]() { server->Wait(); });
   RCLCPP_INFO(logger, "gRPC server listening on %s", address.c_str());

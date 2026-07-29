@@ -26,7 +26,8 @@ set(ROS_DEPENDS
     moveit_msgs
     moveit_ros_planning_interface
     sensor_msgs
-    std_srvs)
+    std_srvs
+    wled_interfaces)
 
 # Hide warnings from importing moveit packages
 if(POLICY CMP0167)
@@ -69,7 +70,10 @@ add_subdirectory(protogen)
 
 # ------------------------------
 # Static library with all CPP files
-add_library(${PROJECT_NAME}_lib STATIC src/robot_read_service.cpp src/robot_control_service.cpp)
+add_library(${PROJECT_NAME}_lib STATIC 
+  src/robot_read_service.cpp 
+  src/robot_control_service.cpp
+  src/wled_service.cpp)
 add_dependencies(${PROJECT_NAME}_lib generate_protos)
 
 target_include_directories(
