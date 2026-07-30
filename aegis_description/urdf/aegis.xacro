@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
   <xacro:include filename="$(find aegis_description)/urdf/modules/cell.xacro"/>
-  <xacro:include filename="$(find aegis_description)/urdf/modules/wled_lights_right.xacro" />
-  <xacro:include filename="$(find aegis_description)/urdf/modules/wled_lights_left.xacro" />
+  <xacro:include filename="$(find aegis_description)/urdf/modules/light_support_right.xacro" />
+  <xacro:include filename="$(find aegis_description)/urdf/modules/light_support_left.xacro" />
   <xacro:include filename="$(find aegis_description)/urdf/modules/adapter_cell.xacro"/>
   <xacro:include filename="$(find aegis_description)/urdf/modules/ur_definition.xacro"/>
   <xacro:include filename="$(find aegis_description)/urdf/modules/adapter_to_sensor.xacro"/>
@@ -16,11 +16,9 @@
   <xacro:include filename="$(find aegis_description)/urdf/modules/camera_tool_basler.xacro"/>
   <xacro:include filename="$(find aegis_description)/urdf/modules/lens_computar.xacro"/>
 
-  <xacro:macro name="aegis_robot" params="parent tf_prefix prefix mock_hardware disable_cell disable_cell_collision">
-    <xacro:cell parent="${parent}" disable_cell="${disable_cell}" disable_cell_collision="${disable_cell_collision}"/>
-    <xacro:wled_lights_right parent="${parent}" prefix="${prefix}"/>
-    <xacro:wled_lights_left parent="${parent}" prefix="${prefix}"/>
-    <xacro:adapter_cell parent="${parent}" prefix="${prefix}" disable_cell="${disable_cell}" disable_cell_collision="${disable_cell_collision}"/>
+  <xacro:macro name="aegis_robot" params="parent tf_prefix prefix mock_hardware disable_cell disable_cell_collision disable_leds:=false">
+    <xacro:cell parent="${parent}" disable_cell="${disable_cell}" disable_cell_collision="${disable_cell_collision}" disable_leds="${disable_leds}"/>
+    <xacro:adapter_cell parent="${parent}" prefix="${prefix}" disable_cell="${disable_cell}" disable_cell_collision="${disable_cell_collision}" disable_leds="${disable_leds}"/>
     <xacro:ur_definition name="aegis" parent="${parent}" tf_prefix="${tf_prefix}" mock_hardware="${mock_hardware}"/>
     <xacro:adapter_to_sensor parent="tool0" prefix="${prefix}"/>
     <xacro:ft_sensor_schunk_axia80 parent="adapter_to_sensor_end" prefix="${prefix}" mock_hardware="${mock_hardware}"/>
