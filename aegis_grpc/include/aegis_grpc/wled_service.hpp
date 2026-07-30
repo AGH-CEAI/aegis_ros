@@ -5,7 +5,7 @@
 #include <grpcpp/grpcpp.h>
 #include <rclcpp/rclcpp.hpp>
 
-#include "wled_service.grpc.pb.h"
+#include "proto_aegis_grpc/v1/wled_service.grpc.pb.h"
 
 #include <wled_interfaces/srv/change_scene.hpp>
 #include <wled_interfaces/srv/define_scene.hpp>
