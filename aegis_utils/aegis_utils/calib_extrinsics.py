@@ -90,7 +90,7 @@ def get_latest_folder(base_path: Path, camera: str) -> Path | None:
     folders = glob.glob(str(base_path / f"{camera}_*"))
     if not folders:
         return None
-    latest_folder = sorted(folders, reverse=True)[0]
+    latest_folder = max(folders)
     return Path(latest_folder)
 
 

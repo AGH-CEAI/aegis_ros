@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-130](https://github.com/AGH-CEAI/aegis_ros/pull/130) - New ruff formatting.
 * [PR-129](https://github.com/AGH-CEAI/aegis_ros/pull/129) - Updated `launch_diagram.plantuml` with wled_service and pylon_cameras_driver 
 * [PR-127](https://github.com/AGH-CEAI/aegis_ros/pull/127) - Updated README and UML diagram.
 

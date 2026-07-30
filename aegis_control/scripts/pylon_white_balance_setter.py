@@ -35,7 +35,7 @@ class PylonWhiteBalanceSetter(Node):
             with open(config_file, "r") as f:
                 self.config: dict[str, dict[str, int]] = yaml.safe_load(f)
             self.get_logger().info(f"Loaded config from {config_file}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.get_logger().error(f"Failed to load {config_file}: {e}")
             return
 

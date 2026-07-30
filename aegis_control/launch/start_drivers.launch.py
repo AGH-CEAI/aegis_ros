@@ -1,4 +1,3 @@
-# Bypassing the launch system to access local import
 import os
 import sys
 
@@ -14,6 +13,7 @@ from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterFile
 from launch_ros.substitutions import FindPackageShare
 
+# HACK Bypassing the launch system to access local import
 run_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(run_path)
 from include.utils import str2bool

@@ -74,12 +74,12 @@ class DepthAIConfig:
         model_path = Path.home() / "ceai_models" / "yolo.blob"
         yolo_src_cfg_path = package_share_path / "config" / "cameras" / "yolo.json"
 
-        self.yolo_cfg_path = Path(
-            tempfile.NamedTemporaryFile(suffix=".json", delete=False).name
-        )
-        self.cam_params_path = Path(
-            tempfile.NamedTemporaryFile(suffix=".yaml", delete=False).name
-        )
+        def make_temp_path(suffix: str) -> Path:
+            with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+                return Path(tmp.name)
+
+        self.yolo_cfg_path = make_temp_path(".json")
+        self.cam_params_path = make_temp_path(".yaml")
 
         with open(yolo_src_cfg_path, "r") as file:
             yolo_cfg = json.load(file)

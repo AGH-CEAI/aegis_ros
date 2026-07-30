@@ -73,7 +73,7 @@ class CollectImageNode(Node):
             with self.mutex:
                 self.image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
                 self.timestamp = self.get_timestamp(msg.header.stamp)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.get_logger().error(f"Failed to convert image: {e}")
 
     def get_timestamp(self, time_msg: Time) -> float:
@@ -115,7 +115,7 @@ class CollectImageNode(Node):
                 "calibration_tool",  # source frame
                 Time(),  # latest available
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.get_logger().error(
                 f"Failed to lookup transform base->calibration_tool: {e}"
             )
@@ -155,7 +155,7 @@ class CollectImageNode(Node):
                 "detected_object",  # source frame
                 Time(),  # latest available
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.get_logger().error(
                 f"Failed to lookup transform base->detected_object: {e}"
             )
@@ -301,10 +301,7 @@ class SafeProgramControl(Node):
         # )
 
         state = self.get_program_state()
-        if state == "PLAYING":
-            return True
-        else:
-            return False
+        return state == "PLAYING"
 
     def stop_if_remote(self) -> bool:
         if not self.is_remote():
@@ -319,10 +316,7 @@ class SafeProgramControl(Node):
         # )
 
         state = self.get_program_state()
-        if state == "STOPPED":
-            return True
-        else:
-            return False
+        return state == "STOPPED"
 
     def get_program_state(self) -> str:
         time.sleep(1)

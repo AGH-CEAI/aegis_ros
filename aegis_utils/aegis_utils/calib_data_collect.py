@@ -1,7 +1,7 @@
 import argparse
 import threading
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import cv2
@@ -69,7 +69,7 @@ class CalibCollectNode(Node):
             with self.mutex:
                 self.image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
                 self.timestamp = self.get_timestamp(msg.header.stamp)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.get_logger().error(f"Failed to convert image: {e}")
 
     def get_timestamp(self, stamp: Time) -> float:
@@ -78,9 +78,12 @@ class CalibCollectNode(Node):
     def get_image(self, time_start: float, timeout: float = 3.0) -> np.ndarray | None:
         while self.get_clock().now().nanoseconds / 1e9 - time_start < timeout:
             with self.mutex:
-                if self.image is not None and self.timestamp is not None:
-                    if self.timestamp > time_start:
-                        return self.image.copy()
+                if (
+                    self.image is not None
+                    and self.timestamp is not None
+                    and self.timestamp > time_start
+                ):
+                    return self.image.copy()
             time.sleep(1)
         return None
 
@@ -113,7 +116,7 @@ def main() -> None:
     cam_name = args.camera
     path_name = args.path
 
-    timestamp = datetime.now().strftime("%y-%m-%d_%H-%M-%S")
+    timestamp = datetime.now(timezone.utc).strftime("%y-%m-%d_%H-%M-%S")
 
     if path_name:
         data_path = Path(path_name).expanduser() / f"{cam_name}_{timestamp}"

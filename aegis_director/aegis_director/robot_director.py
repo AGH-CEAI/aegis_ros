@@ -311,7 +311,7 @@ class RobotDirector:
     def servo_jog(
         self,
         joint_names: tuple[str, ...],
-        velocities: tuple[float, ...] = tuple(),
+        velocities: tuple[float, ...] = (),
     ) -> None:
         if not self.servo_enabled:
             self.node.get_logger().warn("Enable servo before moving. Ignoring.")

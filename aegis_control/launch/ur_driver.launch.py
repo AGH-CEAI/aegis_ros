@@ -1,4 +1,3 @@
-# Bypassing the launch system to access local import
 import os
 import sys
 
@@ -8,6 +7,7 @@ from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import FindExecutable, LaunchConfiguration
 from launch_ros.actions import Node
 
+# HACK Bypassing the launch system to access local import
 run_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(run_path)
 from include.utils import str2bool, controllers_spawner  # noqa E402

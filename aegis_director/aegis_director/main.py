@@ -1,3 +1,4 @@
+import sys
 import time
 
 import numpy as np
@@ -89,7 +90,7 @@ def main(args=None):
     node.get_logger().info(f"Joint positions: {director.get_joint_positions()}")
 
     rclpy.shutdown()
-    exit(0)
+    sys.exit(0)
 
 
 if __name__ == "__main__":
