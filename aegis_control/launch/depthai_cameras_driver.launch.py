@@ -2,7 +2,6 @@ import json
 import tempfile
 import time
 from pathlib import Path
-from typing import Dict
 
 import numpy as np
 import yaml
@@ -167,7 +166,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     }
 
     if any(files_missing.values()):
-        logger.warn(
+        logger.warning(
             "Following calibration files are missing:\n"
             + "\n".join(
                 str(calibration_extrinsics_paths[name])
@@ -175,7 +174,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
                 if missing
             )
         )
-        logger.warn(
+        logger.warning(
             "[WARN] Static TF will not be published for cameras:\n"
             + "\n".join(name for name, missing in files_missing.items() if missing)
         )
@@ -347,8 +346,8 @@ def create_point_cloud_node(
 
 
 def create_static_tf_node(
-    files_missing: Dict[str, bool],
-    calibration_extrinsics_paths: Dict[str, Path],
+    files_missing: dict[str, bool],
+    calibration_extrinsics_paths: dict[str, Path],
     parent_frame: str,
     child_frame: str,
 ) -> Node:

@@ -3,7 +3,6 @@ import threading
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import cv2
 import numpy as np
@@ -76,9 +75,7 @@ class CalibCollectNode(Node):
     def get_timestamp(self, stamp: Time) -> float:
         return stamp.sec + stamp.nanosec * 1e-9
 
-    def get_image(
-        self, time_start: float, timeout: float = 3.0
-    ) -> Optional[np.ndarray]:
+    def get_image(self, time_start: float, timeout: float = 3.0) -> np.ndarray | None:
         while self.get_clock().now().nanoseconds / 1e9 - time_start < timeout:
             with self.mutex:
                 if self.image is not None and self.timestamp is not None:
@@ -87,14 +84,14 @@ class CalibCollectNode(Node):
             time.sleep(1)
         return None
 
-    def save_image(self, image: Optional[np.ndarray], path: Path) -> None:
+    def save_image(self, image: np.ndarray | None, path: Path) -> None:
         if image is None:
             self.get_logger().warn("No image to save")
             return
         cv2.imwrite(str(path), image)
         self.get_logger().info(f"Saved image to: {path}")
 
-    def save_tcp(self, tcp_pose: Dict[str, List[float]], path: Path) -> None:
+    def save_tcp(self, tcp_pose: dict[str, list[float]], path: Path) -> None:
         with open(path, "w") as f:
             yaml.dump(
                 {
@@ -170,7 +167,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def load_positions(config_file_path: Path) -> List[Dict[str, float]]:
+def load_positions(config_file_path: Path) -> list[dict[str, float]]:
     with open(config_file_path, "r") as f:
         data = yaml.safe_load(f)
     return data.get("positions", data)
@@ -181,7 +178,7 @@ def collect_data(
     robot: RobotDirector,
     camera_name: str,
     data_path: Path,
-    positions: List[Dict[str, float]],
+    positions: list[dict[str, float]],
 ) -> None:
     node.move_to_home()
     time.sleep(2)

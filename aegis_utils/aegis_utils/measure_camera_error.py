@@ -23,7 +23,6 @@ from aegis_utils.measure_camera_error_ros_nodes import (
     TcpPosCamera,
 )
 
-
 CAMERA_CONFIG = {
     "scene": {"pos_config": "cam_scene.yaml", "topic": "/cam_scene/rgb/image_raw"},
 }

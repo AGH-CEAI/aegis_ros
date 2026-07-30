@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-import yaml
 from pathlib import Path
 
 import rclpy
+import yaml
+from pylon_ros2_camera_interfaces.srv import SetROI
 from rclpy.client import Client
 from rclpy.node import Node
-from pylon_ros2_camera_interfaces.srv import SetROI
 
 
 class PylonROISetter(Node):

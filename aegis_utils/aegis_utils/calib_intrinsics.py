@@ -1,7 +1,6 @@
 import argparse
 import glob
 from pathlib import Path
-from typing import Optional
 
 import cv2
 import yaml
@@ -75,7 +74,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def get_latest_folder(base_path: Path, camera: str) -> Optional[Path]:
+def get_latest_folder(base_path: Path, camera: str) -> Path | None:
     folders = glob.glob(str(base_path / f"{camera}_*"))
     if not folders:
         return None
