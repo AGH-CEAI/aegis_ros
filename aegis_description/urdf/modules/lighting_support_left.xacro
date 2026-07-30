@@ -1,25 +1,25 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="wled_lights_right" params="parent prefix">
+  <xacro:macro name="lighting_support_left" params="parent prefix">
     
-    <joint name="${prefix}wled_lights_right_joint" type="fixed">
-      <origin xyz="0.32 0.50 0.35" rpy="0.0 0.0 ${pi}"/>
+    <joint name="${prefix}lighting_support_left_joint" type="fixed">
+      <origin xyz="0.32 0.495 0.35" rpy="0.0 0.0 ${pi}"/>
       <parent link="${parent}"/>
-      <child link="${prefix}wled_lights_right_link"/>
+      <child link="${prefix}lighting_support_left_link"/>
     </joint>
 
-    <link name="${prefix}wled_lights_right_link">
+    <link name="${prefix}lighting_support_left_link">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://aegis_description/meshes/wled_lights_right.dae" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://aegis_description/meshes/lighting_support_left.dae" scale="0.001 0.001 0.001"/>
         </geometry>
       </visual>
 
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://aegis_description/meshes/wled_lights_right.dae" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://aegis_description/meshes/lighting_support_left.dae" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
 
