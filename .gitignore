@@ -14,3 +14,4 @@ proto_*/
 dist/
 *.whl
 *.tar.gz
+*.vscode/
