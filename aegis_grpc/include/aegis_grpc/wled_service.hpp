@@ -4,6 +4,8 @@
 #include <memory>
 #include <grpcpp/grpcpp.h>
 #include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/string.hpp>
+#include <string>
 
 #include "proto_aegis_grpc/v1/wled_service.grpc.pb.h"
 
@@ -34,6 +36,10 @@ class WledServiceImpl final : public aegis::grpc::v1::WledService::Service {
   ::grpc::Status GetSections(::grpc::ServerContext* context,
                              const ::aegis::grpc::v1::GetSectionsRequest* request,
                              ::aegis::grpc::v1::GetSectionsResponse* response) override;
+                             
+  ::grpc::Status StreamEffects(::grpc::ServerContext* context,
+                              const ::aegis::grpc::v1::Empty* request,
+                              ::grpc::ServerWriter<::aegis::grpc::v1::WledEffectsResponse>* writer) override;
 
  private:
   std::shared_ptr<rclcpp::Node> node_;
@@ -42,6 +48,9 @@ class WledServiceImpl final : public aegis::grpc::v1::WledService::Service {
   rclcpp::Client<wled_interfaces::srv::DefineScene>::SharedPtr define_scene_client_;
   rclcpp::Client<wled_interfaces::srv::GetScenes>::SharedPtr get_scenes_client_;
   rclcpp::Client<wled_interfaces::srv::GetSections>::SharedPtr get_sections_client_;
+
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr effects_sub_;
+  std::string cached_effects_data_;
 };
 
 }  // namespace aegis_grpc

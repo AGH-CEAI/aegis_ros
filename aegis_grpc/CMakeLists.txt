@@ -26,6 +26,7 @@ set(ROS_DEPENDS
     moveit_msgs
     moveit_ros_planning_interface
     sensor_msgs
+    std_msgs
     std_srvs
     wled_interfaces)
 

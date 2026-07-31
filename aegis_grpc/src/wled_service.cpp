@@ -10,6 +10,16 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
   define_scene_client_ = node_->create_client<wled_interfaces::srv::DefineScene>("wled_define_scene");
   get_scenes_client_ = node_->create_client<wled_interfaces::srv::GetScenes>("wled_get_scenes");
   get_sections_client_ = node_->create_client<wled_interfaces::srv::GetSections>("wled_get_sections");
+
+  rclcpp::QoS qos_profile(1);
+  qos_profile.transient_local();
+  qos_profile.reliable();
+
+  effects_sub_ = node_->create_subscription<std_msgs::msg::String>(
+      "/wled_effects", qos_profile,
+      [this](const std_msgs::msg::String::SharedPtr msg) {
+        this->cached_effects_data_ = msg->data;
+      });
 }
 
 ::grpc::Status WledServiceImpl::ChangeScene(::grpc::ServerContext* /*context*/,
@@ -111,6 +121,21 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
   }
 
   return ::grpc::Status(::grpc::StatusCode::DEADLINE_EXCEEDED, "Timeout calling ROS 2 GetSections service");
+}
+
+::grpc::Status WledServiceImpl::StreamEffects(::grpc::ServerContext* /*context*/,
+                                              const ::aegis::grpc::v1::Empty* /*request*/,
+                                              ::grpc::ServerWriter<::aegis::grpc::v1::WledEffectsResponse>* writer) {
+  if (cached_effects_data_.empty()) {
+    return ::grpc::Status(::grpc::StatusCode::UNAVAILABLE, "Effects not cached yet from /wled_effects topic");
+  }
+
+  ::aegis::grpc::v1::WledEffectsResponse response;
+  response.set_effects_json_or_text(cached_effects_data_);
+
+  writer->Write(response);
+
+  return ::grpc::Status::OK;
 }
 
 }  // namespace aegis_grpc
