@@ -71,7 +71,6 @@
         <xacro:lighting_support_right parent="cell" prefix=""/>
         <xacro:lighting_support_left parent="cell" prefix=""/>
       </xacro:unless>
-      
     </xacro:unless>
   </xacro:macro>
 </robot>
