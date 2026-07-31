@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-131](https://github.com/AGH-CEAI/aegis_ros/pull/131) - LED lighting supports to the cell.
 * [PR-95](https://github.com/AGH-CEAI/aegis_ros/pull/118) - Added cell adapter.
 
 ### Changed

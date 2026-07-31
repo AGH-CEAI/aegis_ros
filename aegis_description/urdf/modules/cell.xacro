@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="cell" params="parent disable_cell disable_cell_collision">
+  <xacro:macro name="cell" params="parent disable_cell disable_cell_collision disable_leds">
     <xacro:unless value="${disable_cell}">
       <joint name="world_to_cell" type="fixed">
         <origin xyz="0 0 -0.821" rpy="0 0 -${0.5 * pi}"/>
@@ -66,6 +66,11 @@
           </collision>
         </xacro:unless>
       </link>
+
+      <xacro:unless value="${disable_leds}">
+        <xacro:lighting_support_right parent="cell" prefix=""/>
+        <xacro:lighting_support_left parent="cell" prefix=""/>
+      </xacro:unless>
     </xacro:unless>
   </xacro:macro>
 </robot>
