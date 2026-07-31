@@ -1,5 +1,5 @@
-#ifndef AEGIS_GRPC_WLED_SERVICE_HPP_
-#define AEGIS_GRPC_WLED_SERVICE_HPP_
+#ifndef AEGIS_GRPC__WLED_SERVICE_HPP_
+#define AEGIS_GRPC__WLED_SERVICE_HPP_
 
 #include <memory>
 #include <grpcpp/grpcpp.h>
@@ -15,31 +15,27 @@
 namespace aegis_grpc {
 
 class WledServiceImpl final : public aegis::grpc::v1::WledService::Service {
-public:
+ public:
   explicit WledServiceImpl(std::shared_ptr<rclcpp::Node> node);
   virtual ~WledServiceImpl() = default;
 
-  ::grpc::Status ChangeScene(
-      ::grpc::ServerContext* context,
-      const ::aegis::grpc::v1::ChangeSceneRequest* request,
-      ::aegis::grpc::v1::GenericStatusResponse* response) override;
+  ::grpc::Status ChangeScene(::grpc::ServerContext* context,
+                             const ::aegis::grpc::v1::ChangeSceneRequest* request,
+                             ::aegis::grpc::v1::GenericStatusResponse* response) override;
 
-  ::grpc::Status DefineScene(
-      ::grpc::ServerContext* context,
-      const ::aegis::grpc::v1::DefineSceneRequest* request,
-      ::aegis::grpc::v1::GenericStatusResponse* response) override;
+  ::grpc::Status DefineScene(::grpc::ServerContext* context,
+                             const ::aegis::grpc::v1::DefineSceneRequest* request,
+                             ::aegis::grpc::v1::GenericStatusResponse* response) override;
 
-  ::grpc::Status GetScenes(
-      ::grpc::ServerContext* context,
-      const ::aegis::grpc::v1::GetScenesRequest* request,
-      ::aegis::grpc::v1::GetScenesResponse* response) override;
+  ::grpc::Status GetScenes(::grpc::ServerContext* context,
+                           const ::aegis::grpc::v1::GetScenesRequest* request,
+                           ::aegis::grpc::v1::GetScenesResponse* response) override;
 
-  ::grpc::Status GetSections(
-      ::grpc::ServerContext* context,
-      const ::aegis::grpc::v1::GetSectionsRequest* request,
-      ::aegis::grpc::v1::GetSectionsResponse* response) override;
+  ::grpc::Status GetSections(::grpc::ServerContext* context,
+                             const ::aegis::grpc::v1::GetSectionsRequest* request,
+                             ::aegis::grpc::v1::GetSectionsResponse* response) override;
 
-private:
+ private:
   std::shared_ptr<rclcpp::Node> node_;
 
   rclcpp::Client<wled_interfaces::srv::ChangeScene>::SharedPtr change_scene_client_;
@@ -50,4 +46,4 @@ private:
 
 }  // namespace aegis_grpc
 
-#endif  // AEGIS_GRPC_WLED_SERVICE_HPP_
+#endif  // AEGIS_GRPC__WLED_SERVICE_HPP_

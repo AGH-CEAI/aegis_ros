@@ -70,10 +70,8 @@ add_subdirectory(protogen)
 
 # ------------------------------
 # Static library with all CPP files
-add_library(${PROJECT_NAME}_lib STATIC 
-  src/robot_read_service.cpp 
-  src/robot_control_service.cpp
-  src/wled_service.cpp)
+add_library(${PROJECT_NAME}_lib STATIC src/robot_read_service.cpp src/robot_control_service.cpp
+                                       src/wled_service.cpp)
 add_dependencies(${PROJECT_NAME}_lib generate_protos)
 
 target_include_directories(
