@@ -1,7 +1,9 @@
-from launch import LaunchDescription, LaunchContext, LaunchDescriptionEntity
+import os
+import sys
+
+from launch import LaunchContext, LaunchDescription, LaunchDescriptionEntity
 from launch.actions import IncludeLaunchDescription, OpaqueFunction
 from launch.conditions import UnlessCondition
-
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
     LaunchConfiguration,
@@ -11,13 +13,10 @@ from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterFile
 from launch_ros.substitutions import FindPackageShare
 
-# Bypassing the launch system to access local import
-import os
-import sys
-
+# HACK Bypassing the launch system to access local import
 run_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(run_path)
-from include.utils import str2bool  # noqa E402
+from include.utils import str2bool
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -83,13 +82,25 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
         ),
         launch_arguments=launch_args.items(),
     )
-
+    wled_service_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution(
+                [
+                    FindPackageShare("aegis_control"),
+                    "launch",
+                    "wled_service.launch.py",
+                ]
+            )
+        ),
+        launch_arguments=launch_args.items(),
+    )
     return [
         ur_driver,
         control_node,
         gripper_driver,
         ft_sensor_driver,
         cameras_driver,
+        wled_service_launch,
     ]
 
 

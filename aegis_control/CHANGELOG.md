@@ -9,11 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* [PR-120](https://github.com/AGH-CEAI/aegis_ros/pull/120) - Added script for automatic Pylon cameras white balance setup.
+* [PR-129](https://github.com/AGH-CEAI/aegis_ros/pull/129) - Added `wled_service.launch.py` launch description
+* [PR-129](https://github.com/AGH-CEAI/aegis_ros/pull/129) - Added `scenes.yaml` to `config/wled` folder
 * [PR-127](https://github.com/AGH-CEAI/aegis_ros/pull/127) - Added launch file for starting only the camera drivers.
+* [PR-120](https://github.com/AGH-CEAI/aegis_ros/pull/120) - Added script for automatic Pylon cameras white balance setup.
 
 ### Changed
 
+* [PR-130](https://github.com/AGH-CEAI/aegis_ros/pull/130) - New ruff formatting.
 * [PR-127](https://github.com/AGH-CEAI/aegis_ros/pull/127) - Camera drivers can now be skipped in `start_drivers.launch.py` via the `disable_cameras` argument.
 
 ### Deprecated

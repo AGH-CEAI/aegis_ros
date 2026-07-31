@@ -1,4 +1,4 @@
-from typing import NamedTuple, List
+from typing import NamedTuple
 
 
 class GripperJointPositions(NamedTuple):
@@ -15,7 +15,7 @@ OPEN_GRIPPER_JOINT_POSITIONS = GripperJointPositions(0.025, 0.025)
 CLOSED_GRIPPER_JOINT_POSITIONS = GripperJointPositions(0.0, 0.0)
 
 
-def joint_names(prefix: str = prefix) -> List[str]:
+def joint_names(prefix: str = prefix) -> list[str]:
     return [
         f"{prefix}shoulder_pan_joint",
         f"{prefix}shoulder_lift_joint",
@@ -34,7 +34,7 @@ def end_effector_name(prefix: str = prefix) -> str:
     return f"{prefix}robotiq_hande_end"
 
 
-def gripper_joint_names(prefix: str = prefix) -> List[str]:
+def gripper_joint_names(prefix: str = prefix) -> list[str]:
     return [
         f"{prefix}robotiq_hande_left_joint",
         f"{prefix}robotiq_hande_right_joint",

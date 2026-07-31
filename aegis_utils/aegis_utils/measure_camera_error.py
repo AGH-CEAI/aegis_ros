@@ -6,7 +6,7 @@ import textwrap
 import threading
 import time
 import tty
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import cv2
@@ -22,7 +22,6 @@ from aegis_utils.measure_camera_error_ros_nodes import (
     SafeProgramControl,
     TcpPosCamera,
 )
-
 
 CAMERA_CONFIG = {
     "scene": {"pos_config": "cam_scene.yaml", "topic": "/cam_scene/rgb/image_raw"},
@@ -191,7 +190,7 @@ class MeasureCameraError:
     def measure_position_from_marker(self, image: np.ndarray) -> TcpPosCamera | None:
         parameters = cv2.aruco.DetectorParameters()
 
-        corners, ids, _ = cv2.aruco.detectMarkers(
+        corners, _ids, _ = cv2.aruco.detectMarkers(
             image, self.aruco_dict, parameters=parameters
         )
 
@@ -295,7 +294,7 @@ def main() -> None:
     data_path = args.data_path
     tool_offset = args.tool_offset
 
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 
     if result_path:
         res_path = Path(result_path).expanduser() / f"{cam_name}_{timestamp}"

@@ -3,6 +3,7 @@
   <xacro:arg name="mock_hardware" default="false"/>
   <xacro:arg name="disable_cell" default="false"/>
   <xacro:arg name="disable_cell_collision" default="false"/>
+  <xacro:arg name="disable_leds" default="false"/>
 
   <xacro:arg name="base_link" default="world"/>
   <xacro:arg name="prefix" default=""/>

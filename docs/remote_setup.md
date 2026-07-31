@@ -17,6 +17,7 @@ The UR driver, gripper and F/T sensor connect by hostname (see `robot_ip`/`ip_ad
 192.168.100.10  aegis_ur
 192.168.100.20  aegis_pc
 192.168.100.30  aegis_ft
+192.168.100.50  aegis_wled
 ```
 
 If running inside the [aegis_docker](https://github.com/AGH-CEAI/aegis_docker) container, `geonosis` is already added via `extra_hosts` in `docker-compose.yaml` — you only need to add it on the host if you run anything outside the container.

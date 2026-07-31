@@ -1,20 +1,18 @@
 import logging
-from enum import Enum, auto
-from typing import Optional, Union
 from contextlib import asynccontextmanager
+from enum import Enum, auto
 
-import numpy as np
 import grpc
+import numpy as np
 from google.protobuf.empty_pb2 import Empty
-from strenum import StrEnum, LowercaseStrEnum
-
 from proto_aegis_grpc.v1 import (
+    control_msgs_pb2,
+    geometry_msgs_pb2,
     robot_srvs_pb2,
     robot_srvs_pb2_grpc,
-    geometry_msgs_pb2,
-    control_msgs_pb2,
     sensor_msgs_pb2,
 )
+from strenum import LowercaseStrEnum, StrEnum
 
 
 class ModalityGroup(StrEnum):
@@ -87,9 +85,9 @@ class AegisRobotClient:
         """
         self.logger = PrefixedLoggerAdapter(logging.getLogger("aegis_grpc_client"), {})
         self.server_address = server_address
-        self.channel: Optional[grpc.aio.Channel] = None
-        self.read_stub: Optional[robot_srvs_pb2_grpc.RobotReadServiceStub] = None
-        self.control_stub: Optional[robot_srvs_pb2_grpc.RobotControlServiceStub] = None
+        self.channel: grpc.aio.Channel | None = None
+        self.read_stub: robot_srvs_pb2_grpc.RobotReadServiceStub | None = None
+        self.control_stub: robot_srvs_pb2_grpc.RobotControlServiceStub | None = None
         self._connected = False
 
     @property
@@ -320,8 +318,8 @@ class AegisRobotClient:
     async def servo_joint(
         self,
         joint_names: list[str],
-        displacements: Optional[Union[list[float], np.ndarray]] = None,
-        velocities: Optional[Union[list[float], np.ndarray]] = None,
+        displacements: list[float] | np.ndarray | None = None,
+        velocities: list[float] | np.ndarray | None = None,
         duration: float = 0.01,
     ) -> None:
         """
@@ -357,8 +355,8 @@ class AegisRobotClient:
 
     async def servo_tcp(
         self,
-        linear: Union[tuple[float, float, float], np.ndarray],
-        angular: Union[tuple[float, float, float], np.ndarray],
+        linear: tuple[float, float, float] | np.ndarray,
+        angular: tuple[float, float, float] | np.ndarray,
     ) -> None:
         """
         Perform TCP servo with Cartesian velocity control.
@@ -401,8 +399,8 @@ class AegisRobotClient:
 
     async def goto_pose(
         self,
-        position: Union[tuple[float, float, float], np.ndarray],
-        orientation: Union[tuple[float, float, float, float], np.ndarray],
+        position: tuple[float, float, float] | np.ndarray,
+        orientation: tuple[float, float, float, float] | np.ndarray,
     ) -> tuple[bool, str]:
         """
         Move robot to specified TCP pose.
@@ -444,7 +442,7 @@ class AegisRobotClient:
     async def goto_joints(
         self,
         names: tuple[str],
-        positions: Union[tuple[float], np.ndarray],
+        positions: tuple[float] | np.ndarray,
     ) -> tuple[bool, str]:
         """
         Move robot to specified joint configuration.

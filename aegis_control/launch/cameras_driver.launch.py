@@ -1,6 +1,5 @@
-from launch import LaunchDescription, LaunchContext, LaunchDescriptionEntity
+from launch import LaunchContext, LaunchDescription, LaunchDescriptionEntity
 from launch.actions import IncludeLaunchDescription, OpaqueFunction
-
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
     LaunchConfiguration,

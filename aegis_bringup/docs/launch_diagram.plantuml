@@ -61,6 +61,14 @@ package aegis_control {
         Node pylon_ros2_camera_wrapper::node_camera_right()
         Node pylon_ros2_camera_wrapper::node_camera_left()
     }
+    class pylon_cameras_driver << (L,#FF7700) LaunchFile >> {
+        Node pylon_ros2_camera_wrapper::node_camera_right()
+        Node pylon_ros2_camera_wrapper::node_camera_left()
+    }
+    class wled_service << (L,#FF7700) LaunchFile >> {
+        Param mock_hardware
+        Node wled_ros_driver::wled_service_node()
+    }
 
     package config {
         package controllers {
@@ -75,6 +83,10 @@ package aegis_control {
             class yolo << (J,#ffffc9) JSON >> {}
             class roi << (Y,#ffffc9) YAML >> {}
         }
+        package wled {
+            class scenes << (Y,#ffffc9) YAML >> {}
+        }
+
     }
 }
 
@@ -142,6 +154,9 @@ aegis_control.start_drivers *-- aegis_control.ur_driver
 aegis_control.start_drivers *-- aegis_control.ft_sensor_driver
 aegis_control.start_drivers *-- aegis_control.gripper_driver
 aegis_control.start_drivers *-- aegis_control.cameras_driver
+aegis_control.start_drivers *-- aegis_control.wled_service
+aegis_control.wled_service *-- aegis_control.config.wled
+
 aegis_control.cameras_driver *-- aegis_control.depthai_cameras_driver
 aegis_control.cameras_driver *-- aegis_control.pylon_cameras_driver
 aegis_control.start_drivers *-- aegis_control.config.controllers

@@ -1,16 +1,16 @@
 import time
+from collections.abc import Iterable
 from threading import Thread
-from typing import Iterable, Optional, Union
 
 import numpy as np
 import rclpy
-from rclpy.callback_groups import ReentrantCallbackGroup, MutuallyExclusiveCallbackGroup
-from rclpy.node import Node
 from controller_manager_msgs.srv import SwitchController
 from geometry_msgs.msg import Point, Pose, PoseStamped, Quaternion
+from pymoveit2 import GripperInterface, MoveIt2, MoveIt2Servo, MoveIt2State
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
+from rclpy.node import Node
 from sensor_msgs.msg import JointState
 
-from pymoveit2 import MoveIt2, MoveIt2State, GripperInterface, MoveIt2Servo
 import aegis_director.aegis_robot as robot
 
 
@@ -196,13 +196,12 @@ class RobotDirector:
 
     def pose_move(
         self,
-        position: Optional[
-            Union[Point, tuple[float, float, float], dict[str, float]]
-        ] = None,
-        quat_xyzw: Optional[
-            Union[Quaternion, tuple[float, float, float, float], dict[str, float]]
-        ] = None,
-        pose: Optional[Union[PoseStamped, Pose]] = None,
+        position: Point | tuple[float, float, float] | dict[str, float] | None = None,
+        quat_xyzw: Quaternion
+        | tuple[float, float, float, float]
+        | dict[str, float]
+        | None = None,
+        pose: PoseStamped | Pose | None = None,
         max_vel: float = 1.0,
         max_accel: float = 1.0,
         cartesian: bool = True,
@@ -237,13 +236,12 @@ class RobotDirector:
 
     def _print_pose_move_info(
         self,
-        position: Optional[
-            Union[Point, tuple[float, float, float], dict[str, float]]
-        ] = None,
-        quat_xyzw: Optional[
-            Union[Quaternion, tuple[float, float, float, float], dict[str, float]]
-        ] = None,
-        pose: Optional[Union[PoseStamped, Pose]] = None,
+        position: Point | tuple[float, float, float] | dict[str, float] | None = None,
+        quat_xyzw: Quaternion
+        | tuple[float, float, float, float]
+        | dict[str, float]
+        | None = None,
+        pose: PoseStamped | Pose | None = None,
         max_vel: float = 1.0,
         max_accel: float = 1.0,
     ) -> None:
@@ -269,7 +267,7 @@ class RobotDirector:
         )
 
     def gripper_move(
-        self, width: Optional[float] = None, action: Optional[str] = None
+        self, width: float | None = None, action: str | None = None
     ) -> None:
         if action is not None:
             self.node.get_logger().info(f"Using gripper action: {action}")
@@ -313,7 +311,7 @@ class RobotDirector:
     def servo_jog(
         self,
         joint_names: tuple[str, ...],
-        velocities: tuple[float, ...] = tuple(),
+        velocities: tuple[float, ...] = (),
     ) -> None:
         if not self.servo_enabled:
             self.node.get_logger().warn("Enable servo before moving. Ignoring.")

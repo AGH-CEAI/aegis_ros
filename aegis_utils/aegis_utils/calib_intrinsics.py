@@ -1,7 +1,6 @@
 import argparse
 import glob
 from pathlib import Path
-from typing import Optional
 
 import cv2
 import yaml
@@ -75,11 +74,11 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def get_latest_folder(base_path: Path, camera: str) -> Optional[Path]:
+def get_latest_folder(base_path: Path, camera: str) -> Path | None:
     folders = glob.glob(str(base_path / f"{camera}_*"))
     if not folders:
         return None
-    latest_folder = sorted(folders, reverse=True)[0]
+    latest_folder = max(folders)
     return Path(latest_folder)
 
 
@@ -132,7 +131,7 @@ def calibrate_intrinsics(
         print("No valid views for calibration")
         return
 
-    ret, camera_matrix, dist_coeffs, rvecs, tvecs = cv2.aruco.calibrateCameraCharuco(
+    _ret, camera_matrix, dist_coeffs, _rvecs, _tvecs = cv2.aruco.calibrateCameraCharuco(
         charucoCorners=all_corners,
         charucoIds=all_ids,
         board=board,
