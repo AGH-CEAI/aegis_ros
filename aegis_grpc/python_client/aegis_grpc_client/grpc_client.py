@@ -11,8 +11,8 @@ from proto_aegis_grpc.v1 import (
     robot_srvs_pb2,
     robot_srvs_pb2_grpc,
     sensor_msgs_pb2,
+    wled_service_pb2,
     wled_service_pb2_grpc,
-    wled_service_pb2
 )
 from strenum import LowercaseStrEnum, StrEnum
 
@@ -534,8 +534,8 @@ class AegisRobotClient:
         except grpc.RpcError as e:
             raise RuntimeError("Failed to disable servo") from e
 
-class AegisWledClient:
 
+class AegisWledClient:
     def __init__(self, channel):
         self._stub = wled_service_pb2_grpc.WledServiceStub(channel)
 
@@ -544,16 +544,14 @@ class AegisWledClient:
             scene=scene,
             section=section,
             effect_id=effect_id,
-            optional_params=optional_params
+            optional_params=optional_params,
         )
         response = self._stub.ChangeScene(request)
         return response.success, response.message
 
     def define_scene(self, scene_name, color, brightness):
         request = wled_service_pb2.DefineSceneRequest(
-            scene_name=scene_name,
-            color=color,
-            brightness=brightness
+            scene_name=scene_name, color=color, brightness=brightness
         )
         response = self._stub.DefineScene(request)
         return response.success, response.message

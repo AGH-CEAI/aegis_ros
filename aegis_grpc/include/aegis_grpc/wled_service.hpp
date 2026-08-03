@@ -36,10 +36,10 @@ class WledServiceImpl final : public aegis::grpc::v1::WledService::Service {
   ::grpc::Status GetSections(::grpc::ServerContext* context,
                              const ::aegis::grpc::v1::GetSectionsRequest* request,
                              ::aegis::grpc::v1::GetSectionsResponse* response) override;
-                             
+
   ::grpc::Status StreamEffects(::grpc::ServerContext* context,
-                              const ::aegis::grpc::v1::Empty* request,
-                              ::grpc::ServerWriter<::aegis::grpc::v1::WledEffectsResponse>* writer) override;
+                               const ::aegis::grpc::v1::Empty* request,
+                               ::grpc::ServerWriter<::aegis::grpc::v1::WledEffectsResponse>* writer) override;
 
  private:
   std::shared_ptr<rclcpp::Node> node_;

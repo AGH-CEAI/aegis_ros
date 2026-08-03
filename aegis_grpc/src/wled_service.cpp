@@ -17,9 +17,7 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
 
   effects_sub_ = node_->create_subscription<std_msgs::msg::String>(
       "/wled_effects", qos_profile,
-      [this](const std_msgs::msg::String::SharedPtr msg) {
-        this->cached_effects_data_ = msg->data;
-      });
+      [this](const std_msgs::msg::String::SharedPtr msg) { this->cached_effects_data_ = msg->data; });
 }
 
 ::grpc::Status WledServiceImpl::ChangeScene(::grpc::ServerContext* /*context*/,
