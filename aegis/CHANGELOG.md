@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 ### Removed
 ### Fixed
+
+* [PR-134](https://github.com/AGH-CEAI/aegis_ros/pull/134) - Updated the `scene_objects_manager` repository (updated in PR #115).
+
 ### Security
 
 ## [v202603091730]
