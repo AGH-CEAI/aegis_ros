@@ -1,0 +1,38 @@
+name: Build - Humble
+
+on:
+  push:
+    branches: [ humble, humble-devel ]
+  pull_request:
+    branches: [ humble, humble-devel ]
+
+env:
+  ROS_DISTRO: humble
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Install ROS 2 and build tools
+      - name: Setup ROS 2
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: humble
+
+      # Install dependencies using rosdep
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          rosdep update
+          rosdep install --from-paths src --ignore-src -y
+
+      # Build the workspace
+      - name: Build workspace
+        run: |
+          colcon build \
+            --symlink-install \
+            --cmake-args -DCMAKE_BUILD_TYPE=Release
