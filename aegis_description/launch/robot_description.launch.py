@@ -17,6 +17,7 @@ def generate_launch_description():
     disable_cell_collision = LaunchConfiguration(
         "disable_cell_collision", default="false"
     )
+    disable_leds = LaunchConfiguration("disable_leds", default="false")
 
     robot_description_str = Command(
         [
@@ -41,6 +42,9 @@ def generate_launch_description():
             " ",
             "disable_cell_collision:=",
             disable_cell_collision,
+            " ",
+            "disable_leds:=",
+            disable_leds,
         ]
     )
 
