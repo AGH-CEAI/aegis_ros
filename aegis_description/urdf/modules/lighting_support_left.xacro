@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="lighting_support_left" params="parent prefix">
     <joint name="${prefix}lighting_support_left_joint" type="fixed">
-      <origin xyz="0.32 0.495 0.35" rpy="0.0 0.0 ${pi}"/>
+      <origin xyz="0.50 0.30 1.171" rpy="0.0 0.0 ${-0.5 * pi}"/>
       <parent link="${parent}"/>
       <child link="${prefix}lighting_support_left_link"/>
     </joint>
