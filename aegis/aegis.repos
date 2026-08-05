@@ -14,7 +14,7 @@ repositories:
   scene_objects_manager:
     type: git
     url: https://github.com/AGH-CEAI/scene_objects_manager
-    version: 96a370865c7ac15622a74123e93a1b96b26dcee7
+    version: e028dc959c2f3e72645a95d24d2cae05f4b9a396
   pymoveit2:
     type: git
     url: https://github.com/macmacal/pymoveit2.git
