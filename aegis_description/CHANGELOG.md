@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 ### Removed
 ### Fixed
+
+* [PR-133](https://github.com/AGH-CEAI/aegis_ros/pull/133) - Hotfix: Added `disable_leds` argument to launch files.
+
 ### Security
 
 ## [v202603091730]

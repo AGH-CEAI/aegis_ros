@@ -19,5 +19,6 @@
     mock_hardware="$(arg mock_hardware)"
     disable_cell="$(arg disable_cell)"
     disable_cell_collision="$(arg disable_cell_collision)"
+    disable_leds="$(arg disable_leds)"
   />
 </robot>
