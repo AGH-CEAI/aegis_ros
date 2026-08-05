@@ -68,9 +68,10 @@
       </link>
 
       <xacro:unless value="${disable_leds}">
-        <xacro:lighting_support_right parent="cell" prefix=""/>
-        <xacro:lighting_support_left parent="cell" prefix=""/>
+      <xacro:lighting_support_right parent="cell" prefix="" disable_cell_collision="${disable_cell_collision}"/>
+      <xacro:lighting_support_left parent="cell" prefix="" disable_cell_collision="${disable_cell_collision}"/>
       </xacro:unless>
+
     </xacro:unless>
   </xacro:macro>
 </robot>
