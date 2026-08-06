@@ -8,13 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-### Changed
+* [PR-132](https://github.com/AGH-CEAI/aegis_ros/pull/130) - gRPC control over wled service.
 
+### Changed
 * [PR-130](https://github.com/AGH-CEAI/aegis_ros/pull/130) - New ruff formatting.
 * [PR-125](https://github.com/AGH-CEAI/aegis_ros/pull/125) - Client: Reordered the joints to match simulation joints order.
 * [PR-125](https://github.com/AGH-CEAI/aegis_ros/pull/125) - Client: Changed cameras names and introduced StrEnums for all literals.
 * [PR-119](https://github.com/AGH-CEAI/aegis_ros/pull/119) - Server: parametrized topics subs buffer size (and changed default from `10` to `1`).
-
 ### Deprecated
 ### Removed
 ### Fixed
@@ -23,7 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v202603091730]
 
 ### Added
-
 * [PR-109](https://github.com/AGH-CEAI/aegis_ros/pull/109) - Client: Enum with indexes of all joints.
 * [PR-104](https://github.com/AGH-CEAI/aegis_ros/pull/104) - Server: Omit MoveIt2 call if the target is close to current pose.
 * [PR-103](https://github.com/AGH-CEAI/aegis_ros/pull/103) - Server: Adds servo idling with zero commands.

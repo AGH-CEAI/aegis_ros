@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package aegis.grpc.v1;
+
+service WledService {
+  rpc ChangeScene(ChangeSceneRequest) returns (GenericStatusResponse);
+  rpc DefineScene(DefineSceneRequest) returns (GenericStatusResponse);
+  rpc GetScenes(GetScenesRequest) returns (GetScenesResponse);
+  rpc GetSections(GetSectionsRequest) returns (GetSectionsResponse);
+  rpc StreamEffects(Empty) returns (stream WledEffectsResponse);
+}
+
+message Empty {}
+
+message GenericStatusResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ChangeSceneRequest {
+  string scene = 1;
+  string section = 2;
+  int64 effect_id = 3;
+  string optional_params = 4;
+}
+
+message DefineSceneRequest {
+  string scene_name = 1;
+  repeated int32 color = 2;
+  int32 brightness = 3;
+}
+
+message GetScenesRequest {}
+
+message GetScenesResponse {
+  repeated string scene_names = 1;
+  repeated int32 brightnesses = 2;
+  repeated int32 colors_r = 3;
+  repeated int32 colors_g = 4;
+  repeated int32 colors_b = 5;
+}
+
+message GetSectionsRequest {}
+
+message GetSectionsResponse {
+  repeated string section_names = 1;
+  repeated int32 starts = 2;
+  repeated int32 stops = 3;
+}
+
+message WledEffectsResponse {
+  string effects_json_or_text = 1;
+}
