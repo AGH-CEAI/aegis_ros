@@ -23,7 +23,7 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
 ::grpc::Status WledServiceImpl::ChangeScene(::grpc::ServerContext* /*context*/,
                                             const ::aegis::grpc::v1::ChangeSceneRequest* request,
                                             ::aegis::grpc::v1::GenericStatusResponse* response) {
-  if (!change_scene_client_->wait_for_service(1s)) {
+  if (!change_scene_client_->wait_for_service(10s)) {
     return ::grpc::Status(::grpc::StatusCode::UNAVAILABLE, "ROS 2 ChangeScene service not available");
   }
 
@@ -32,9 +32,10 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
   ros_req->section = request->section();
   ros_req->effect_id = request->effect_id();
   ros_req->optional_params = request->optional_params();
-
+  // RCLCPP_INFO(node_->get_logger(), "Sending ChangeScene request to ROS 2 service with scene: %s, section: %s,
+  // effect_id: %ld", ros_req->scene.c_str(), ros_req->section.c_str(), ros_req->effect_id);
   auto future = change_scene_client_->async_send_request(ros_req);
-  if (future.wait_for(3s) == std::future_status::ready) {
+  if (future.wait_for(10s) == std::future_status::ready) {
     auto ros_res = future.get();
     response->set_success(ros_res->success);
     response->set_message(ros_res->message);
