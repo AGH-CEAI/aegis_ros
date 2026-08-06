@@ -1,10 +1,17 @@
 import logging
+import os
+import sys
 from contextlib import asynccontextmanager
 from enum import Enum, auto
 
 import grpc
 import numpy as np
 from google.protobuf.empty_pb2 import Empty
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 from proto_aegis_grpc.v1 import (
     control_msgs_pb2,
     geometry_msgs_pb2,
