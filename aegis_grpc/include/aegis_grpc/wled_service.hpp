@@ -16,30 +16,30 @@
 
 namespace aegis_grpc {
 
-class WledServiceImpl final : public aegis::grpc::v1::WledService::Service {
+class WledServiceImpl final : public proto_aegis_grpc::v1::WledService::Service {
  public:
   explicit WledServiceImpl(std::shared_ptr<rclcpp::Node> node);
   virtual ~WledServiceImpl() = default;
 
   ::grpc::Status ChangeScene(::grpc::ServerContext* context,
-                             const ::aegis::grpc::v1::ChangeSceneRequest* request,
-                             ::aegis::grpc::v1::GenericStatusResponse* response) override;
+                             const ::proto_aegis_grpc::v1::ChangeSceneRequest* request,
+                             ::proto_aegis_grpc::v1::GenericStatusResponse* response) override;
 
   ::grpc::Status DefineScene(::grpc::ServerContext* context,
-                             const ::aegis::grpc::v1::DefineSceneRequest* request,
-                             ::aegis::grpc::v1::GenericStatusResponse* response) override;
+                             const ::proto_aegis_grpc::v1::DefineSceneRequest* request,
+                             ::proto_aegis_grpc::v1::GenericStatusResponse* response) override;
 
   ::grpc::Status GetScenes(::grpc::ServerContext* context,
-                           const ::aegis::grpc::v1::GetScenesRequest* request,
-                           ::aegis::grpc::v1::GetScenesResponse* response) override;
+                           const ::proto_aegis_grpc::v1::GetScenesRequest* request,
+                           ::proto_aegis_grpc::v1::GetScenesResponse* response) override;
 
   ::grpc::Status GetSections(::grpc::ServerContext* context,
-                             const ::aegis::grpc::v1::GetSectionsRequest* request,
-                             ::aegis::grpc::v1::GetSectionsResponse* response) override;
+                             const ::proto_aegis_grpc::v1::GetSectionsRequest* request,
+                             ::proto_aegis_grpc::v1::GetSectionsResponse* response) override;
 
   ::grpc::Status StreamEffects(::grpc::ServerContext* context,
-                               const ::aegis::grpc::v1::Empty* request,
-                               ::grpc::ServerWriter<::aegis::grpc::v1::WledEffectsResponse>* writer) override;
+                               const ::proto_aegis_grpc::v1::Empty* request,
+                               ::grpc::ServerWriter<::proto_aegis_grpc::v1::WledEffectsResponse>* writer) override;
 
  private:
   std::shared_ptr<rclcpp::Node> node_;

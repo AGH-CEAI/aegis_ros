@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package aegis.grpc.v1;
+package proto_aegis_grpc.v1;
 
 service WledService {
   rpc ChangeScene(ChangeSceneRequest) returns (GenericStatusResponse);

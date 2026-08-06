@@ -21,8 +21,8 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
 }
 
 ::grpc::Status WledServiceImpl::ChangeScene(::grpc::ServerContext* /*context*/,
-                                            const ::aegis::grpc::v1::ChangeSceneRequest* request,
-                                            ::aegis::grpc::v1::GenericStatusResponse* response) {
+                                            const ::proto_aegis_grpc::v1::ChangeSceneRequest* request,
+                                            ::proto_aegis_grpc::v1::GenericStatusResponse* response) {
   if (!change_scene_client_->wait_for_service(10s)) {
     return ::grpc::Status(::grpc::StatusCode::UNAVAILABLE, "ROS 2 ChangeScene service not available");
   }
@@ -46,8 +46,8 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
 }
 
 ::grpc::Status WledServiceImpl::DefineScene(::grpc::ServerContext* /*context*/,
-                                            const ::aegis::grpc::v1::DefineSceneRequest* request,
-                                            ::aegis::grpc::v1::GenericStatusResponse* response) {
+                                            const ::proto_aegis_grpc::v1::DefineSceneRequest* request,
+                                            ::proto_aegis_grpc::v1::GenericStatusResponse* response) {
   if (!define_scene_client_->wait_for_service(1s)) {
     return ::grpc::Status(::grpc::StatusCode::UNAVAILABLE, "ROS 2 DefineScene service not available");
   }
@@ -71,8 +71,8 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
 }
 
 ::grpc::Status WledServiceImpl::GetScenes(::grpc::ServerContext* /*context*/,
-                                          const ::aegis::grpc::v1::GetScenesRequest* /*request*/,
-                                          ::aegis::grpc::v1::GetScenesResponse* response) {
+                                          const ::proto_aegis_grpc::v1::GetScenesRequest* /*request*/,
+                                          ::proto_aegis_grpc::v1::GetScenesResponse* response) {
   if (!get_scenes_client_->wait_for_service(1s)) {
     return ::grpc::Status(::grpc::StatusCode::UNAVAILABLE, "ROS 2 GetScenes service not available");
   }
@@ -99,8 +99,8 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
 }
 
 ::grpc::Status WledServiceImpl::GetSections(::grpc::ServerContext* /*context*/,
-                                            const ::aegis::grpc::v1::GetSectionsRequest* /*request*/,
-                                            ::aegis::grpc::v1::GetSectionsResponse* response) {
+                                            const ::proto_aegis_grpc::v1::GetSectionsRequest* /*request*/,
+                                            ::proto_aegis_grpc::v1::GetSectionsResponse* response) {
   if (!get_sections_client_->wait_for_service(1s)) {
     return ::grpc::Status(::grpc::StatusCode::UNAVAILABLE, "ROS 2 GetSections service not available");
   }
@@ -122,14 +122,15 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
   return ::grpc::Status(::grpc::StatusCode::DEADLINE_EXCEEDED, "Timeout calling ROS 2 GetSections service");
 }
 
-::grpc::Status WledServiceImpl::StreamEffects(::grpc::ServerContext* /*context*/,
-                                              const ::aegis::grpc::v1::Empty* /*request*/,
-                                              ::grpc::ServerWriter<::aegis::grpc::v1::WledEffectsResponse>* writer) {
+::grpc::Status WledServiceImpl::StreamEffects(
+    ::grpc::ServerContext* /*context*/,
+    const ::proto_aegis_grpc::v1::Empty* /*request*/,
+    ::grpc::ServerWriter<::proto_aegis_grpc::v1::WledEffectsResponse>* writer) {
   if (cached_effects_data_.empty()) {
     return ::grpc::Status(::grpc::StatusCode::UNAVAILABLE, "Effects not cached yet from /wled_effects topic");
   }
 
-  ::aegis::grpc::v1::WledEffectsResponse response;
+  ::proto_aegis_grpc::v1::WledEffectsResponse response;
   response.set_effects_json_or_text(cached_effects_data_);
 
   writer->Write(response);
