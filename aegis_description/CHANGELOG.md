@@ -14,12 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-135](https://github.com/AGH-CEAI/aegis_ros/pull/135) - Changed launch param `disable_leds` to `model_disable_cell_led_supports`.
+* [PR-135](https://github.com/AGH-CEAI/aegis_ros/pull/135) - Added prefixes `model_` to every launch parameter related to the xacro parsing.
 * [PR-130](https://github.com/AGH-CEAI/aegis_ros/pull/130) - New ruff formatting.
 
 ### Deprecated
 ### Removed
 ### Fixed
 
+* [PR-135](https://github.com/AGH-CEAI/aegis_ros/pull/135) - Fixed meshes for the lighting supports (position of the centers) and their poses relative to the cell link.
 * [PR-133](https://github.com/AGH-CEAI/aegis_ros/pull/133) - Hotfix: Added `disable_leds` argument to launch files.
 
 ### Security
