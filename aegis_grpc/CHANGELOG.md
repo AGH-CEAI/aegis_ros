@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-* [PR-132](https://github.com/AGH-CEAI/aegis_ros/pull/130) - gRPC control over wled service.
+* [PR-132](https://github.com/AGH-CEAI/aegis_ros/pull/130) - gRPC control over [wled_ros_driver](https://github.com/AGH-CEAI/wled_ros_driver).
 
 ### Changed
 * [PR-130](https://github.com/AGH-CEAI/aegis_ros/pull/130) - New ruff formatting.
