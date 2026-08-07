@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 ### Added
-* [PR-132](https://github.com/AGH-CEAI/aegis_ros/pull/130) - gRPC control over [wled_ros_driver](https://github.com/AGH-CEAI/wled_ros_driver).
+* [PR-132](https://github.com/AGH-CEAI/aegis_ros/pull/130) - updated aegis.repos wled hash view reference to humble-devel branch HEAD.
 * [PR-129](https://github.com/AGH-CEAI/aegis_ros/pull/129) - Added `wled_ros_driver` repository
 * [PR-128](https://github.com/AGH-CEAI/aegis_ros/pull/128) - Added a remote setup guide for connecting to the robot station over the network.
 
