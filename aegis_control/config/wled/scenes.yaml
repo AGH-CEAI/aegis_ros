@@ -1,6 +1,6 @@
 wled_service_node:
   ros__parameters:
-    wled_url: "192.168.100.50"
+    wled_url: "aegis_wled"
     led_count: 44
     scenes:
       scene_1:

@@ -1,7 +1,6 @@
 import argparse
 
 import grpc
-
 from aegis_grpc_client.grpc_client import AegisWledClient
 
 """
