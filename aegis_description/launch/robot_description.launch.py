@@ -13,11 +13,13 @@ from launch_ros.substitutions import FindPackageShare
 def generate_launch_description():
     tf_prefix = LaunchConfiguration("tf_prefix", default="")
     mock_hardware = LaunchConfiguration("mock_hardware", default="false")
-    disable_cell = LaunchConfiguration("disable_cell", default="false")
-    disable_cell_collision = LaunchConfiguration(
-        "disable_cell_collision", default="false"
+    model_disable_cell = LaunchConfiguration("model_disable_cell", default="false")
+    model_disable_cell_collision = LaunchConfiguration(
+        "model_disable_cell_collision", default="false"
     )
-    disable_leds = LaunchConfiguration("disable_leds", default="false")
+    model_disable_cell_led_supports = LaunchConfiguration(
+        "model_disable_led_supports", default="false"
+    )
 
     robot_description_str = Command(
         [
@@ -38,13 +40,13 @@ def generate_launch_description():
             mock_hardware,
             " ",
             "disable_cell:=",
-            disable_cell,
+            model_disable_cell,
             " ",
             "disable_cell_collision:=",
-            disable_cell_collision,
+            model_disable_cell_collision,
             " ",
-            "disable_leds:=",
-            disable_leds,
+            "disable_led_supports:=",
+            model_disable_cell_led_supports,
         ]
     )
 
