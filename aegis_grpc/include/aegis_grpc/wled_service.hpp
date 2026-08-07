@@ -23,22 +23,22 @@ class WledServiceImpl final : public proto_aegis_grpc::v1::WledService::Service 
 
   ::grpc::Status ChangeScene(::grpc::ServerContext* context,
                              const ::proto_aegis_grpc::v1::ChangeSceneRequest* request,
-                             ::proto_aegis_grpc::v1::GenericStatusResponse* response) override;
+                             ::proto_aegis_grpc::v1::TriggerResponse* response) override;
 
   ::grpc::Status DefineScene(::grpc::ServerContext* context,
                              const ::proto_aegis_grpc::v1::DefineSceneRequest* request,
-                             ::proto_aegis_grpc::v1::GenericStatusResponse* response) override;
+                             ::proto_aegis_grpc::v1::TriggerResponse* response) override;
 
   ::grpc::Status GetScenes(::grpc::ServerContext* context,
-                           const ::proto_aegis_grpc::v1::GetScenesRequest* request,
+                           const ::google::protobuf::Empty* request,
                            ::proto_aegis_grpc::v1::GetScenesResponse* response) override;
 
   ::grpc::Status GetSections(::grpc::ServerContext* context,
-                             const ::proto_aegis_grpc::v1::GetSectionsRequest* request,
+                             const ::google::protobuf::Empty* request,
                              ::proto_aegis_grpc::v1::GetSectionsResponse* response) override;
 
   ::grpc::Status StreamEffects(::grpc::ServerContext* context,
-                               const ::proto_aegis_grpc::v1::Empty* request,
+                               const ::google::protobuf::Empty* request,
                                ::grpc::ServerWriter<::proto_aegis_grpc::v1::WledEffectsResponse>* writer) override;
 
  private:

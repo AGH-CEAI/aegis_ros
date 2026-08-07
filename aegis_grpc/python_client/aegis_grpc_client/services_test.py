@@ -17,29 +17,31 @@ stream-effects
 """
 
 
-def define_scene_command(client, scene_name: str, color: list[int], brightness: int):
+def define_scene_command(
+    client, scene_name: str, color: list[int], brightness: int
+) -> None:
     print(f"\n[1] Defining new scene '{scene_name}' with color {color}...")
     try:
-        success, message = client.define_scene(
+        success, msg = client.define_scene(
             scene_name=scene_name, color=color, brightness=brightness
         )
-        print(f"Success: {success}, Message: '{message}'")
+        print(f"Success: {success}, msg: '{msg}'")
     except grpc.RpcError as e:
         print(f"\ngRPC Error: {e.code()} - {e.details()}")
 
 
-def change_scene_command(client, section: str, scene: str, effect_id: int):
+def change_scene_command(client, section: str, scene: str, effect_id: int) -> None:
     print(f"\n[2] Changing scene to '{scene}' on section '{section}'...")
     try:
-        success, message = client.change_scene(
+        success, msg = client.change_scene(
             scene=scene, section=section, effect_id=effect_id
         )
-        print(f"Success: {success}, Message: '{message}'")
+        print(f"Success: {success}, msg: '{msg}'")
     except grpc.RpcError as e:
         print(f"\ngRPC Error: {e.code()} - {e.details()}")
 
 
-def get_scenes_command(client):
+def get_scenes_command(client) -> None:
     print("\n[3] Fetching available scenes...")
     try:
         scene_names, brightnesses = client.get_scenes()
@@ -49,7 +51,7 @@ def get_scenes_command(client):
         print(f"\ngRPC Error: {e.code()} - {e.details()}")
 
 
-def get_sections_command(client):
+def get_sections_command(client) -> None:
     print("\n[4] Fetching sections...")
     try:
         section_names, starts, stops = client.get_sections()
@@ -59,7 +61,7 @@ def get_sections_command(client):
         print(f"\ngRPC Error: {e.code()} - {e.details()}")
 
 
-def stream_effects_command(client, limit: int):
+def stream_effects_command(client, limit: int) -> None:
     print(f"\n[5] Streaming effects (listening for up to {limit} events)...")
     try:
         stream = client.stream_effects()

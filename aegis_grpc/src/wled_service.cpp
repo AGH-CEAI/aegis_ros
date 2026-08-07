@@ -22,7 +22,7 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
 
 ::grpc::Status WledServiceImpl::ChangeScene(::grpc::ServerContext* /*context*/,
                                             const ::proto_aegis_grpc::v1::ChangeSceneRequest* request,
-                                            ::proto_aegis_grpc::v1::GenericStatusResponse* response) {
+                                            ::proto_aegis_grpc::v1::TriggerResponse* response) {
   if (!change_scene_client_->wait_for_service(10s)) {
     return ::grpc::Status(::grpc::StatusCode::UNAVAILABLE, "ROS 2 ChangeScene service not available");
   }
@@ -36,7 +36,7 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
   if (future.wait_for(10s) == std::future_status::ready) {
     auto ros_res = future.get();
     response->set_success(ros_res->success);
-    response->set_message(ros_res->message);
+    response->set_msg(ros_res->message);
     return ::grpc::Status::OK;
   }
 
@@ -45,7 +45,7 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
 
 ::grpc::Status WledServiceImpl::DefineScene(::grpc::ServerContext* /*context*/,
                                             const ::proto_aegis_grpc::v1::DefineSceneRequest* request,
-                                            ::proto_aegis_grpc::v1::GenericStatusResponse* response) {
+                                            ::proto_aegis_grpc::v1::TriggerResponse* response) {
   if (!define_scene_client_->wait_for_service(1s)) {
     return ::grpc::Status(::grpc::StatusCode::UNAVAILABLE, "ROS 2 DefineScene service not available");
   }
@@ -61,7 +61,7 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
   if (future.wait_for(3s) == std::future_status::ready) {
     auto ros_res = future.get();
     response->set_success(ros_res->success);
-    response->set_message(ros_res->message);
+    response->set_msg(ros_res->message);
     return ::grpc::Status::OK;
   }
 
@@ -69,7 +69,7 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
 }
 
 ::grpc::Status WledServiceImpl::GetScenes(::grpc::ServerContext* /*context*/,
-                                          const ::proto_aegis_grpc::v1::GetScenesRequest* /*request*/,
+                                          const ::google::protobuf::Empty* /*request*/,
                                           ::proto_aegis_grpc::v1::GetScenesResponse* response) {
   if (!get_scenes_client_->wait_for_service(1s)) {
     return ::grpc::Status(::grpc::StatusCode::UNAVAILABLE, "ROS 2 GetScenes service not available");
@@ -97,7 +97,7 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
 }
 
 ::grpc::Status WledServiceImpl::GetSections(::grpc::ServerContext* /*context*/,
-                                            const ::proto_aegis_grpc::v1::GetSectionsRequest* /*request*/,
+                                            const ::google::protobuf::Empty* /*request*/,
                                             ::proto_aegis_grpc::v1::GetSectionsResponse* response) {
   if (!get_sections_client_->wait_for_service(1s)) {
     return ::grpc::Status(::grpc::StatusCode::UNAVAILABLE, "ROS 2 GetSections service not available");
@@ -122,7 +122,7 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
 
 ::grpc::Status WledServiceImpl::StreamEffects(
     ::grpc::ServerContext* /*context*/,
-    const ::proto_aegis_grpc::v1::Empty* /*request*/,
+    const ::google::protobuf::Empty* /*request*/,
     ::grpc::ServerWriter<::proto_aegis_grpc::v1::WledEffectsResponse>* writer) {
   if (cached_effects_data_.empty()) {
     return ::grpc::Status(::grpc::StatusCode::UNAVAILABLE, "Effects not cached yet from /wled_effects topic");

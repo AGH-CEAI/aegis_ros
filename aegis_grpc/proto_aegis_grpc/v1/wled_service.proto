@@ -1,20 +1,15 @@
 syntax = "proto3";
-
 package proto_aegis_grpc.v1;
 
+import "google/protobuf/empty.proto";
+import "proto_aegis_grpc/v1/robot_srvs.proto";
+
 service WledService {
-  rpc ChangeScene(ChangeSceneRequest) returns (GenericStatusResponse);
-  rpc DefineScene(DefineSceneRequest) returns (GenericStatusResponse);
-  rpc GetScenes(GetScenesRequest) returns (GetScenesResponse);
-  rpc GetSections(GetSectionsRequest) returns (GetSectionsResponse);
-  rpc StreamEffects(Empty) returns (stream WledEffectsResponse);
-}
-
-message Empty {}
-
-message GenericStatusResponse {
-  bool success = 1;
-  string message = 2;
+  rpc ChangeScene(ChangeSceneRequest) returns (TriggerResponse);
+  rpc DefineScene(DefineSceneRequest) returns (TriggerResponse);
+  rpc GetScenes(google.protobuf.Empty) returns (GetScenesResponse);
+  rpc GetSections(google.protobuf.Empty) returns (GetSectionsResponse);
+  rpc StreamEffects(google.protobuf.Empty) returns (stream WledEffectsResponse);
 }
 
 message ChangeSceneRequest {
@@ -30,8 +25,6 @@ message DefineSceneRequest {
   int32 brightness = 3;
 }
 
-message GetScenesRequest {}
-
 message GetScenesResponse {
   repeated string scene_names = 1;
   repeated int32 brightnesses = 2;
@@ -39,8 +32,6 @@ message GetScenesResponse {
   repeated int32 colors_g = 4;
   repeated int32 colors_b = 5;
 }
-
-message GetSectionsRequest {}
 
 message GetSectionsResponse {
   repeated string section_names = 1;

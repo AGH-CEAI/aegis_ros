@@ -1,17 +1,10 @@
 import logging
-import os
-import sys
 from contextlib import asynccontextmanager
 from enum import Enum, auto
 
 import grpc
 import numpy as np
 from google.protobuf.empty_pb2 import Empty
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)
-
 from proto_aegis_grpc.v1 import (
     control_msgs_pb2,
     geometry_msgs_pb2,
@@ -543,10 +536,16 @@ class AegisRobotClient:
 
 
 class AegisWledClient:
-    def __init__(self, channel):
+    def __init__(self, channel: grpc.Channel):
         self._stub = wled_service_pb2_grpc.WledServiceStub(channel)
 
-    def change_scene(self, scene, section="section_1", effect_id=0, optional_params=""):
+    def change_scene(
+        self,
+        scene: str,
+        section: str = "section_1",
+        effect_id: int = 0,
+        optional_params: str = "",
+    ) -> tuple[bool, str]:
         request = wled_service_pb2.ChangeSceneRequest(
             scene=scene,
             section=section,
@@ -554,26 +553,28 @@ class AegisWledClient:
             optional_params=optional_params,
         )
         response = self._stub.ChangeScene(request)
-        return response.success, response.message
+        return response.success, response.msg
 
-    def define_scene(self, scene_name, color, brightness):
+    def define_scene(
+        self, scene_name: str, color: list[int], brightness: int
+    ) -> tuple[bool, str]:
         request = wled_service_pb2.DefineSceneRequest(
             scene_name=scene_name, color=color, brightness=brightness
         )
         response = self._stub.DefineScene(request)
-        return response.success, response.message
+        return response.success, response.msg
 
-    def get_scenes(self):
+    def get_scenes(self) -> tuple[list[str], list[int]]:
         request = wled_service_pb2.GetScenesRequest()
         response = self._stub.GetScenes(request)
         return list(response.scene_names), list(response.brightnesses)
 
-    def get_sections(self):
+    def get_sections(self) -> tuple[list[str], list[int], list[int]]:
         request = wled_service_pb2.GetSectionsRequest()
         response = self._stub.GetSections(request)
         return list(response.section_names), list(response.starts), list(response.stops)
 
-    def stream_effects(self):
+    def stream_effects(self) -> iter:
         request = wled_service_pb2.Empty()
         for response in self._stub.StreamEffects(request):
             yield response.effects_json_or_text
