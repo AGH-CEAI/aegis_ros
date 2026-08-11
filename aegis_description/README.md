@@ -25,7 +25,7 @@ ros2 launch aegis_description aegis_preview.launch.py
 
 Useful for exporting model to simulation (or ClearML dataset).
 ```bash
-ros2 launch aegis_description generate_standalone_urdf.launch.py save_dir:="~/ceai_ws/aegis_urdf" disable_cell:="false" disable_cell_collision:="false" disable_leds:="false"
+ros2 launch aegis_description generate_standalone_urdf.launch.py save_dir:="~/ceai_ws/aegis_urdf" model_disable_cell:="false" model_disable_cell_collision:="false" model_disable_cell_led_supports:="false"
 ```
 
 ![aegis_preview](./docs/aegis_preview.png)

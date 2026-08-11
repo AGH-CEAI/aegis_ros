@@ -19,7 +19,7 @@ ros2 launch aegis_bringup bringup.launch.py
 ```
 **Working offline**, without the hardware:
 ```bash
-ros2 launch aegis_bringup bringup.launch.py mock_hardware:=true disable_cameras:=true disable_leds:=false launch_rviz:=true
+ros2 launch aegis_bringup bringup.launch.py mock_hardware:=true disable_cameras:=true launch_rviz:=true
 ```
 
 The system should now be up and running!
@@ -27,10 +27,10 @@ The system should now be up and running!
 Possible launch arguments:
 * `mock_hardware:={false, true}` (default: `false`) – enables the _fake_hardware_ feature of the `ros2_control` (the simplest "simulation")
 * `launch_rviz:={false, true}` (default: `true`) – launches visualization in RViz
-* `disable_cell:={false, true}` (default: `false`) – completely removes the cell from the robot description
-* `disable_cell_collision:={false, true}` (default: `false`) – keeps the cell visual geometry but removes its collision geometry
 * `disable_cameras:={false, true}` (default: `false`) – do not launch the cameras drivers
-* `disable_leds:={false, true`} (default: `false`) - exclude LED strips support from the robot description.
+* `model_disable_cell:={false, true}` (default: `false`) – completely removes the cell from the robot description
+* `model_disable_cell_collision:={false, true}` (default: `false`) – keeps the cell visual geometry but removes its collision geometry
+* `model_disable_cell_led_supports:={false, true`} (default: `false`) - exclude LED strips support from the robot description.
 
 ### Control the client program on the robot via dashboard service:
 
