@@ -19,7 +19,7 @@
     <xacro:net_ft_sensor
       parent="${parent}"
       prefix="${prefix}"
-      use_physical_hardware="${mock_hardware == 'false'}"
+      use_physical_hardware="${'true' if mock_hardware == 'false' else 'false'}"
       ip_address="$(arg ip_address)"
       rdt_sampling_rate="$(arg rdt_sampling_rate)"
       sensor_type="$(arg sensor_type)"
