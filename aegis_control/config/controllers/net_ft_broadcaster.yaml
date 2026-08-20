@@ -10,4 +10,4 @@
   net_ft_sensor_broadcaster:
     ros__parameters:
       sensor_name: axia_fts_sensor
-      frame_id: tool0
+      frame_id: fts_link
