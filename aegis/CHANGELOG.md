@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Fixed
 
+* [PR-137](https://github.com/AGH-CEAI/aegis_ros/pull/137) - Updated the `wled_ros_driver` repository.
 * [PR-134](https://github.com/AGH-CEAI/aegis_ros/pull/134) - Updated the `scene_objects_manager` repository (updated in PR #115).
 
 ### Security
