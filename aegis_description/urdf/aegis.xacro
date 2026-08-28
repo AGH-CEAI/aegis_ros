@@ -16,8 +16,8 @@
   <xacro:include filename="$(find aegis_description)/urdf/modules/camera_tool_basler.xacro"/>
   <xacro:include filename="$(find aegis_description)/urdf/modules/lens_computar.xacro"/>
 
-  <xacro:macro name="aegis_robot" params="parent tf_prefix prefix mock_hardware disable_cell disable_cell_collision disable_leds">
-    <xacro:cell parent="${parent}" disable_cell="${disable_cell}" disable_cell_collision="${disable_cell_collision}" disable_leds="${disable_leds}"/>
+  <xacro:macro name="aegis_robot" params="parent tf_prefix prefix mock_hardware disable_cell disable_cell_collision disable_led_supports">
+    <xacro:cell parent="${parent}" disable_cell="${disable_cell}" disable_cell_collision="${disable_cell_collision}" disable_led_supports="${disable_led_supports}"/>
     <xacro:adapter_cell parent="${parent}" prefix="${prefix}" disable_cell="${disable_cell}" disable_cell_collision="${disable_cell_collision}"/>
     <xacro:ur_definition name="aegis" parent="${parent}" tf_prefix="${tf_prefix}" mock_hardware="${mock_hardware}"/>
     <xacro:adapter_to_sensor parent="tool0" prefix="${prefix}"/>

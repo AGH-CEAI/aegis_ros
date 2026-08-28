@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+* [PR-135](https://github.com/AGH-CEAI/aegis_ros/pull/135) - Disabled collision between cell and LED lighting supports.
+
 ### Changed
 
 * [PR-130](https://github.com/AGH-CEAI/aegis_ros/pull/130) - New ruff formatting.

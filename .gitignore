@@ -15,3 +15,11 @@ dist/
 *.whl
 *.tar.gz
 *.vscode/
+
+*.step
+*.blender
+*.blender1
+
+*.step
+*.blend
+*.blend1
