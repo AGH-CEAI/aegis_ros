@@ -135,20 +135,41 @@ You can always list the methods with the `grpcurl` command:
 grpcurl -plaintext 127.0.0.1:50051 list proto_aegis_grpc.v1.RobotControlService
 ```
 
+### Controlling the LED strips with `WledService`
+
+The wled control service is implemented in the [`WledServiceImpl`](./include/aegis_grpc/wled_service.hpp) class with following methods:
+
+| Method name                                                  | Desc.                                                           | Impl. | gRPC Request                                                                                         | gRPC Response                                                                                  |
+| ------------------------------------------------------------ | --------------------------------------------------------------- | ----- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `aegis.grpc.v1.WledService.ChangeScene`                      | Change color end effect displayed on selected segment.          | ✅    | [`aegis.grpc.v1.wled_service.ChangeSceneRequest`](./proto_aegis_grpc/v1/wled_service.proto)          | [`aegis.grpc.v1.wled_service.GenericStatusResponse`](./proto_aegis_grpc/v1/wled_service.proto) |
+| `aegis.grpc.v1.WledService.DefineScene`                      | Create new color and brightness preset.                         | ✅    | [`aegis.grpc.v1.wled_service.DefineSceneRequest`](./proto_aegis_grpc/v1/wled_service.proto)          | [`aegis.grpc.v1.wled_service.GenericStatusResponse`](./proto_aegis_grpc/v1/wled_service.proto) |
+| `aegis.grpc.v1.WledService.GetScenes`                        | Get all scenes.                                                 | ✅    | `google.protobuf.Empty`                                                                              | [`aegis.grpc.v1.wled_service.GetScenesResponse`](./proto_aegis_grpc/v1/wled_service.proto)     |
+| `aegis.grpc.v1.WledService.GetSections`                      | Get all sections.                                               | ✅    | `google.protobuf.Empty`                                                                              | [`aegis.grpc.v1.wled_service.GetSectionsResponse`](./proto_aegis_grpc/v1/wled_service.proto)   |
+| `aegis.grpc.v1.WledService.StreamEffects`                    | Get all effects.                                                | ✅    | `google.protobuf.Empty`                                                                              | [`aegis.grpc.v1.wled_service.WledEffectsResponse`](./proto_aegis_grpc/v1/wled_service.proto)   |
+
+You can always list the methods with the `grpcurl` command:
+```bash
+grpcurl -plaintext 127.0.0.1:50051 list aegis.grpc.v1.WledService
+```
+
 ### All messages
 
-| gRPC message                                                                                         | ROS 2 interface                                                                                                                            |
-| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| [`proto_aegis_grpc.v1.control_msgs.JointJog`](./proto_aegis_grpc/v1/control_msgs.proto)              | [`control_msgs/msg/JointJog`](https://github.com/ros-controls/control_msgs/blob/humble/control_msgs/msg/JointJog.msg)                      |
-| [`proto_aegis_grpc.v1.geometry_msgs.Vector3`](./proto_aegis_grpc/v1/geometry_msgs.proto)             | [`geometry_msgs/msg/Vector3`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Vector3.msg)                         |
-| [`proto_aegis_grpc.v1.geometry_msgs.Point`](./proto_aegis_grpc/v1/geometry_msgs.proto)               | [`geometry_msgs/msg/Point`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Point.msg)                             |
-| [`proto_aegis_grpc.v1.geometry_msgs.Quaternion`](./proto_aegis_grpc/v1/geometry_msgs.proto)          | [`geometry_msgs/msg/Quaternion`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Quaternion.msg)                   |
-| [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)                | [`geometry_msgs/msg/Pose`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Pose.msg)                               |
-| [`proto_aegis_grpc.v1.geometry_msgs.Wrench`](./proto_aegis_grpc/v1/geometry_msgs.proto)              | [`geometry_msgs/msg/Wrench`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Wrench.msg)                           |
-| [`proto_aegis_grpc.v1.geometry_msgs.Twist`](./proto_aegis_grpc/v1/geometry_msgs.proto)               | [`geometry_msgs/msg/Twist`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Twist.msg)                             |
-| [`proto_aegis_grpc.v1.robot_srvs.RobotState`](./proto_aegis_grpc/v1/robot_srvs.proto)                | -                                                                                                                                          |
-| [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto)           | [`std_srvs/srv/Trigger`](https://github.com/ros2/common_interfaces/blob/humble/std_srvs/srv/Trigger.srv)                                   |
-| [`proto_aegis_grpc.v1.robot_srvs.GripperSetPositionRequest`](./proto_aegis_grpc/v1/robot_srvs.proto) | [`control_msgs/action/GripperCommand`](https://github.com/ros-controls/control_msgs/blob/humble/control_msgs/action/GripperCommand.action) |
+| gRPC message                                                                                         | ROS 2 interface                                                                                                                                        |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`proto_aegis_grpc.v1.control_msgs.JointJog`](./proto_aegis_grpc/v1/control_msgs.proto)              | [`control_msgs/msg/JointJog`](https://github.com/ros-controls/control_msgs/blob/humble/control_msgs/msg/JointJog.msg)                                  |
+| [`proto_aegis_grpc.v1.geometry_msgs.Vector3`](./proto_aegis_grpc/v1/geometry_msgs.proto)             | [`geometry_msgs/msg/Vector3`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Vector3.msg)                                     |
+| [`proto_aegis_grpc.v1.geometry_msgs.Point`](./proto_aegis_grpc/v1/geometry_msgs.proto)               | [`geometry_msgs/msg/Point`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Point.msg)                                         |
+| [`proto_aegis_grpc.v1.geometry_msgs.Quaternion`](./proto_aegis_grpc/v1/geometry_msgs.proto)          | [`geometry_msgs/msg/Quaternion`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Quaternion.msg)                               |
+| [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)                | [`geometry_msgs/msg/Pose`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Pose.msg)                                           |
+| [`proto_aegis_grpc.v1.geometry_msgs.Wrench`](./proto_aegis_grpc/v1/geometry_msgs.proto)              | [`geometry_msgs/msg/Wrench`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Wrench.msg)                                       |
+| [`proto_aegis_grpc.v1.geometry_msgs.Twist`](./proto_aegis_grpc/v1/geometry_msgs.proto)               | [`geometry_msgs/msg/Twist`](https://github.com/ros2/common_interfaces/blob/humble/geometry_msgs/msg/Twist.msg)                                         |
+| [`proto_aegis_grpc.v1.robot_srvs.RobotState`](./proto_aegis_grpc/v1/robot_srvs.proto)                | -                                                                                                                                                      |
+| [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto)           | [`std_srvs/srv/Trigger`](https://github.com/ros2/common_interfaces/blob/humble/std_srvs/srv/Trigger.srv)                                               |
+| [`proto_aegis_grpc.v1.robot_srvs.GripperSetPositionRequest`](./proto_aegis_grpc/v1/robot_srvs.proto) | [`control_msgs/action/GripperCommand`](https://github.com/ros-controls/control_msgs/blob/humble/control_msgs/action/GripperCommand.action)             |
+| [`proto_aegis_grpc.v1.wled_service.ChangeScene`](./proto_aegis_grpc/v1/wled_service.proto)           | [`wled_ros_dirver/wled_interfaces/srv/ChangeScene`](https://github.com/AGH-CEAI/wled_ros_driver/tree/humble-devel/wled_interfaces/srv/ChangeScene.srv) |
+| [`proto_aegis_grpc.v1.wled_service.DefineScene`](./proto_aegis_grpc/v1/wled_service.proto)           | [`wled_ros_dirver/wled_interfaces/srv/DefineScene`](https://github.com/AGH-CEAI/wled_ros_driver/tree/humble-devel/wled_interfaces/srv/DefineScene.srv) |
+| [`proto_aegis_grpc.v1.wled_service.GetScenes`](./proto_aegis_grpc/v1/wled_service.proto)             | [`wled_ros_dirver/wled_interfaces/srv/GetScenes`](https://github.com/AGH-CEAI/wled_ros_driver/tree/humble-devel/wled_interfaces/srv/GetScenes.srv)     |
+| [`proto_aegis_grpc.v1.wled_service.GetSections`](./proto_aegis_grpc/v1/wled_service.proto)           | [`wled_ros_dirver/wled_interfaces/srv/GetSections`](https://github.com/AGH-CEAI/wled_ros_driver/tree/humble-devel/wled_interfaces/srv/GetSections.srv) |
 
 ## ROS parameters
 
