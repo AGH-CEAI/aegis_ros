@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+* [PR-137](https://github.com/AGH-CEAI/aegis_ros/pull/137) - New UR dashboard client (2.14.0) workaround.
 * [PR-126](https://github.com/AGH-CEAI/aegis_ros/pull/126) - Fixed frame drops on the DepthAI rectified image by enabling intra-process comms and a multithreaded component container.
 
 ### Security
