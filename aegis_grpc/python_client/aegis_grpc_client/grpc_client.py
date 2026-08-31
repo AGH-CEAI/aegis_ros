@@ -90,6 +90,7 @@ class AegisRobotClient:
         self.channel: grpc.aio.Channel | None = None
         self.read_stub: robot_srvs_pb2_grpc.RobotReadServiceStub | None = None
         self.control_stub: robot_srvs_pb2_grpc.RobotControlServiceStub | None = None
+        self.wled_stub: wled_service_pb2_grpc.WledServiceStub | None = None
         self._connected = False
 
     @property
@@ -104,6 +105,7 @@ class AegisRobotClient:
             self.control_stub = robot_srvs_pb2_grpc.RobotControlServiceStub(
                 self.channel
             )
+            self.wled_stub = wled_service_pb2_grpc.WledServiceStub(self.channel)
             self._connected = True
             self.logger.info(f"Connected to gRPC server at {self.server_address}")
         except Exception as e:
@@ -534,47 +536,135 @@ class AegisRobotClient:
         except grpc.RpcError as e:
             raise RuntimeError("Failed to disable servo") from e
 
+    # ==================== WledService Methods ====================
 
-class AegisWledClient:
-    def __init__(self, channel: grpc.Channel):
-        self._stub = wled_service_pb2_grpc.WledServiceStub(channel)
-
-    def change_scene(
+    async def wled_change_scene(
         self,
         scene: str,
         section: str = "section_1",
         effect_id: int = 0,
         optional_params: str = "",
     ) -> tuple[bool, str]:
+        """
+        Apply a scene/effect to an LED section.
+
+        Args:
+            scene: Name of the scene to apply
+            section: LED section identifier
+            effect_id: Effect index to use
+            optional_params: Any extra effect parameters, as a raw string
+
+        Returns:
+            (success, message) tuple
+        """
+        self._check_connected()
+
         request = wled_service_pb2.ChangeSceneRequest(
             scene=scene,
             section=section,
             effect_id=effect_id,
             optional_params=optional_params,
         )
-        response = self._stub.ChangeScene(request)
-        return response.success, response.msg
 
-    def define_scene(
+        try:
+            response = await self.wled_stub.ChangeScene(request)
+            return response.success, response.msg
+        except grpc.RpcError as e:
+            self.logger.error(f"WLED ChangeScene failed: {e}")
+            raise
+
+    async def wled_define_scene(
         self, scene_name: str, color: list[int], brightness: int
     ) -> tuple[bool, str]:
+        """
+        Define a new named scene with a color and brightness.
+
+        Args:
+            scene_name: Name to register the scene under
+            color: RGB(W) color values
+            brightness: Brightness level
+
+        Returns:
+            (success, message) tuple
+        """
+        self._check_connected()
+
         request = wled_service_pb2.DefineSceneRequest(
             scene_name=scene_name, color=color, brightness=brightness
         )
-        response = self._stub.DefineScene(request)
-        return response.success, response.msg
 
-    def get_scenes(self) -> tuple[list[str], list[int]]:
-        request = wled_service_pb2.GetScenesRequest()
-        response = self._stub.GetScenes(request)
-        return list(response.scene_names), list(response.brightnesses)
+        try:
+            response = await self.wled_stub.DefineScene(request)
+            return response.success, response.msg
+        except grpc.RpcError as e:
+            self.logger.error(f"WLED DefineScene failed: {e}")
+            raise
 
-    def get_sections(self) -> tuple[list[str], list[int], list[int]]:
-        request = wled_service_pb2.GetSectionsRequest()
-        response = self._stub.GetSections(request)
-        return list(response.section_names), list(response.starts), list(response.stops)
+    async def wled_get_scenes(self) -> tuple[list[str], list[int]]:
+        """
+        Get all defined scenes and their brightnesses.
 
-    def stream_effects(self) -> iter:
-        request = wled_service_pb2.Empty()
-        for response in self._stub.StreamEffects(request):
-            yield response.effects_json_or_text
+        Returns:
+            (scene_names, brightnesses) tuple of lists
+        """
+        self._check_connected()
+
+        try:
+            response = await self.wled_stub.GetScenes(Empty())
+            return list(response.scene_names), list(response.brightnesses)
+        except grpc.RpcError as e:
+            self.logger.error(f"WLED GetScenes failed: {e}")
+            raise
+
+    async def wled_get_sections(self) -> tuple[list[str], list[int], list[int]]:
+        """
+        Get all LED sections with their start/stop indices.
+
+        Returns:
+            (section_names, starts, stops) tuple of lists
+        """
+        self._check_connected()
+
+        try:
+            response = await self.wled_stub.GetSections(Empty())
+            return (
+                list(response.section_names),
+                list(response.starts),
+                list(response.stops),
+            )
+        except grpc.RpcError as e:
+            self.logger.error(f"WLED GetSections failed: {e}")
+            raise
+
+    async def wled_get_effects(self) -> dict[str, int]:
+        """
+        Get all available effects as a name -> id mapping.
+
+        Returns:
+            dict mapping effect name to effect id
+        """
+        self._check_connected()
+
+        try:
+            response = await self.wled_stub.GetEffects(Empty())
+        except grpc.RpcError as e:
+            self.logger.error(f"WLED GetEffects failed: {e}")
+            raise
+
+        raw = response.effects_dict_serialized
+
+        result = {}
+        if not raw:
+            return result
+
+        for entry in raw.split(";"):
+            entry = entry.strip()
+            if not entry:
+                continue
+            try:
+                id_str, name = entry.split(":", 1)
+                result[name] = int(id_str)
+            except ValueError:
+                continue
+
+        return result

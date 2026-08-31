@@ -9,7 +9,7 @@ service WledService {
   rpc DefineScene(DefineSceneRequest) returns (TriggerResponse);
   rpc GetScenes(google.protobuf.Empty) returns (GetScenesResponse);
   rpc GetSections(google.protobuf.Empty) returns (GetSectionsResponse);
-  rpc StreamEffects(google.protobuf.Empty) returns (stream WledEffectsResponse);
+  rpc GetEffects(google.protobuf.Empty) returns (WledEffectsResponse);
 }
 
 message ChangeSceneRequest {
@@ -40,5 +40,5 @@ message GetSectionsResponse {
 }
 
 message WledEffectsResponse {
-  string effects_json_or_text = 1;
+  string effects_dict_serialized = 1;
 }
