@@ -139,17 +139,17 @@ grpcurl -plaintext 127.0.0.1:50051 list proto_aegis_grpc.v1.RobotControlService
 
 The wled control service is implemented in the [`WledServiceImpl`](./include/aegis_grpc/wled_service.hpp) class with following methods:
 
-| Method name                                                  | Desc.                                                           | Impl. | gRPC Request                                                                                         | gRPC Response                                                                                  |
-| ------------------------------------------------------------ | --------------------------------------------------------------- | ----- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `aegis.grpc.v1.WledService.ChangeScene`                      | Change color end effect displayed on selected segment.          | ✅    | [`aegis.grpc.v1.wled_service.ChangeSceneRequest`](./proto_aegis_grpc/v1/wled_service.proto)          | [`aegis.grpc.v1.wled_service.GenericStatusResponse`](./proto_aegis_grpc/v1/wled_service.proto) |
-| `aegis.grpc.v1.WledService.DefineScene`                      | Create new color and brightness preset.                         | ✅    | [`aegis.grpc.v1.wled_service.DefineSceneRequest`](./proto_aegis_grpc/v1/wled_service.proto)          | [`aegis.grpc.v1.wled_service.GenericStatusResponse`](./proto_aegis_grpc/v1/wled_service.proto) |
-| `aegis.grpc.v1.WledService.GetScenes`                        | Get all scenes.                                                 | ✅    | `google.protobuf.Empty`                                                                              | [`aegis.grpc.v1.wled_service.GetScenesResponse`](./proto_aegis_grpc/v1/wled_service.proto)     |
-| `aegis.grpc.v1.WledService.GetSections`                      | Get all sections.                                               | ✅    | `google.protobuf.Empty`                                                                              | [`aegis.grpc.v1.wled_service.GetSectionsResponse`](./proto_aegis_grpc/v1/wled_service.proto)   |
-| `aegis.grpc.v1.WledService.StreamEffects`                    | Get all effects.                                                | ✅    | `google.protobuf.Empty`                                                                              | [`aegis.grpc.v1.wled_service.WledEffectsResponse`](./proto_aegis_grpc/v1/wled_service.proto)   |
+| Method name                                   | Desc.                                                  | Impl. | gRPC Request                                                                                      | gRPC Response                                                                                        |
+| --------------------------------------------- | ------------------------------------------------------ | ----- | ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `proto_aegis_grpc.v1.WledService.ChangeScene` | Change color end effect displayed on selected segment. | ✅     | [`proto_aegis_grpc.v1.wled_service.ChangeSceneRequest`](./proto_aegis_grpc/v1/wled_service.proto) | [`proto_aegis_grpc.v1.wled_service.GenericStatusResponse`](./proto_aegis_grpc/v1/wled_service.proto) |
+| `proto_aegis_grpc.v1.WledService.DefineScene` | Create new color and brightness preset.                | ✅     | [`proto_aegis_grpc.v1.wled_service.DefineSceneRequest`](./proto_aegis_grpc/v1/wled_service.proto) | [`proto_aegis_grpc.v1.wled_service.GenericStatusResponse`](./proto_aegis_grpc/v1/wled_service.proto) |
+| `proto_aegis_grpc.v1.WledService.GetScenes`   | Get all scenes.                                        | ✅     | `google.protobuf.Empty`                                                                           | [`proto_aegis_grpc.v1.wled_service.GetScenesResponse`](./proto_aegis_grpc/v1/wled_service.proto)     |
+| `proto_aegis_grpc.v1.WledService.GetSections` | Get all sections.                                      | ✅     | `google.protobuf.Empty`                                                                           | [`proto_aegis_grpc.v1.wled_service.GetSectionsResponse`](./proto_aegis_grpc/v1/wled_service.proto)   |
+| `proto_aegis_grpc.v1.WledService.GetEffects`  | Get all effects.                                       | ✅     | `google.protobuf.Empty`                                                                           | [`proto_aegis_grpc.v1.wled_service.WledEffectsResponse`](./proto_aegis_grpc/v1/wled_service.proto)   |
 
 You can always list the methods with the `grpcurl` command:
 ```bash
-grpcurl -plaintext 127.0.0.1:50051 list aegis.grpc.v1.WledService
+grpcurl -plaintext 127.0.0.1:50051 list proto_aegis_grpc.v1.WledService
 ```
 
 ### All messages
@@ -219,7 +219,15 @@ There is no hardcoded parameters, everything can be modified via ROS:
 | `enable_image_resize`  | `bool`   | `true`                          | -     | Enable resizing images before sending over gRPC. |
 
 >[!TIP]
-> The end-effector's TCP pose is obtained from the tf2 transform (using `tcp_frame` and `base_frame`).
+> The end-effector's TCP pose can be obtained from the tf2 transform (using `tcp_frame` and `base_frame`).
+
+### WledService
+
+**Initialization parameters**
+
+| Parameter              | Type     | Default                         | Units | Description                                        |
+| ---------------------- | -------- | ------------------------------- | ----- | -------------------------------------------------- |
+| `wled_effects_topic`   | `string` | `"/wled_effects"`               | -     | Topic providing serialized dict with WLED effects. |
 
 ### Run and set examples
 The initialization params can be set via ROS 2 run or launch:
