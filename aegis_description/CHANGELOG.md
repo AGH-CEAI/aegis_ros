@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Fixed
 
+* [PR-136](https://github.com/AGH-CEAI/aegis_ros/pull/136) - Fixed the `use_physical_hardware` condition that was blocking the AXIA F/T sensor driver from being selected on real hardware.
 * [PR-135](https://github.com/AGH-CEAI/aegis_ros/pull/135) - Fixed meshes for the lighting supports (position of the centers) and their poses relative to the cell link.
 * [PR-133](https://github.com/AGH-CEAI/aegis_ros/pull/133) - Hotfix: Added `disable_leds` argument to launch files.
 
