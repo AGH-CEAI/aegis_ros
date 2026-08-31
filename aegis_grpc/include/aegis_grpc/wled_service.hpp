@@ -37,11 +37,14 @@ class WledServiceImpl final : public proto_aegis_grpc::v1::WledService::Service 
                              const ::google::protobuf::Empty* request,
                              ::proto_aegis_grpc::v1::GetSectionsResponse* response) override;
 
-  ::grpc::Status StreamEffects(::grpc::ServerContext* context,
-                               const ::google::protobuf::Empty* request,
-                               ::grpc::ServerWriter<::proto_aegis_grpc::v1::WledEffectsResponse>* writer) override;
+  ::grpc::Status GetEffects(::grpc::ServerContext* context,
+                            const ::google::protobuf::Empty* request,
+                            ::proto_aegis_grpc::v1::WledEffectsResponse* response) override;
 
  private:
+  template <class T>
+  void DeclareROSParameter(const std::string& name, const T& default_val, const std::string& description);
+
   std::shared_ptr<rclcpp::Node> node_;
 
   rclcpp::Client<wled_interfaces::srv::ChangeScene>::SharedPtr change_scene_client_;

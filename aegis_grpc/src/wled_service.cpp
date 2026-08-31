@@ -6,6 +6,9 @@ using namespace std::chrono_literals;
 namespace aegis_grpc {
 
 WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(node) {
+  DeclareROSParameter("wled_effects_topic", std::string("/wled_effects"),
+                      "[str] Init; Sub: topic with serialized WLED effects.");
+
   change_scene_client_ = node_->create_client<wled_interfaces::srv::ChangeScene>("wled_change_scene");
   define_scene_client_ = node_->create_client<wled_interfaces::srv::DefineScene>("wled_define_scene");
   get_scenes_client_ = node_->create_client<wled_interfaces::srv::GetScenes>("wled_get_scenes");
@@ -16,8 +19,21 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
   qos_profile.reliable();
 
   effects_sub_ = node_->create_subscription<std_msgs::msg::String>(
-      "/wled_effects", qos_profile,
+      node_->get_parameter("wled_effects_topic").as_string(), qos_profile,
       [this](const std_msgs::msg::String::SharedPtr msg) { this->cached_effects_data_ = msg->data; });
+}
+
+template <class T>
+void WledServiceImpl::DeclareROSParameter(const std::string& name,
+                                          const T& default_val,
+                                          const std::string& description) {
+  auto param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+  param_desc.description = description;
+
+  node_->declare_parameter<T>(name, default_val, param_desc);
+
+  const auto p = node_->get_parameter(name);
+  RCLCPP_INFO(node_->get_logger(), "> %s := %s", name.c_str(), p.value_to_string().c_str());
 }
 
 ::grpc::Status WledServiceImpl::ChangeScene(::grpc::ServerContext* /*context*/,
@@ -120,18 +136,14 @@ WledServiceImpl::WledServiceImpl(std::shared_ptr<rclcpp::Node> node) : node_(nod
   return ::grpc::Status(::grpc::StatusCode::DEADLINE_EXCEEDED, "Timeout calling ROS 2 GetSections service");
 }
 
-::grpc::Status WledServiceImpl::StreamEffects(
-    ::grpc::ServerContext* /*context*/,
-    const ::google::protobuf::Empty* /*request*/,
-    ::grpc::ServerWriter<::proto_aegis_grpc::v1::WledEffectsResponse>* writer) {
+::grpc::Status WledServiceImpl::GetEffects(::grpc::ServerContext* /*context*/,
+                                           const ::google::protobuf::Empty* /*request*/,
+                                           ::proto_aegis_grpc::v1::WledEffectsResponse* response) {
   if (cached_effects_data_.empty()) {
-    return ::grpc::Status(::grpc::StatusCode::UNAVAILABLE, "Effects not cached yet from /wled_effects topic");
+    return ::grpc::Status(::grpc::StatusCode::UNAVAILABLE, "Effects not cached yet from the ROS 2 topic");
   }
 
-  ::proto_aegis_grpc::v1::WledEffectsResponse response;
-  response.set_effects_json_or_text(cached_effects_data_);
-
-  writer->Write(response);
+  response->set_effects_dict_serialized(cached_effects_data_);
 
   return ::grpc::Status::OK;
 }
