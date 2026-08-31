@@ -42,6 +42,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     dashboard_client_node = prepare_dashboard_client_node(mock_hardware, cfg)
     urscript_interface = prepare_urscript_interface(cfg)
     controller_stopper_node = prepare_controller_stopper_node(mock_hardware)
+    service_call_stop = prepare_service_call_stop()
     service_call_play = prepare_service_call_play()
 
     controllers_active = [
@@ -81,7 +82,8 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         controller_stopper_node,
         controllers_spawner(controllers_active),
         controllers_spawner(controllers_inactive, active=False),
-        service_call_play,
+        service_call_stop,
+        *service_call_play,
     ]
 
 
@@ -155,16 +157,16 @@ def prepare_controller_stopper_node(mock_hardware: LaunchConfiguration) -> Node:
     )
 
 
-def prepare_service_call_play() -> TimerAction:
+def prepare_service_call_stop() -> TimerAction:
     return TimerAction(
-        period=5.0,  # s
+        period=1.0,  # s
         actions=[
             ExecuteProcess(
                 cmd=[
                     [
                         FindExecutable(name="ros2"),
                         " service call ",
-                        "/dashboard_client/play ",
+                        "/dashboard_client/stop ",
                         "std_srvs/srv/Trigger ",
                         "'{}'",
                     ]
@@ -173,3 +175,42 @@ def prepare_service_call_play() -> TimerAction:
             )
         ],
     )
+
+
+def prepare_service_call_play() -> TimerAction:
+    return [
+        TimerAction(
+            period=5.0,  # s
+            actions=[
+                ExecuteProcess(
+                    cmd=[
+                        [
+                            FindExecutable(name="ros2"),
+                            " service call ",
+                            "/dashboard_client/play ",
+                            "std_srvs/srv/Trigger ",
+                            "'{}'",
+                        ]
+                    ],
+                    shell=True,
+                )
+            ],
+        ),
+        TimerAction(
+            period=6.0,  # s
+            actions=[
+                ExecuteProcess(
+                    cmd=[
+                        [
+                            FindExecutable(name="ros2"),
+                            " service call ",
+                            "/dashboard_client/play ",
+                            "std_srvs/srv/Trigger ",
+                            "'{}'",
+                        ]
+                    ],
+                    shell=True,
+                )
+            ],
+        ),
+    ]

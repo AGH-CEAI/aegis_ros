@@ -135,17 +135,19 @@ def generate_launch_description() -> LaunchDescription:
 
     declared_arguments.append(
         DeclareLaunchArgument(
-            "disable_cell",
-            default_value=EnvironmentVariable("DISABLE_CELL", default_value="false"),
+            "model_disable_cell",
+            default_value=EnvironmentVariable(
+                "URDF_DISABLE_CELL", default_value="false"
+            ),
             description="Exclude the cell from description.",
         )
     )
 
     declared_arguments.append(
         DeclareLaunchArgument(
-            "disable_cell_collision",
+            "model_disable_cell_collision",
             default_value=EnvironmentVariable(
-                "DISABLE_CELL_COLLISION", default_value="false"
+                "URDF_DISABLE_CELL_COLLISION", default_value="false"
             ),
             description="Exclude the cell collision from description.",
         )
@@ -153,9 +155,11 @@ def generate_launch_description() -> LaunchDescription:
 
     declared_arguments.append(
         DeclareLaunchArgument(
-            "disable_leds",
-            default_value=EnvironmentVariable("DISABLE_LEDS", default_value="false"),
-            description="Exclude LEDs supports from the robot cell description.",
+            "model_disable_cell_led_supports",
+            default_value=EnvironmentVariable(
+                "URDF_DISABLE_CELL_LED_SUPPORTS", default_value="false"
+            ),
+            description="Exclude LED lighting supports from the cell description.",
         )
     )
 
