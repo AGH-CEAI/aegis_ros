@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-129](https://github.com/AGH-CEAI/aegis_ros/pull/129) - Added script for installing custom rosdep dependency lists.
 * [PR-129](https://github.com/AGH-CEAI/aegis_ros/pull/129) - Added `wled_ros_driver` repository
 * [PR-128](https://github.com/AGH-CEAI/aegis_ros/pull/128) - Added a remote setup guide for connecting to the robot station over the network.
 
