@@ -65,6 +65,14 @@ class AegisJointIndex(Enum):
     ROBOTIQ_HANDE_LEFT_FINGER_JOINT = 6
 
 
+class AegisWLEDSections(Enum):
+    LEFT_DOWN = 1
+    LEFT_UP = 2
+    MIDDLE = 3
+    RIGHT_UP = 4
+    RIGHT_DOWN = 5
+
+
 class PrefixedLoggerAdapter(logging.LoggerAdapter):
     def process(self, msg, kwargs):
         return f"[aegis_robot_client] {msg}", kwargs
