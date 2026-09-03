@@ -22,6 +22,10 @@ RobotControlServiceImpl::RobotControlServiceImpl(std::shared_ptr<rclcpp::Node> n
                       "[str] Init; Pub: output topic for TCP servo commands.");
   DeclareROSParameter("action_gripper", std::string("/gripper_action_controller/gripper_cmd"),
                       "[str] Init; Action: GripperCommand action.");
+  DeclareROSParameter("service_wrench_bias_set", std::string("/net_ft_bias/set_bias"),
+                      "[str] Init; Service: Service to set bias (to tare/to zero) of net F/T measurements");
+  DeclareROSParameter("service_wrench_bias_clear", std::string("/net_ft_bias/clear_bias"),
+                      "[str] Init; Service: Service to remove bias of net F/T measurements");
   DeclareROSParameter("action_timeout_s", 3.0, "[double] Init; Waiting timeout for action in seconds.");
   DeclareROSParameter("servo_in_rate_hz", 10.0, "[double] Init; Servo commands frequency in Hz.");
   DeclareROSParameter("servo_out_rate_hz", 250.0, "[double] Init; Servo publish loop frequency in Hz.");
@@ -60,6 +64,10 @@ RobotControlServiceImpl::RobotControlServiceImpl(std::shared_ptr<rclcpp::Node> n
       node_->get_parameter("topic_servo_tcp").as_string(), 10);
   gripper_client_ =
       rclcpp_action::create_client<GripperCommand>(node_, node_->get_parameter("action_gripper").as_string());
+  wrench_bias_set_client_ =
+      node_->create_client<std_srvs::srv::Trigger>(node_->get_parameter("service_wrench_bias_set").as_string());
+  wrench_bias_clear_client_ =
+      node_->create_client<std_srvs::srv::Trigger>(node_->get_parameter("service_wrench_bias_clear").as_string());
 
   double hz = node_->get_parameter("servo_out_rate_hz").as_double();
   auto servo_pub_period = std::chrono::duration<double>(1.0 / hz);
@@ -406,6 +414,68 @@ grpc::Status RobotControlServiceImpl::GripperOpen(grpc::ServerContext* context,
   response->set_success(gripper_cmd_success_);
   response->set_msg(gripper_cmd_msg_);
   gripper_in_use_.store(false, std::memory_order_relaxed);
+  return grpc::Status::OK;
+}
+
+grpc::Status RobotControlServiceImpl::WrenchBiasSet(grpc::ServerContext* context,
+                                                    const google::protobuf::Empty* request,
+                                                    proto_aegis_grpc::v1::TriggerResponse* response) {
+  (void)context;
+  (void)request;
+
+  response->set_success(false);
+
+  if (!wrench_bias_set_client_->wait_for_service(action_timeout_)) {
+    auto msg = "Service `" + node_->get_parameter("service_wrench_bias_set").as_string() + "` not available.";
+    RCLCPP_WARN(get_logger(), msg.c_str());
+    response->set_msg(msg);
+    return grpc::Status::OK;
+  }
+
+  auto srv_request = std::make_shared<std_srvs::srv::Trigger::Request>();
+  auto result_future = wrench_bias_set_client_->async_send_request(srv_request);
+
+  if (result_future.wait_for(action_timeout_) != std::future_status::ready) {
+    auto msg = "Service `" + node_->get_parameter("service_wrench_bias_set").as_string() + "` call timed out.";
+    RCLCPP_WARN(get_logger(), msg.c_str());
+    response->set_msg(msg);
+    return grpc::Status::OK;
+  }
+  auto result = result_future.get();
+
+  response->set_success(result->success);
+  response->set_msg("Set bias service called.");
+  return grpc::Status::OK;
+}
+
+grpc::Status RobotControlServiceImpl::WrenchBiasClear(grpc::ServerContext* context,
+                                                      const google::protobuf::Empty* request,
+                                                      proto_aegis_grpc::v1::TriggerResponse* response) {
+  (void)context;
+  (void)request;
+
+  response->set_success(false);
+
+  if (!wrench_bias_clear_client_->wait_for_service(action_timeout_)) {
+    auto msg = "Service `" + node_->get_parameter("service_wrench_bias_clear").as_string() + "` not available.";
+    RCLCPP_WARN(get_logger(), msg.c_str());
+    response->set_msg(msg);
+    return grpc::Status::OK;
+  }
+
+  auto srv_request = std::make_shared<std_srvs::srv::Trigger::Request>();
+  auto result_future = wrench_bias_clear_client_->async_send_request(srv_request);
+
+  if (result_future.wait_for(action_timeout_) != std::future_status::ready) {
+    auto msg = "Service `" + node_->get_parameter("service_wrench_bias_clear").as_string() + "` call timed out.";
+    RCLCPP_WARN(get_logger(), msg.c_str());
+    response->set_msg(msg);
+    return grpc::Status::OK;
+  }
+  auto result = result_future.get();
+
+  response->set_success(result->success);
+  response->set_msg("Clear bias service called.");
   return grpc::Status::OK;
 }
 

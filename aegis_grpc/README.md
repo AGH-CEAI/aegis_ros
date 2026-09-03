@@ -129,6 +129,8 @@ The control bridge for MoveIt2 servo and planners are implemented in the [`Robot
 | `proto_aegis_grpc.v1.RobotControlService.GripperSetPosition` | Set the gripper width.                                          | ✅     | [`proto_aegis_grpc.v1.robot_srvs.GripperSetPositionRequest`](./proto_aegis_grpc/v1/robot_srvs.proto) | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
 | `proto_aegis_grpc.v1.RobotControlService.ServoJoint`         | Servoing (w.r.t. joints).                                       | ✅     | [`proto_aegis_grpc.v1.control_msgs.JointJog`](./proto_aegis_grpc/v1/control_msgs.proto)              | `google.protobuf.Empty`                                                                    |
 | `proto_aegis_grpc.v1.RobotControlService.ServoTCP`           | Servoing (w.r.t. TCP).                                          | ✅     | [`proto_aegis_grpc.v1.geometry_msgs.Twist`](./proto_aegis_grpc/v1/geometry_msgs.proto)               | `google.protobuf.Empty`                                                                    |
+| `proto_aegis_grpc.v1.RobotControlService.WrenchBiasSet`      | Set bias for net FT measurements (aka sensor taring/zeroing).   | ✅     | `google.protobuf.Empty`                                                                              | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
+| `proto_aegis_grpc.v1.RobotControlService.WrenchBiasClear`    | Remove net FT measurements bias.                                | ✅     | `google.protobuf.Empty`                                                                              | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto) |
 
 You can always list the methods with the `grpcurl` command:
 ```bash
@@ -158,19 +160,21 @@ There is no hardcoded parameters, everything can be modified via ROS:
 
 **Initialization parameters**
 
-| Parameter               | Type     | Default                             | Units   | Description                                                                  |
-| ----------------------- | -------- | ----------------------------------- | ------- | ---------------------------------------------------------------------------- |
-| `servo_link`            | `string` | `"base_link"`                       | -       | Name of the base link for TCP servoing.                                      |
-| `topic_servo_joint`     | `string` | `"/servo_node/delta_joint_cmds"`    | -       | Output topic for joint servo commands.                                       |
-| `topic_servo_tcp`       | `string` | `"/servo_node/delta_twist_cmds"`    | -       | Output topic for TCP servo commands.                                         |
-| `action_gripper`        | `string` | `"/gripper_controller/gripper_cmd"` | -       | `GripperCommand` action name for the gripper controller.                     |
-| `action_timeout_s`      | `double` | `3.0`                               | seconds | Waiting timeout for actions.                                                 |
-| `servo_in_rate_hz`      | `double` | `10.0`                              | Hz      | Expected input servo command frequency.                                      |
-| `servo_out_rate_hz`     | `double` | `250.0`                             | Hz      | Servo command publish loop frequency.                                        |
-| `move_group`            | `string` | `"aegis_arm"`                       | -       | Name of the planning group to control.                                       |
-| `joint_tolerance`       | `double` | `0.017`                             | radians | Ignore MoveIt joints call if target closer than this absolute value.         |
-| `position_tolerance`    | `double` | `0.001`                             | meters  | Ignore MoveIt pose call if position target closer than this absolute value.  |
-| `orientation_tolerance` | `double` | `0.017`                             | radians | Ignore MoveIt pose call if orientation target closer than this absolute val. |
+| Parameter                   | Type     | Default                             | Units   | Description                                                                  |
+| --------------------------- | -------- | ----------------------------------- | ------- | ---------------------------------------------------------------------------- |
+| `servo_link`                | `string` | `"base_link"`                       | -       | Name of the base link for TCP servoing.                                      |
+| `topic_servo_joint`         | `string` | `"/servo_node/delta_joint_cmds"`    | -       | Output topic for joint servo commands.                                       |
+| `topic_servo_tcp`           | `string` | `"/servo_node/delta_twist_cmds"`    | -       | Output topic for TCP servo commands.                                         |
+| `action_gripper`            | `string` | `"/gripper_controller/gripper_cmd"` | -       | `GripperCommand` action name for the gripper controller.                     |
+| `action_timeout_s`          | `double` | `3.0`                               | seconds | Waiting timeout for actions.                                                 |
+| `servo_in_rate_hz`          | `double` | `10.0`                              | Hz      | Expected input servo command frequency.                                      |
+| `servo_out_rate_hz`         | `double` | `250.0`                             | Hz      | Servo command publish loop frequency.                                        |
+| `move_group`                | `string` | `"aegis_arm"`                       | -       | Name of the planning group to control.                                       |
+| `joint_tolerance`           | `double` | `0.017`                             | radians | Ignore MoveIt joints call if target closer than this absolute value.         |
+| `position_tolerance`        | `double` | `0.001`                             | meters  | Ignore MoveIt pose call if position target closer than this absolute value.  |
+| `orientation_tolerance`     | `double` | `0.017`                             | radians | Ignore MoveIt pose call if orientation target closer than this absolute val. |
+| `service_wrench_bias_set`   | `string` | `"/net_ft_bias/set_bias"`           | -       | Service name for setting the net FT sensor bias (zeroing/taring).            |
+| `service_wrench_bias_clear` | `string` | `"/net_ft_bias/clear_bias"`         | -       | Service name for clearing the net FT sensor bias.                            |
 
 **Runtime parameters**
 
