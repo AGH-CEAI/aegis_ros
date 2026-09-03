@@ -531,3 +531,23 @@ class AegisRobotClient:
             return resp.success, resp.msg
         except grpc.RpcError as e:
             raise RuntimeError("Failed to disable servo") from e
+
+    async def wrench_bias_set(self) -> tuple[bool, str]:
+        """Set bias (taring/zeroing) of the net force and torque measurements."""
+        self._check_connected()
+        try:
+            response = await self.control_stub.WrenchBiasSet(Empty())
+            return response.success, response.msg
+        except grpc.RpcError as e:
+            self.logger.error(f"WrenchBiasSet failed: {e}")
+            raise
+
+    async def wrench_bias_clear(self) -> tuple[bool, str]:
+        """Clear bias (untaring/unzeoring) of the the net force and torque measurements."""
+        self._check_connected()
+        try:
+            response = await self.control_stub.WrenchBiasClear(Empty())
+            return response.success, response.msg
+        except grpc.RpcError as e:
+            self.logger.error(f"WrenchBiasClear failed: {e}")
+            raise
