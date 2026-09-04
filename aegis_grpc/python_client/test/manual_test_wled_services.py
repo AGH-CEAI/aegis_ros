@@ -150,18 +150,6 @@ def main():
     # Subcommand: get-sections
     subparsers.add_parser("get-sections", help="Retrieve all LED sections")
 
-    # Subcommand: get-effects
-    get_parser = subparsers.add_parser(
-        "get-effects", help="Get effects from the server"
-    )
-    get_parser.add_argument(
-        "-l",
-        "--limit",
-        type=int,
-        default=3,
-        help="Number of events to receive before stopping (default: 3)",
-    )
-
     args = parser.parse_args()
     asyncio.run(run(args))
 
