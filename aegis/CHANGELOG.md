@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-138](https://github.com/AGH-CEAI/aegis_ros/pull/138) - Added script for installing custom rosdep dependency lists.
 * [PR-129](https://github.com/AGH-CEAI/aegis_ros/pull/129) - Added `wled_ros_driver` repository
 * [PR-128](https://github.com/AGH-CEAI/aegis_ros/pull/128) - Added a remote setup guide for connecting to the robot station over the network.
 
@@ -17,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Fixed
 
+* [PR-138](https://github.com/AGH-CEAI/aegis_ros/pull/138) - Updated the `wled_ros_driver` repository.
 * [PR-136](https://github.com/AGH-CEAI/aegis_ros/pull/136) - Updated the `ros2_net_ft_driver` repository.
 * [PR-137](https://github.com/AGH-CEAI/aegis_ros/pull/137) - Updated the `wled_ros_driver` repository.
 * [PR-134](https://github.com/AGH-CEAI/aegis_ros/pull/134) - Updated the `scene_objects_manager` repository (updated in PR #115).

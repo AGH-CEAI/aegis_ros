@@ -64,6 +64,7 @@ rosdep init
 ```bash
 cd ~/ceai_ws
 vcs import src < src/aegis_ros/aegis/aegis.repos
+./src/aegis_ros/aegis/scripts/register_local_rosdep_sources.sh src
 rosdep update --rosdistro $ROS_DISTRO
 rosdep install --from-paths src -y -i
 colcon build --symlink-install
