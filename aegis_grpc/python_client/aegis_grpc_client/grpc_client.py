@@ -608,7 +608,9 @@ class AegisRobotClient:
             self.logger.error(f"WLED DefineScene failed: {e}")
             raise
 
-    async def wled_get_scenes(self) -> tuple[list[str], list[int]]:
+    async def wled_get_scenes(
+        self,
+    ) -> tuple[list[str], list[int], list[int], list[int], list[int]]:
         """
         Get all defined scenes and their brightnesses.
 
@@ -619,7 +621,13 @@ class AegisRobotClient:
 
         try:
             response = await self.wled_stub.GetScenes(Empty())
-            return list(response.scene_names), list(response.brightnesses)
+            return (
+                list(response.scene_names),
+                list(response.brightnesses),
+                tuple(response.colors_r),
+                tuple(response.colors_g),
+                tuple(response.colors_b),
+            )
         except grpc.RpcError as e:
             self.logger.error(f"WLED GetScenes failed: {e}")
             raise
