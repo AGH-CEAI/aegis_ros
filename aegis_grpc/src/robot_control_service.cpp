@@ -427,7 +427,7 @@ grpc::Status RobotControlServiceImpl::WrenchBiasSet(grpc::ServerContext* context
 
   if (!wrench_bias_set_client_->wait_for_service(action_timeout_)) {
     auto msg = "Service `" + node_->get_parameter("service_wrench_bias_set").as_string() + "` not available.";
-    RCLCPP_WARN(get_logger(), msg.c_str());
+    RCLCPP_WARN(get_logger(), "%s", msg.c_str());
     response->set_msg(msg);
     return grpc::Status::OK;
   }
@@ -437,14 +437,14 @@ grpc::Status RobotControlServiceImpl::WrenchBiasSet(grpc::ServerContext* context
 
   if (result_future.wait_for(action_timeout_) != std::future_status::ready) {
     auto msg = "Service `" + node_->get_parameter("service_wrench_bias_set").as_string() + "` call timed out.";
-    RCLCPP_WARN(get_logger(), msg.c_str());
+    RCLCPP_WARN(get_logger(), "%s", msg.c_str());
     response->set_msg(msg);
     return grpc::Status::OK;
   }
   auto result = result_future.get();
 
   response->set_success(result->success);
-  response->set_msg("Set bias service called.");
+  response->set_msg(result->message.empty() ? "Set bias service called." : result->message);
   return grpc::Status::OK;
 }
 
@@ -458,7 +458,7 @@ grpc::Status RobotControlServiceImpl::WrenchBiasClear(grpc::ServerContext* conte
 
   if (!wrench_bias_clear_client_->wait_for_service(action_timeout_)) {
     auto msg = "Service `" + node_->get_parameter("service_wrench_bias_clear").as_string() + "` not available.";
-    RCLCPP_WARN(get_logger(), msg.c_str());
+    RCLCPP_WARN(get_logger(), "%s", msg.c_str());
     response->set_msg(msg);
     return grpc::Status::OK;
   }
@@ -468,14 +468,14 @@ grpc::Status RobotControlServiceImpl::WrenchBiasClear(grpc::ServerContext* conte
 
   if (result_future.wait_for(action_timeout_) != std::future_status::ready) {
     auto msg = "Service `" + node_->get_parameter("service_wrench_bias_clear").as_string() + "` call timed out.";
-    RCLCPP_WARN(get_logger(), msg.c_str());
+    RCLCPP_WARN(get_logger(), "%s", msg.c_str());
     response->set_msg(msg);
     return grpc::Status::OK;
   }
   auto result = result_future.get();
 
   response->set_success(result->success);
-  response->set_msg("Clear bias service called.");
+  response->set_msg(result->message.empty() ? "Clear bias service called." : result->message);
   return grpc::Status::OK;
 }
 
