@@ -1,0 +1,44 @@
+syntax = "proto3";
+package proto_aegis_grpc.v1;
+
+import "google/protobuf/empty.proto";
+import "proto_aegis_grpc/v1/robot_srvs.proto";
+
+service WledService {
+  rpc ChangeScene(ChangeSceneRequest) returns (TriggerResponse);
+  rpc DefineScene(DefineSceneRequest) returns (TriggerResponse);
+  rpc GetScenes(google.protobuf.Empty) returns (GetScenesResponse);
+  rpc GetSections(google.protobuf.Empty) returns (GetSectionsResponse);
+  rpc GetEffects(google.protobuf.Empty) returns (WledEffectsResponse);
+}
+
+message ChangeSceneRequest {
+  string scene = 1;
+  string section = 2;
+  int64 effect_id = 3;
+  string optional_params = 4;
+}
+
+message DefineSceneRequest {
+  string scene_name = 1;
+  repeated int32 color = 2;
+  int32 brightness = 3;
+}
+
+message GetScenesResponse {
+  repeated string scene_names = 1;
+  repeated int32 brightnesses = 2;
+  repeated int32 colors_r = 3;
+  repeated int32 colors_g = 4;
+  repeated int32 colors_b = 5;
+}
+
+message GetSectionsResponse {
+  repeated string section_names = 1;
+  repeated int32 starts = 2;
+  repeated int32 stops = 3;
+}
+
+message WledEffectsResponse {
+  string effects_dict_serialized = 1;
+}
