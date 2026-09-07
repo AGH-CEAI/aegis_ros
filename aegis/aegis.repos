@@ -26,4 +26,4 @@ repositories:
   wled_ros_driver:
     type: git
     url: https://github.com/AGH-CEAI/wled_ros_driver.git
-    version: 15dfba6689d0199855d1b23191fce088db7a463a
+    version: e0fa5ca289837ce8cfd23ee87379d50af95d398d

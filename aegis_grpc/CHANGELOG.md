@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * [PR-139](https://github.com/AGH-CEAI/aegis_ros/pull/139) - Support for set/clear bias of the FT wrench measurements.
+* [PR-138](https://github.com/AGH-CEAI/aegis_ros/pull/138) - gRPC control over [wled_ros_driver](https://github.com/AGH-CEAI/wled_ros_driver).
 
 ### Changed
 
