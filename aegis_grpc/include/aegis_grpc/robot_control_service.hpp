@@ -97,11 +97,9 @@ class RobotControlServiceImpl final : public proto_aegis_grpc::v1::RobotControlS
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr stop_servo_client_;
   rclcpp::Publisher<control_msgs::msg::JointJog>::SharedPtr servo_joint_pub_;
   rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr servo_tcp_pub_;
-  rclcpp_action::Client<GripperCommand>::SharedPtr gripper_client_;
   rclcpp::TimerBase::SharedPtr servo_pub_timer_;
 
-  std::mutex wrench_bias_mutex_;
-  std::atomic<bool> wrench_bias_in_use_;
+  rclcpp_action::Client<GripperCommand>::SharedPtr gripper_client_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr wrench_bias_set_client_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr wrench_bias_clear_client_;
 
