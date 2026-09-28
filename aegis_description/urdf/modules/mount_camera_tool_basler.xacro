@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="mount_camera_tool_basler" params="prefix parent side">
-    <xacro:property name="mass" value="0.217"/>
+    <xacro:property name="mass" value="0.054"/>
     <xacro:property name="mounting_width" value="0.07000"/>
     <xacro:property name="mounting_height" value="0.01360"/>
     <xacro:property name="mounting_size_x" value="0.09070"/>
@@ -23,11 +23,6 @@
           <mesh filename="package://aegis_description/meshes/mount_camera_tool_basler.dae" scale="0.001 0.001 0.001"/>
         </geometry>
       </visual>
-      <!-- TODO(issue#46): Fix inertial parameters for tool cameras -->
-      <inertial>
-        <mass value="${mass}"/>
-        <inertia ixx="116e-6" ixy="0" ixz="37.5e-6" iyy="196e-6" iyz="0" izz="106e-6"/>
-      </inertial>
       <collision>
         <origin xyz="0.048 0 0" rpy="0 0 0"/>
         <geometry>
@@ -58,6 +53,18 @@
           <box size="0.076 0.04 0.03"/>
         </geometry>
       </collision>
+      <inertial>
+        <origin xyz="0.09912 0 -0.02301" rpy="0 0 0"/>
+        <mass value="${mass}"/>
+        <inertia
+          ixx="5.227e-5"
+          ixy="0.0"
+          ixz="1.688e-5"
+          iyy="8.825e-5"
+          iyz="0.0"
+          izz="4.786e-5"
+        />
+      </inertial>
     </link>
 
     <joint name="${prefix}mount_${side}_end_joint" type="fixed">
