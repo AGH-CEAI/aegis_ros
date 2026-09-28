@@ -34,14 +34,7 @@
       <inertial>
         <origin xyz="0.00005 -0.00298 -0.01266" rpy="0 0 0"/>
         <mass value="${oak_mass}"/>
-        <inertia
-          ixx="1.140e-4"
-          ixy="0.0"
-          ixz="0.0"
-          iyy="2.018e-4"
-          iyz="0.0"
-          izz="2.165e-4"
-        />
+        <inertia ixx="1.140e-4" ixy="0.0" ixz="0.0" iyy="2.018e-4" iyz="0.0" izz="2.165e-4"/>
       </inertial>
     </link>
   </xacro:macro>
