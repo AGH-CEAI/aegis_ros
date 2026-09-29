@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="camera_tool_basler" params="prefix parent side">
-    <xacro:property name="camera_mass" value="0.217"/>
+    <xacro:property name="camera_mass" value="0.090"/>
     <xacro:property name="camera_mounting_offset" value="-0.0387"/>
     <xacro:property name="camera_height" value="0.0290"/>
     <xacro:property name="camera_length" value="0.0603"/>
@@ -20,10 +20,17 @@
           <mesh filename="package://aegis_description/meshes/camera_tool_basler.dae" scale="0.001 0.001 0.001"/>
         </geometry>
       </visual>
-      <!-- TODO(issue#46): Fix inertial parameters for tool cameras -->
       <inertial>
+        <origin xyz="0 0 ${0.5 * camera_length}" rpy="0 0 0"/>
         <mass value="${camera_mass}"/>
-        <inertia ixx="0.3403" ixy="0.0" ixz="0.0" iyy="0.3403" iyz="0.0" izz="0.039606138"/>
+        <inertia
+          ixx="${(camera_mass/12.0) * (camera_height*camera_height + camera_length*camera_length)}"
+          ixy="0.0"
+          ixz="0.0"
+          iyy="${(camera_mass/12.0) * (camera_height*camera_height + camera_length*camera_length)}"
+          iyz="0.0"
+          izz="${(camera_mass/6.0) * (camera_height*camera_height)}"
+        />
       </inertial>
     </link>
   </xacro:macro>

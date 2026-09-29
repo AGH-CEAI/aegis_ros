@@ -14,7 +14,6 @@
           <mesh filename="package://aegis_description/meshes/lighting_support_right.dae" scale="0.001 0.001 0.001"/>
         </geometry>
       </visual>
-
       <xacro:unless value="${disable_cell_collision}">
         <collision>
           <origin xyz="-0.277 -0.007 -0.015" rpy="0 0 0"/>
@@ -23,10 +22,9 @@
           </geometry>
         </collision>
       </xacro:unless>
-
       <inertial>
-        <mass value="0.1"/>
         <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.1"/>
         <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
       </inertial>
     </link>

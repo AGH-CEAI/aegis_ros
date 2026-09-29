@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-140](https://github.com/AGH-CEAI/aegis_ros/pull/140) - Unified the order of `visual`, `collision` and `inertial` blocks across the description.
 * [PR-135](https://github.com/AGH-CEAI/aegis_ros/pull/135) - Changed launch param `disable_leds` to `model_disable_cell_led_supports`.
 * [PR-135](https://github.com/AGH-CEAI/aegis_ros/pull/135) - Added prefixes `model_` to every launch parameter related to the xacro parsing.
 * [PR-130](https://github.com/AGH-CEAI/aegis_ros/pull/130) - New ruff formatting.
@@ -22,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Fixed
 
+* [PR-140](https://github.com/AGH-CEAI/aegis_ros/pull/140) - Corrected the masses and inertia of the tool cameras, their mounts and the sensor adapter. Several links carried placeholder values or another part's mass, and most left the centre of mass at the mounting point.
+* [PR-140](https://github.com/AGH-CEAI/aegis_ros/pull/140) - The front tool camera had no mass at all, because the vendor package declares none; it is now carried by a dedicated link at the camera pose.
 * [PR-136](https://github.com/AGH-CEAI/aegis_ros/pull/136) - Fixed the `use_physical_hardware` condition that was blocking the AXIA F/T sensor driver from being selected on real hardware.
 * [PR-135](https://github.com/AGH-CEAI/aegis_ros/pull/135) - Fixed meshes for the lighting supports (position of the centers) and their poses relative to the cell link.
 * [PR-133](https://github.com/AGH-CEAI/aegis_ros/pull/133) - Hotfix: Added `disable_leds` argument to launch files.

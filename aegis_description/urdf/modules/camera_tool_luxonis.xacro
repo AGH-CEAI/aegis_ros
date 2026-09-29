@@ -21,5 +21,21 @@
       cam_yaw="0"
       rs_compat="$(arg tool_camera_rs_compat)"
     />
+
+    <xacro:property name="oak_mass" value="0.300"/>
+
+    <joint name="${prefix}cam_tool_front_inertia_joint" type="fixed">
+      <origin xyz="0.003 -0.019 -0.039" rpy="0 ${pi / 2} 0"/>
+      <parent link="${parent}"/>
+      <child link="${prefix}cam_tool_front_inertia"/>
+    </joint>
+
+    <link name="${prefix}cam_tool_front_inertia">
+      <inertial>
+        <origin xyz="0.00005 -0.00298 -0.01266" rpy="0 0 0"/>
+        <mass value="${oak_mass}"/>
+        <inertia ixx="1.140e-4" ixy="0.0" ixz="0.0" iyy="2.018e-4" iyz="0.0" izz="2.165e-4"/>
+      </inertial>
+    </link>
   </xacro:macro>
 </robot>
