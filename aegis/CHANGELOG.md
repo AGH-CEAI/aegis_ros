@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Fixed
 
+* [PR-141](https://github.com/AGH-CEAI/aegis_ros/pull/141) - Updated the `robotiq_hande_driver` and `robotiq_hande_description` repositories.
 * [PR-139](https://github.com/AGH-CEAI/aegis_ros/pull/139) - Updated the `ros2_net_ft_driver` repository.
 * [PR-138](https://github.com/AGH-CEAI/aegis_ros/pull/138) - Updated the `wled_ros_driver` repository.
 * [PR-136](https://github.com/AGH-CEAI/aegis_ros/pull/136) - Updated the `ros2_net_ft_driver` repository.
