@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Fixed
 
+* [PR-142](https://github.com/AGH-CEAI/aegis_ros/pull/142) - Fixed collision redefitinion in `lighting_support_left.urdf`.
 * [PR-140](https://github.com/AGH-CEAI/aegis_ros/pull/140) - Corrected the masses and inertia of the tool cameras, their mounts and the sensor adapter. Several links carried placeholder values or another part's mass, and most left the centre of mass at the mounting point.
 * [PR-140](https://github.com/AGH-CEAI/aegis_ros/pull/140) - The front tool camera had no mass at all, because the vendor package declares none; it is now carried by a dedicated link at the camera pose.
 * [PR-136](https://github.com/AGH-CEAI/aegis_ros/pull/136) - Fixed the `use_physical_hardware` condition that was blocking the AXIA F/T sensor driver from being selected on real hardware.
