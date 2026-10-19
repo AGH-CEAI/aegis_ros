@@ -1,7 +1,7 @@
 import argparse
 import threading
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import cv2
@@ -116,7 +116,7 @@ def main() -> None:
     cam_name = args.camera
     path_name = args.path
 
-    timestamp = datetime.now(timezone.utc).strftime("%y-%m-%d_%H-%M-%S")
+    timestamp = datetime.now(UTC).strftime("%y-%m-%d_%H-%M-%S")
 
     if path_name:
         data_path = Path(path_name).expanduser() / f"{cam_name}_{timestamp}"
