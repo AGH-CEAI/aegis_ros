@@ -6,7 +6,7 @@ import textwrap
 import threading
 import time
 import tty
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import cv2
@@ -294,7 +294,7 @@ def main() -> None:
     data_path = args.data_path
     tool_offset = args.tool_offset
 
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
 
     if result_path:
         res_path = Path(result_path).expanduser() / f"{cam_name}_{timestamp}"

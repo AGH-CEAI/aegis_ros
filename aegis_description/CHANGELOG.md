@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-143](https://github.com/AGH-CEAI/aegis_ros/pull/143) - Limited UR's pan joint to `[-90, 90]` degrees.
 * [PR-140](https://github.com/AGH-CEAI/aegis_ros/pull/140) - Unified the order of `visual`, `collision` and `inertial` blocks across the description.
 * [PR-135](https://github.com/AGH-CEAI/aegis_ros/pull/135) - Changed launch param `disable_leds` to `model_disable_cell_led_supports`.
 * [PR-135](https://github.com/AGH-CEAI/aegis_ros/pull/135) - Added prefixes `model_` to every launch parameter related to the xacro parsing.
