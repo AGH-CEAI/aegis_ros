@@ -11,6 +11,9 @@
     <xacro:arg name="joint_limit_params" default="$(find aegis_description)/config/ur5e/joint_limits.yaml"/>
     <xacro:arg name="physical_params" default="$(find aegis_description)/config/ur5e/physical_parameters.yaml"/>
     <xacro:arg name="visual_params" default="$(find aegis_description)/config/ur5e/visual_parameters.yaml"/>
+    <xacro:arg name="ur_type" default="ur5e"/>
+    <xacro:arg name="generate_ros2_control_tag" default="true"/>
+    <xacro:arg name="transmission_hw_interface" default="hardware_interface/PositionJointInterface"/>
 
     <!-- ros2_control side safety -->
     <xacro:arg name="safety_limits" default="true"/>
@@ -22,12 +25,26 @@
     <xacro:arg name="script_filename" default="$(find ur_robot_driver)/resources/ros_control.urscript"/>
     <xacro:arg name="output_recipe_filename" default="$(find ur_robot_driver)/resources/rtde_output_recipe.txt"/>
     <xacro:arg name="input_recipe_filename" default="$(find ur_robot_driver)/resources/rtde_input_recipe.txt"/>
+    <xacro:arg name="reverse_port" default="50001"/>
+    <xacro:arg name="script_sender_port" default="50002"/>
     <xacro:arg name="reverse_ip" default="0.0.0.0"/>
+    <xacro:arg name="script_command_port" default="50004"/>
+    <xacro:arg name="trajectory_port" default="50003"/>
+    <xacro:arg name="non_blocking_read" default="true"/>
+    <xacro:arg name="keep_alive_count" default="2"/>
+    <xacro:arg name="verify_robot_model" default="false"/>
+    <xacro:arg name="use_currents_as_efforts" default="true"/>
 
     <!--   tool communication related parameters-->
     <xacro:arg name="use_tool_communication" default="false"/>
     <xacro:arg name="tool_voltage" default="0"/>
+    <xacro:arg name="tool_parity" default="0"/>
+    <xacro:arg name="tool_baud_rate" default="115200"/>
+    <xacro:arg name="tool_stop_bits" default="1"/>
+    <xacro:arg name="tool_rx_idle_chars" default="1.5"/>
+    <xacro:arg name="tool_tx_idle_chars" default="3.5"/>
     <xacro:arg name="tool_device_name" default="/tmp/ttyUR"/>
+    <xacro:arg name="tool_tcp_port" default="54321"/>
 
     <!-- Simulation parameters -->
     <xacro:arg name="use_fake_hardware" default="${str(mock_hardware)}"/>
@@ -49,6 +66,9 @@
       name="${name}"
       tf_prefix="$(arg tf_prefix)"
       parent="${parent}"
+      ur_type="$(arg ur_type)"
+      generate_ros2_control_tag="$(arg generate_ros2_control_tag)"
+      transmission_hw_interface="$(arg transmission_hw_interface)"
       joint_limits_parameters_file="$(arg joint_limit_params)"
       kinematics_parameters_file="$(arg kinematics_calibration)"
       physical_parameters_file="$(arg physical_params)"
@@ -64,12 +84,26 @@
       initial_positions="${xacro.load_yaml(initial_positions_file)}"
       use_tool_communication="$(arg use_tool_communication)"
       tool_voltage="$(arg tool_voltage)"
+      tool_parity="$(arg tool_parity)"
+      tool_baud_rate="$(arg tool_baud_rate)"
+      tool_stop_bits="$(arg tool_stop_bits)"
+      tool_rx_idle_chars="$(arg tool_rx_idle_chars)"
+      tool_tx_idle_chars="$(arg tool_tx_idle_chars)"
       tool_device_name="$(arg tool_device_name)"
+      tool_tcp_port="$(arg tool_tcp_port)"
       robot_ip="$(arg robot_ip)"
       script_filename="$(arg script_filename)"
       output_recipe_filename="$(arg output_recipe_filename)"
       input_recipe_filename="$(arg input_recipe_filename)"
       reverse_ip="$(arg reverse_ip)"
+      reverse_port="$(arg reverse_port)"
+      script_command_port="$(arg script_command_port)"
+      script_sender_port="$(arg script_sender_port)"
+      trajectory_port="$(arg trajectory_port)"
+      non_blocking_read="$(arg non_blocking_read)"
+      keep_alive_count="$(arg keep_alive_count)"
+      verify_robot_model="$(arg verify_robot_model)"
+      use_currents_as_efforts="$(arg use_currents_as_efforts)"
     >
       <!-- robot relative pose -->
       <origin xyz="0 0 0" rpy="0 0 0"/>

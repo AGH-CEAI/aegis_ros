@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-144](https://github.com/AGH-CEAI/aegis_ros/pull/144) - Updated UR launch files to incorporate new `ur_controllers` (`friction_model_controller` and `forward_effort_controller`).
 * [PR-130](https://github.com/AGH-CEAI/aegis_ros/pull/130) - New ruff formatting.
 * [PR-118](https://github.com/AGH-CEAI/aegis_ros/pull/114) - Updated collision checking.
 

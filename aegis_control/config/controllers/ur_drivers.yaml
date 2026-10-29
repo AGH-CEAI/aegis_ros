@@ -21,11 +21,17 @@
       force_mode_controller:
         type: ur_controllers/ForceModeController
 
+      friction_model_controller:
+        type: ur_controllers/FrictionModelController
+
       forward_position_controller:
         type: position_controllers/JointGroupPositionController
 
       forward_velocity_controller:
         type: velocity_controllers/JointGroupVelocityController
+
+      forward_effort_controller:
+        type: effort_controllers/JointGroupEffortController
 
       freedrive_mode_controller:
         type: ur_controllers/FreedriveModeController
@@ -77,6 +83,10 @@
     ros__parameters:
       tf_prefix: "$(var tf_prefix)"
 
+  friction_model_controller:
+    ros__parameters:
+      tf_prefix: "$(var tf_prefix)"
+
   forward_position_controller:
     ros__parameters:
       joints:
@@ -97,6 +107,17 @@
         - $(var tf_prefix)wrist_2_joint
         - $(var tf_prefix)wrist_3_joint
       interface_name: velocity
+
+  forward_effort_controller:
+    ros__parameters:
+      joints:
+        - $(var tf_prefix)shoulder_pan_joint
+        - $(var tf_prefix)shoulder_lift_joint
+        - $(var tf_prefix)elbow_joint
+        - $(var tf_prefix)wrist_1_joint
+        - $(var tf_prefix)wrist_2_joint
+        - $(var tf_prefix)wrist_3_joint
+      interface_name: effort
 
   freedrive_mode_controller:
     ros__parameters:
