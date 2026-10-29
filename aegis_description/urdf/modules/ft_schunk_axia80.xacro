@@ -10,7 +10,7 @@
   <xacro:arg name="rdt_sampling_rate" default="500"/>
   <xacro:arg name="sensor_type" default="ati_axia80"/>
   <xacro:arg name="bolts_mass" default="0.019"/>
-  <xacro:arg name="internal_filter_rate" default="0"/>
+  <xacro:arg name="internal_filter_rate" default="8"/>
   <xacro:arg name="use_hardware_biasing" default="false"/>
 
   <xacro:include filename="$(find net_ft_description)/urdf/net_ft_sensor.xacro"/>
