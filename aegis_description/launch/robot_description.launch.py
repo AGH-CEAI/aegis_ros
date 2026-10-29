@@ -60,7 +60,9 @@ def generate_launch_description():
                     {
                         "robot_description": ParameterValue(
                             robot_description_str, value_type=str
+                        ),
                         )
+                        "publish_frequency": 250.0,
                     }
                 ],
             )
