@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-145](https://github.com/AGH-CEAI/aegis_ros/pull/145) - `ft_mock_injector` controller (mock hardware only) for injecting test wrenches into the mock F/T sensor.
 * [PR-129](https://github.com/AGH-CEAI/aegis_ros/pull/129) - Added `wled_service.launch.py` launch description
 * [PR-129](https://github.com/AGH-CEAI/aegis_ros/pull/129) - Added `scenes.yaml` to `config/wled` folder
 * [PR-127](https://github.com/AGH-CEAI/aegis_ros/pull/127) - Added launch file for starting only the camera drivers.
