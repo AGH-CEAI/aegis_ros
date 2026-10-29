@@ -10,10 +10,11 @@
   <xacro:arg name="rdt_sampling_rate" default="500"/>
   <xacro:arg name="sensor_type" default="ati_axia80"/>
   <xacro:arg name="bolts_mass" default="0.019"/>
-  <xacro:arg name="internal_filter_rate" default="0"/>
+  <xacro:arg name="internal_filter_rate" default="8"/>
   <xacro:arg name="use_hardware_biasing" default="false"/>
 
   <xacro:include filename="$(find net_ft_description)/urdf/net_ft_sensor.xacro"/>
+  <xacro:include filename="$(find aegis_description)/urdf/modules/ft_mock.ros2_control.xacro"/>
 
   <xacro:macro name="ft_sensor_schunk_axia80" params="prefix parent mock_hardware">
     <xacro:net_ft_sensor
@@ -29,5 +30,10 @@
     >
       <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
     </xacro:net_ft_sensor>
+
+    <!-- The net_ft_sensor macro skips its ros2_control block in mock mode; provide a mock one instead. -->
+    <xacro:if value="${mock_hardware}">
+      <xacro:ft_sensor_mock_ros2_control name="NetFtMockHardware"/>
+    </xacro:if>
   </xacro:macro>
 </robot>

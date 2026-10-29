@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <!--
+    Mock ros2_control block for the Schunk FT-AXIA80 F/T sensor (used only with mock_hardware).
+
+    The net_ft_description macro adds the real ros2_control block only for physical hardware.
+
+    The sensor and GPIO names mirror net_ft_sensor.ros2_control.xacro
+  -->
+  <xacro:macro name="ft_sensor_mock_ros2_control" params="name">
+    <ros2_control name="${name}" type="system">
+      <hardware>
+        <plugin>mock_components/GenericSystem</plugin>
+        <param name="mock_sensor_commands">true</param>
+      </hardware>
+
+      <sensor name="axia_fts_sensor">
+        <state_interface name="force.x">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="force.y">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="force.z">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="torque.x">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="torque.y">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="torque.z">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <param name="frame_id">tool_mount_link</param>
+      </sensor>
+
+      <gpio name="diagnostic">
+        <state_interface name="packet_count">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="lost_packets">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="out_of_order_count">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="status">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+      </gpio>
+    </ros2_control>
+  </xacro:macro>
+</robot>
