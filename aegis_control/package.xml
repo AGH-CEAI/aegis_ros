@@ -16,8 +16,12 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
 
+  <exec_depend>admittance_controller</exec_depend>
   <exec_depend>controller_manager</exec_depend>
   <exec_depend>depthai_ros_driver</exec_depend>
+  <exec_depend>forward_command_controller</exec_depend>
+  <exec_depend>joint_trajectory_controller</exec_depend>
+  <exec_depend>kinematics_interface_kdl</exec_depend>
   <exec_depend>pylon_ros2_camera_interfaces</exec_depend>
   <exec_depend>pylon_ros2_camera_wrapper</exec_depend>
   <exec_depend>ur_robot_driver</exec_depend>

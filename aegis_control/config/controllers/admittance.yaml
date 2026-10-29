@@ -1,0 +1,136 @@
+# Admittance control chain for the Aegis station (ROS 2 Humble).
+#
+#   gRPC AdmittanceService --(JointTrajectory @ policy rate)--> admittance_jtc
+#     --(position + velocity reference interfaces)--> admittance_controller
+#     --(position command interfaces, servoj @ 500 Hz)--> UR5e
+#   F/T input: `axia_fts_sensor` state interfaces (net_ft_driver plugin) in the same controller_manager.
+
+/**:
+  controller_manager:
+    ros__parameters:
+      admittance_controller:
+        type: admittance_controller/AdmittanceController
+
+      admittance_jtc:
+        type: joint_trajectory_controller/JointTrajectoryController
+
+      ft_mock_injector:
+        type: forward_command_controller/MultiInterfaceForwardCommandController
+
+  admittance_controller:
+    ros__parameters:
+      joints:
+        - $(var tf_prefix)shoulder_pan_joint
+        - $(var tf_prefix)shoulder_lift_joint
+        - $(var tf_prefix)elbow_joint
+        - $(var tf_prefix)wrist_1_joint
+        - $(var tf_prefix)wrist_2_joint
+        - $(var tf_prefix)wrist_3_joint
+      command_interfaces:
+        - position
+      state_interfaces:
+        - position
+        - velocity
+      chainable_command_interfaces:
+        - position
+        - velocity
+
+      kinematics:
+        plugin_name: kinematics_interface_kdl/KinematicsInterfaceKDL
+        plugin_package: kinematics_interface
+        base: $(var tf_prefix)base_link
+        # The KDL chain is base -> tip. Every frame used below must lie on this chain.
+        tip: robotiq_hande_end
+        alpha: 0.05
+
+      ft_sensor:
+        name: axia_fts_sensor
+        frame:
+          # Frame of the reported wrench (same as the driver's frame_id).
+          # The Humble controller only rotates the wrench (no lever-arm shift) and applies the
+          # admittance motion at THIS frame, so it is also the effective compliance center.
+          id: tool_mount_link
+        filter_coefficient: 0.1
+
+      control:
+        frame:
+          # Rotates stiffness / damping / selected_axes only; does not move the compliance center.
+          id: robotiq_hande_end
+
+      fixed_world_frame:
+        frame:
+          # Gravity points to -Z in this frame. Must be on the KDL chain.
+          id: $(var tf_prefix)base_link
+
+      gravity_compensation:
+        frame:
+          id: tool_mount_link
+        CoG:
+          # Default strategy: tare the sensor (WrenchBiasSet) in the episode start pose and keep
+          # force at 0.0. For large orientation changes identify mass and CoG instead
+          # (URDF tool-side mass ~1.28 kg -> ~12.5 N) and do NOT tare with the tool attached.
+          pos: [0.0, 0.0, 0.0]
+          force: 0.0
+
+      admittance:
+        # Translational compliance only; rotations stay stiff (see compliance center note above).
+        selected_axes: [true, true, true, false, false, false]
+        # Conservative start: heavy and critically damped. Lower the mass only after stable contact tests.
+        mass: [5.0, 5.0, 5.0, 1.0, 1.0, 1.0]
+        damping_ratio: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+        stiffness: [500.0, 500.0, 500.0, 50.0, 50.0, 50.0]
+        joint_damping: 5.0
+
+      enable_parameter_update_without_reactivation: true
+
+  admittance_jtc:
+    ros__parameters:
+      # States come from the hardware joints ...
+      joints:
+        - $(var tf_prefix)shoulder_pan_joint
+        - $(var tf_prefix)shoulder_lift_joint
+        - $(var tf_prefix)elbow_joint
+        - $(var tf_prefix)wrist_1_joint
+        - $(var tf_prefix)wrist_2_joint
+        - $(var tf_prefix)wrist_3_joint
+      # ... commands go to the admittance controller's reference interfaces.
+      command_joints:
+        - admittance_controller/$(var tf_prefix)shoulder_pan_joint
+        - admittance_controller/$(var tf_prefix)shoulder_lift_joint
+        - admittance_controller/$(var tf_prefix)elbow_joint
+        - admittance_controller/$(var tf_prefix)wrist_1_joint
+        - admittance_controller/$(var tf_prefix)wrist_2_joint
+        - admittance_controller/$(var tf_prefix)wrist_3_joint
+      command_interfaces:
+        - position
+        - velocity
+      state_interfaces:
+        - position
+        - velocity
+      # Interpolate from the last commanded reference, not from the measured state.
+      # Otherwise each new message would absorb the admittance deflection (no spring return).
+      open_loop_control: true
+      allow_partial_joints_goal: false
+      state_publish_rate: 100.0
+      action_monitor_rate: 20.0
+      constraints:
+        # 0.0 disables the checks: the admittance deflection would look like a tracking error.
+        stopped_velocity_tolerance: 0.0
+        goal_time: 0.0
+        $(var tf_prefix)shoulder_pan_joint: { trajectory: 0.0, goal: 0.0 }
+        $(var tf_prefix)shoulder_lift_joint: { trajectory: 0.0, goal: 0.0 }
+        $(var tf_prefix)elbow_joint: { trajectory: 0.0, goal: 0.0 }
+        $(var tf_prefix)wrist_1_joint: { trajectory: 0.0, goal: 0.0 }
+        $(var tf_prefix)wrist_2_joint: { trajectory: 0.0, goal: 0.0 }
+        $(var tf_prefix)wrist_3_joint: { trajectory: 0.0, goal: 0.0 }
+
+  ft_mock_injector:
+    ros__parameters:
+      joint: axia_fts_sensor
+      interface_names:
+        - force.x
+        - force.y
+        - force.z
+        - torque.x
+        - torque.y
+        - torque.z

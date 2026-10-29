@@ -62,6 +62,8 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         "passthrough_trajectory_controller",
         "freedrive_mode_controller",
         "tool_contact_controller",
+        "admittance_controller",
+        "admittance_jtc",
     ]
 
     init_joint_controller = (
