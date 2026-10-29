@@ -33,7 +33,7 @@
     </link>
 
     <joint name="${prefix}adapter_from_sensor_end_joint" type="fixed">
-      <origin xyz="0 0 ${height2}" rpy="0 0 ${0.5 * pi}"/>
+      <origin xyz="0 0 ${height2}" rpy="0 0 0"/>
       <parent link="${prefix}adapter_from_sensor"/>
       <child link="${prefix}adapter_from_sensor_end"/>
     </joint>
