@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-145](https://github.com/AGH-CEAI/aegis_ros/pull/145) - Admittance control chain `admittance_jtc` -> `admittance_controller` (config `admittance.yaml`).
 * [PR-149](https://github.com/AGH-CEAI/aegis_ros/pull/149) - Added tool payload setter via YAML config.
 * [PR-147](https://github.com/AGH-CEAI/aegis_ros/pull/147) - `ft_mock_injector` controller (mock hardware only) for injecting test wrenches into the mock F/T sensor.
 * [PR-129](https://github.com/AGH-CEAI/aegis_ros/pull/129) - Added `wled_service.launch.py` launch description
