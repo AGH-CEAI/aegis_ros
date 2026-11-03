@@ -137,6 +137,55 @@ You can always list the methods with the `grpcurl` command:
 grpcurl -plaintext 127.0.0.1:50051 list proto_aegis_grpc.v1.RobotControlService
 ```
 
+### Compliant TCP control with `AdmittanceService`
+
+The [`AdmittanceServiceImpl`](./include/aegis_grpc/admittance_service.hpp) drives the ros2_control admittance chain
+`admittance_jtc` -> `admittance_controller` -> UR (see `aegis_control/config/controllers/admittance.yaml`),
+defined in [`proto_aegis_grpc.v1.admittance_service`](./proto_aegis_grpc/v1/admittance_service.proto):
+
+| Method name                                           | Desc.                                                                               | Impl. | gRPC Request                                                                                      | gRPC Response                                                                                                 |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `proto_aegis_grpc.v1.AdmittanceService.Enable`        | Switch the arm to the admittance chain (refused while Servo is enabled).            | ✅     | `google.protobuf.Empty`                                                                           | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto)                    |
+| `proto_aegis_grpc.v1.AdmittanceService.Disable`       | Relax the reference, switch back to the MoveIt joint controller.                    | ✅     | `google.protobuf.Empty`                                                                           | [`proto_aegis_grpc.v1.robot_srvs.TriggerResponse`](./proto_aegis_grpc/v1/robot_srvs.proto)                    |
+| `proto_aegis_grpc.v1.AdmittanceService.StepTCP`       | Move the TCP reference by a displacement (translation + rotation vector, `world`). | ✅     | [`proto_aegis_grpc.v1.admittance_service.PoseDelta`](./proto_aegis_grpc/v1/admittance_service.proto) | [`proto_aegis_grpc.v1.admittance_service.AdmittanceStepResponse`](./proto_aegis_grpc/v1/admittance_service.proto) |
+| `proto_aegis_grpc.v1.AdmittanceService.SetTCPTarget`  | Move the TCP reference towards an absolute pose (same per-call limits).            | ✅     | [`proto_aegis_grpc.v1.geometry_msgs.Pose`](./proto_aegis_grpc/v1/geometry_msgs.proto)             | [`proto_aegis_grpc.v1.admittance_service.AdmittanceStepResponse`](./proto_aegis_grpc/v1/admittance_service.proto) |
+| `proto_aegis_grpc.v1.AdmittanceService.GetWrench`     | Wrench used by the admittance controller (filtered, gravity compensated, base frame). | ✅     | `google.protobuf.Empty`                                                                           | [`proto_aegis_grpc.v1.geometry_msgs.Wrench`](./proto_aegis_grpc/v1/geometry_msgs.proto)                       |
+
+How the TCP reference is generated (each `StepTCP` / `SetTCPTarget` call):
+1. The displacement is rate limited (`admittance_max_step_lin`, `admittance_max_step_rot`).
+2. It is integrated from the previous **reference**, not from the measured pose, so the admittance spring is not
+   absorbed by the next command (MoveIt Servo re-bases on the measured state and cannot be used upstream of the admittance).
+3. The position is clamped to the optional workspace box.
+4. The reference is kept within `admittance_max_offset_*` from the measured pose. This bounds the force the robot applies
+   to roughly `stiffness * max_offset` (10 N with the default 500 N/m and 20 mm); a larger external force pushes the robot away.
+5. Damped least squares IK warm-started from the previous solution (no IK branch flips), joint-step limit,
+   and a MoveIt collision check (`/check_state_validity`, loaded by default by `move_group`).
+6. The joint target is sent to `admittance_jtc` as a single-point trajectory lasting `admittance_step_duration_s`
+   (set it to the policy period); the JTC interpolates it at the controller rate.
+
+A rejected call (IK, joint step, collision) returns `success=false` and keeps the previous reference.
+If the chain was stopped externally (e.g. by `controller_stopper` after a protective stop), the calls fail with
+`FAILED_PRECONDITION` until `Enable` is called again.
+
+Typical episode:
+```python
+await client.admittance_disable()  # no-op if not enabled
+await client.goto_pose(start_pos, start_quat)  # reset with MoveIt (scaled JTC)
+await (
+    client.wrench_bias_set()
+)  # tare the F/T sensor in the start pose (see admittance.yaml)
+await client.admittance_enable()
+for _ in range(steps):  # e.g. 10 Hz
+    obs_wrench = await client.admittance_get_wrench()
+    ok, msg, clipped, ref = await client.admittance_step(dp, drot)
+await client.admittance_disable()
+```
+
+You can always list the methods with the `grpcurl` command:
+```bash
+grpcurl -plaintext 127.0.0.1:50051 list proto_aegis_grpc.v1.AdmittanceService
+```
+
 ### Controlling the LED strips with `WledService`
 
 The wled control service is implemented in the [`WledServiceImpl`](./include/aegis_grpc/wled_service.hpp) class with following methods:
@@ -232,6 +281,33 @@ There is no hardcoded parameters, everything can be modified via ROS:
 | Parameter              | Type     | Default                         | Units | Description                                        |
 | ---------------------- | -------- | ------------------------------- | ----- | -------------------------------------------------- |
 | `wled_effects_topic`   | `string` | `"/wled_effects"`               | -     | Topic providing serialized dict with WLED effects. |
+
+### AdmittanceService
+
+**Initialization parameters**
+
+| Parameter                              | Type       | Default                                                  | Units   | Description                                                                                   |
+| -------------------------------------- | ---------- | -------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------- |
+| `admittance_group`                     | `string`   | `"aegis_arm"`                                            | -       | MoveIt planning group controlled by the chain.                                                |
+| `admittance_tcp_link`                  | `string`   | `"robotiq_hande_end"`                                    | -       | Commanded link (TCP).                                                                         |
+| `admittance_controllers`               | `string[]` | `["admittance_controller", "admittance_jtc"]`            | -       | Controllers of the chain, activated together.                                                 |
+| `admittance_servo_controllers`         | `string[]` | `["forward_position_controller", "forward_velocity_controller"]` | - | `Enable` is refused while one of them is active (Servo mode).                                 |
+| `admittance_fallback_controller`       | `string`   | `"scaled_joint_trajectory_controller"`                   | -       | Controller activated by `Disable` (used by MoveIt). The launch file sets the mock one.         |
+| `admittance_topic_trajectory`          | `string`   | `"/admittance_jtc/joint_trajectory"`                     | -       | Pub: trajectory topic of the chained JTC.                                                     |
+| `admittance_topic_status`              | `string`   | `"/admittance_controller/status"`                        | -       | Sub: admittance controller state (wrench, liveness).                                          |
+| `admittance_topic_joints`              | `string`   | `"/joint_states"`                                        | -       | Sub: measured joint states.                                                                   |
+| `admittance_step_duration_s`           | `double`   | `0.1`                                                    | seconds | Duration of each reference segment; set to the policy period.                                 |
+| `admittance_settle_time_s`             | `double`   | `0.3`                                                    | seconds | Relaxation time before `Disable` switches controllers.                                        |
+| `admittance_max_step_lin`              | `double`   | `0.01`                                                   | meters  | Max TCP translation per call.                                                                 |
+| `admittance_max_step_rot`              | `double`   | `0.05`                                                   | radians | Max TCP rotation per call.                                                                    |
+| `admittance_max_offset_lin`            | `double`   | `0.02`                                                   | meters  | Max reference-to-measured translation (force bound). Keep >= 2x `max_step_lin`.               |
+| `admittance_max_offset_rot`            | `double`   | `0.1`                                                    | radians | Max reference-to-measured rotation. Keep >= 2x `max_step_rot`.                                |
+| `admittance_workspace_min`/`_max`      | `double[3]`| `[]` (disabled)                                          | meters  | Workspace box in the root frame.                                                              |
+| `admittance_max_joint_step`            | `double`   | `0.2`                                                    | radians | Reject IK solutions moving any joint more than this per call.                                 |
+| `admittance_ik_damping`                | `double`   | `0.01`                                                   | -       | Damped least squares factor.                                                                  |
+| `admittance_ik_max_iterations`         | `int`      | `20`                                                     | -       | IK iterations per call.                                                                       |
+| `admittance_check_collisions`          | `bool`     | `true`                                                   | -       | Validate each reference with MoveIt `/check_state_validity`.                                   |
+| `admittance_collision_check_timeout_s` | `double`   | `0.1`                                                    | seconds | Timeout of a single collision check.                                                          |
 
 ### Run and set examples
 The initialization params can be set via ROS 2 run or launch:

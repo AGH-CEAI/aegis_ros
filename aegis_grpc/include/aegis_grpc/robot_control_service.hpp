@@ -74,6 +74,8 @@ class RobotControlServiceImpl final : public proto_aegis_grpc::v1::RobotControlS
                                const google::protobuf::Empty* request,
                                proto_aegis_grpc::v1::TriggerResponse* response) override;
 
+  moveit::core::RobotModelConstPtr GetRobotModel() const { return move_group_->getRobotModel(); }
+
  private:
   bool SwitchControllers(const std::vector<std::string>& activate, const std::vector<std::string>& deactivate);
   bool CallServoStartService();

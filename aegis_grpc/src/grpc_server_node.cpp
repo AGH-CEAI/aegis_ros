@@ -5,6 +5,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <grpcpp/ext/proto_server_reflection_plugin.h>
 
+#include "aegis_grpc/admittance_service.hpp"
 #include "aegis_grpc/robot_control_service.hpp"
 #include "aegis_grpc/robot_read_service.hpp"
 #include "aegis_grpc/wled_service.hpp"
@@ -45,8 +46,11 @@ int main(int argc, char* argv[]) {
   RCLCPP_INFO(logger, "Creating WledService");
   aegis_grpc::WledServiceImpl wled_service(node);
 
+  RCLCPP_INFO(logger, "Creating AdmittanceService");
+  aegis_grpc::AdmittanceServiceImpl admittance_service(node, control_service.GetRobotModel());
+
   RCLCPP_INFO(logger, "Setting up gRPC server with services");
-  std::vector<grpc::Service*> services = {&read_service, &control_service, &wled_service};
+  std::vector<grpc::Service*> services = {&read_service, &control_service, &wled_service, &admittance_service};
   auto server = BuildServer(address, services);
   std::thread grpc_thread([&server]() { server->Wait(); });
   RCLCPP_INFO(logger, "gRPC server listening on %s", address.c_str());
