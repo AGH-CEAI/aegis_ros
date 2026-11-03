@@ -6,6 +6,8 @@ import grpc
 import numpy as np
 from google.protobuf.empty_pb2 import Empty
 from proto_aegis_grpc.v1 import (
+    admittance_service_pb2,
+    admittance_service_pb2_grpc,
     control_msgs_pb2,
     geometry_msgs_pb2,
     robot_srvs_pb2,
@@ -84,6 +86,7 @@ class AegisRobotClient:
     Provides convenient wrappers for:
     - RobotReadService: Getting sensor data (TCP pose, wrench, joint states)
     - RobotControlService: Commanding robot motion (servo, goto, gripper)
+    - AdmittanceService: Compliant TCP control through the admittance chain
     """
 
     def __init__(self, server_address: str = "127.0.0.1:50051"):
@@ -99,6 +102,9 @@ class AegisRobotClient:
         self.read_stub: robot_srvs_pb2_grpc.RobotReadServiceStub | None = None
         self.control_stub: robot_srvs_pb2_grpc.RobotControlServiceStub | None = None
         self.wled_stub: wled_service_pb2_grpc.WledServiceStub | None = None
+        self.admittance_stub: (
+            admittance_service_pb2_grpc.AdmittanceServiceStub | None
+        ) = None
         self._connected = False
 
     @property
@@ -114,6 +120,9 @@ class AegisRobotClient:
                 self.channel
             )
             self.wled_stub = wled_service_pb2_grpc.WledServiceStub(self.channel)
+            self.admittance_stub = admittance_service_pb2_grpc.AdmittanceServiceStub(
+                self.channel
+            )
             self._connected = True
             self.logger.info(f"Connected to gRPC server at {self.server_address}")
         except Exception as e:
@@ -563,6 +572,124 @@ class AegisRobotClient:
         except grpc.RpcError as e:
             self.logger.error(f"WrenchBiasClear failed: {e}")
             raise
+
+    # ==================== AdmittanceService Methods ====================
+
+    async def admittance_enable(self) -> tuple[bool, str]:
+        """
+        Switch the arm to the compliant admittance chain.
+
+        Fails while Servo is enabled (call `servo_disable()` first). MoveIt motions
+        (`goto_pose`, `goto_joints`) do not work until `admittance_disable()` is called.
+        """
+        self._check_connected()
+        try:
+            response = await self.admittance_stub.Enable(Empty())
+            return response.success, response.msg
+        except grpc.RpcError as e:
+            self.logger.error(f"AdmittanceService.Enable failed: {e}")
+            raise
+
+    async def admittance_disable(self) -> tuple[bool, str]:
+        """Relax the reference to the measured pose and switch back to the MoveIt joint controller."""
+        self._check_connected()
+        try:
+            response = await self.admittance_stub.Disable(Empty())
+            return response.success, response.msg
+        except grpc.RpcError as e:
+            self.logger.error(f"AdmittanceService.Disable failed: {e}")
+            raise
+
+    async def admittance_step(
+        self,
+        translation: tuple[float, float, float] | np.ndarray,
+        rotation: tuple[float, float, float] | np.ndarray = (0.0, 0.0, 0.0),
+    ) -> tuple[bool, str, bool, np.ndarray]:
+        """
+        Move the TCP reference by a displacement (root frame `world`).
+
+        Args:
+            translation: [m]
+            rotation: rotation vector (axis * angle) [rad]
+
+        Returns:
+            (success, message, clipped, reference pose [x, y, z, qx, qy, qz, qw]).
+            A rejected step (IK, joint step or collision) returns success=False
+            and keeps the previous reference.
+        """
+        self._check_connected()
+        request = admittance_service_pb2.PoseDelta(
+            translation=geometry_msgs_pb2.Vector3(
+                x=float(translation[0]),
+                y=float(translation[1]),
+                z=float(translation[2]),
+            ),
+            rotation=geometry_msgs_pb2.Vector3(
+                x=float(rotation[0]), y=float(rotation[1]), z=float(rotation[2])
+            ),
+        )
+        try:
+            response = await self.admittance_stub.StepTCP(request)
+        except grpc.RpcError as e:
+            self.logger.error(f"AdmittanceService.StepTCP failed: {e}")
+            raise
+        return (
+            response.success,
+            response.msg,
+            response.clipped,
+            self._pose_to_array(response.reference),
+        )
+
+    async def admittance_set_target(
+        self,
+        position: tuple[float, float, float] | np.ndarray,
+        orientation: tuple[float, float, float, float] | np.ndarray,
+    ) -> tuple[bool, str, bool, np.ndarray]:
+        """
+        Move the TCP reference towards an absolute pose (root frame `world`),
+        with the same per-call limits as `admittance_step()`.
+
+        Args:
+            position: [x, y, z] in meters
+            orientation: quaternion [qx, qy, qz, qw]
+        """
+        self._check_connected()
+        pose = geometry_msgs_pb2.Pose(
+            position=geometry_msgs_pb2.Point(
+                x=float(position[0]), y=float(position[1]), z=float(position[2])
+            ),
+            orientation=geometry_msgs_pb2.Quaternion(
+                x=float(orientation[0]),
+                y=float(orientation[1]),
+                z=float(orientation[2]),
+                w=float(orientation[3]),
+            ),
+        )
+        try:
+            response = await self.admittance_stub.SetTCPTarget(pose)
+        except grpc.RpcError as e:
+            self.logger.error(f"AdmittanceService.SetTCPTarget failed: {e}")
+            raise
+        return (
+            response.success,
+            response.msg,
+            response.clipped,
+            self._pose_to_array(response.reference),
+        )
+
+    async def admittance_get_wrench(self) -> np.ndarray:
+        """
+        Wrench used by the admittance controller [fx, fy, fz, tx, ty, tz]: filtered,
+        gravity compensated (as configured), in the controller base frame.
+        Torques are about the F/T sensor origin.
+        """
+        self._check_connected()
+        try:
+            response = await self.admittance_stub.GetWrench(Empty())
+        except grpc.RpcError as e:
+            self.logger.error(f"AdmittanceService.GetWrench failed: {e}")
+            raise
+        return self._wrench_to_array(response)
 
     # ==================== WledService Methods ====================
 
