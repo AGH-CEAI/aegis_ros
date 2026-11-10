@@ -39,6 +39,6 @@ message PoseDelta {
 message AdmittanceStepResponse {
   bool success = 1;
   string msg = 2;
-  bool clipped = 3;     // the requested motion was limited by step / offset / workspace limits
-  Pose reference = 4;   // TCP reference after this call
+  bool clipped = 3;    // the requested motion was limited by step / offset / workspace limits
+  Pose reference = 4;  // TCP reference after this call
 }

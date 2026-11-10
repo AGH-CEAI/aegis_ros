@@ -13,6 +13,9 @@ struct AdmittanceReferenceLimits {
   double max_step_rot{0.05};    ///< Max rotation per call [rad].
   double max_offset_lin{0.02};  ///< Max translation between reference and measured pose [m].
   double max_offset_rot{0.1};   ///< Max rotation between reference and measured pose [rad].
+  /// Max change of the translation step between consecutive calls [m], i.e. max_accel * dt^2
+  /// (negative = disabled). Bounds the commanded acceleration of the reference.
+  double max_step_change_lin{-1.0};
   bool workspace_enabled{false};
   Eigen::Vector3d workspace_min{Eigen::Vector3d::Constant(-1e9)};  ///< Workspace box [m].
   Eigen::Vector3d workspace_max{Eigen::Vector3d::Constant(1e9)};
@@ -48,7 +51,12 @@ class AdmittanceReference {
   /// Candidate reference computed by Step()/StepTowards(); call Commit() to accept it.
   const Eigen::Isometry3d& Candidate() const { return candidate_; }
   /// Accept the last candidate (e.g. after IK and collision checks succeeded).
-  void Commit() { reference_ = candidate_; }
+  void Commit() {
+    last_step_ = candidate_.translation() - reference_.translation();
+    reference_ = candidate_;
+  }
+  /// The candidate was rejected: the reference stands still, so the next step starts from rest.
+  void Hold() { last_step_.setZero(); }
   const Eigen::Isometry3d& Reference() const { return reference_; }
   const AdmittanceReferenceLimits& Limits() const { return limits_; }
 
@@ -61,6 +69,7 @@ class AdmittanceReference {
   AdmittanceReferenceLimits limits_;
   Eigen::Isometry3d reference_{Eigen::Isometry3d::Identity()};
   Eigen::Isometry3d candidate_{Eigen::Isometry3d::Identity()};
+  Eigen::Vector3d last_step_{Eigen::Vector3d::Zero()};  ///< Committed translation of the last call.
 };
 
 }  // namespace aegis_grpc

@@ -60,6 +60,9 @@ AdmittanceServiceImpl::AdmittanceServiceImpl(std::shared_ptr<rclcpp::Node> node,
                       "[double] Init; Max reference-to-measured translation [m]. Bounds the force the robot applies "
                       "to ~stiffness*offset; a larger external force pushes the robot away. Keep >= 2x max_step_lin, "
                       "otherwise the tracking lag clips free-space motion.");
+  DeclareROSParameter("admittance_max_accel_lin", 0.0,
+                      "[double] Init; Max acceleration of the TCP reference [m/s^2]: the per-call translation may "
+                      "change by at most accel * step_duration^2 between calls (0 = disabled).");
   DeclareROSParameter("admittance_max_offset_rot", 0.1,
                       "[double] Init; Max reference-to-measured rotation [rad]. Keep >= 2x max_step_rot.");
   DeclareROSParameter("admittance_workspace_min", std::vector<double>{},
@@ -92,6 +95,10 @@ AdmittanceServiceImpl::AdmittanceServiceImpl(std::shared_ptr<rclcpp::Node> node,
   limits.max_step_rot = node_->get_parameter("admittance_max_step_rot").as_double();
   limits.max_offset_lin = node_->get_parameter("admittance_max_offset_lin").as_double();
   limits.max_offset_rot = node_->get_parameter("admittance_max_offset_rot").as_double();
+  const double max_accel_lin = node_->get_parameter("admittance_max_accel_lin").as_double();
+  if (max_accel_lin > 0.0) {
+    limits.max_step_change_lin = max_accel_lin * step_duration_s_ * step_duration_s_;
+  }
   const auto ws_min = node_->get_parameter("admittance_workspace_min").as_double_array();
   const auto ws_max = node_->get_parameter("admittance_workspace_max").as_double_array();
   if (ws_min.size() == 3 && ws_max.size() == 3) {
@@ -487,6 +494,7 @@ void AdmittanceServiceImpl::ApplyCandidate(bool clipped, proto_aegis_grpc::v1::A
   response->set_success(false);
 
   if (!SolveIK(reference_.Candidate(), q_ref_, q_new, err)) {
+    reference_.Hold();
     EigenToProtoPose(reference_.Reference(), response->mutable_reference());
     response->set_msg(err);
     return;
@@ -496,11 +504,13 @@ void AdmittanceServiceImpl::ApplyCandidate(bool clipped, proto_aegis_grpc::v1::A
     max_dq = std::max(max_dq, std::abs(q_new[i] - q_ref_[i]));
   }
   if (max_dq > max_joint_step_) {
+    reference_.Hold();
     EigenToProtoPose(reference_.Reference(), response->mutable_reference());
     response->set_msg("Rejected: joint step " + std::to_string(max_dq) + " rad exceeds admittance_max_joint_step.");
     return;
   }
   if (!IsStateValid(q_new, err)) {
+    reference_.Hold();
     EigenToProtoPose(reference_.Reference(), response->mutable_reference());
     response->set_msg(err);
     return;

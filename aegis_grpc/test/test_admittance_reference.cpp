@@ -102,3 +102,48 @@ TEST(AdmittanceReference, StepTowardsTargetUsesSameLimits) {
   EXPECT_TRUE(ref.StepTowards(Pose(1.0, 0.0, 0.0), Pose(0.0, 0.0, 0.0)));
   EXPECT_NEAR(ref.Candidate().translation().norm(), 0.01, 1e-12);
 }
+
+TEST(AdmittanceReference, StepChangeIsAccelerationLimited) {
+  AdmittanceReferenceLimits l = Limits();
+  l.max_step_change_lin = 0.002;
+  AdmittanceReference ref(l);
+  ref.Reset(Pose(0.0, 0.0, 0.0));
+  // From rest the step grows by at most 2 mm per call: 2, 4, 6, 8, 10 (max_step_lin) mm.
+  double x = 0.0;
+  for (const double expected : {0.002, 0.004, 0.006, 0.008, 0.01, 0.01}) {
+    ref.Step({0.01, 0.0, 0.0}, Eigen::Vector3d::Zero(), Pose(x, 0.0, 0.0));
+    ref.Commit();
+    EXPECT_NEAR(ref.Reference().translation().x() - x, expected, 1e-12);
+    x = ref.Reference().translation().x();
+  }
+  // Stopping decelerates the same way.
+  EXPECT_TRUE(ref.Step(Eigen::Vector3d::Zero(), Eigen::Vector3d::Zero(), Pose(x, 0.0, 0.0)));
+  ref.Commit();
+  EXPECT_NEAR(ref.Reference().translation().x() - x, 0.008, 1e-12);
+}
+
+TEST(AdmittanceReference, StepWithinAccelerationLimitIsNotClipped) {
+  AdmittanceReferenceLimits l = Limits();
+  l.max_step_change_lin = 0.002;
+  AdmittanceReference ref(l);
+  ref.Reset(Pose(0.0, 0.0, 0.0));
+  EXPECT_FALSE(ref.Step({0.0015, 0.0, 0.0}, Eigen::Vector3d::Zero(), Pose(0.0, 0.0, 0.0)));
+}
+
+TEST(AdmittanceReference, HoldAndResetRestartFromRest) {
+  AdmittanceReferenceLimits l = Limits();
+  l.max_step_change_lin = 0.002;
+  AdmittanceReference ref(l);
+  ref.Reset(Pose(0.0, 0.0, 0.0));
+  for (int i = 0; i < 5; ++i) {
+    ref.Step({0.01, 0.0, 0.0}, Eigen::Vector3d::Zero(), ref.Reference());
+    ref.Commit();
+  }
+  ref.Hold();
+  const double x = ref.Reference().translation().x();
+  ref.Step({0.01, 0.0, 0.0}, Eigen::Vector3d::Zero(), ref.Reference());
+  EXPECT_NEAR(ref.Candidate().translation().x() - x, 0.002, 1e-12);
+  ref.Reset(Pose(0.0, 0.0, 0.0));
+  ref.Step({0.01, 0.0, 0.0}, Eigen::Vector3d::Zero(), Pose(0.0, 0.0, 0.0));
+  EXPECT_NEAR(ref.Candidate().translation().x(), 0.002, 1e-12);
+}

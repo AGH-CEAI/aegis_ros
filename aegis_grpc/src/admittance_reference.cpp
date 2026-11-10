@@ -10,6 +10,7 @@ AdmittanceReference::AdmittanceReference(const AdmittanceReferenceLimits& limits
 void AdmittanceReference::Reset(const Eigen::Isometry3d& pose) {
   reference_ = pose;
   candidate_ = pose;
+  last_step_.setZero();
 }
 
 Eigen::Vector3d AdmittanceReference::RotationVector(const Eigen::Matrix3d& rotation) {
@@ -36,6 +37,16 @@ bool AdmittanceReference::Step(const Eigen::Vector3d& translation,
   Eigen::Vector3d dr = rotation;
   clipped |= ClipNorm(dp, limits_.max_step_lin);
   clipped |= ClipNorm(dr, limits_.max_step_rot);
+
+  // 1b) Acceleration limit: the step may differ from the last committed one by at most
+  // max_step_change_lin. Both lie within max_step_lin, so the result does too.
+  if (limits_.max_step_change_lin >= 0.0) {
+    Eigen::Vector3d change = dp - last_step_;
+    if (ClipNorm(change, limits_.max_step_change_lin)) {
+      clipped = true;
+      dp = last_step_ + change;
+    }
+  }
 
   // 2) Integrate from the previous REFERENCE (not from the measured pose).
   Eigen::Vector3d p = reference_.translation() + dp;
