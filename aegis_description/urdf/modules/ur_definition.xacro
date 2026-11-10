@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find ur_description)/urdf/ur_macro.xacro"/>
+  <xacro:include filename="$(find aegis_description)/urdf/modules/ur_ros2_control.xacro"/>
 
   <!-- The list of all available options can be found in the <ur_description>/urdf/ur_macro.xacro file -->
   <!-- Descriptions of the arguments can be found in the <ur_robot_driver>/src/hardware_interface.cpp file -->
@@ -23,6 +24,9 @@
     <xacro:arg name="output_recipe_filename" default="$(find ur_robot_driver)/resources/rtde_output_recipe.txt"/>
     <xacro:arg name="input_recipe_filename" default="$(find ur_robot_driver)/resources/rtde_input_recipe.txt"/>
     <xacro:arg name="reverse_ip" default="0.0.0.0"/>
+    <!-- servoj on the UR controller; the lookahead adds delay to every command (UR default 0.03 s) -->
+    <xacro:arg name="servoj_gain" default="2000"/>
+    <xacro:arg name="servoj_lookahead_time" default="0.03"/>
 
     <!--   tool communication related parameters-->
     <xacro:arg name="use_tool_communication" default="false"/>
@@ -43,12 +47,14 @@
 
     <!-- convert to property to use substitution in function -->
     <xacro:property name="initial_positions_file" default="$(arg initial_positions_file)"/>
+    <xacro:property name="kinematics_calibration_file" default="$(arg kinematics_calibration)"/>
 
     <!-- arm -->
     <xacro:ur_robot
       name="${name}"
       tf_prefix="$(arg tf_prefix)"
       parent="${parent}"
+      generate_ros2_control_tag="false"
       joint_limits_parameters_file="$(arg joint_limit_params)"
       kinematics_parameters_file="$(arg kinematics_calibration)"
       physical_parameters_file="$(arg physical_params)"
@@ -74,6 +80,28 @@
       <!-- robot relative pose -->
       <origin xyz="0 0 0" rpy="0 0 0"/>
     </xacro:ur_robot>
+
+    <xacro:aegis_ur_ros2_control
+      name="${name}"
+      use_fake_hardware="$(arg use_fake_hardware)"
+      fake_sensor_commands="$(arg fake_sensor_commands)"
+      headless_mode="$(arg headless_mode)"
+      sim_gazebo="$(arg sim_gazebo)"
+      sim_ignition="$(arg sim_ignition)"
+      initial_positions="${xacro.load_yaml(initial_positions_file)}"
+      script_filename="$(arg script_filename)"
+      output_recipe_filename="$(arg output_recipe_filename)"
+      input_recipe_filename="$(arg input_recipe_filename)"
+      tf_prefix="$(arg tf_prefix)"
+      hash_kinematics="${xacro.load_yaml(kinematics_calibration_file)['kinematics']['hash']}"
+      robot_ip="$(arg robot_ip)"
+      use_tool_communication="$(arg use_tool_communication)"
+      tool_voltage="$(arg tool_voltage)"
+      tool_device_name="$(arg tool_device_name)"
+      reverse_ip="$(arg reverse_ip)"
+      servoj_gain="$(arg servoj_gain)"
+      servoj_lookahead_time="$(arg servoj_lookahead_time)"
+    />
 
     <xacro:if value="$(arg sim_gazebo)">
       <!-- Gazebo plugins -->

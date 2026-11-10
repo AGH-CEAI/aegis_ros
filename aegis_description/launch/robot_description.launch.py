@@ -20,6 +20,7 @@ def generate_launch_description():
     model_disable_cell_led_supports = LaunchConfiguration(
         "model_disable_led_supports", default="false"
     )
+    servoj_lookahead_time = LaunchConfiguration("servoj_lookahead_time", default="0.03")
 
     robot_description_str = Command(
         [
@@ -47,6 +48,9 @@ def generate_launch_description():
             " ",
             "disable_led_supports:=",
             model_disable_cell_led_supports,
+            " ",
+            "servoj_lookahead_time:=",
+            servoj_lookahead_time,
         ]
     )
 
@@ -60,7 +64,10 @@ def generate_launch_description():
                     {
                         "robot_description": ParameterValue(
                             robot_description_str, value_type=str
-                        )
+                        ),
+                        # Humble default is 20 Hz: the gRPC TCP pose (a TF lookup) was up to
+                        # 50 ms stale and repeated every ~5th read of the 25 Hz policy.
+                        "publish_frequency": 250.0,
                     }
                 ],
             )
