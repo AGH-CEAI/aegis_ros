@@ -1,0 +1,4 @@
+# Everything mounted past the UR tool flange (adapters, F/T sensor, Hand-E, camera mounts, cameras,
+# lenses, cables). Measured with the PolyScope payload estimation on 2026-11-04.
+mass: 3.29  # [kg]
+center_of_gravity: [-0.011, -0.009, 0.073]  # [m], tool flange frame

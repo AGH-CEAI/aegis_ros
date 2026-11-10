@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-149](https://github.com/AGH-CEAI/aegis_ros/pull/149) - Added tool payload setter via YAML config.
 * [PR-129](https://github.com/AGH-CEAI/aegis_ros/pull/129) - Added `wled_service.launch.py` launch description
 * [PR-129](https://github.com/AGH-CEAI/aegis_ros/pull/129) - Added `scenes.yaml` to `config/wled` folder
 * [PR-127](https://github.com/AGH-CEAI/aegis_ros/pull/127) - Added launch file for starting only the camera drivers.
