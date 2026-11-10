@@ -10,6 +10,8 @@ log/
 COLCON_IGNORE
 
 proto_*/
+# Generated proto_* dirs stay ignored; the .proto sources are versioned.
+!aegis_grpc/proto_aegis_grpc/
 
 dist/
 *.whl
@@ -23,3 +25,6 @@ dist/
 *.step
 *.blend
 *.blend1
+
+*.csv
+*.png
