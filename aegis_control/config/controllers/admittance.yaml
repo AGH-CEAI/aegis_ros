@@ -111,7 +111,8 @@
       # Otherwise each new message would absorb the admittance deflection (no spring return).
       open_loop_control: true
       allow_partial_joints_goal: false
-      state_publish_rate: 100.0
+      # Same as the controller_manager rate: the delay calibration compares reference and feedback.
+      state_publish_rate: 500.0
       action_monitor_rate: 20.0
       constraints:
         # 0.0 disables the checks: the admittance deflection would look like a tracking error.

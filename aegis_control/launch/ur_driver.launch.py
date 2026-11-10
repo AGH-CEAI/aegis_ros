@@ -4,8 +4,13 @@ import sys
 from launch import LaunchContext, LaunchDescription
 from launch.actions import ExecuteProcess, OpaqueFunction, TimerAction
 from launch.conditions import IfCondition, UnlessCondition
-from launch.substitutions import FindExecutable, LaunchConfiguration
+from launch.substitutions import (
+    FindExecutable,
+    LaunchConfiguration,
+    PathJoinSubstitution,
+)
 from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
 
 # HACK Bypassing the launch system to access local import
 run_path = os.path.dirname(os.path.realpath(__file__))
@@ -42,6 +47,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
     dashboard_client_node = prepare_dashboard_client_node(mock_hardware, cfg)
     urscript_interface = prepare_urscript_interface(cfg)
     controller_stopper_node = prepare_controller_stopper_node(mock_hardware)
+    payload_setter_node = prepare_payload_setter_node(mock_hardware)
     service_call_stop = prepare_service_call_stop()
     service_call_play = prepare_service_call_play()
 
@@ -82,6 +88,7 @@ def launch_setup(context: LaunchContext) -> list[Node]:
         dashboard_client_node,
         urscript_interface,
         controller_stopper_node,
+        payload_setter_node,
         controllers_spawner(controllers_active),
         controllers_spawner(controllers_inactive, active=False),
         service_call_stop,
@@ -155,6 +162,28 @@ def prepare_controller_stopper_node(mock_hardware: LaunchConfiguration) -> Node:
                 "controller_manager/list_controllers",
                 "~/controller_manager/list_controllers",
             )
+        ],
+    )
+
+
+def prepare_payload_setter_node(mock_hardware: LaunchConfiguration) -> Node:
+    return Node(
+        package="aegis_control",
+        executable="ur_payload_setter.py",
+        name="ur_payload_setter",
+        output="screen",
+        condition=UnlessCondition(mock_hardware),
+        parameters=[
+            {
+                "config_file": PathJoinSubstitution(
+                    [
+                        FindPackageShare("aegis_description"),
+                        "config",
+                        "ur5e",
+                        "payload.yaml",
+                    ]
+                )
+            }
         ],
     )
 
