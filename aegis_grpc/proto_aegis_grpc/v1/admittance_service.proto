@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package proto_aegis_grpc.v1;
+
+import "google/protobuf/empty.proto";
+import "proto_aegis_grpc/v1/geometry_msgs.proto";
+import "proto_aegis_grpc/v1/robot_srvs.proto";
+
+// Compliant TCP control through the ros2_control admittance chain
+// (admittance_jtc -> admittance_controller -> UR), intended for learned policies.
+//
+// All poses and displacements are expressed in the robot model root frame (`world`),
+// the same frame as RobotReadService.GetTCPPose.
+//
+// The TCP reference is integrated from the previous REFERENCE (not from the measured pose),
+// so the admittance spring keeps working. It is rate limited per call, kept within a bounded
+// offset from the measured pose (which bounds the contact force to ~stiffness * offset),
+// optionally clamped to a workspace box and checked for collisions by MoveIt.
+service AdmittanceService {
+  // Switch the arm to the admittance chain. Fails if Servo controllers are active.
+  rpc Enable(google.protobuf.Empty) returns (TriggerResponse);
+  // Relax the reference to the measured pose and switch back to the fallback joint controller
+  // (e.g. scaled_joint_trajectory_controller), so MoveIt (GotoPose/GotoJoints) works again.
+  rpc Disable(google.protobuf.Empty) returns (TriggerResponse);
+  // Move the TCP reference by a displacement.
+  rpc StepTCP(PoseDelta) returns (AdmittanceStepResponse);
+  // Move the TCP reference towards an absolute target (with the same per-call limits as StepTCP).
+  rpc SetTCPTarget(Pose) returns (AdmittanceStepResponse);
+  // Wrench used by the admittance controller: filtered, gravity compensated (as configured),
+  // expressed in the controller base frame. Torques are about the F/T sensor origin.
+  rpc GetWrench(google.protobuf.Empty) returns (Wrench);
+}
+
+message PoseDelta {
+  Vector3 translation = 1;  // [m]
+  Vector3 rotation = 2;     // rotation vector (axis * angle) [rad]
+}
+
+message AdmittanceStepResponse {
+  bool success = 1;
+  string msg = 2;
+  bool clipped = 3;     // the requested motion was limited by step / offset / workspace limits
+  Pose reference = 4;   // TCP reference after this call
+}
