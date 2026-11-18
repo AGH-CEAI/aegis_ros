@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+* [PR-146](https://github.com/AGH-CEAI/aegis_ros/pull/146) - Tee form T-Pusher ArUco scripts.
+* [PR-146](https://github.com/AGH-CEAI/aegis_ros/pull/146) - Admittance calibration scripts.
+
 ### Changed
 
 * [PR-130](https://github.com/AGH-CEAI/aegis_ros/pull/130) - New ruff formatting.
