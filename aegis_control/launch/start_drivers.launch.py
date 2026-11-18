@@ -1,11 +1,15 @@
 import os
 import sys
+import tempfile
 
+import yaml
 from launch import LaunchContext, LaunchDescription, LaunchDescriptionEntity
 from launch.actions import IncludeLaunchDescription, OpaqueFunction
 from launch.conditions import UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
+    Command,
+    FindExecutable,
     LaunchConfiguration,
     PathJoinSubstitution,
 )
@@ -32,6 +36,9 @@ def launch_setup(context: LaunchContext) -> list[LaunchDescriptionEntity]:
     disable_cameras = LaunchConfiguration("disable_cameras", default="false")
 
     control_params_files = prepare_params_files()
+    control_params_files.append(
+        prepare_admittance_description_params(context, launch_args)
+    )
     control_node = prepare_control_node(mock_hardware_bool, control_params_files)
 
     ur_driver = IncludeLaunchDescription(
@@ -143,13 +150,60 @@ def prepare_params_files() -> list[PathJoinSubstitution]:
         ),
         allow_substs=True,
     )
+    admittance_cfg = ParameterFile(
+        PathJoinSubstitution(
+            [
+                FindPackageShare("aegis_control"),
+                "config",
+                "controllers",
+                "admittance.yaml",
+            ]
+        ),
+        allow_substs=True,
+    )
 
     return [
         ur_controllers_cfg,
         ur_update_rate_config_file,
         ft_sensor_controllers_cfg,
         gripper_cfg,
+        admittance_cfg,
     ]
+
+
+def prepare_admittance_description_params(
+    context: LaunchContext, launch_args: dict[str, LaunchConfiguration]
+) -> str:
+    """
+    Create a parameter file with `robot_description` for the `admittance_controller` node.
+
+    In ROS 2 Humble the admittance_controller (and its kinematics_interface_kdl plugin) reads
+    `robot_description` from its own node parameters, while the controller_manager here gets
+    the description from the `/robot_description` topic and does not forward it to controllers.
+
+    Returns:
+        str: Path to a temporary YAML parameter file.
+    """
+    urdf = Command(
+        [
+            PathJoinSubstitution([FindExecutable(name="xacro")]),
+            " ",
+            PathJoinSubstitution(
+                [FindPackageShare("aegis_description"), "urdf", "aegis.urdf.xacro"]
+            ),
+            " tf_prefix:=",
+            launch_args["tf_prefix"],
+            " mock_hardware:=",
+            launch_args["mock_hardware"],
+        ]
+    ).perform(context)
+
+    params = {"admittance_controller": {"ros__parameters": {"robot_description": urdf}}}
+    with tempfile.NamedTemporaryFile(
+        "w", prefix="aegis_admittance_", suffix=".yaml", delete=False
+    ) as params_file:
+        yaml.safe_dump(params, params_file)
+        return params_file.name
 
 
 def prepare_control_node(
