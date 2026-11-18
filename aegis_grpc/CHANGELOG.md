@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-145](https://github.com/AGH-CEAI/aegis_ros/pull/145) - `AdmittanceService`: compliant TCP control through the ros2_control admittance chain (Enable/Disable, StepTCP, SetTCPTarget, GetWrench) with a reference generator that integrates from the previous reference, bounded reference-to-measured offset, workspace box, damped least squares IK and MoveIt collision checks. Python client methods `admittance_*`.
 * [PR-139](https://github.com/AGH-CEAI/aegis_ros/pull/139) - Support for set/clear bias of the FT wrench measurements.
 * [PR-138](https://github.com/AGH-CEAI/aegis_ros/pull/138) - gRPC control over [wled_ros_driver](https://github.com/AGH-CEAI/wled_ros_driver).
 
