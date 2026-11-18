@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-148](https://github.com/AGH-CEAI/aegis_ros/pull/148) - Removed 90deg rotation from "adapter_from_sensor" (it was moved into the `AGH-CEAI/ros2_net_ft_driver` fork).
 * [PR-144](https://github.com/AGH-CEAI/aegis_ros/pull/144) - Updated UR URDF files to incorporate new `ur_robot_driver` arguments.
 * [PR-143](https://github.com/AGH-CEAI/aegis_ros/pull/143) - Limited UR's pan joint to `[-90, 90]` degrees.
 * [PR-140](https://github.com/AGH-CEAI/aegis_ros/pull/140) - Unified the order of `visual`, `collision` and `inertial` blocks across the description.
