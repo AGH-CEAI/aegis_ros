@@ -31,7 +31,7 @@ MAX_DISTANCE = 0.15
 
 
 class StepLog:
-    FIELDS = [
+    FIELDS = (
         "t_wall",
         "k",
         "success",
@@ -41,10 +41,10 @@ class StepLog:
         "ref_z",
         "latency_ms",
         "msg",
-    ]
+    )
 
     def __init__(self, path: str | None):
-        self._file = open(path, "w", newline="") if path else None
+        self._file = open(path, "w", newline="") if path else None  # noqa: SIM115
         self._writer = csv.writer(self._file) if self._file else None
         if self._writer:
             self._writer.writerow(self.FIELDS)
@@ -122,7 +122,7 @@ async def cmd_hold(client, args):
 async def cmd_track(client, args, log):
     direction = np.zeros(3)
     direction[AXES[args.axis]] = 1.0 if args.sign > 0 else -1.0
-    n = int(round(args.distance / args.step))
+    n = round(args.distance / args.step)
     legs = [direction, -direction] if args.back else [direction]
     k = 0
     latencies = []
@@ -151,7 +151,7 @@ async def cmd_press(client, args, log):
     direction = np.zeros(3)
     direction[AXES[args.axis]] = 1.0 if args.sign > 0 else -1.0
     start_pose = await client.get_tcp_pose()
-    n_max = int(round(args.max_distance / args.step))
+    n_max = round(args.max_distance / args.step)
     consecutive = 0
     k = 0
     reason = "max distance"
