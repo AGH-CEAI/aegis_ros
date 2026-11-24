@@ -36,6 +36,7 @@ package aegis_control {
         Node ur_driver::ur_dashboard_client()
         Node ur_driver::ur_tool_communication()
         Node ur_driver::urscript_interface()
+        Node ur_payload_setter()
         Node ros2_control::controllers_spawner()
     }
     class ft_sensor_driver << (L,#FF7700) LaunchFile >> {
@@ -106,6 +107,7 @@ package aegis_description {
         package ur5e {
             class calibration << (Y,#ffffc9) YAML >> {}
             class joint_limits << (Y,#ffffc9) YAML >> {}
+            class payload << (Y,#ffffc9) YAML >> {}
         }
     }
 
@@ -151,6 +153,7 @@ aegis_bringup.bringup *-- aegis_description.robot_description
 aegis_description.robot_description *-- aegis_description.urdf.aegis_urdf
 
 aegis_control.start_drivers *-- aegis_control.ur_driver
+aegis_control.ur_driver *-- aegis_description.config.ur5e.payload
 aegis_control.start_drivers *-- aegis_control.ft_sensor_driver
 aegis_control.start_drivers *-- aegis_control.gripper_driver
 aegis_control.start_drivers *-- aegis_control.cameras_driver

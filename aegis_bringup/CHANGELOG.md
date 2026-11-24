@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* [PR-149](https://github.com/AGH-CEAI/aegis_ros/pull/149) - Updated `launch_diagram.plantuml` with `ur_payload_setter` node and `payload.yaml` config.
 * [PR-135](https://github.com/AGH-CEAI/aegis_ros/pull/135) - Added prefixes `model_` to every launch parameter related to the xacro parsing.
 * [PR-130](https://github.com/AGH-CEAI/aegis_ros/pull/130) - New ruff formatting.
 * [PR-129](https://github.com/AGH-CEAI/aegis_ros/pull/129) - Updated `launch_diagram.plantuml` with wled_service and pylon_cameras_driver

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* [PR-149](https://github.com/AGH-CEAI/aegis_ros/pull/149) - Added `config/ur5e/payload.yaml` definition for mass and center of gravity to use with `aegis_control`'s ur_payload_setter.
 * [PR-147](https://github.com/AGH-CEAI/aegis_ros/pull/147) - Mock `ros2_control` block for the FT-AXIA80 sensor (`axia_fts_sensor` + `diagnostic` GPIO) when `mock_hardware` is enabled.
 * [PR-131](https://github.com/AGH-CEAI/aegis_ros/pull/131) - LED lighting supports to the cell.
 * [PR-95](https://github.com/AGH-CEAI/aegis_ros/pull/118) - Added cell adapter.
