@@ -14,10 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [PR-128](https://github.com/AGH-CEAI/aegis_ros/pull/128) - Added a remote setup guide for connecting to the robot station over the network.
 
 ### Changed
-### Deprecated
-### Removed
-### Fixed
 
+* [PR-148](https://github.com/AGH-CEAI/aegis_ros/pull/148) - Updated the `ros2_net_ft_driver` repository.
 * [PR-141](https://github.com/AGH-CEAI/aegis_ros/pull/141) - Updated the `robotiq_hande_driver` and `robotiq_hande_description` repositories.
 * [PR-139](https://github.com/AGH-CEAI/aegis_ros/pull/139) - Updated the `ros2_net_ft_driver` repository.
 * [PR-138](https://github.com/AGH-CEAI/aegis_ros/pull/138) - Updated the `wled_ros_driver` repository.
@@ -25,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [PR-137](https://github.com/AGH-CEAI/aegis_ros/pull/137) - Updated the `wled_ros_driver` repository.
 * [PR-134](https://github.com/AGH-CEAI/aegis_ros/pull/134) - Updated the `scene_objects_manager` repository (updated in PR #115).
 
+### Deprecated
+### Removed
+### Fixed
 ### Security
 
 ## [v202603091730]
