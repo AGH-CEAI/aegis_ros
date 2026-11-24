@@ -23,11 +23,13 @@ set(ROS_DEPENDS
     controller_manager_msgs
     cv_bridge
     geometry_msgs
+    moveit_core
     moveit_msgs
     moveit_ros_planning_interface
     sensor_msgs
     std_msgs
     std_srvs
+    trajectory_msgs
     wled_interfaces)
 
 # Hide warnings from importing moveit packages
@@ -71,8 +73,13 @@ add_subdirectory(protogen)
 
 # ------------------------------
 # Static library with all CPP files
-add_library(${PROJECT_NAME}_lib STATIC src/robot_read_service.cpp src/robot_control_service.cpp
-                                       src/wled_service.cpp)
+add_library(
+  ${PROJECT_NAME}_lib STATIC
+  src/robot_read_service.cpp
+  src/robot_control_service.cpp
+  src/wled_service.cpp
+  src/admittance_service.cpp
+  src/admittance_reference.cpp)
 add_dependencies(${PROJECT_NAME}_lib generate_protos)
 
 target_include_directories(
@@ -111,5 +118,18 @@ install(TARGETS grpc_server ${PROJECT_NAME}_lib DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY include/ DESTINATION include)
 
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
+
+# ------------------------------
+# Tests
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(Eigen3 REQUIRED)
+  # The reference generator has no ROS / gRPC dependencies
+  ament_add_gtest(test_admittance_reference test/test_admittance_reference.cpp
+                  src/admittance_reference.cpp)
+  target_include_directories(test_admittance_reference PRIVATE include)
+  target_link_libraries(test_admittance_reference Eigen3::Eigen)
+endif()
 
 ament_package()
